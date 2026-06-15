@@ -1,0 +1,11 @@
+CREATE TABLE IF NOT EXISTS student_guides (
+    id VARCHAR(36) PRIMARY KEY,
+    student_id VARCHAR(36) NOT NULL UNIQUE,
+    base_character VARCHAR(100),
+    custom_name VARCHAR(100),
+    visual_style VARCHAR(50) DEFAULT 'normal',
+    avatar_url VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (student_id) REFERENCES users(id) ON DELETE CASCADE
+);

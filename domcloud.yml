@@ -1,0 +1,16 @@
+source: clear
+features:
+  - mysql
+  - node
+commands:
+  - npm install -g pnpm pm2
+  - pnpm install
+  - cd frontend && pnpm run build
+  - pm2 start ecosystem.config.cjs
+  - pm2 save
+nginx:
+  locations:
+    - match: /api/
+      proxy: http://127.0.0.1:5001/api/
+    - match: /
+      proxy: http://127.0.0.1:3000/
