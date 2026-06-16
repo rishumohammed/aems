@@ -174,7 +174,7 @@ const resetFilters = () => {
 };
 
 useSeoMeta({
-  title: 'Job Board | AEMS Academy',
+  title: 'Job Board',
   description: 'Explore career opportunities from our hiring partners. Apply to full-time, part-time, and internship roles.'
 });
 </script>

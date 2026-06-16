@@ -19,7 +19,7 @@
       <v-col cols="12" md="4">
         <div class="apple-card h-100 d-flex flex-column">
           <div class="pa-4 border-b font-weight-bold d-flex align-center">
-            <v-icon left color="orange" class="mr-2">mdi-history</v-icon> Event Timeline
+            <v-icon left color="warning" class="mr-2">mdi-history</v-icon> Event Timeline
           </div>
           <div class="pa-4 flex-grow-1 overflow-y-auto" style="max-height: 600px;">
             <v-timeline density="compact" side="end">
@@ -141,13 +141,13 @@ const loadData = async () => {
 
 const getEventColor = (type: string) => {
   switch (type) {
-    case 'tab_switch': return 'orange';
-    case 'window_blur': return 'orange';
+    case 'tab_switch': return 'warning';
+    case 'window_blur': return 'warning';
     case 'fullscreen_exit': return 'red';
     case 'forbidden_shortcut': return 'red';
     case 'devtools_open': return 'red';
     case 'face_absent': return 'blue';
-    case 'multiple_faces': return 'orange';
+    case 'multiple_faces': return 'warning';
     default: return 'gray';
   }
 };
@@ -197,8 +197,8 @@ const flagAttempt = () => {
 
 .apple-card {
   background: white;
-  border-radius: var(--r16);
-  box-shadow: var(--s2);
+  border-radius: var(--radius-lg);
+  
   overflow: hidden;
   border: 1px solid rgba(0, 0, 0, 0.05);
 }
@@ -213,7 +213,8 @@ const flagAttempt = () => {
 
 .video-wrapper {
   background: black;
-  box-shadow: inset 0 0 40px rgba(0,0,0,0.5);
+  border: 1px solid var(--border);
+  
 }
 
 .scrollbar-hide::-webkit-scrollbar {

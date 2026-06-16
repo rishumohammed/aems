@@ -49,8 +49,22 @@ export const CRMController = {
       // Get total count for pagination
       const [total] = await pool.query('SELECT COUNT(*) as count FROM leads WHERE 1=1' + (assigned_to ? ' AND assigned_to = ?' : ''), assigned_to ? [assigned_to] : []);
 
+      const parsedLeads = leads.map(l => {
+        let parsedIds = l.course_interest_ids;
+        if (typeof parsedIds === 'string') {
+          try {
+            parsedIds = JSON.parse(parsedIds);
+          } catch(e) {
+            parsedIds = [];
+          }
+        } else if (!parsedIds) {
+            parsedIds = [];
+        }
+        return { ...l, course_interest_ids: parsedIds };
+      });
+
       res.json({
-        leads,
+        leads: parsedLeads,
         total: total[0].count,
         page: parseInt(page),
         limit: parseInt(limit)
@@ -78,6 +92,15 @@ export const CRMController = {
       }
 
       const lead = leads[0];
+      if (typeof lead.course_interest_ids === 'string') {
+        try {
+          lead.course_interest_ids = JSON.parse(lead.course_interest_ids);
+        } catch(e) {
+          lead.course_interest_ids = [];
+        }
+      } else if (!lead.course_interest_ids) {
+        lead.course_interest_ids = [];
+      }
 
       // Get Custom Fields
       const [customFields] = await pool.query('SELECT * FROM lead_custom_fields WHERE lead_id = ?', [id]);

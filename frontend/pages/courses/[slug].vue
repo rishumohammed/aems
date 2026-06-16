@@ -634,7 +634,7 @@ const highlights = [
 ];
 
 useSeoMeta({
-  title: () => `${course.value?.title || 'Course Details'} | AEMS Academy`,
+  title: () => `${course.value?.title || 'Course Details'}`,
   description: () => course.value?.description?.substring(0, 160) || 'Detailed course information and curriculum.',
   ogImage: () => course.value?.thumbnail_url || 'https://aems.local/default-course-og.png'
 });
@@ -745,7 +745,7 @@ const proceedToCheckout = async () => {
 
 const handleShare = async () => {
   const shareData = {
-    title: `${course.value.title} | AEMS Academy`,
+    title: `${course.value.title}`,
     text: `I found this great course: ${course.value.title}. Check it out!`,
     url: window.location.href,
   };

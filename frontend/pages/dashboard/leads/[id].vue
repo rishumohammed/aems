@@ -480,6 +480,15 @@ const fetchData = async () => {
   loading.value = true;
   try {
     const { data } = await api.get(`/crm/leads/${route.params.id}`);
+    if (typeof data.course_interest_ids === 'string') {
+      try {
+        data.course_interest_ids = JSON.parse(data.course_interest_ids);
+      } catch (e) {
+        data.course_interest_ids = [];
+      }
+    } else if (!data.course_interest_ids) {
+      data.course_interest_ids = [];
+    }
     lead.value = data;
     if (lead.value.status === 'converted') {
       await fetchConvertedStudentDetails();

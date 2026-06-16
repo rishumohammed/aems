@@ -610,6 +610,7 @@ definePageMeta({
   margin-bottom: 1.25rem;
 }
 .shadow-apple {
-  box-shadow: 0 4px 14px 0 rgba(0, 118, 255, 0.39);
+  border: 1px solid var(--border);
+  
 }
 </style>

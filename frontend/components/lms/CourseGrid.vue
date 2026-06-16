@@ -138,7 +138,8 @@ const formatStatus = (course) => {
 }
 .course-grid-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 10px 30px rgba(0,0,0,0.1) !important;
+  border: 1px solid var(--border);
+  
 }
 .line-clamp-2 {
   display: -webkit-box;

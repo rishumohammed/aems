@@ -22,7 +22,8 @@ defineProps({
 <style scoped>
 .hover-glow:hover {
   border-color: var(--color-brand) !important;
-  box-shadow: 0 0 15px rgba(0, 122, 255, 0.1) !important;
+  
   background-color: #F5F5F7 !important;
+  border: 1px solid var(--border);
 }
 </style>

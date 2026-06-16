@@ -55,7 +55,8 @@ defineEmits(['update:modelValue', 'submit']);
 <style scoped>
 .modal-card {
   background: white !important;
-  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.18), 0 0 0 1px rgba(0, 0, 0, 0.06) !important;
+  border: 1px solid var(--border);
+  
 }
 
 .modal-header {

@@ -130,9 +130,11 @@
                   <v-list v-if="applicant.enrollments?.length" lines="two" class="bg-transparent border rounded-lg mb-6">
                     <v-list-item v-for="en in applicant.enrollments" :key="en.id" :title="en.course_title">
                       <template v-slot:subtitle>
-                        <div class="d-flex align-center mt-1">
-                          <v-progress-linear :model-value="en.completion_percentage" color="primary" height="6" rounded class="mr-3" style="max-width: 150px;"></v-progress-linear>
-                          <span class="text-caption">{{ en.completion_percentage }}% Complete</span>
+                        <div class="d-flex align-center mt-1" style="max-width: 150px;">
+                          <UiProgressFraction
+                            :current="en.completed_lessons || 0"
+                            :total="en.total_lessons || 100"
+                          />
                         </div>
                       </template>
                       <template v-slot:append>
@@ -529,7 +531,8 @@ const submitSchedule = async () => {
 
 <style scoped>
 .shadow-card {
-  box-shadow: 0 15px 40px rgba(0,0,0,0.1) !important;
+  border: 1px solid var(--border);
+  
 }
 .gap-4 {
   gap: 16px;

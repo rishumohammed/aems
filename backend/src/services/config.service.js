@@ -79,7 +79,7 @@ export class ConfigService {
         if (typeof value === 'string' && value.includes('...')) {
             continue;
         }
-        await connection.query('UPDATE system_config SET value = ? WHERE `key` = ?', [value, key]);
+        await connection.query('INSERT INTO system_config (`key`, `value`, `group`) VALUES (?, ?, "branding") ON DUPLICATE KEY UPDATE `value` = ?', [key, value, value]);
       }
       await connection.commit();
       // Invalidate cache (non-fatal)

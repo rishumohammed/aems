@@ -62,15 +62,16 @@ const timeAgo = (date: string) => dayjs(date).fromNow();
 <style scoped>
 .lead-card {
   background: white !important;
-  border-radius: var(--r12) !important;
-  box-shadow: var(--s1) !important;
-  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease;
+  border-radius: var(--radius-md) !important;
+  
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease;
   border: 1px solid rgba(0, 0, 0, 0.03) !important;
 }
 
 .lead-card:hover {
   transform: translateY(-2px);
-  box-shadow: var(--s2) !important;
+  border: 1px solid var(--border);
+  
 }
 
 .status-border-interested { border-left: 3px solid var(--purple) !important; }
@@ -88,7 +89,7 @@ const timeAgo = (date: string) => dayjs(date).fromNow();
   color: var(--blue);
   background: var(--blue-l);
   padding: 2px 8px;
-  border-radius: var(--r6);
+  border-radius: var(--radius-sm);
   display: inline-flex;
 }
 
@@ -111,6 +112,6 @@ const timeAgo = (date: string) => dayjs(date).fromNow();
 
 .agent-avatar {
   border: 1px solid white;
-  box-shadow: 0 0 0 1px var(--g2);
+  
 }
 </style>

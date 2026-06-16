@@ -90,7 +90,7 @@ onUnmounted(() => {
   height: 120px;
   border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+  
   border: 2px solid rgba(255,255,255,0.1);
   background: #000;
   z-index: 9990; /* below overlay */

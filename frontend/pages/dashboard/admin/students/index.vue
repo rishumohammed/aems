@@ -93,7 +93,7 @@
         <KpiCard label="Avg. Progress" :value="stats.avgProgress + '%'" icon="mdi-trending-up" color="purple" />
       </v-col>
       <v-col cols="12" sm="6" md="3">
-        <KpiCard label="Pending Payments" :value="stats.pendingPayments" icon="mdi-cash-clock" color="orange" />
+        <KpiCard label="Pending Payments" :value="stats.pendingPayments" icon="mdi-cash-clock" color="warning" />
       </v-col>
     </v-row>
 
@@ -153,15 +153,11 @@
         </template>
 
         <template #[`item.avg_progress`]="{ item }">
-          <div class="d-flex align-center" style="width: 100px;">
-            <v-progress-linear
-              :model-value="item.avg_progress || 0"
-              color="primary"
-              height="6"
-              rounded
-              class="mr-2"
-            ></v-progress-linear>
-            <span class="text-caption font-weight-bold">{{ Math.round(item.avg_progress || 0) }}%</span>
+          <div style="width: 100px;">
+            <UiProgressFraction
+              :current="Math.round(item.avg_progress || 0)"
+              :total="100"
+            />
           </div>
         </template>
 
@@ -379,8 +375,9 @@ const statusColor = (status: string) => {
 
 .filters-card {
   background: white;
-  border-radius: var(--r16);
-  box-shadow: var(--s2);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  
 }
 
 .search-pill {
@@ -400,9 +397,10 @@ const statusColor = (status: string) => {
 
 .apple-table-card {
   background: white;
-  border-radius: var(--r16);
-  box-shadow: var(--s2);
+  border-radius: var(--radius-lg);
+  
   overflow: hidden;
+  border: 1px solid var(--border);
 }
 
 .apple-data-table {

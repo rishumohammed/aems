@@ -275,8 +275,9 @@ const copyPassword = async () => {
 
 <style scoped>
 .shadow-card {
-  box-shadow: 0 10px 30px rgba(0,0,0,0.05) !important;
+  
   border-color: rgba(0,0,0,0.05) !important;
+  border: 1px solid var(--border);
 }
 ::v-deep(.custom-table th) {
   background: #f8fafc !important;

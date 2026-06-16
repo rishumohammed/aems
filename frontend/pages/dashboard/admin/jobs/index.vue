@@ -168,7 +168,7 @@ async function loadJobs() {
 function getStatusColor(status: string) {
   switch(status) {
     case 'approved': return 'green';
-    case 'pending': return 'orange';
+    case 'pending': return 'warning';
     case 'rejected': return 'red';
     default: return 'gray';
   }
@@ -225,9 +225,10 @@ async function deleteJob(job: any) {
 
 .apple-table-card {
   background: white;
-  border-radius: var(--r16);
-  box-shadow: var(--s2);
+  border-radius: var(--radius-lg);
+  
   overflow: hidden;
+  border: 1px solid var(--border);
 }
 
 .apple-data-table {

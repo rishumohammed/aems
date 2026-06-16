@@ -53,7 +53,7 @@ defineEmits(['click']);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: var(--r10);
+  border-radius: var(--radius-md);
   font-size: 13px;
   font-weight: 600;
   font-family: var(--font);
@@ -72,13 +72,15 @@ defineEmits(['click']);
 .btn-blue {
   background-color: var(--blue);
   color: white;
-  box-shadow: 0 2px 8px rgba(0, 122, 255, 0.25);
+  border: 1px solid var(--border);
+  
 }
 .btn-p:hover:not(:disabled),
 .btn-blue:hover:not(:disabled) {
   background-color: var(--blue-d);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 122, 255, 0.35);
+  border: 1px solid var(--border);
+  
 }
 
 /* Ghost */
@@ -112,15 +114,16 @@ defineEmits(['click']);
 }
 
 /* Sizes */
-.btn-sm  { padding: 6px 12px; font-size: 12px; border-radius: var(--r8); }
-.btn-xs  { padding: 4px 10px; font-size: 11px; border-radius: var(--r6); }
-.btn-lg  { padding: 12px 24px; font-size: 15px; border-radius: var(--r12); }
+.btn-sm  { padding: 6px 12px; font-size: 12px; border-radius: var(--radius-sm); }
+.btn-xs  { padding: 4px 10px; font-size: 11px; border-radius: var(--radius-sm); }
+.btn-lg  { padding: 12px 24px; font-size: 15px; border-radius: var(--radius-md); }
 
 .apple-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
-  box-shadow: none;
+  
   transform: none !important;
+  border: 1px solid var(--border);
 }
 
 .apple-btn:active:not(:disabled) {

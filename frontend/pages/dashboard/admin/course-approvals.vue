@@ -248,7 +248,7 @@
                         </div>
                       </div>
                       <a v-if="lesson.resource_url" :href="getImageUrl(lesson.resource_url)" target="_blank" class="text-decoration-none">
-                        <v-btn size="x-small" variant="tonal" color="orange" prepend-icon="mdi-download">View File</v-btn>
+                        <v-btn size="x-small" variant="tonal" color="info" prepend-icon="mdi-download">View File</v-btn>
                       </a>
                     </div>
 
@@ -410,7 +410,7 @@ const getLessonTypeIcon = (type: string) => {
 const getLessonTypeColor = (type: string) => {
   const map: Record<string, string> = {
     video: 'blue',
-    resource: 'orange',
+    resource: 'info',
     live: 'red',
     quiz: 'purple',
     exam: 'deep-purple',
@@ -476,8 +476,9 @@ const confirmReject = async () => {
 
 <style scoped>
 .shadow-card {
-  box-shadow: 0 10px 30px rgba(0,0,0,0.05) !important;
+  
   border-color: rgba(0,0,0,0.05) !important;
+  border: 1px solid var(--border);
 }
 ::v-deep(.custom-table th) {
   background: #f8fafc !important;

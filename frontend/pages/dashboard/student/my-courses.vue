@@ -40,11 +40,11 @@
                 <h3 class="text-subtitle-2 font-weight-bold mb-1 text-truncate">{{ course.title }}</h3>
                 <div class="text-caption text-grey-darken-1 mb-4">{{ course.instructor_name || 'AEMS Instructor' }}</div>
                 
-                <div class="d-flex align-center justify-space-between mb-1">
-                  <span class="text-caption font-weight-bold">{{ course.completion_percentage }}%</span>
-                  <span class="text-caption text-grey">{{ course.completed_lessons }}/{{ course.total_lessons }} Lessons</span>
-                </div>
-                <v-progress-linear :model-value="course.completion_percentage" color="primary" height="6" rounded class="mb-4"></v-progress-linear>
+                <UiProgressFraction
+                  :current="course.completed_lessons || 0"
+                  :total="course.total_lessons || 100"
+                  class="mb-4"
+                />
 
                 <div class="d-flex flex-column gap-2">
                   <v-btn block :color="course.status === 'completed' ? 'success' : 'primary'" variant="flat" rounded="lg" class="text-none font-weight-bold" @click="navigateToCourse(course)">
@@ -121,11 +121,12 @@ definePageMeta({
 
 <style scoped>
 .course-card {
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.2s ease, border-color 0.2s ease;
 }
 .course-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 10px 30px rgba(0,0,0,0.1) !important;
+  border: 1px solid var(--border);
+  
 }
 .bg-gradient-overlay {
   background: linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 100%);

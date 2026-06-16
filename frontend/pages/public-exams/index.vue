@@ -235,7 +235,7 @@ useSeoMeta({
 
 .details-grid :deep(.v-card) {
   border: 1px solid rgba(0,0,0,0.04) !important;
-  box-shadow: none !important;
+  
 }
 
 .gap-3 {

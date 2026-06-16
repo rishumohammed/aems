@@ -135,7 +135,7 @@ const handleForgot = async () => {
   border: 1px solid rgba(0, 0, 0, 0.07);
   border-radius: 24px;
   padding: 40px;
-  box-shadow: 0 8px 40px rgba(0, 122, 255, 0.08);
+  
 }
 
 .login-card-header {

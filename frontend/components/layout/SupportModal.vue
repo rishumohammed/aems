@@ -61,7 +61,8 @@ defineExpose({ open });
 
 <style scoped>
 .shadow-apple {
-  box-shadow: 0 10px 40px rgba(0,0,0,0.1) !important;
+  border: 1px solid var(--border);
+  
 }
 .gap-2 { gap: 8px; }
 </style>

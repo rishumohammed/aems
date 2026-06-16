@@ -177,7 +177,7 @@ const openCompanyWebsite = () => {
 };
 
 useSeoMeta({
-  title: () => `${job.value?.title || 'Job Detail'} | AEMS Academy`,
+  title: () => `${job.value?.title || 'Job Detail'}`,
   description: () => job.value?.description?.substring(0, 160) || 'Job detail and application.'
 });
 </script>

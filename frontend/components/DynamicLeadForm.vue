@@ -152,14 +152,13 @@
 
           <v-btn
             type="submit"
-            color="primary"
+            color="accent"
             block
             size="large"
             rounded="lg"
             class="mt-6 font-weight-bold text-capitalize"
             :loading="submitting"
             :disabled="submitting || loading"
-            elevation="2"
           >
             Submit Inquiry
           </v-btn>
@@ -331,11 +330,11 @@ const handleSubmit = async () => {
   border-radius: 8px !important;
   height: 48px !important;
   background-color: #ffffff !important;
-  transition: border-color 0.15s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.15s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  transition: border-color 0.15s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.15s cubic-bezier(0.4, 0, 0.2, 1) !important;
   font-family: inherit !important;
   display: flex !important;
   align-items: center !important;
-  box-shadow: none !important;
+  
 }
 
 .dynamic-lead-form :deep(.vue-tel-input:hover) {
@@ -344,7 +343,8 @@ const handleSubmit = async () => {
 
 .dynamic-lead-form :deep(.vue-tel-input:focus-within) {
   border-color: rgb(var(--v-theme-primary)) !important;
-  box-shadow: 0 0 0 1px rgb(var(--v-theme-primary)) !important;
+  border: 1px solid var(--border);
+  
 }
 
 /* Error state */
@@ -353,7 +353,8 @@ const handleSubmit = async () => {
 }
 .dynamic-lead-form :deep(.vue-tel-input.is-invalid:focus-within) {
   border-color: rgb(var(--v-theme-error)) !important;
-  box-shadow: 0 0 0 1px rgb(var(--v-theme-error)) !important;
+  border: 1px solid var(--border);
+  
 }
 
 /* Dropdown / Flag Selector styling */
@@ -376,7 +377,7 @@ const handleSubmit = async () => {
 /* Dropdown list of countries */
 .dynamic-lead-form :deep(.vti__dropdown-list) {
   border-radius: 8px !important;
-  box-shadow: 0 5px 5px -3px rgba(0,0,0,0.2), 0 8px 10px 1px rgba(0,0,0,0.14), 0 3px 14px 2px rgba(0,0,0,0.12) !important;
+  
   border: 1px solid rgba(0,0,0,0.08) !important;
   padding: 8px 0 !important;
   background-color: #ffffff !important;

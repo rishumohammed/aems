@@ -245,7 +245,7 @@ const triggerConfetti = () => {
   background: #1e1b4b; /* Fallback for older browsers */
   border-radius: 24px;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 20px 40px -10px rgba(79, 70, 229, 0.4) !important;
+  
 }
 
 .card-bg-gradient {
@@ -310,8 +310,9 @@ const triggerConfetti = () => {
 .glass-pill {
   background: rgba(255, 255, 255, 0.95);
   border-radius: 30px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  
   color: #4f46e5 !important;
+  border: 1px solid var(--border);
 }
 
 .glass-panel {
@@ -320,7 +321,7 @@ const triggerConfetti = () => {
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 16px;
-  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+  
   transition: transform 0.2s ease, background 0.2s ease;
 }
 

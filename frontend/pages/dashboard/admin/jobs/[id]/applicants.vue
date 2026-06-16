@@ -189,7 +189,8 @@ function exportCSV() {
 
 <style scoped>
 .shadow-card {
-  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+  border: 1px solid var(--border);
+  
 }
 ::v-deep(.custom-table) {
   background: transparent !important;

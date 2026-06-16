@@ -27,6 +27,58 @@
           <!-- Branding Tab -->
           <div v-if="activeTab[0] === 'branding'" class="fade-in">
             <h2 class="text-h6 font-weight-bold mb-6">Branding & Identity</h2>
+            
+            <!-- Logo & Favicon Upload -->
+            <v-row class="mb-8">
+              <v-col cols="12" md="6">
+                <v-card variant="outlined" class="pa-4 rounded-xl d-flex flex-column align-center justify-center text-center">
+                  <div class="mb-3">
+                    <img v-if="form.app_logo" :src="baseUrl + form.app_logo" alt="Logo Preview" style="max-height: 60px; max-width: 100%; object-fit: contain;" />
+                    <v-icon v-else size="48" color="grey-lighten-1">mdi-image-outline</v-icon>
+                  </div>
+                  <div class="text-subtitle-2 font-weight-bold mb-1">Platform Logo</div>
+                  <div class="text-caption text-secondary mb-3">Recommended: 400x100px PNG/SVG</div>
+                  <v-file-input
+                    v-model="logoFile"
+                    accept="image/*"
+                    label="Upload new logo"
+                    variant="outlined"
+                    density="compact"
+                    prepend-icon=""
+                    prepend-inner-icon="mdi-camera"
+                    hide-details
+                    class="w-100"
+                    @change="uploadBranding"
+                  ></v-file-input>
+                </v-card>
+              </v-col>
+              
+              <v-col cols="12" md="6">
+                <v-card variant="outlined" class="pa-4 rounded-xl d-flex flex-column align-center justify-center text-center">
+                  <div class="mb-3">
+                    <img v-if="form.app_favicon" :src="baseUrl + form.app_favicon" alt="Favicon Preview" style="max-height: 48px; max-width: 48px; border-radius: 8px; object-fit: cover;" />
+                    <v-icon v-else size="48" color="grey-lighten-1">mdi-web</v-icon>
+                  </div>
+                  <div class="text-subtitle-2 font-weight-bold mb-1">Favicon</div>
+                  <div class="text-caption text-secondary mb-3">Recommended: 64x64px ICO/PNG</div>
+                  <v-file-input
+                    v-model="faviconFile"
+                    accept="image/*,.ico"
+                    label="Upload new favicon"
+                    variant="outlined"
+                    density="compact"
+                    prepend-icon=""
+                    prepend-inner-icon="mdi-camera"
+                    hide-details
+                    class="w-100"
+                    @change="uploadBranding"
+                  ></v-file-input>
+                </v-card>
+              </v-col>
+            </v-row>
+
+            <v-divider class="mb-8"></v-divider>
+
             <div class="fr2 mb-4">
               <AppInput v-model="form.institute_name" label="Institution Name" placeholder="AEMS Academy" large />
               <AppInput v-model="form.tagline" label="Tagline" placeholder="Learn the future" large />
@@ -163,7 +215,193 @@
             <SocialPlatformsTab />
           </div>
 
-          <div class="d-flex justify-end gap-3 mt-12 pt-6 border-t" v-if="activeTab[0] !== 'social'">
+          <!-- Homepage Tab -->
+          <div v-if="activeTab[0] === 'homepage'" class="fade-in">
+            <h2 class="text-h6 font-weight-bold mb-2">Static Pages Image Management</h2>
+            <p class="text-body-2 text-secondary mb-8">Upload or set URL for the main images displayed on the homepage and about page.</p>
+
+            <!-- Hero Image -->
+            <v-card variant="outlined" class="rounded-xl pa-6 mb-6">
+              <div class="d-flex align-center mb-4">
+                <v-avatar color="primary" size="40" class="mr-3">
+                  <v-icon color="white" size="20">mdi-image-area</v-icon>
+                </v-avatar>
+                <div>
+                  <div class="text-subtitle-1 font-weight-bold">Hero Section Image</div>
+                  <div class="text-caption text-secondary">Shown on the right side of the main hero banner</div>
+                </div>
+              </div>
+
+              <!-- Preview -->
+              <div v-if="form.homepage_hero_image" class="mb-4">
+                <img
+                  :src="form.homepage_hero_image?.startsWith('/') ? (baseUrl + form.homepage_hero_image) : form.homepage_hero_image"
+                  alt="Hero Image Preview"
+                  style="width:100%; max-height:200px; object-fit:cover; border-radius:12px; border:1px solid rgba(0,0,0,0.08);"
+                />
+              </div>
+              <div v-else class="mb-4 pa-6 rounded-xl d-flex align-center justify-center" style="background:#f8f9fc; border:1px dashed rgba(0,0,0,0.12); min-height:120px;">
+                <div class="text-center text-secondary">
+                  <v-icon size="40" color="grey-lighten-2" class="mb-2">mdi-image-outline</v-icon>
+                  <div class="text-caption">No image set — using default</div>
+                </div>
+              </div>
+
+              <v-row>
+                <v-col cols="12" md="6">
+                  <v-file-input
+                    v-model="heroImageFile"
+                    accept="image/*"
+                    label="Upload new hero image"
+                    variant="outlined"
+                    density="compact"
+                    prepend-icon=""
+                    prepend-inner-icon="mdi-upload"
+                    hide-details
+                    class="mb-3"
+                  />
+                  <v-btn color="primary" variant="tonal" rounded="lg" size="small" :loading="saving" @click="uploadHomepageImages" class="text-none">
+                    <v-icon start>mdi-cloud-upload</v-icon> Upload Hero Image
+                  </v-btn>
+                </v-col>
+                <v-col cols="12" md="6">
+                  <AppInput
+                    v-model="form.homepage_hero_image_url"
+                    label="Or paste image URL"
+                    placeholder="https://images.unsplash.com/..."
+                  />
+                  <div class="text-caption text-secondary mt-1">If set, URL takes priority over uploaded file.</div>
+                </v-col>
+              </v-row>
+            </v-card>
+
+            <!-- About / Why Section Image -->
+            <v-card variant="outlined" class="rounded-xl pa-6">
+              <div class="d-flex align-center mb-4">
+                <v-avatar color="teal" size="40" class="mr-3">
+                  <v-icon color="white" size="20">mdi-image-multiple</v-icon>
+                </v-avatar>
+                <div>
+                  <div class="text-subtitle-1 font-weight-bold">"Why Brixify" Section Image</div>
+                  <div class="text-caption text-secondary">Shown on the left side of the Why Brixify split section</div>
+                </div>
+              </div>
+
+              <!-- Preview -->
+              <div v-if="form.homepage_about_image" class="mb-4">
+                <img
+                  :src="form.homepage_about_image?.startsWith('/') ? (baseUrl + form.homepage_about_image) : form.homepage_about_image"
+                  alt="About Image Preview"
+                  style="width:100%; max-height:200px; object-fit:cover; border-radius:12px; border:1px solid rgba(0,0,0,0.08);"
+                />
+              </div>
+              <div v-else class="mb-4 pa-6 rounded-xl d-flex align-center justify-center" style="background:#f8f9fc; border:1px dashed rgba(0,0,0,0.12); min-height:120px;">
+                <div class="text-center text-secondary">
+                  <v-icon size="40" color="grey-lighten-2" class="mb-2">mdi-image-outline</v-icon>
+                  <div class="text-caption">No image set — using default</div>
+                </div>
+              </div>
+
+              <v-row>
+                <v-col cols="12" md="6">
+                  <v-file-input
+                    v-model="aboutImageFile"
+                    accept="image/*"
+                    label="Upload new section image"
+                    variant="outlined"
+                    density="compact"
+                    prepend-icon=""
+                    prepend-inner-icon="mdi-upload"
+                    hide-details
+                    class="mb-3"
+                  />
+                  <v-btn color="teal" variant="tonal" rounded="lg" size="small" :loading="saving" @click="uploadHomepageImages" class="text-none">
+                    <v-icon start>mdi-cloud-upload</v-icon> Upload Section Image
+                  </v-btn>
+                </v-col>
+                <v-col cols="12" md="6">
+                  <AppInput
+                    v-model="form.homepage_about_image_url"
+                    label="Or paste image URL"
+                    placeholder="https://images.unsplash.com/..."
+                  />
+                  <div class="text-caption text-secondary mt-1">If set, URL takes priority over uploaded file.</div>
+                </v-col>
+              </v-row>
+            </v-card>
+
+            <!-- About Page Who We Are Image -->
+            <v-card variant="outlined" class="rounded-xl pa-6 mb-6">
+              <div class="d-flex align-center mb-4">
+                <v-avatar color="primary" size="40" class="mr-3">
+                  <v-icon color="white" size="20">mdi-account-group</v-icon>
+                </v-avatar>
+                <div>
+                  <div class="text-subtitle-1 font-weight-bold">About Page - Who We Are</div>
+                  <div class="text-caption text-secondary">Shown next to the Who We Are text block on the About page</div>
+                </div>
+              </div>
+
+              <!-- Preview -->
+              <div v-if="form.aboutpage_who_image" class="mb-4">
+                <img
+                  :src="form.aboutpage_who_image?.startsWith('/') ? (baseUrl + form.aboutpage_who_image) : form.aboutpage_who_image"
+                  alt="Who We Are Image Preview"
+                  style="width:100%; max-height:200px; object-fit:cover; border-radius:12px; border:1px solid rgba(0,0,0,0.08);"
+                />
+              </div>
+              <div v-else class="mb-4 pa-6 rounded-xl d-flex align-center justify-center" style="background:#f8f9fc; border:1px dashed rgba(0,0,0,0.12); min-height:120px;">
+                <div class="text-center text-secondary">
+                  <v-icon size="40" color="grey-lighten-2" class="mb-2">mdi-image-outline</v-icon>
+                  <div class="text-caption">No image set — using default</div>
+                </div>
+              </div>
+
+              <v-row>
+                <v-col cols="12" md="6">
+                  <v-file-input
+                    v-model="aboutpageWhoImageFile"
+                    accept="image/*"
+                    label="Upload new section image"
+                    variant="outlined"
+                    density="compact"
+                    prepend-icon=""
+                    prepend-inner-icon="mdi-upload"
+                    hide-details
+                    class="mb-3"
+                  />
+                  <v-btn color="teal" variant="tonal" rounded="lg" size="small" :loading="saving" @click="uploadHomepageImages" class="text-none">
+                    <v-icon start>mdi-cloud-upload</v-icon> Upload Section Image
+                  </v-btn>
+                </v-col>
+                <v-col cols="12" md="6">
+                  <AppInput
+                    v-model="form.aboutpage_who_image_url"
+                    label="Or paste image URL"
+                    placeholder="https://images.unsplash.com/..."
+                  />
+                  <div class="text-caption text-secondary mt-1">If set, URL takes priority over uploaded file.</div>
+                </v-col>
+              </v-row>
+            </v-card>
+
+            <div class="d-flex justify-end gap-3 mt-8 pt-6 border-t">
+              <AppButton variant="g" size="lg" icon="mdi-refresh" @click="fetchData">Reset</AppButton>
+              <AppButton size="lg" icon="mdi-check" :loading="saving" @click="save">Save URL Settings</AppButton>
+            </div>
+          </div>
+
+          <!-- Currencies Tab -->
+          <div v-if="activeTab[0] === 'currencies'" class="fade-in">
+            <CurrenciesTab />
+          </div>
+
+          <!-- Certifications Tab -->
+          <div v-if="activeTab[0] === 'certifications'" class="fade-in">
+            <CertificationsTab />
+          </div>
+
+          <div class="d-flex justify-end gap-3 mt-12 pt-6 border-t" v-if="activeTab[0] !== 'social' && activeTab[0] !== 'currencies' && activeTab[0] !== 'homepage' && activeTab[0] !== 'certifications'">
             <AppButton variant="g" size="lg" icon="mdi-refresh" @click="fetchData">
               Reset Changes
             </AppButton>
@@ -183,9 +421,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue';
+import { ref, onMounted, watch, computed } from 'vue';
 import { useApi } from '@/composables/useApi';
 import SocialPlatformsTab from '@/components/admin/settings/SocialPlatformsTab.vue';
+import CurrenciesTab from '@/components/admin/settings/CurrenciesTab.vue';
+import CertificationsTab from '@/components/admin/settings/CertificationsTab.vue';
 
 definePageMeta({
   layout: 'dashboard',
@@ -194,10 +434,18 @@ definePageMeta({
 });
 
 const api = useApi();
+const config = useRuntimeConfig();
+const baseUrl = computed(() => config.public.apiBase.replace('/api', ''));
+
 const activeTab = ref(['branding']);
 const saving = ref(false);
 const form = ref<any>({});
 const acceptanceHistory = ref<any[]>([]);
+const logoFile = ref(null);
+const faviconFile = ref(null);
+const heroImageFile = ref(null);
+const aboutImageFile = ref(null);
+const aboutpageWhoImageFile = ref(null);
 
 const snackbar = ref(false);
 const snackbarMessage = ref('');
@@ -205,12 +453,15 @@ const snackbarColor = ref('success');
 
 const tabs = [
   { label: 'Branding', value: 'branding', icon: 'mdi-palette-outline' },
+  { label: 'Homepage', value: 'homepage', icon: 'mdi-home-outline' },
   { label: 'Contact Info', value: 'contact', icon: 'mdi-map-marker-outline' },
   { label: 'Email (SMTP)', value: 'email', icon: 'mdi-email-outline' },
   { label: 'WhatsApp API', value: 'whatsapp', icon: 'mdi-whatsapp' },
   { label: 'Payments', value: 'payments', icon: 'mdi-credit-card-outline' },
   { label: 'Terms & Privacy', value: 'terms_privacy', icon: 'mdi-shield-lock-outline' },
   { label: 'Social Platforms', value: 'social', icon: 'mdi-account-group-outline' },
+  { label: 'Currencies', value: 'currencies', icon: 'mdi-currency-usd' },
+  { label: 'Certifications', value: 'certifications', icon: 'mdi-certificate-outline' },
 ];
 
 const historyHeaders = [
@@ -248,6 +499,74 @@ const fetchData = async () => {
     form.value = configMap;
   } catch (err) {
     console.error('Failed to fetch config');
+  }
+};
+
+const uploadBranding = async () => {
+  if (!logoFile.value && !faviconFile.value) return;
+  
+  saving.value = true;
+  const formData = new FormData();
+  
+  const logo = Array.isArray(logoFile.value) ? logoFile.value[0] : logoFile.value;
+  const favicon = Array.isArray(faviconFile.value) ? faviconFile.value[0] : faviconFile.value;
+
+  if (logo) formData.append('logo', logo);
+  if (favicon) formData.append('favicon', favicon);
+
+  try {
+    const { data } = await api.post('/admin/config/branding/upload', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+    if (data.updates.app_logo) form.value.app_logo = data.updates.app_logo;
+    if (data.updates.app_favicon) form.value.app_favicon = data.updates.app_favicon;
+    snackbarMessage.value = 'Branding assets uploaded successfully';
+    snackbarColor.value = 'success';
+    snackbar.value = true;
+    logoFile.value = null;
+    faviconFile.value = null;
+  } catch (err) {
+    snackbarMessage.value = 'Failed to upload images';
+    snackbarColor.value = 'error';
+    snackbar.value = true;
+  } finally {
+    saving.value = false;
+  }
+};
+
+const uploadHomepageImages = async () => {
+  if (!heroImageFile.value && !aboutImageFile.value && !aboutpageWhoImageFile.value) return;
+
+  saving.value = true;
+  const formData = new FormData();
+
+  const hero = Array.isArray(heroImageFile.value) ? heroImageFile.value[0] : heroImageFile.value;
+  const about = Array.isArray(aboutImageFile.value) ? aboutImageFile.value[0] : aboutImageFile.value;
+  const aboutWho = Array.isArray(aboutpageWhoImageFile.value) ? aboutpageWhoImageFile.value[0] : aboutpageWhoImageFile.value;
+
+  if (hero) formData.append('hero_image', hero);
+  if (about) formData.append('about_image', about);
+  if (aboutWho) formData.append('aboutpage_who_image', aboutWho);
+
+  try {
+    const { data } = await api.post('/admin/config/branding/upload', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+    if (data.updates.homepage_hero_image) form.value.homepage_hero_image = data.updates.homepage_hero_image;
+    if (data.updates.homepage_about_image) form.value.homepage_about_image = data.updates.homepage_about_image;
+    if (data.updates.aboutpage_who_image) form.value.aboutpage_who_image = data.updates.aboutpage_who_image;
+    snackbarMessage.value = 'Images uploaded successfully';
+    snackbarColor.value = 'success';
+    snackbar.value = true;
+    heroImageFile.value = null;
+    aboutImageFile.value = null;
+    aboutpageWhoImageFile.value = null;
+  } catch (err) {
+    snackbarMessage.value = 'Failed to upload homepage images';
+    snackbarColor.value = 'error';
+    snackbar.value = true;
+  } finally {
+    saving.value = false;
   }
 };
 
@@ -300,10 +619,11 @@ onMounted(() => {
 .settings-layout {
   display: flex;
   background: white;
-  border-radius: var(--r16);
-  box-shadow: var(--s2);
+  border-radius: var(--radius-lg);
+  
   min-height: 600px;
   overflow: hidden;
+  border: 1px solid var(--border);
 }
 
 .settings-sidebar {
@@ -322,7 +642,8 @@ onMounted(() => {
 
 :deep(.v-list-item--selected) {
   background-color: white !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
+  border: 1px solid var(--border);
+  
 }
 
 .fr2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }

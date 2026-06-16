@@ -283,17 +283,18 @@ const openSupport = () => {
 <style scoped>
 .profile-header {
   background: linear-gradient(135deg, #5c24d0 0%, #1e1b4b 100%);
-  box-shadow: 0 10px 30px rgba(92, 36, 208, 0.2);
+  border: 1px solid var(--border);
+  
 }
 
 .profile-avatar {
   background: linear-gradient(135deg, #007aff, #8a2be2);
   border: 3px solid rgba(255, 255, 255, 0.3);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+  
 }
 
 .shadow-apple {
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04) !important;
+  
   border: 1px solid rgba(0, 0, 0, 0.05) !important;
 }
 
@@ -324,7 +325,8 @@ const openSupport = () => {
 }
 .status-indicator.success {
   background-color: #34c759;
-  box-shadow: 0 0 8px #34c759;
+  border: 1px solid var(--border);
+  
 }
 
 .info-alert {

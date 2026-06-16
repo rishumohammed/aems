@@ -49,6 +49,16 @@
         <!-- Actions -->
         <div class="d-flex gap-2 ml-4">
           <v-btn icon="mdi-eye-outline" variant="text" color="grey" size="small" @click="$emit('view', course)"></v-btn>
+          <template v-if="userRole === 'super_admin'">
+            <v-btn 
+              :icon="course.is_featured ? 'mdi-star' : 'mdi-star-outline'" 
+              variant="text" 
+              :color="course.is_featured ? 'warning' : 'grey'" 
+              size="small" 
+              @click="$emit('toggle-featured', course)"
+              title="Toggle Featured"
+            ></v-btn>
+          </template>
           <template v-if="userRole !== 'student'">
             <v-btn icon="mdi-pencil-outline" variant="tonal" color="primary" size="small" @click="$emit('edit', course)"></v-btn>
             <v-btn icon="mdi-archive-outline" variant="text" color="grey" size="small" @click="$emit('archive', course)"></v-btn>
@@ -73,7 +83,7 @@ const props = defineProps({
 const authStore = useAuthStore();
 const userRole = computed(() => authStore.userRole);
 
-defineEmits(['edit', 'view', 'archive'])
+defineEmits(['edit', 'view', 'archive', 'toggle-featured'])
 
 const getStatusColor = (course) => {
   if (course.status === 'published' && course.tutor_role === 'super_admin') return 'deep-purple-accent-2';

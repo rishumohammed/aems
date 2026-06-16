@@ -9,42 +9,24 @@
     </div>
 
     <!-- Quick Navigation Links (Admin Submenu) -->
-    <v-card flat border class="pa-4 mb-8 rounded-xl bg-grey-lighten-4">
-      <div class="d-flex gap-2 flex-wrap">
-        <v-btn to="/dashboard/admin/public-exams" variant="text" rounded="lg" class="text-capitalize font-weight-bold text-secondary">
-          <v-icon start>mdi-card-text-outline</v-icon> All Exams
-        </v-btn>
-        <v-btn to="/dashboard/admin/public-exams/create" variant="text" rounded="lg" class="text-capitalize font-weight-bold text-secondary">
-          <v-icon start>mdi-plus</v-icon> Create Exam
-        </v-btn>
-        <v-btn to="/dashboard/admin/public-exams/categories" variant="text" rounded="lg" class="text-capitalize font-weight-bold text-secondary">
-          <v-icon start>mdi-folder-outline</v-icon> Categories
-        </v-btn>
-        <v-btn to="/dashboard/admin/public-exams/questions" color="primary" variant="flat" rounded="lg" class="text-capitalize font-weight-bold">
-          <v-icon start>mdi-database-outline</v-icon> Question Bank
-        </v-btn>
-        <v-btn to="/dashboard/admin/public-exams/results" variant="text" rounded="lg" class="text-capitalize font-weight-bold text-secondary">
-          <v-icon start>mdi-chart-bar</v-icon> Results &amp; Analytics
-        </v-btn>
-      </div>
-    </v-card>
+    <!-- Removed to act as a child page of the specific exam -->
 
-    <!-- Exam Selector & Action Controls -->
+    <!-- Exam Title & Action Controls -->
     <v-card class="pa-6 border rounded-xl mb-6" flat>
       <v-row align="center">
         <v-col cols="12" md="5">
-          <v-select
-            v-model="selectedExamId"
-            :items="exams"
-            item-title="name"
-            item-value="id"
-            label="Select Public Exam to Manage"
-            hide-details
-            density="comfortable"
-            variant="outlined"
-            rounded="lg"
-            @update:model-value="onExamChange"
-          ></v-select>
+          <div v-if="selectedExam" class="d-flex align-center gap-3">
+            <v-btn icon="mdi-arrow-left" variant="tonal" size="small" color="secondary" to="/dashboard/admin/public-exams" title="Back to Exams" class="mr-2"></v-btn>
+            <div>
+              <div class="text-caption text-secondary font-weight-bold text-uppercase">Managing Questions For</div>
+              <h2 class="text-h6 font-weight-black text-dark">{{ selectedExam.name }}</h2>
+            </div>
+          </div>
+          <div v-else>
+            <v-btn to="/dashboard/admin/public-exams" variant="tonal" color="primary" rounded="lg">
+              <v-icon start>mdi-arrow-left</v-icon> Return to Exams
+            </v-btn>
+          </div>
         </v-col>
         <v-col cols="12" md="7" class="d-flex justify-md-end gap-2 flex-wrap" v-if="selectedExamId">
           <!-- Import Toggle Buttons -->
@@ -180,8 +162,11 @@
 
     <div v-else-if="!selectedExamId" class="text-center py-16 border rounded-xl bg-white" flat>
       <v-icon size="64" color="primary" class="mb-3">mdi-database-search-outline</v-icon>
-      <h3 class="text-h6 font-weight-bold mb-2">Select a Public Exam</h3>
-      <p class="text-body-2 text-secondary">Choose an exam from the dropdown list above to view and manage its question bank.</p>
+      <h3 class="text-h6 font-weight-bold mb-2">No Exam Selected</h3>
+      <p class="text-body-2 text-secondary mb-4">You must select an exam from the All Exams list to manage its questions.</p>
+      <v-btn to="/dashboard/admin/public-exams" color="primary" rounded="lg" class="text-capitalize font-weight-bold">
+        Go to All Exams
+      </v-btn>
     </div>
 
     <!-- Questions Listing -->
@@ -427,6 +412,7 @@ const api = useApi();
 
 const exams = ref<any[]>([]);
 const selectedExamId = ref('');
+const selectedExam = computed(() => exams.value.find(e => e.id === selectedExamId.value));
 const loadingQuestions = ref(false);
 const questionsList = ref<any[]>([]);
 
@@ -483,12 +469,9 @@ async function loadExams() {
     const { data } = await api.get('/admin/public-exams');
     exams.value = data;
     
-    // Support picking exam from route query parameters if navigated to from lists page
+    // Require exam from route query parameters
     if (route.query.examId) {
       selectedExamId.value = route.query.examId as string;
-      fetchQuestions();
-    } else if (data.length > 0) {
-      selectedExamId.value = data[0].id;
       fetchQuestions();
     }
   } catch (err) {

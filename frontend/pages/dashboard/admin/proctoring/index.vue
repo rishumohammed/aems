@@ -25,7 +25,7 @@
       <v-col cols="12" sm="6" md="3">
         <v-card class="pa-5 rounded-xl border-0 shadow-sm bg-white h-100">
           <div class="d-flex align-center">
-            <v-avatar color="orange" size="32" class="mr-3">
+            <v-avatar color="warning" size="32" class="mr-3">
               <v-icon icon="mdi-alert" color="white" size="18"></v-icon>
             </v-avatar>
             <div>
@@ -321,7 +321,7 @@ const filterViolations = (violations: any[]) => {
 const getSeverityColor = (severity: string) => {
   switch (severity) {
     case 'High': return 'red';
-    case 'Medium': return 'orange';
+    case 'Medium': return 'warning';
     case 'Low': return 'green';
     default: return 'grey';
   }
@@ -331,7 +331,7 @@ const getStatusColor = (status: string) => {
   switch (status) {
     case 'graded': return 'green';
     case 'submitted': return 'blue';
-    case 'pending_manual_review': return 'orange';
+    case 'pending_manual_review': return 'warning';
     case 'in_progress': return 'gray';
     default: return 'gray';
   }
@@ -353,7 +353,7 @@ const getStatusColor = (status: string) => {
 
 .exam-panel {
   border: 1px solid rgba(0, 0, 0, 0.08) !important;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.03) !important;
+  
 }
 
 .exam-panel-title {

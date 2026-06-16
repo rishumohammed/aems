@@ -144,7 +144,7 @@ const resetFilters = () => {
 };
 
 useSeoMeta({
-  title: 'Browse Courses | AEMS Academy',
+  title: 'Browse Courses',
   description: 'Explore our wide range of industry-led courses and certifications.'
 });
 </script>

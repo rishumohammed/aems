@@ -50,7 +50,9 @@ export default defineNuxtConfig({
 
   googleFonts: {
     families: {
-      Figtree: [300, 400, 500, 600, 700, 800, 900]
+      Figtree: [300, 400, 500, 600, 700, 800, 900],
+      Inter: [400, 500, 600, 700],
+      'JetBrains Mono': [400, 500, 600]
     },
     display: 'swap'
   },
@@ -61,19 +63,34 @@ export default defineNuxtConfig({
     },
     vuetifyOptions: {
       theme: {
-        defaultTheme: 'appleLight',
+        defaultTheme: 'brand',
         themes: {
-          appleLight: {
+          brand: {
             dark: false,
             colors: {
-              primary:    '#5624D0', // Udemy purple
-              secondary:  '#6A6F73', // Udemy secondary grey
-              success:    '#1CA15B',
-              error:      '#D63D2D',
-              warning:    '#E59819', // Udemy gold
-              info:       '#A435F0', // Udemy accent violet
-              surface:    '#FFFFFF',
-              background: '#F7F9FA',
+              primary: '#1B1B3A',
+              secondary: '#6B6B76',
+              accent: '#F4791F',
+              background: '#FAFAF9',
+              surface: '#FFFFFF',
+              error: '#D85A30',
+              success: '#27500A',
+              warning: '#854F0B',
+              info: '#0C447C'
+            }
+          },
+          adminNeutral: {
+            dark: false,
+            colors: {
+              primary: '#2563EB',
+              secondary: '#64748B',
+              accent: '#2563EB',
+              background: '#F8FAFC',
+              surface: '#FFFFFF',
+              error: '#DC2626',
+              success: '#16A34A',
+              warning: '#D97706',
+              info: '#0EA5E9'
             }
           }
         }
@@ -81,12 +98,14 @@ export default defineNuxtConfig({
       defaults: {
         VCard: {
           elevation: 0,
-          rounded: 'lg',   /* Udemy uses a squarer 8px radius */
         },
         VBtn: {
-          rounded: 'lg',
-          flat: true,
-          style: 'text-transform: none; font-weight: 600;'
+          elevation: 0,
+          rounded: 'md',
+          style: 'text-transform: none;'
+        },
+        VAppBar: {
+          elevation: 0
         },
         VTextField: {
           variant: 'outlined',
@@ -109,7 +128,8 @@ export default defineNuxtConfig({
 
   css: [
     '@/assets/styles/base.css',
-    '@/assets/styles/main.css'
+    '@/assets/styles/main.css',
+    '@/assets/css/tokens.css'
   ],
 
   runtimeConfig: {
@@ -121,7 +141,7 @@ export default defineNuxtConfig({
 
   app: {
     head: {
-      title: 'AEMS Academy',
+      titleTemplate: '%s',
       meta: [
         { charset: 'utf-8' },
         { name: 'viewport', content: 'width=device-width, initial-scale=1' },

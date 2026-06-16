@@ -150,7 +150,8 @@ const handleLogin = async () => {
   backdrop-filter: blur(20px);
   border-radius: 24px;
   padding: 40px;
-  box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+  border: 1px solid var(--border);
+  
 }
 
 .login-card-header {

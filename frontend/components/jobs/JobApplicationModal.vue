@@ -349,7 +349,8 @@ async function submit() {
 
 <style scoped>
 ::v-deep(.custom-stepper .v-stepper-header) {
-  box-shadow: none !important;
+  
   border-bottom: 1px solid rgba(0,0,0,0.08);
+  border: 1px solid var(--border);
 }
 </style>

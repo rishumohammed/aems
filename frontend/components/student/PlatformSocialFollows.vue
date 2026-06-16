@@ -152,7 +152,8 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.shadow-sm { box-shadow: 0 4px 20px rgba(0,0,0,0.05) !important; }
+.shadow-sm {
+  border: 1px solid var(--border);  }
 .hover-card:hover {
   border-color: rgba(var(--v-theme-primary), 0.5) !important;
   background-color: rgba(var(--v-theme-primary), 0.02);

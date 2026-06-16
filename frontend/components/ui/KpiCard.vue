@@ -61,22 +61,24 @@ const trendLabel = computed((): string | undefined => {
 <style scoped>
 .kpi-card {
   background: white;
-  border-radius: var(--r16);
-  box-shadow: var(--s2);
+  border-radius: var(--radius-lg);
+  
   padding: 20px 22px;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.2s ease, border-color 0.2s ease;
   height: 100%;
+  border: 1px solid var(--border);
 }
 
 .kpi-card:hover {
   transform: translateY(-2px);
-  box-shadow: var(--s3);
+  border: 1px solid var(--border);
+  
 }
 
 .icon-box {
   width: 38px;
   height: 38px;
-  border-radius: var(--r10);
+  border-radius: var(--radius-md);
   display: flex;
   align-items: center;
   justify-content: center;

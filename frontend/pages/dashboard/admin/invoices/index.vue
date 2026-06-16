@@ -172,7 +172,7 @@
               v-if="editData.balance_amount > 0"
               type="button" 
               variant="g" 
-              color="orange" 
+              color="warning" 
               size="xs" 
               @click="waiveBalance"
             >
@@ -528,7 +528,7 @@ const viewPDF = async (invoice: any) => {
 const getStatusColor = (status: string) => {
   switch (status) {
     case 'paid': return 'green';
-    case 'partial': return 'orange';
+    case 'partial': return 'warning';
     case 'pending': return 'blue';
     case 'voided': return 'grey';
     default: return 'grey';
@@ -550,9 +550,10 @@ const formatDate = (dateStr: string) => {
 
 .apple-table-card {
   background: white;
-  border-radius: var(--r16);
-  box-shadow: var(--s2);
+  border-radius: var(--radius-lg);
+  
   overflow: hidden;
+  border: 1px solid var(--border);
 }
 
 .border-b {

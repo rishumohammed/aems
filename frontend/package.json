@@ -29,6 +29,7 @@
     "axios": "^1.6.8",
     "canvas-confetti": "^1.9.4",
     "chart.js": "^4.5.1",
+    "chartjs-plugin-datalabels": "^2.2.0",
     "dayjs": "^1.11.20",
     "nuxt": "^3.11.2",
     "nuxt-icon": "^0.6.10",

@@ -1,11 +1,11 @@
 <template>
   <v-container fluid class="pa-0">
-    <!-- Header with Glassmorphism Effect -->
-    <div class="header-section pa-8 pb-15 mb-n10">
+    <!-- Header -->
+    <div class="pa-8 pb-4">
       <div class="d-flex align-center justify-space-between mb-2">
         <div>
-          <h1 class="text-h4 font-weight-black text-white mb-1">Global Course Q&A</h1>
-          <p class="text-subtitle-1 text-white opacity-80">Oversee all student questions across the platform.</p>
+          <h1 class="text-h4 font-weight-black mb-1">Global Course Q&A</h1>
+          <p class="text-subtitle-1 text-secondary">Oversee all student questions across the platform.</p>
         </div>
       </div>
     </div>
@@ -14,27 +14,27 @@
       <!-- Stats Row -->
       <v-row class="mb-6">
         <v-col cols="12" sm="6" md="3">
-          <v-card flat class="border rounded-xl pa-4">
+          <v-card flat class="border rounded-lg pa-4">
             <div class="text-caption text-grey font-weight-bold text-uppercase mb-1">Total Questions</div>
             <div class="text-h4 font-weight-black">{{ stats.total || 0 }}</div>
           </v-card>
         </v-col>
         <v-col cols="12" sm="6" md="3">
-          <v-card flat class="border rounded-xl pa-4">
-            <div class="text-caption text-error font-weight-bold text-uppercase mb-1">Pending Review</div>
+          <v-card flat class="border rounded-lg pa-4">
+            <div class="text-caption text-grey font-weight-bold text-uppercase mb-1">Pending Review</div>
             <div class="text-h4 font-weight-black text-error">{{ stats.pending || 0 }}</div>
           </v-card>
         </v-col>
         <v-col cols="12" sm="6" md="3">
-          <v-card flat class="border rounded-xl pa-4">
-            <div class="text-caption text-success font-weight-bold text-uppercase mb-1">Resolved</div>
+          <v-card flat class="border rounded-lg pa-4">
+            <div class="text-caption text-grey font-weight-bold text-uppercase mb-1">Resolved</div>
             <div class="text-h4 font-weight-black text-success">{{ stats.resolved || 0 }}</div>
           </v-card>
         </v-col>
         <v-col cols="12" sm="6" md="3">
-          <v-card flat class="border rounded-xl pa-4">
-            <div class="text-caption text-primary font-weight-bold text-uppercase mb-1">Active Courses</div>
-            <div class="text-h5 font-weight-bold">{{ stats.activeCourses?.[0]?.title || '--' }}</div>
+          <v-card flat class="border rounded-lg pa-4">
+            <div class="text-caption text-grey font-weight-bold text-uppercase mb-1">Active Courses</div>
+            <div class="text-h5 font-weight-bold text-primary">{{ stats.activeCourses?.[0]?.title || '--' }}</div>
           </v-card>
         </v-col>
       </v-row>
@@ -45,7 +45,7 @@
           <v-tabs v-model="statusTab" color="primary" density="comfortable">
             <v-tab value="" class="text-capitalize font-weight-bold">All</v-tab>
             <v-tab value="open" class="text-capitalize font-weight-bold">Unanswered</v-tab>
-            <v-tab value="pending_review" class="text-capitalize font-weight-bold text-warning">Pending Review</v-tab>
+            <v-tab value="pending_review" class="text-capitalize font-weight-bold">Pending Review</v-tab>
             <v-tab value="answered" class="text-capitalize font-weight-bold">Answered</v-tab>
             <v-tab value="closed" class="text-capitalize font-weight-bold">Closed</v-tab>
           </v-tabs>
@@ -199,14 +199,10 @@ definePageMeta({
 </script>
 
 <style scoped>
-.header-section {
-  background: linear-gradient(135deg, #1A2980 0%, #26D0CE 100%);
-  position: relative;
-  overflow: hidden;
-}
 
 .shadow-soft {
-  box-shadow: 0 4px 20px rgba(0,0,0,0.05) !important;
+  border: 1px solid var(--border);
+  
 }
 
 .modern-table :deep(thead th) {

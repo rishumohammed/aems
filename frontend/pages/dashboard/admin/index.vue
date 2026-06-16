@@ -4,15 +4,15 @@
       <v-skeleton-loader type="heading" class="mb-8" width="300"></v-skeleton-loader>
       <v-row class="mb-4">
         <v-col v-for="i in 4" :key="i" cols="12" sm="6" md="3">
-          <v-skeleton-loader type="card" class="rounded-xl"></v-skeleton-loader>
+          <v-skeleton-loader type="card" class="rounded-lg"></v-skeleton-loader>
         </v-col>
       </v-row>
       <v-row>
         <v-col cols="12" md="7">
-          <v-skeleton-loader type="image" class="rounded-xl" height="400"></v-skeleton-loader>
+          <v-skeleton-loader type="image" class="rounded-lg" height="400"></v-skeleton-loader>
         </v-col>
         <v-col cols="12" md="5">
-          <v-skeleton-loader type="list-item-three-line" class="rounded-xl" height="400"></v-skeleton-loader>
+          <v-skeleton-loader type="list-item-three-line" class="rounded-lg" height="400"></v-skeleton-loader>
         </v-col>
       </v-row>
     </div>
@@ -29,26 +29,39 @@
     <div class="d-flex align-center mb-8">
       <div>
         <h1 class="text-h4 font-weight-bold">Platform Overview</h1>
-        <p class="text-secondary">Comprehensive analytics and system health for AEMS Academy.</p>
+        <p class="text-secondary">Comprehensive analytics and system health for your platform.</p>
       </div>
       <v-spacer></v-spacer>
       <div class="d-flex gap-2">
-        <v-btn color="primary" rounded="pill" prepend-icon="mdi-account-plus" to="/dashboard/leads">Add Lead</v-btn>
-        <v-btn variant="outlined" rounded="pill" prepend-icon="mdi-briefcase-plus" to="/dashboard/admin/jobs">Post Job</v-btn>
+        <v-btn color="primary" prepend-icon="mdi-account-plus" to="/dashboard/leads">Add Lead</v-btn>
+        <v-btn variant="outlined" prepend-icon="mdi-briefcase-plus" to="/dashboard/admin/jobs">Post Job</v-btn>
       </div>
     </div>
 
     <!-- KPI Row 1 -->
     <v-row class="mb-8" v-if="data.kpis && data.kpis.row1">
       <v-col cols="12" sm="6" md="3" v-for="stat in data.kpis.row1" :key="stat.title">
-        <v-card :color="stat.color" class="kpi-glow-card pa-0 rounded-xl border-0 overflow-hidden" elevation="6">
+        <v-card :color="stat.color" class="kpi-glow-card pa-0 rounded-lg overflow-hidden" elevation="0">
           <div class="pa-6 text-white h-100 position-relative glass-overlay">
             <div class="position-relative" style="z-index: 2">
               <div class="text-caption font-weight-bold opacity-80 text-uppercase mb-1">{{ stat.title }}</div>
               <div class="text-h4 font-weight-black">{{ stat.value }}</div>
-              <div class="text-caption mt-2 font-weight-medium">
-                <v-icon size="14">mdi-trending-up</v-icon>
-                8% increase
+              <div class="text-caption mt-2 font-weight-medium d-flex align-center gap-1">
+                <!-- No trend data -->
+                <template v-if="!stat.trend || stat.trend.direction === 'neutral'">
+                  <v-icon size="13">mdi-minus</v-icon>
+                  <span>No change vs last month</span>
+                </template>
+                <!-- Up trend -->
+                <template v-else-if="stat.trend.direction === 'up'">
+                  <v-icon size="13">mdi-trending-up</v-icon>
+                  <span>+{{ stat.trend.change }}% vs last month</span>
+                </template>
+                <!-- Down trend -->
+                <template v-else>
+                  <v-icon size="13">mdi-trending-down</v-icon>
+                  <span>-{{ stat.trend.change }}% vs last month</span>
+                </template>
               </div>
             </div>
             <v-icon :icon="stat.icon" class="kpi-icon-bg"></v-icon>
@@ -62,7 +75,7 @@
       <v-card
         v-for="stat in data.kpis.row2"
         :key="stat.title"
-        class="pa-5 rounded-xl border-0 shadow-sm bg-white"
+        class="pa-5 rounded-lg shadow-sm bg-white"
         style="flex: 1 1 0; min-width: 0;"
       >
         <div class="d-flex align-center">
@@ -81,12 +94,36 @@
     <v-row>
       <!-- Lead Funnel Chart -->
       <v-col cols="12" md="7">
-        <v-card class="pa-6 rounded-xl border-0 shadow-sm fill-height dashboard-card">
-          <div class="text-h6 font-weight-bold mb-6">Lead Pipeline Stage</div>
-          <div style="height: 300px" class="d-flex align-center justify-center">
+        <v-card class="pa-6 rounded-lg shadow-sm fill-height dashboard-card">
+          <div class="d-flex align-center justify-space-between mb-2">
+            <div>
+              <div class="text-h6 font-weight-bold">Lead Pipeline Stage</div>
+              <div class="text-caption text-secondary mt-1">Live distribution of leads across all stages</div>
+            </div>
+            <v-chip size="small" color="primary" variant="tonal">{{ (data.funnel || []).length }} Stages</v-chip>
+          </div>
+
+          <!-- Summary chips -->
+          <div class="d-flex flex-wrap gap-2 mb-4">
+            <v-chip
+              v-for="(stage, i) in (data.funnel || [])"
+              :key="i"
+              size="x-small"
+              :color="stageColors[i % stageColors.length]"
+              variant="tonal"
+              class="font-weight-bold"
+            >
+              {{ stage.status }}: {{ stage.count }}
+            </v-chip>
+          </div>
+
+          <div style="height: 280px" class="d-flex align-center justify-center">
             <client-only>
-              <Bar v-if="funnelChartData.datasets[0].data.length > 0" :data="funnelChartData" :options="chartOptions" />
-              <div v-else class="text-caption text-grey">No pipeline data available</div>
+              <Bar v-if="funnelChartData.datasets[0].data.length > 0" :data="funnelChartData" :options="chartOptions" style="width:100%; height:100%" />
+              <div v-else class="text-caption text-grey text-center">
+                <v-icon size="40" color="grey-lighten-2" class="mb-2">mdi-chart-bar</v-icon>
+                <div>No pipeline data available</div>
+              </div>
             </client-only>
           </div>
         </v-card>
@@ -94,7 +131,7 @@
 
       <!-- System Health -->
       <v-col cols="12" md="5">
-        <v-card class="pa-6 rounded-xl border-0 shadow-sm fill-height">
+        <v-card class="pa-6 rounded-lg shadow-sm fill-height">
           <div class="text-h6 font-weight-bold mb-6">System Health</div>
           <div class="mb-6">
             <div class="d-flex justify-space-between mb-2">
@@ -131,7 +168,7 @@
 
       <!-- Recent Enrollments Table -->
       <v-col cols="12">
-        <v-card class="pa-6 rounded-xl border-0 shadow-sm mt-4">
+        <v-card class="pa-6 rounded-lg shadow-sm mt-4">
           <div class="d-flex align-center mb-6">
             <div class="text-h6 font-weight-bold">Recent Enrollments</div>
             <v-spacer></v-spacer>
@@ -154,7 +191,7 @@
                 <td class="text-grey">{{ formatDate(e.date) }}</td>
                 <td class="font-weight-bold">₹{{ e.amount.toLocaleString() }}</td>
                 <td class="text-right">
-                  <Badge :color="e.amount > 0 ? 'green' : 'orange'">Paid</Badge>
+                  <Badge :color="e.amount > 0 ? 'success' : 'warning'">Paid</Badge>
                   <v-btn icon="mdi-eye-outline" variant="text" size="small" :to="`/dashboard/students/${e.student_id}`"></v-btn>
                 </td>
               </tr>
@@ -173,11 +210,12 @@
 <script setup lang="ts">
 import { Bar } from 'vue-chartjs';
 import { Chart as ChartJS, Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale } from 'chart.js';
+import ChartDataLabels from 'chartjs-plugin-datalabels';
 import { useApi } from '@/composables/useApi';
 import Badge from '@/components/ui/Badge.vue';
 import dayjs from 'dayjs';
 
-ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale);
+ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale, ChartDataLabels);
 
 const api = useApi();
 const loading = ref(true);
@@ -233,24 +271,89 @@ const data = ref<AdminDashboardData>({
   systemHealth: { diskUsage: 0, dbStatus: 'Offline', redisStatus: 'Offline' }
 });
 
-const funnelChartData = computed(() => ({
-  labels: (data.value.funnel || []).map(f => (f.status || 'unknown').toUpperCase()),
-  datasets: [{
-    backgroundColor: '#5624D0',
-    borderRadius: 8,
-    data: (data.value.funnel || []).map(f => f.count || 0)
-  }]
-}));
+const stageColors = [
+  '#5624D0', '#7C3AED', '#2563EB', '#0EA5E9',
+  '#10B981', '#F59E0B', '#EF4444', '#6366F1'
+];
 
-const chartOptions = {
+const stageColorsByName: Record<string, string> = {
+  new: '#5624D0',
+  contacted: '#7C3AED',
+  qualified: '#2563EB',
+  proposal: '#0EA5E9',
+  negotiation: '#10B981',
+  converted: '#22C55E',
+  lost: '#EF4444',
+  followup: '#F59E0B',
+};
+
+const funnelChartData = computed(() => {
+  const stages = data.value.funnel || [];
+  const labels = stages.map(f => (f.status || 'unknown').toUpperCase());
+  const counts = stages.map(f => f.count || 0);
+  const colors = stages.map((f, i) =>
+    stageColorsByName[(f.status || '').toLowerCase()] || stageColors[i % stageColors.length]
+  );
+  const total = counts.reduce((a, b) => a + b, 0);
+
+  return {
+    labels,
+    datasets: [{
+      data: counts,
+      backgroundColor: colors,
+      borderRadius: 10,
+      borderSkipped: false,
+      hoverBackgroundColor: colors.map(c => c + 'CC'),
+      barPercentage: 0.65,
+    }],
+    // pass total for tooltip
+    _total: total,
+  };
+});
+
+const chartOptions = computed(() => ({
   responsive: true,
   maintainAspectRatio: false,
-  plugins: { legend: { display: false } },
+  animation: { duration: 900, easing: 'easeOutQuart' },
+  plugins: {
+    legend: { display: false },
+    tooltip: {
+      backgroundColor: '#1e1b4b',
+      titleColor: '#e0e7ff',
+      bodyColor: '#c7d2fe',
+      padding: 12,
+      cornerRadius: 10,
+      callbacks: {
+        title: (items: any[]) => items[0]?.label || '',
+        label: (item: any) => {
+          const total = (data.value.funnel || []).reduce((a: number, b: any) => a + (b.count || 0), 0);
+          const pct = total > 0 ? ((item.raw / total) * 100).toFixed(1) : 0;
+          return ` ${item.raw} leads  (${pct}%)`;
+        }
+      }
+    },
+    datalabels: {
+      anchor: 'end',
+      align: 'top',
+      color: '#374151',
+      font: { weight: 'bold', size: 12 },
+      formatter: (value: number) => value > 0 ? value : ''
+    }
+  },
   scales: {
-    y: { beginAtZero: true, grid: { display: false } },
-    x: { grid: { display: false } }
+    y: {
+      beginAtZero: true,
+      ticks: { stepSize: 1, color: '#9CA3AF', font: { size: 11 } },
+      grid: { color: 'rgba(0,0,0,0.04)', drawBorder: false },
+      border: { display: false }
+    },
+    x: {
+      ticks: { color: '#6B7280', font: { size: 11, weight: 'bold' } },
+      grid: { display: false },
+      border: { display: false }
+    }
   }
-};
+}));
 
 const errorMsg = ref('');
 
@@ -280,10 +383,10 @@ onMounted(fetchData);
 <style scoped>
 .kpi-glow-card {
   transition: all 0.3s ease;
+  border: 1px solid var(--border);
 }
 .kpi-glow-card:hover {
   transform: translateY(-5px) scale(1.02);
-  box-shadow: 0 15px 30px rgba(0,0,0,0.2) !important;
 }
 .kpi-icon-bg {
   position: absolute;
@@ -297,7 +400,7 @@ onMounted(fetchData);
 .glass-overlay {
   background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%);
 }
-.shadow-sm { box-shadow: 0 10px 30px rgba(0,0,0,0.05) !important; }
+.shadow-sm { border: 1px solid var(--border); }
 
 .fade-in {
   animation: fadeIn 0.6s cubic-bezier(0.22, 1, 0.36, 1);

@@ -329,7 +329,8 @@ const submitJob = async (action: 'draft' | 'submit') => {
 
 <style scoped>
 .shadow-card {
-  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+  border: 1px solid var(--border);
+  
 }
 .tiptap-wrapper {
   border-color: rgba(255,255,255,0.2) !important;

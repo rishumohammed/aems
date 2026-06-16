@@ -37,12 +37,6 @@
         <v-btn to="/dashboard/admin/public-exams" color="primary" variant="flat" rounded="lg" class="text-capitalize font-weight-bold">
           <v-icon start>mdi-card-text-outline</v-icon> All Exams
         </v-btn>
-        <v-btn to="/dashboard/admin/public-exams/create" variant="text" rounded="lg" class="text-capitalize font-weight-bold text-secondary">
-          <v-icon start>mdi-plus</v-icon> Create Exam
-        </v-btn>
-        <v-btn to="/dashboard/admin/public-exams/categories" variant="text" rounded="lg" class="text-capitalize font-weight-bold text-secondary">
-          <v-icon start>mdi-folder-outline</v-icon> Categories
-        </v-btn>
         <v-btn to="/dashboard/admin/public-exams/questions" variant="text" rounded="lg" class="text-capitalize font-weight-bold text-secondary">
           <v-icon start>mdi-database-outline</v-icon> Question Bank
         </v-btn>
@@ -108,53 +102,56 @@
         :items="filteredExams"
         class="bg-transparent custom-table"
       >
-        <!-- Exam Name Column -->
+        <!-- Exam Details Column -->
         <template v-slot:item.name="{ item }">
           <div class="py-3">
-            <div class="font-weight-bold text-dark">{{ item.name }}</div>
-            <div class="text-caption text-secondary">Slug: <code class="text-primary font-weight-bold">/public-exams/{{ item.slug }}</code></div>
+            <div class="font-weight-bold text-dark text-subtitle-2 mb-1">{{ item.name }}</div>
+            <div class="d-flex align-center gap-2">
+              <v-chip size="x-small" color="primary" variant="tonal" class="font-weight-bold">
+                {{ item.category_name }}
+              </v-chip>
+            </div>
           </div>
         </template>
 
-        <!-- Category Column -->
-        <template v-slot:item.category_name="{ item }">
-          <v-chip size="small" color="primary" variant="tonal" class="font-weight-bold">
-            {{ item.category_name }}
-          </v-chip>
-        </template>
-
-        <!-- Registration Status Column -->
-        <template v-slot:item.registration_status="{ item }">
-          <v-chip
-            size="small"
-            :color="item.registration_status === 'open' ? 'teal' : 'deep-orange'"
-            variant="tonal"
-            class="font-weight-bold text-uppercase"
-            rounded="lg"
-          >
-            <v-icon start size="12">{{ item.registration_status === 'open' ? 'mdi-lock-open-outline' : 'mdi-lock-outline' }}</v-icon>
-            {{ item.registration_status === 'open' ? 'Open' : 'Closed' }}
-          </v-chip>
+        <!-- Configuration Column -->
+        <template v-slot:item.settings="{ item }">
+          <div class="py-3">
+            <div class="font-weight-bold text-dark">{{ item.question_count }} <span class="text-secondary font-weight-regular text-caption">Qs</span></div>
+            <div class="text-caption text-secondary mt-1">
+              {{ item.duration_minutes }} min &bull; {{ item.passing_marks }} ({{ item.pass_percentage }}%) Pass
+            </div>
+          </div>
         </template>
 
         <!-- Status Column -->
         <template v-slot:item.status="{ item }">
-          <v-chip
-            size="small"
-            :color="getStatusColor(item.status)"
-            variant="flat"
-            class="text-white font-weight-black text-uppercase"
-            rounded="lg"
-          >
-            {{ item.status }}
-          </v-chip>
+          <div class="d-flex flex-column align-center gap-1 py-2">
+            <v-chip
+              size="small"
+              :color="getStatusColor(item.status)"
+              variant="flat"
+              class="text-white font-weight-black text-uppercase"
+            >
+              {{ item.status }}
+            </v-chip>
+            <v-chip
+              size="x-small"
+              :color="item.registration_status === 'open' ? 'teal' : 'error'"
+              variant="tonal"
+              class="font-weight-bold text-uppercase"
+            >
+              <v-icon start size="10">{{ item.registration_status === 'open' ? 'mdi-lock-open-outline' : 'mdi-lock-outline' }}</v-icon>
+              {{ item.registration_status === 'open' ? 'Open' : 'Closed' }}
+            </v-chip>
+          </div>
         </template>
 
-        <!-- Pass Mark Column -->
-        <template v-slot:item.passing_marks="{ item }">
-          <div>
-            <span class="font-weight-bold text-dark">{{ item.passing_marks }}</span>
-            <span class="text-caption text-secondary"> ({{ item.pass_percentage }}%)</span>
+        <!-- Engagement Column -->
+        <template v-slot:item.engagement="{ item }">
+          <div class="py-3 text-center">
+            <div class="font-weight-bold text-dark">{{ item.candidate_count }} <span class="text-secondary font-weight-regular text-caption">Candidates</span></div>
+            <div class="text-caption text-secondary mt-1">{{ item.attempts_count }} Attempts</div>
           </div>
         </template>
 
@@ -165,65 +162,71 @@
 
         <!-- Actions Column -->
         <template v-slot:item.actions="{ item }">
-          <div class="d-flex justify-end gap-1 px-2">
-            
-            <!-- Registration Form -->
-            <v-btn icon="mdi-link-variant" variant="tonal" size="small" color="teal" :to="`/public-exams/${item.slug}/register`" target="_blank" title="Registration Form" />
-            
-            <!-- Candidates -->
-            <v-btn icon="mdi-account-group-outline" variant="tonal" size="small" color="purple" :to="`/dashboard/admin/public-exams/${item.id}/candidates`" title="Candidates" />
-            
-            <!-- Share / Copy Link Modal -->
-            <v-btn icon="mdi-share-variant" variant="tonal" size="small" color="info" @click="openShareDialog(item)" title="Share Exam Link" />
-            
-            <!-- Edit -->
-            <v-btn icon="mdi-pencil-outline" variant="tonal" size="small" color="indigo" :to="`/dashboard/admin/public-exams/create?id=${item.id}`" title="Edit Exam Settings" />
-            
-            <!-- Duplicate -->
-            <v-btn icon="mdi-content-copy" variant="tonal" size="small" color="warning" @click="duplicateExam(item.id)" title="Duplicate Exam" />
-            
-            <!-- Publish / Unpublish Workflow Toggle -->
-            <v-btn
-              v-if="item.status !== 'published'"
-              icon="mdi-rocket-launch-outline"
-              variant="tonal"
-              size="small"
-              color="success"
-              @click="changeStatus(item.id, 'published')"
-              title="Publish Exam"
-            />
-            <v-btn
-              v-else
-              icon="mdi-pause-circle-outline"
-              variant="tonal"
-              size="small"
-              color="grey-darken-2"
-              @click="changeStatus(item.id, 'draft')"
-              title="Unpublish (Set to Draft)"
-            />
+          <div class="d-flex justify-end py-2 px-2">
+            <div class="d-flex flex-column gap-1">
+              <!-- First Row of Actions -->
+              <div class="d-flex gap-1">
+                <!-- Manage Questions -->
+                <v-btn icon="mdi-database-outline" variant="tonal" size="small" color="blue-grey" :to="`/dashboard/admin/public-exams/questions?examId=${item.id}`" title="Manage Questions" />
+                <!-- Registration Form -->
+                <v-btn icon="mdi-link-variant" variant="tonal" size="small" color="teal" :to="`/public-exams/${item.slug}/register`" target="_blank" title="Registration Form" />
+                <!-- Candidates -->
+                <v-btn icon="mdi-account-group-outline" variant="tonal" size="small" color="purple" :to="`/dashboard/admin/public-exams/${item.id}/candidates`" title="Candidates" />
+                <!-- Share / Copy Link Modal -->
+                <v-btn icon="mdi-share-variant" variant="tonal" size="small" color="info" @click="openShareDialog(item)" title="Share Exam Link" />
+                <!-- Edit -->
+                <v-btn icon="mdi-pencil-outline" variant="tonal" size="small" color="indigo" :to="`/dashboard/admin/public-exams/create?id=${item.id}`" title="Edit Exam Settings" />
+              </div>
+              
+              <!-- Second Row of Actions -->
+              <div class="d-flex gap-1">
+                <!-- Duplicate -->
+                <v-btn icon="mdi-content-copy" variant="tonal" size="small" color="warning" @click="duplicateExam(item.id)" title="Duplicate Exam" />
+                
+                <!-- Publish / Unpublish Workflow Toggle -->
+                <v-btn
+                  v-if="item.status !== 'published'"
+                  icon="mdi-rocket-launch-outline"
+                  variant="tonal"
+                  size="small"
+                  color="success"
+                  @click="changeStatus(item.id, 'published')"
+                  title="Publish Exam"
+                />
+                <v-btn
+                  v-else
+                  icon="mdi-pause-circle-outline"
+                  variant="tonal"
+                  size="small"
+                  color="grey-darken-2"
+                  @click="changeStatus(item.id, 'draft')"
+                  title="Unpublish (Set to Draft)"
+                />
 
-            <!-- Stop / Open Registration -->
-            <v-btn
-              v-if="item.registration_status !== 'closed'"
-              icon="mdi-stop-circle-outline"
-              variant="tonal"
-              size="small"
-              color="deep-orange"
-              @click="confirmStopRegistration(item)"
-              title="Stop Registration"
-            />
-            <v-btn
-              v-else
-              icon="mdi-lock-open-outline"
-              variant="tonal"
-              size="small"
-              color="teal"
-              @click="toggleRegistrationStatus(item.id, 'open')"
-              title="Open Registration"
-            />
+                <!-- Stop / Open Registration -->
+                <v-btn
+                  v-if="item.registration_status !== 'closed'"
+                  icon="mdi-stop-circle-outline"
+                  variant="tonal"
+                  size="small"
+                  color="error"
+                  @click="confirmStopRegistration(item)"
+                  title="Stop Registration"
+                />
+                <v-btn
+                  v-else
+                  icon="mdi-lock-open-outline"
+                  variant="tonal"
+                  size="small"
+                  color="teal"
+                  @click="toggleRegistrationStatus(item.id, 'open')"
+                  title="Open Registration"
+                />
 
-            <!-- Delete -->
-            <v-btn icon="mdi-delete-outline" variant="tonal" size="small" color="error" @click="confirmDelete(item)" title="Delete Exam" />
+                <!-- Delete -->
+                <v-btn icon="mdi-delete-outline" variant="tonal" size="small" color="error" @click="confirmDelete(item)" title="Delete Exam" />
+              </div>
+            </div>
           </div>
         </template>
       </v-data-table>
@@ -247,7 +250,7 @@
     <v-dialog v-model="stopRegistrationDialog" max-width="440">
       <v-card class="pa-6 rounded-xl">
         <div class="d-flex align-center gap-3 mb-4">
-          <v-icon size="36" color="deep-orange">mdi-stop-circle-outline</v-icon>
+          <v-icon size="36" color="error">mdi-stop-circle-outline</v-icon>
           <h3 class="text-h6 font-weight-bold text-dark">Stop Registrations?</h3>
         </div>
         <p class="text-body-2 text-secondary mb-2">
@@ -259,7 +262,7 @@
         </p>
         <div class="d-flex justify-end gap-2">
           <v-btn variant="text" color="grey" @click="stopRegistrationDialog = false">Cancel</v-btn>
-          <v-btn color="deep-orange" rounded="lg" class="text-capitalize font-weight-bold text-white" :loading="togglingReg" @click="doStopRegistration">Confirm – Stop Registration</v-btn>
+          <v-btn color="error" rounded="lg" class="text-capitalize font-weight-bold text-white" :loading="togglingReg" @click="doStopRegistration">Confirm – Stop Registration</v-btn>
         </div>
       </v-card>
     </v-dialog>
@@ -348,15 +351,10 @@ const shareDialog = ref(false);
 const shareUrl = ref('');
 
 const headers = [
-  { title: 'Exam Name', key: 'name' },
-  { title: 'Category', key: 'category_name' },
-  { title: 'Questions', key: 'question_count', align: 'center' as const },
-  { title: 'Duration', key: 'duration_minutes', align: 'center' as const },
-  { title: 'Pass Mark', key: 'passing_marks', align: 'center' as const },
-  { title: 'Registration', key: 'registration_status', align: 'center' as const },
-  { title: 'Candidates', key: 'candidate_count', align: 'center' as const },
+  { title: 'Exam Details', key: 'name' },
+  { title: 'Configuration', key: 'settings', sortable: false },
   { title: 'Status', key: 'status', align: 'center' as const },
-  { title: 'Attempts', key: 'attempts_count', align: 'center' as const },
+  { title: 'Engagement', key: 'engagement', align: 'center' as const, sortable: false },
   { title: 'Created Date', key: 'created_at' },
   { title: 'Actions', key: 'actions', sortable: false, align: 'end' as const }
 ];

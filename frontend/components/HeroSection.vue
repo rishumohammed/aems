@@ -1,32 +1,34 @@
 <template>
   <section class="hero-section" aria-label="Hero">
-    <!-- Subtle grid texture overlay -->
-    <div class="hero-grid-bg" aria-hidden="true"></div>
-    <!-- Ambient glow blobs -->
-    <div class="glow glow-blue" aria-hidden="true"></div>
-    <div class="glow glow-purple" aria-hidden="true"></div>
-
+    <!-- Minimal Light Background Designs -->
+    <div class="hero-bg-overlay"></div>
+    <div class="bg-shape shape-1"></div>
+    <div class="bg-shape shape-2"></div>
+    <div class="bg-shape shape-3"></div>
+    
     <div class="hero-inner">
       <!-- Left: Copy -->
       <div class="hero-copy" v-motion-fade-visible>
         <!-- Badge -->
         <div class="hero-badge">
           <span class="badge-dot"></span>
-          Season 2026 · 100% Placement Support
+          Global Food Safety & Certification
         </div>
 
         <!-- Headline -->
-        <h1 class="hero-headline">
-          Level Up Your<br />
-          <span class="headline-accent">Career</span><br />
-          With Experts.
+        <h1 class="hero-headline" style="font-size: clamp(3rem, 6vw, 4.5rem); letter-spacing: -0.03em;">
+          <span style="color: var(--primary);">brix</span> <span style="color: var(--secondary);">Certifications</span>
         </h1>
 
         <!-- Sub-copy -->
-        <p class="hero-sub">
-          Join India's most comprehensive learning platform. Get certified, build
-          real-world projects, and land your dream job.
-        </p>
+        <div style="margin-bottom: 40px; display: flex; flex-direction: column; gap: 12px;">
+          <h2 style="font-size: 1.4rem; font-weight: 800; color: var(--g7); letter-spacing: -0.01em; margin: 0;">
+            Elevating Global Food Industry Excellence
+          </h2>
+          <h3 style="font-size: 1.25rem; font-weight: 600; color: var(--primary); letter-spacing: 0.02em; margin: 0;">
+            ISO | FSSC | BRCGS | OHSMS | QMS | HACCP
+          </h3>
+        </div>
 
         <!-- CTAs -->
         <div class="hero-ctas">
@@ -53,7 +55,7 @@
             />
           </div>
           <div class="proof-text">
-            <strong>10k+</strong> students already enrolled
+            <strong>Trusted globally</strong> by industry leaders
             <div class="proof-stars">
               <span v-for="s in 5" :key="s" class="star">★</span>
               <span class="proof-rating">4.9 / 5</span>
@@ -67,8 +69,8 @@
         <!-- Main image -->
         <div class="image-frame">
           <img
-            src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=1200"
-            alt="Students learning together"
+            :src="heroImgSrc"
+            alt="Food technology quality control"
             class="hero-img"
             width="600"
             height="450"
@@ -85,8 +87,8 @@
             </svg>
           </div>
           <div class="float-content">
-            <div class="float-label">Placement Rate</div>
-            <div class="float-value">94%</div>
+            <div class="float-label">Global Compliance</div>
+            <div class="float-value">100%</div>
             <div class="float-bar">
               <div class="float-bar-fill" style="width: 94%"></div>
             </div>
@@ -101,30 +103,29 @@
             </svg>
           </div>
           <div class="float-content">
-            <div class="float-label">Certified &amp; Job Ready</div>
+            <div class="float-label">Certified Experts</div>
             <div class="float-value-sm">Industry Recognized</div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Bottom metrics row -->
-    <div class="hero-metrics" v-motion-fade-visible>
-      <div class="metric" v-for="(m, i) in metrics" :key="i">
-        <div class="metric-value">{{ m.value }}</div>
-        <div class="metric-label">{{ m.label }}</div>
-      </div>
-    </div>
+
   </section>
 </template>
 
 <script setup lang="ts">
-const metrics = [
-  { value: '10k+', label: 'Active Students' },
-  { value: '94%',  label: 'Placement Rate' },
-  { value: '200+', label: 'Hiring Partners' },
-  { value: '6.5 LPA', label: 'Avg. Package' },
-];
+const config = useRuntimeConfig();
+const baseUrl = computed(() => config.public.apiBase.replace('/api', ''));
+
+const heroImageConfig = useState('homepage_hero_image', () => '');
+const heroImageUrlConfig = useState('homepage_hero_image_url', () => '');
+
+const heroImgSrc = computed(() => {
+  if (heroImageUrlConfig.value) return heroImageUrlConfig.value;
+  if (heroImageConfig.value) return baseUrl.value + heroImageConfig.value;
+  return 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?q=80&w=1200';
+});
 </script>
 
 <style scoped>
@@ -132,46 +133,53 @@ const metrics = [
 .hero-section {
   position: relative;
   overflow: hidden;
-  /* Match the site-wide gradient exactly so the hero blends into the page */
-  background: linear-gradient(135deg, #eef4ff 0%, #f5eeff 50%, #fff4ee 100%);
-  color: #1D1D1F;
+  background: #fdfdfd; /* Clean, light background */
+  color: var(--g7);
   padding: 0 0 0 0;
 }
 
-/* ── Texture: dot grid ────────────────────────────────── */
-.hero-grid-bg {
+/* ── Minimal Background Designs ───────────────────────── */
+.hero-bg-overlay {
   position: absolute;
-  inset: 0;
-  background-image:
-    radial-gradient(circle, rgba(0,0,0,0.055) 1px, transparent 1px);
-  background-size: 28px 28px;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background-image: 
+    radial-gradient(circle at 80% 10%, rgba(33, 29, 113, 0.03) 0%, transparent 50%),
+    radial-gradient(circle at 20% 90%, rgba(246, 130, 31, 0.03) 0%, transparent 50%);
   z-index: 0;
   pointer-events: none;
 }
 
-/* ── Ambient glow blobs ───────────────────────────────── */
-.glow {
+.bg-shape {
   position: absolute;
   border-radius: 50%;
-  filter: blur(100px);
+  filter: blur(60px);
   z-index: 0;
   pointer-events: none;
-  opacity: 0.28;
+  opacity: 0.6;
 }
-.glow-blue {
-  width: 560px;
-  height: 560px;
-  background: #5624D0;   /* Udemy purple */
-  top: -200px;
-  right: -120px;
+
+.shape-1 {
+  width: 300px;
+  height: 300px;
+  background: rgba(33, 29, 113, 0.04);
+  top: -50px;
+  right: -50px;
 }
-.glow-purple {
+
+.shape-2 {
   width: 400px;
   height: 400px;
-  background: #A435F0;   /* Udemy accent */
-  bottom: 0px;
-  left: -120px;
-  opacity: 0.18;
+  background: rgba(246, 130, 31, 0.03);
+  bottom: -100px;
+  left: -100px;
+}
+
+.shape-3 {
+  width: 200px;
+  height: 200px;
+  background: rgba(33, 29, 113, 0.03);
+  top: 40%;
+  left: 30%;
 }
 
 /* ── Inner layout ─────────────────────────────────────── */
@@ -205,51 +213,49 @@ const metrics = [
   gap: 8px;
   padding: 6px 14px;
   border-radius: 999px;
-  border: 1px solid rgba(86,36,208,0.22);
-  background: rgba(86,36,208,0.08);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: var(--surface);
   font-size: 12px;
   font-weight: 600;
-  color: #5624D0;
+  color: var(--g6);
   letter-spacing: 0.2px;
   margin-bottom: 28px;
-  backdrop-filter: blur(8px);
 }
 .badge-dot {
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: #30B94D;
-  box-shadow: 0 0 0 3px rgba(48,185,77,0.25);
+  background: var(--green);
+  
   animation: pulse-dot 2s ease-in-out infinite;
+  border: 1px solid var(--border);
 }
 @keyframes pulse-dot {
-  0%, 100% { box-shadow: 0 0 0 3px rgba(48,185,77,0.25); }
-  50%       { box-shadow: 0 0 0 6px rgba(48,185,77,0.10); }
+  0%, 100% {
+  border: 1px solid var(--border);  }
+  50%       {
+  border: 1px solid var(--border);  }
 }
 
 /* ── Headline ─────────────────────────────────────────── */
 .hero-headline {
   font-size: clamp(2.6rem, 5.5vw, 4.25rem);
   font-weight: 900;
-  line-height: 1.0;
+  line-height: 1.05;
   letter-spacing: -0.04em;
-  color: #1D1D1F;
+  color: var(--g7);
   margin-bottom: 24px;
 }
 .headline-accent {
-  /* Gradient text */
-  background: linear-gradient(135deg, #007AFF 0%, #AF52DE 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: var(--blue);
 }
 
 /* ── Sub-copy ─────────────────────────────────────────── */
 .hero-sub {
-  font-size: 1.05rem;
+  font-size: 1.1rem;
   font-weight: 400;
   line-height: 1.7;
-  color: #636366;
+  color: var(--g5);
   max-width: 460px;
   margin-bottom: 40px;
 }
@@ -268,20 +274,18 @@ const metrics = [
   align-items: center;
   gap: 8px;
   padding: 14px 28px;
-  border-radius: 12px;
-  background: #5624D0;   /* Udemy purple */
+  border-radius: var(--radius-md);
+  background: var(--accent);
   color: #ffffff;
   font-size: 15px;
   font-weight: 700;
   letter-spacing: -0.01em;
   text-decoration: none;
-  transition: background 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
-  box-shadow: 0 0 0 0 rgba(86,36,208,0);
+  transition: all 0.2s ease;
 }
 .cta-primary:hover {
-  background: #3D1FA3;   /* Udemy purple dark */
+  opacity: 0.9;
   transform: translateY(-2px);
-  box-shadow: 0 8px 28px rgba(86,36,208,0.40);
 }
 .cta-arrow {
   width: 16px;
@@ -296,18 +300,17 @@ const metrics = [
   display: inline-flex;
   align-items: center;
   padding: 14px 24px;
-  border-radius: 12px;
-  border: 1px solid rgba(0,0,0,0.14);
-  color: #3A3A3C;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--g2);
+  color: var(--g7);
   font-size: 15px;
   font-weight: 600;
   text-decoration: none;
-  transition: border-color 0.18s ease, color 0.18s ease, background 0.18s ease;
+  transition: all 0.2s ease;
 }
 .cta-ghost:hover {
-  border-color: rgba(86,36,208,0.40);
-  color: #5624D0;
-  background: rgba(86,36,208,0.05);
+  border-color: var(--g4);
+  background: var(--g1);
 }
 
 /* ── Social Proof ─────────────────────────────────────── */
@@ -345,7 +348,7 @@ const metrics = [
   margin-top: 2px;
 }
 .star {
-  color: #FF9500;
+  color: var(--accent);
   font-size: 11px;
 }
 .proof-rating {
@@ -361,10 +364,9 @@ const metrics = [
 }
 .image-frame {
   position: relative;
-  border-radius: 24px;
+  border-radius: var(--radius-lg);
   overflow: hidden;
-  border: 1px solid rgba(0,0,0,0.07);
-  box-shadow: 0 24px 60px rgba(0,0,0,0.12), 0 4px 16px rgba(0,0,0,0.06);
+  border: 1px solid var(--border);
 }
 .hero-img {
   width: 100%;
@@ -386,12 +388,9 @@ const metrics = [
   align-items: center;
   gap: 12px;
   padding: 12px 16px;
-  border-radius: 16px;
-  background: rgba(255, 255, 255, 0.80);
-  border: 1px solid rgba(0,0,0,0.07);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  box-shadow: 0 8px 32px rgba(0,0,0,0.10);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  border: 1px solid var(--border);
   min-width: 190px;
 }
 .float-top {
@@ -411,24 +410,24 @@ const metrics = [
 .float-icon {
   width: 36px;
   height: 36px;
-  border-radius: 10px;
+  border-radius: var(--radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
 }
 .float-icon--green {
-  background: rgba(48,185,77,0.15);
-  color: #30B94D;
+  background: var(--green-l);
+  color: var(--green);
 }
 .float-icon--blue {
-  background: rgba(86,36,208,0.12);
-  color: #5624D0;
+  background: var(--blue-l);
+  color: var(--blue);
 }
 
 .float-label {
   font-size: 11px;
-  color: #8E8E93;
+  color: var(--g4);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.4px;
@@ -437,7 +436,7 @@ const metrics = [
 .float-value {
   font-size: 22px;
   font-weight: 900;
-  color: #1D1D1F;
+  color: var(--g7);
   letter-spacing: -0.04em;
   line-height: 1;
   margin-bottom: 6px;
@@ -445,17 +444,17 @@ const metrics = [
 .float-value-sm {
   font-size: 13px;
   font-weight: 600;
-  color: #3A3A3C;
+  color: var(--g6);
 }
 .float-bar {
   height: 4px;
-  background: rgba(255,255,255,0.1);
+  background: var(--g2);
   border-radius: 99px;
   overflow: hidden;
 }
 .float-bar-fill {
   height: 100%;
-  background: linear-gradient(90deg, #30B94D, #60d976);
+  background: var(--green);
   border-radius: 99px;
 }
 
@@ -465,9 +464,8 @@ const metrics = [
   z-index: 1;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  border-top: 1px solid rgba(0,0,0,0.07);
-  background: rgba(255,255,255,0.45);
-  backdrop-filter: blur(8px);
+  border-top: 1px solid var(--g2);
+  background: var(--bg);
 }
 
 @media (max-width: 640px) {
@@ -478,7 +476,7 @@ const metrics = [
 
 .metric {
   padding: var(--sp-6) var(--sp-8); /* 24px 32px */
-  border-right: 1px solid rgba(0,0,0,0.07);
+  border-right: 1px solid var(--g2);
   text-align: center;
 }
 .metric:last-child { border-right: none; }
@@ -487,14 +485,14 @@ const metrics = [
   font-size: 1.85rem;
   font-weight: 900;
   letter-spacing: -0.04em;
-  color: #5624D0;   /* Udemy purple */
+  color: var(--blue);
   line-height: 1;
   margin-bottom: var(--sp-2); /* 8px */
 }
 .metric-label {
   font-size: 12px;
   font-weight: 600;
-  color: #8E8E93;
+  color: var(--g5);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }

@@ -274,7 +274,8 @@ definePageMeta({
   max-width: 75%;
 }
 .shadow-sm {
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05) !important;
+  border: 1px solid var(--border);
+  
 }
 .text-xsmall {
   font-size: 0.7rem;

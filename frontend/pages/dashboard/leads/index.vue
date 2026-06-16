@@ -318,8 +318,9 @@ watch(viewMode, (newVal) => {
 
 .filters-card {
   background: white;
-  border-radius: var(--r16);
-  box-shadow: var(--s2);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  
 }
 
 .search-pill {
@@ -350,7 +351,7 @@ watch(viewMode, (newVal) => {
   width: 280px;
   flex-shrink: 0;
   background-color: var(--g1);
-  border-radius: var(--r16);
+  border-radius: var(--radius-lg);
   padding: 16px;
   display: flex;
   flex-direction: column;
@@ -379,8 +380,8 @@ watch(viewMode, (newVal) => {
   right: 24px;
   width: 320px;
   background: white;
-  border-radius: var(--r16);
-  box-shadow: var(--s3);
+  border-radius: var(--radius-lg);
+  
   padding: 16px;
   z-index: 100;
   border: 1px solid rgba(0, 0, 0, 0.05);

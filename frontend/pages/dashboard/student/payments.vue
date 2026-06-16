@@ -459,7 +459,8 @@ const contactEmail = () => {
 .uppercase { text-transform: uppercase; letter-spacing: 1px; }
 
 .shadow-sm {
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05) !important;
+  border: 1px solid var(--border);
+  
 }
 
 .bg-gradient-blue {

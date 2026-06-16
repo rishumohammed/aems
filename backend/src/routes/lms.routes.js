@@ -381,7 +381,7 @@ router.put('/courses/:id', authenticateJWT, isTutorOrAdmin, upload.single('thumb
   const courseId = req.params.id;
   
   try {
-    const fields = ['title', 'slug', 'description', 'short_description', 'category_id', 'level', 'language', 'price_type', 'price', 'intro_video_source', 'intro_video_id'];
+    const fields = ['title', 'slug', 'description', 'short_description', 'category_id', 'level', 'language', 'price_type', 'price', 'intro_video_source', 'intro_video_id', 'is_featured'];
     let updateStr = fields.filter(f => data[f] !== undefined).map(f => `${f} = ?`).join(', ');
     let values = fields.filter(f => data[f] !== undefined).map(f => data[f]);
 
@@ -569,7 +569,7 @@ router.delete('/courses/:id/sections/:sid/modules/:mid', authenticateJWT, isTuto
 
 // Add Lesson
 router.post('/courses/:id/sections/:sid/modules/:mid/lessons', authenticateJWT, isTutorOrAdmin, upload.single('resource'), sanitizeBody, async (req, res) => {
-  const { title, type, video_source, video_id, notes, is_free_preview, live_date, live_time, zoom_link, thumbnail_url, duration_seconds, quiz_id, assignment_id, content_html, is_mandatory } = req.body;
+  const { title, type, video_source, video_id, notes, is_free_preview, live_date, live_time, zoom_link, thumbnail_url, duration_seconds, quiz_id, assignment_id, content_html, is_mandatory, scheduled_at, duration_minutes, live_link } = req.body;
   const section_id = req.params.sid;
   const module_id = req.params.mid;
   const id = uuidv4();
@@ -580,8 +580,8 @@ router.post('/courses/:id/sections/:sid/modules/:mid/lessons', authenticateJWT, 
     const nextOrder = (maxOrder[0].max_order || 0) + 1;
 
     await pool.query(
-      `INSERT INTO course_lessons (id, section_id, module_id, title, type, video_source, video_id, notes, is_free_preview, order_index, resource_url, live_date, live_time, zoom_link, thumbnail_url, duration_seconds, quiz_id, assignment_id, content_html, is_mandatory) 
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO course_lessons (id, section_id, module_id, title, type, video_source, video_id, notes, is_free_preview, order_index, resource_url, live_date, live_time, zoom_link, thumbnail_url, duration_seconds, quiz_id, assignment_id, content_html, is_mandatory, scheduled_at, duration_minutes, live_link) 
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         id, section_id, module_id, title, type,
         video_source || null, video_id || null, notes || null,
@@ -589,7 +589,8 @@ router.post('/courses/:id/sections/:sid/modules/:mid/lessons', authenticateJWT, 
         live_date || null, live_time || null, zoom_link || null,
         thumbnail_url || null, parseInt(duration_seconds || 0),
         quiz_id || null, assignment_id || null, content_html || null,
-        is_mandatory === undefined ? true : (is_mandatory === 'true' || is_mandatory === true)
+        is_mandatory === undefined ? true : (is_mandatory === 'true' || is_mandatory === true),
+        scheduled_at || null, parseInt(duration_minutes || 60), live_link || null
       ]
     );
     res.status(201).json({ id, message: 'Lesson added' });
@@ -600,17 +601,18 @@ router.post('/courses/:id/sections/:sid/modules/:mid/lessons', authenticateJWT, 
 
 // Update Lesson
 router.put('/courses/:id/sections/:sid/modules/:mid/lessons/:lid', authenticateJWT, isTutorOrAdmin, upload.single('resource'), sanitizeBody, async (req, res) => {
-  const { title, type, video_source, video_id, notes, is_free_preview, live_date, live_time, zoom_link, thumbnail_url, duration_seconds, quiz_id, assignment_id, content_html, is_mandatory } = req.body;
+  const { title, type, video_source, video_id, notes, is_free_preview, live_date, live_time, zoom_link, thumbnail_url, duration_seconds, quiz_id, assignment_id, content_html, is_mandatory, scheduled_at, duration_minutes, live_link } = req.body;
   const lesson_id = req.params.lid;
   const resource_url = req.file ? `/uploads/resources/${req.file.filename}` : undefined;
 
   try {
-    const fields = ['title', 'type', 'video_source', 'video_id', 'notes', 'is_free_preview', 'live_date', 'live_time', 'zoom_link', 'thumbnail_url', 'duration_seconds', 'quiz_id', 'assignment_id', 'content_html', 'is_mandatory'];
+    const fields = ['title', 'type', 'video_source', 'video_id', 'notes', 'is_free_preview', 'live_date', 'live_time', 'zoom_link', 'thumbnail_url', 'duration_seconds', 'quiz_id', 'assignment_id', 'content_html', 'is_mandatory', 'scheduled_at', 'duration_minutes', 'live_link'];
     let updateStr = fields.filter(f => req.body[f] !== undefined).map(f => `${f} = ?`).join(', ');
     let values = fields.filter(f => req.body[f] !== undefined).map(f => {
       if (f === 'is_free_preview') return req.body[f] === 'true' || req.body[f] === true;
       if (f === 'is_mandatory') return req.body[f] === 'true' || req.body[f] === true;
       if (f === 'duration_seconds') return parseInt(req.body[f] || 0);
+      if (f === 'duration_minutes') return parseInt(req.body[f] || 60);
       return req.body[f];
     });
 

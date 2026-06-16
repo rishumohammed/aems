@@ -314,21 +314,24 @@ useSeoMeta({ title: 'Register for Exam - AEMS' });
 <style scoped>
 .text-dark { color: #1e293b; }
 .shadow-sm {
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03) !important;
+  border: 1px solid var(--border);
+  
 }
 .success-icon-wrap {
   width: 80px; height: 80px; border-radius: 50%;
   background: linear-gradient(135deg, #22c55e, #16a34a);
   display: flex; align-items: center; justify-content: center;
-  box-shadow: 0 0 0 12px rgba(34, 197, 94, 0.12);
+  
   animation: pop-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  border: 1px solid var(--border);
 }
 .closed-icon-wrap {
   width: 80px; height: 80px; border-radius: 50%;
   background: linear-gradient(135deg, #f59e0b, #d97706);
   display: flex; align-items: center; justify-content: center;
-  box-shadow: 0 0 0 12px rgba(245, 158, 11, 0.12);
+  
   animation: pop-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  border: 1px solid var(--border);
 }
 @keyframes pop-in {
   0% { transform: scale(0); opacity: 0; }

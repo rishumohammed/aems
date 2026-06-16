@@ -160,7 +160,7 @@ const summaryCards = computed(() => [
     title: 'Outstanding', 
     value: summary.value.total_outstanding || 0, 
     icon: 'mdi-clock-outline', 
-    color: 'orange', 
+    color: 'warning', 
     trend: { value: 0, label: 'receivables', positive: false } 
   }
 ]);
@@ -253,9 +253,10 @@ const exportFullReport = () => {
 
 .apple-table-card {
   background: white;
-  border-radius: var(--r16);
-  box-shadow: var(--s2);
+  border-radius: var(--radius-lg);
+  
   overflow: hidden;
+  border: 1px solid var(--border);
 }
 
 .chart-container {

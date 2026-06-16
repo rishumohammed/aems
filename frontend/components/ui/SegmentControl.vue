@@ -26,7 +26,7 @@ defineEmits(['update:modelValue']);
 .segment-control {
   display: inline-flex;
   background: var(--g1);
-  border-radius: var(--r10);
+  border-radius: var(--radius-md);
   padding: 2px;
   gap: 1px;
 }
@@ -36,7 +36,7 @@ defineEmits(['update:modelValue']);
   font-size: 12px;
   font-weight: 600;
   color: var(--g5);
-  border-radius: var(--r8);
+  border-radius: var(--radius-sm);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -46,6 +46,7 @@ defineEmits(['update:modelValue']);
 .segment-active {
   background: white;
   color: var(--g7);
-  box-shadow: var(--s1);
+  border: 1px solid var(--border);
+  
 }
 </style>

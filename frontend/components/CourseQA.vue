@@ -259,9 +259,11 @@ onMounted(() => {
 
 <style scoped>
 .shadow-glow {
-  box-shadow: 0 4px 15px rgba(0, 122, 255, 0.3) !important;
+  border: 1px solid var(--border);
+  
 }
 .shadow-soft {
-  box-shadow: 0 4px 20px rgba(0,0,0,0.05) !important;
+  border: 1px solid var(--border);
+  
 }
 </style>

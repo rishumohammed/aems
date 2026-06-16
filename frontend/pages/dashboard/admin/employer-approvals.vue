@@ -244,7 +244,8 @@ onMounted(fetchPendingEmployers);
 
 <style scoped>
 .shadow-soft {
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05) !important;
+  border: 1px solid var(--border);
+  
 }
 .employer-table :deep(th) {
   font-size: 0.75rem !important;

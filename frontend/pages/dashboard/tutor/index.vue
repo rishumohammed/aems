@@ -269,7 +269,8 @@ onMounted(fetchDashboardData);
 }
 
 .shadow-glow-amber {
-  box-shadow: 0 10px 30px rgba(255, 193, 7, 0.3) !important;
+  border: 1px solid var(--border);
+  
 }
 
 .stat-card {
@@ -281,8 +282,9 @@ onMounted(fetchDashboardData);
 
 .stat-card:hover {
   transform: translateY(-10px);
-  box-shadow: 0 25px 50px rgba(0,0,0,0.1) !important;
+  
   border-color: rgba(59, 130, 246, 0.2) !important;
+  border: 1px solid var(--border);
 }
 
 .stat-icon-box {
@@ -301,7 +303,8 @@ onMounted(fetchDashboardData);
 }
 
 .shadow-soft {
-  box-shadow: 0 4px 20px rgba(0,0,0,0.05) !important;
+  border: 1px solid var(--border);
+  
 }
 
 .tracking-tight {

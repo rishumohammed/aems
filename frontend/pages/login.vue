@@ -2,14 +2,17 @@
   <div class="login-page">
     <div class="login-card-wrap">
       <NuxtLink to="/" class="login-brand">
-        <span class="brand-icon">◈</span>
-        <span class="brand-name">AEMS Academy</span>
+        <img v-if="appLogo" :src="baseUrl + appLogo" :alt="instituteName" style="max-height: 40px; max-width: 160px; object-fit: contain;" />
+        <template v-else>
+          <span class="brand-icon">◈</span>
+          <span class="brand-name">{{ instituteName || 'Brixify' }}</span>
+        </template>
       </NuxtLink>
 
       <div class="login-card">
         <div class="login-card-header">
           <h1 class="login-title">Welcome back</h1>
-          <p class="login-sub">Sign in to your AEMS account</p>
+          <p class="login-sub">Sign in to your {{ instituteName || 'Brixify' }} account</p>
         </div>
 
         <v-form @submit.prevent="handleLogin" :disabled="loading">
@@ -87,6 +90,12 @@ definePageMeta({
 
 const authStore = useAuthStore();
 const router = useRouter();
+const config = useRuntimeConfig();
+const baseUrl = computed(() => config.public.apiBase.replace('/api', ''));
+
+const instituteName = useState('instituteName');
+const appLogo = useState('appLogo');
+
 const email = ref('admin@aems.local');
 const password = ref('Admin@1234');
 const loading = ref(false);
@@ -162,9 +171,9 @@ const handleLogin = async () => {
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid rgba(0, 0, 0, 0.07);
-  border-radius: var(--r24);
+  border-radius: var(--radius-lg);
   padding: var(--sp-10);
-  box-shadow: 0 8px 40px rgba(0, 122, 255, 0.08), 0 2px 8px rgba(0,0,0,0.06);
+  
 }
 
 .login-card-header {

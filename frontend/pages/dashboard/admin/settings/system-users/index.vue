@@ -229,7 +229,7 @@ const formatRole = (role) => {
 const getRoleColor = (role) => {
   const map = {
     'super_admin': 'red',
-    'sub_admin': 'orange',
+    'sub_admin': 'info',
     'crm_agent': 'info',
     'placement_coordinator': 'purple',
     'finance_staff': 'green',

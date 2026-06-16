@@ -27,12 +27,6 @@
         <v-btn to="/dashboard/admin/public-exams" variant="text" rounded="lg" class="text-capitalize font-weight-bold text-secondary">
           <v-icon start>mdi-card-text-outline</v-icon> All Exams
         </v-btn>
-        <v-btn to="/dashboard/admin/public-exams/create" variant="text" rounded="lg" class="text-capitalize font-weight-bold text-secondary">
-          <v-icon start>mdi-plus</v-icon> Create Exam
-        </v-btn>
-        <v-btn to="/dashboard/admin/public-exams/categories" color="primary" variant="flat" rounded="lg" class="text-capitalize font-weight-bold">
-          <v-icon start>mdi-folder-outline</v-icon> Categories
-        </v-btn>
         <v-btn to="/dashboard/admin/public-exams/questions" variant="text" rounded="lg" class="text-capitalize font-weight-bold text-secondary">
           <v-icon start>mdi-database-outline</v-icon> Question Bank
         </v-btn>

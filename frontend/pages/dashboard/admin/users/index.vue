@@ -80,7 +80,7 @@
             <template #activator="{ props }">
               <v-btn icon="mdi-dots-horizontal" variant="text" size="small" color="secondary" v-bind="props"></v-btn>
             </template>
-            <v-list class="rounded-lg shadow-apple pa-1" min-width="160">
+            <v-list class="rounded-lg border pa-1" min-width="160">
               <v-list-item v-if="item.role === 'student'" @click="navigateTo(`/dashboard/students/${item.id}`)" rounded="md">
                 <template v-slot:prepend><v-icon size="18" class="mr-2">mdi-account-details-outline</v-icon></template>
                 <v-list-item-title class="text-caption font-weight-bold">View Profile</v-list-item-title>
@@ -125,7 +125,7 @@
       <div class="mb-4">
         <AppInput v-model="modal.form.role" label="Role" type="select" :options="roles" large />
       </div>
-      <div v-if="!modal.isEdit" class="d-flex align-center mt-4 pa-3 bg-apple-gray rounded-apple">
+      <div v-if="!modal.isEdit" class="d-flex align-center mt-4 pa-3 bg-apple-gray rounded-lg">
         <v-checkbox-btn v-model="modal.form.send_welcome" color="primary"></v-checkbox-btn>
         <div class="ml-2">
           <div class="text-caption font-weight-bold">Send Welcome Email</div>
@@ -243,7 +243,7 @@ const statusColor = (status: string) => {
   switch (status) {
     case 'active': return 'green';
     case 'suspended': return 'red';
-    case 'pending_verification': return 'orange';
+    case 'pending_verification': return 'warning';
     default: return 'gray';
   }
 };
@@ -270,14 +270,14 @@ definePageMeta({
 
 .filters-card {
   background: white;
-  border-radius: var(--r16);
-  box-shadow: var(--s2);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
 }
 
 .apple-table-card {
   background: white;
-  border-radius: var(--r16);
-  box-shadow: var(--s2);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
   overflow: hidden;
 }
 

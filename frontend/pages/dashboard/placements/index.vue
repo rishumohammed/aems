@@ -118,11 +118,12 @@ onMounted(fetchPlacements);
 
 <style scoped>
 .placement-card {
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.2s ease, border-color 0.2s ease;
 }
 .placement-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 12px 24px rgba(0,0,0,0.1) !important;
+  border: 1px solid var(--border);
+  
 }
 .fade-in {
   animation: fadeIn 0.4s ease-out;

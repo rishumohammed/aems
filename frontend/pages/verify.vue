@@ -9,7 +9,7 @@
           </p>
         </div>
 
-        <v-card class="mx-auto pa-4 rounded-xl shadow-xl border mb-12" max-width="600">
+        <v-card class="mx-auto pa-4 rounded-lg border mb-12 bg-surface" flat max-width="600">
           <v-form @submit.prevent="verifyCert" class="d-flex align-center gap-4">
             <v-text-field
               v-model="certId"
@@ -133,7 +133,7 @@ onMounted(() => {
 });
 
 useSeoMeta({
-  title: 'Verify Certificate | AEMS Academy',
+  title: 'Verify Certificate',
   description: 'Public verification portal for AEMS Academy certificates and credentials.'
 });
 </script>

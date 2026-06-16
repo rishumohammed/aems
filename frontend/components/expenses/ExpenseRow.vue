@@ -61,8 +61,9 @@ const formatDate = (dateStr: string) => {
   transition: all 0.2s ease;
 }
 .hover-shadow:hover {
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  
   transform: translateY(-1px);
+  border: 1px solid var(--border);
 }
 .category-dot {
   width: 12px;

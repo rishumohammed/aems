@@ -257,7 +257,8 @@ const getStatusColor = (status: string) => {
 
 <style scoped>
 .shadow-card {
-  box-shadow: 0 15px 40px rgba(0,0,0,0.2) !important;
+  border: 1px solid var(--border);
+  
 }
 ::v-deep(.custom-table) {
   background: transparent !important;

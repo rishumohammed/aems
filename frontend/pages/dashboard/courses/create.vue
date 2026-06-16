@@ -947,10 +947,12 @@ onMounted(fetchCategories);
 
 /* ── Buttons ── */
 .shadow-glow {
-  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3) !important;
+  border: 1px solid var(--border);
+  
 }
 .shadow-glow-green {
-  box-shadow: 0 4px 15px rgba(34, 197, 94, 0.35) !important;
+  border: 1px solid var(--border);
+  
 }
 
 /* ── Success Dialog ── */
@@ -966,7 +968,8 @@ onMounted(fetchCategories);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 8px 24px rgba(34, 197, 94, 0.4);
+  border: 1px solid var(--border);
+  
 }
 
 /* ── Misc ── */

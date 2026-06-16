@@ -121,7 +121,7 @@ onMounted(async () => {
 .apple-table-card {
   background: white;
   border-radius: 20px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  
   overflow: hidden;
   border: 1px solid rgba(0, 0, 0, 0.05);
 }

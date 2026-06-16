@@ -15,10 +15,11 @@
       ></v-btn>
 
       <div class="d-flex align-center ml-2">
-        <div class="logo-box">
-          <v-icon icon="mdi-orbit" color="primary" size="32" class="logo-icon"></v-icon>
+        <div class="logo-box d-flex align-center justify-center" :style="{ width: appLogo ? 'auto' : '32px', height: '32px' }">
+          <img v-if="appLogo" :src="fullLogoUrl" alt="Logo" style="max-height: 32px; object-fit: contain;" />
+          <v-icon v-else icon="mdi-orbit" color="primary" size="32" class="logo-icon"></v-icon>
         </div>
-        <div class="ml-3 d-none d-sm-block">
+        <div v-if="!appLogo" class="ml-3 d-none d-sm-block">
           <div class="wordmark font-weight-black text-uppercase">{{ instituteName }}</div>
           <div class="version-label">PRODUCTION v1.0</div>
         </div>
@@ -95,7 +96,15 @@ const { connect, disconnect } = useSocket();
 
 const supportModalRef = ref<any>(null);
 const searchQuery = ref('');
-const instituteName = useState('instituteName', () => 'AEMS Academy');
+const instituteName = useState('instituteName', () => '');
+const appLogo = useState('appLogo', () => '');
+const config = useRuntimeConfig();
+
+const fullLogoUrl = computed(() => {
+  if (!appLogo.value) return '';
+  const baseUrl = config.public.apiBase.replace('/api', '');
+  return `${baseUrl}${appLogo.value}`;
+});
 
 const canSearch = computed(() => {
   const role = authStore.userRole;
@@ -191,7 +200,8 @@ const handleSearch = () => {
 .search-pill:focus-within {
   background: white;
   border-color: var(--blue);
-  box-shadow: 0 4px 12px rgba(86, 36, 208, 0.1);
+  border: 1px solid var(--border);
+  
 }
 
 .search-input {
@@ -222,6 +232,7 @@ const handleSearch = () => {
   background: linear-gradient(135deg, var(--blue), var(--purple));
   color: white;
   cursor: pointer;
-  box-shadow: 0 4px 10px rgba(86, 36, 208, 0.2);
+  border: 1px solid var(--border);
+  
 }
 </style>

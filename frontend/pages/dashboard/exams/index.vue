@@ -36,6 +36,36 @@
         <v-progress-circular indeterminate color="blue" size="40" />
       </div>
       <div v-else class="apple-table-card overflow-x-auto">
+        <!-- Analytical KPI Cards -->
+        <div class="pa-6 border-b bg-grey-lighten-5">
+          <v-row>
+            <v-col cols="12" sm="6" md="3">
+              <v-card flat class="border rounded-lg pa-4 bg-white">
+                <div class="text-caption text-grey font-weight-bold text-uppercase mb-1">Total Exams</div>
+                <div class="text-h4 font-weight-black">{{ totalExams }}</div>
+              </v-card>
+            </v-col>
+            <v-col cols="12" sm="6" md="3">
+              <v-card flat class="border rounded-lg pa-4 bg-white">
+                <div class="text-caption text-grey font-weight-bold text-uppercase mb-1">Published</div>
+                <div class="text-h4 font-weight-black text-success">{{ publishedExams }}</div>
+              </v-card>
+            </v-col>
+            <v-col cols="12" sm="6" md="3">
+              <v-card flat class="border rounded-lg pa-4 bg-white">
+                <div class="text-caption text-grey font-weight-bold text-uppercase mb-1">Submissions</div>
+                <div class="text-h4 font-weight-black text-primary">{{ totalSubmissions }}</div>
+              </v-card>
+            </v-col>
+            <v-col cols="12" sm="6" md="3">
+              <v-card flat class="border rounded-lg pa-4 bg-white">
+                <div class="text-caption text-grey font-weight-bold text-uppercase mb-1">Proctored</div>
+                <div class="text-h4 font-weight-black">{{ proctoredExams }}</div>
+              </v-card>
+            </v-col>
+          </v-row>
+        </div>
+
         <v-data-table
           :headers="headers"
           :items="exams"
@@ -106,6 +136,11 @@ const loading = ref(true);
 const exams = ref<any[]>([]);
 const eligibleExams = ref<any[]>([]);
 
+const totalExams = computed(() => exams.value.length);
+const publishedExams = computed(() => exams.value.filter(e => e.status === 'published').length);
+const totalSubmissions = computed(() => exams.value.reduce((sum, e) => sum + (e.attempt_count || 0), 0));
+const proctoredExams = computed(() => exams.value.filter(e => e.proctoring_enabled).length);
+
 const headers: any[] = [
   { title: 'Title', key: 'title' },
   { title: 'Course', key: 'course_title' },
@@ -163,9 +198,10 @@ onMounted(fetchData);
 
 .apple-table-card {
   background: white;
-  border-radius: var(--r16);
-  box-shadow: var(--s2);
+  border-radius: var(--radius-lg);
+  
   overflow: hidden;
+  border: 1px solid var(--border);
 }
 
 .apple-data-table {
@@ -191,8 +227,9 @@ onMounted(fetchData);
   text-align: center;
   padding: 80px 20px;
   background: white;
-  border-radius: var(--r16);
-  box-shadow: var(--s2);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  
 }
 
 .fade-in {

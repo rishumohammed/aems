@@ -65,16 +65,36 @@ export const DashboardController = {
         ORDER BY lf.scheduled_at ASC
       `);
 
+      // Fetch Base Currency
+      const [baseCurrencies] = await pool.query('SELECT symbol, code FROM currencies WHERE is_base = TRUE LIMIT 1');
+      const currencySymbol = baseCurrencies.length > 0 ? baseCurrencies[0].symbol : '₹';
+      const currencyCode = baseCurrencies.length > 0 ? baseCurrencies[0].code.toLowerCase() : 'inr';
+      const currencyIcon = `mdi-currency-${currencyCode}`; // Might not exist for all, but works for major ones. Fallback is fine if empty, or we could just use mdi-cash. Let's use mdi-cash to be universally safe.
+      const safeIcon = ['usd', 'eur', 'gbp', 'inr', 'jpy', 'rub', 'krw'].includes(currencyCode) ? `mdi-currency-${currencyCode}` : 'mdi-cash';
+
+      // Month-over-month trends for row1 KPIs
+      const [pendingTutorsLastMonth] = await pool.query("SELECT COUNT(*) as count FROM users WHERE role = 'tutor' AND status = 'pending_review' AND MONTH(created_at) = MONTH(CURRENT_DATE() - INTERVAL 1 MONTH) AND YEAR(created_at) = YEAR(CURRENT_DATE() - INTERVAL 1 MONTH)");
+      const [pendingEmployersLastMonth] = await pool.query("SELECT COUNT(*) as count FROM users WHERE role = 'employer' AND status = 'pending_review' AND MONTH(created_at) = MONTH(CURRENT_DATE() - INTERVAL 1 MONTH) AND YEAR(created_at) = YEAR(CURRENT_DATE() - INTERVAL 1 MONTH)");
+      const [totalTutorsLastMonth] = await pool.query("SELECT COUNT(*) as count FROM users WHERE role = 'tutor' AND status = 'active' AND MONTH(created_at) <= MONTH(CURRENT_DATE() - INTERVAL 1 MONTH)");
+      const [totalEmployersLastMonth] = await pool.query("SELECT COUNT(*) as count FROM users WHERE role = 'employer' AND status = 'active' AND MONTH(created_at) <= MONTH(CURRENT_DATE() - INTERVAL 1 MONTH)");
+
+      const calcTrend = (current, previous) => {
+        if (previous === 0 && current === 0) return { change: 0, direction: 'neutral' };
+        if (previous === 0) return { change: 100, direction: 'up' };
+        const pct = Math.round(((current - previous) / previous) * 100);
+        return { change: Math.abs(pct), direction: pct > 0 ? 'up' : pct < 0 ? 'down' : 'neutral' };
+      };
+
       res.json({
         kpis: {
           row1: [
-            { title: 'Pending Tutors', value: pendingTutors[0].count, icon: 'mdi-account-clock', color: 'error' },
-            { title: 'Pending Employers', value: pendingEmployers[0].count, icon: 'mdi-domain-plus', color: 'warning' },
-            { title: 'Approved Tutors', value: totalTutors[0].count, icon: 'mdi-account-tie', color: 'primary' },
-            { title: 'Approved Employers', value: totalEmployers[0].count, icon: 'mdi-domain', color: 'info' }
+            { title: 'Pending Tutors', value: pendingTutors[0].count, icon: 'mdi-account-clock', color: 'error', trend: calcTrend(pendingTutors[0].count, pendingTutorsLastMonth[0].count) },
+            { title: 'Pending Employers', value: pendingEmployers[0].count, icon: 'mdi-domain-plus', color: 'warning', trend: calcTrend(pendingEmployers[0].count, pendingEmployersLastMonth[0].count) },
+            { title: 'Approved Tutors', value: totalTutors[0].count, icon: 'mdi-account-tie', color: 'primary', trend: calcTrend(totalTutors[0].count, totalTutorsLastMonth[0].count) },
+            { title: 'Approved Employers', value: totalEmployers[0].count, icon: 'mdi-domain', color: 'info', trend: calcTrend(totalEmployers[0].count, totalEmployersLastMonth[0].count) },
           ],
           row2: [
-            { title: 'Monthly Revenue', value: '$' + (revenueMonth[0].total || 0).toLocaleString(), icon: 'mdi-currency-usd', color: 'success' },
+            { title: 'Monthly Revenue', value: currencySymbol + (revenueMonth[0].total || 0).toLocaleString(), icon: safeIcon, color: 'success' },
             { title: 'Active Students', value: activeStudents[0].count, icon: 'mdi-school', color: 'info' },
             { title: 'Active Courses', value: activeCourses[0].count, icon: 'mdi-book-open-variant', color: 'primary' },
             { title: 'Pending Job Approvals', value: pendingJobs[0].count, icon: 'mdi-briefcase-clock', color: 'warning' },

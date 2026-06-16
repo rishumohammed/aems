@@ -39,9 +39,10 @@ defineProps<{
 
 :deep(.v-list-item--active) {
   background-color: white !important;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04) !important;
+  
   border-left: 3px solid var(--color-brand) !important;
   color: var(--color-brand) !important;
+  border: 1px solid var(--border);
 }
 
 .item-collapsed {

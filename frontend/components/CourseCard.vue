@@ -1,7 +1,8 @@
 <template>
   <v-card
     class="course-card h-100 d-flex flex-column"
-    :variant="viewType === 'list' ? 'flat' : 'elevated'"
+    flat
+    border
     @click="navigateTo(`/courses/${course.slug}`)"
     v-motion-fade-visible-once
   >
@@ -47,14 +48,14 @@
 
         <div class="d-flex align-center mb-3">
           <v-rating
-            :model-value="4.8"
+            :model-value="course.rating || 0"
             color="amber-darken-2"
             density="compact"
             size="small"
             half-increments
             readonly
           ></v-rating>
-          <span class="text-caption text-grey-darken-1 ml-2">(1.2k students)</span>
+          <span class="text-caption text-grey-darken-1 ml-2">({{ course.students_count || 0 }} students)</span>
         </div>
 
         <v-spacer></v-spacer>
@@ -65,7 +66,7 @@
               Get Quote
             </span>
             <span v-else class="text-h6 font-weight-bold">
-              ₹{{ course.price }}
+              {{ course.currency_symbol || '₹' }}{{ course.price }}
             </span>
           </div>
           
@@ -99,14 +100,14 @@ defineProps({
 
 <style scoped>
 .course-card {
-  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s ease;
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.2s ease;
   cursor: pointer;
   overflow: hidden;
 }
 
 .course-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08) !important;
+  border-color: rgb(var(--v-theme-primary));
+  transform: translateY(-2px);
 }
 
 .line-clamp-2 {

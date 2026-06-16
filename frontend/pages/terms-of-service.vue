@@ -54,7 +54,7 @@ definePageMeta({
 });
 
 useSeoMeta({
-  title: 'Terms of Service · AEMS Academy',
+  title: 'Terms of Service',
   description: 'Review the terms and conditions for using the AEMS Academy platform.'
 });
 </script>

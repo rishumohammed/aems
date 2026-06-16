@@ -203,7 +203,7 @@ onUnmounted(() => {
 .icon-box {
   width: 36px;
   height: 36px;
-  border-radius: var(--r10);
+  border-radius: var(--radius-md);
   display: flex;
   align-items: center;
   justify-content: center;

@@ -19,15 +19,11 @@
       </template>
 
       <template v-slot:item.progress="{ item }">
-        <div class="d-flex align-center" style="min-width: 150px">
-          <v-progress-linear
-            v-model="item.completion_percentage"
-            color="primary"
-            height="6"
-            rounded
-            class="mr-3"
-          ></v-progress-linear>
-          <span class="text-caption font-weight-bold">{{ item.completion_percentage }}%</span>
+        <div style="min-width: 150px">
+          <UiProgressFraction
+            :current="item.completed_lessons || 0"
+            :total="item.total_lessons || 100"
+          />
         </div>
       </template>
 

@@ -204,7 +204,8 @@ const deleteStatus = async (platformName) => {
 </script>
 
 <style scoped>
-.shadow-sm { box-shadow: 0 4px 20px rgba(0,0,0,0.05) !important; }
+.shadow-sm {
+  border: 1px solid var(--border);  }
 .bg-primary-lighten-5 { background-color: #f4f6fd; }
 .bg-success-lighten-5 { background-color: #f1f8f5; }
 .hover-card:hover {

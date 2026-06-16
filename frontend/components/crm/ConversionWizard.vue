@@ -402,9 +402,21 @@ watch(step, () => {
 });
 
 watch(() => props.modelValue, (isOpen) => {
-  if (isOpen && props.lead?.course_interest_ids && props.lead.course_interest_ids.length > 0) {
-    selectedCourseIds.value = [...props.lead.course_interest_ids];
-    onCourseSelect(selectedCourseIds.value);
+  if (isOpen && props.lead?.course_interest_ids) {
+    let ids = props.lead.course_interest_ids;
+    if (typeof ids === 'string') {
+      try {
+        ids = JSON.parse(ids);
+      } catch (e) {
+        ids = [];
+      }
+    }
+    if (Array.isArray(ids) && ids.length > 0) {
+      selectedCourseIds.value = [...ids];
+      onCourseSelect(selectedCourseIds.value);
+    } else {
+      selectedCourseIds.value = [];
+    }
   }
 });
 

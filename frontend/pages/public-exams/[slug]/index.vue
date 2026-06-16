@@ -184,7 +184,7 @@ useSeoMeta({ robots: 'noindex, nofollow' });
 .leading-relaxed { line-height: 1.6; }
 .details-grid :deep(.v-card) {
   border: 1px solid rgba(0,0,0,0.04) !important;
-  box-shadow: none !important;
+  
 }
 .gap-3 { gap: 12px; }
 </style>

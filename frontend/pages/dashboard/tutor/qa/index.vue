@@ -1,11 +1,11 @@
 <template>
   <v-container fluid class="pa-0">
-    <!-- Header with Glassmorphism Effect -->
-    <div class="header-section pa-8 pb-15 mb-n10">
+    <!-- Header -->
+    <div class="pa-8 pb-4">
       <div class="d-flex align-center justify-space-between mb-2">
         <div>
-          <h1 class="text-h4 font-weight-black text-white mb-1">Course Q&A</h1>
-          <p class="text-subtitle-1 text-white opacity-80">Manage and answer student questions across your courses.</p>
+          <h1 class="text-h4 font-weight-black mb-1">Course Q&A</h1>
+          <p class="text-subtitle-1 text-secondary">Manage and answer student questions across your courses.</p>
         </div>
       </div>
     </div>
@@ -14,25 +14,25 @@
       <!-- Stats Row -->
       <v-row class="mb-6">
         <v-col cols="12" sm="6" md="3">
-          <v-card flat class="border rounded-xl pa-4">
+          <v-card flat class="border rounded-lg pa-4">
             <div class="text-caption text-grey font-weight-bold text-uppercase mb-1">Total Questions</div>
             <div class="text-h4 font-weight-black">{{ stats.total || 0 }}</div>
           </v-card>
         </v-col>
         <v-col cols="12" sm="6" md="3">
-          <v-card flat class="border rounded-xl pa-4">
-            <div class="text-caption text-error font-weight-bold text-uppercase mb-1">Unanswered</div>
+          <v-card flat class="border rounded-lg pa-4">
+            <div class="text-caption text-grey font-weight-bold text-uppercase mb-1">Unanswered</div>
             <div class="text-h4 font-weight-black text-error">{{ stats.unanswered || 0 }}</div>
           </v-card>
         </v-col>
         <v-col cols="12" sm="6" md="3">
-          <v-card flat class="border rounded-xl pa-4">
-            <div class="text-caption text-success font-weight-bold text-uppercase mb-1">Answered</div>
+          <v-card flat class="border rounded-lg pa-4">
+            <div class="text-caption text-grey font-weight-bold text-uppercase mb-1">Answered</div>
             <div class="text-h4 font-weight-black text-success">{{ stats.answered || 0 }}</div>
           </v-card>
         </v-col>
         <v-col cols="12" sm="6" md="3">
-          <v-card flat class="border rounded-xl pa-4">
+          <v-card flat class="border rounded-lg pa-4">
             <div class="text-caption text-grey font-weight-bold text-uppercase mb-1">Avg Response</div>
             <div class="text-h4 font-weight-black">{{ stats.avgResponseTime || '--' }}</div>
           </v-card>
@@ -199,14 +199,10 @@ definePageMeta({
 </script>
 
 <style scoped>
-.header-section {
-  background: linear-gradient(135deg, #007AFF 0%, #AF52DE 100%);
-  position: relative;
-  overflow: hidden;
-}
 
 .shadow-soft {
-  box-shadow: 0 4px 20px rgba(0,0,0,0.05) !important;
+  border: 1px solid var(--border);
+  
 }
 
 .modern-table :deep(thead th) {

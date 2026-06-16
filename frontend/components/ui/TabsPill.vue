@@ -25,7 +25,7 @@ defineEmits(['update:modelValue']);
 .tabs-pill {
   display: inline-flex;
   background: var(--g1);
-  border-radius: var(--r12);
+  border-radius: var(--radius-md);
   padding: 3px;
   gap: 2px;
 }
@@ -35,7 +35,7 @@ defineEmits(['update:modelValue']);
   font-size: 13px;
   font-weight: 500;
   color: var(--g5);
-  border-radius: var(--r10);
+  border-radius: var(--radius-md);
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   white-space: nowrap;
@@ -49,6 +49,7 @@ defineEmits(['update:modelValue']);
   background: white;
   color: var(--blue);
   font-weight: 700;
-  box-shadow: var(--s1);
+  border: 1px solid var(--border);
+  
 }
 </style>

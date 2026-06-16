@@ -85,6 +85,7 @@
           :course="course" 
           @edit="editCourse"
           @view="viewCourse"
+          @toggle-featured="toggleFeatured"
         />
       </div>
     </div>
@@ -162,6 +163,16 @@ const viewCourse = (course: any) => {
   window.open(`/courses/${course.slug}`, '_blank');
 };
 
+const toggleFeatured = async (course: any) => {
+  try {
+    const newStatus = !course.is_featured;
+    await api.put(`/lms/courses/${course.id}`, { is_featured: newStatus });
+    course.is_featured = newStatus;
+  } catch (error) {
+    console.error('Toggle featured error:', error);
+  }
+};
+
 onMounted(() => {
   fetchCategories();
   fetchCourses();
@@ -178,8 +189,9 @@ onMounted(() => {
 
 .filters-card {
   background: white;
-  border-radius: var(--r16);
-  box-shadow: var(--s2);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  
 }
 
 .search-pill {
@@ -203,8 +215,9 @@ onMounted(() => {
 
 .empty-state {
   background: white;
-  border-radius: var(--r16);
-  box-shadow: var(--s2);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  
 }
 
 .fade-in {

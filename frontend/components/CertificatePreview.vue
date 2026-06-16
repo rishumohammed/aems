@@ -60,8 +60,9 @@ defineProps<{
   background: white;
   padding: 24px;
   box-sizing: border-box;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  
   font-family: 'Helvetica', 'Arial', sans-serif;
+  border: 1px solid var(--border);
 }
 
 .cert-card {

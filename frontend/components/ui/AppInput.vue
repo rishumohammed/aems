@@ -26,6 +26,22 @@
         @input="$emit('update:modelValue', ($event.target as HTMLTextAreaElement).value)"
       ></textarea>
 
+      <div v-else-if="type === 'color'" class="color-input-wrapper">
+        <input
+          type="color"
+          :value="modelValue || '#000000'"
+          class="color-picker-box"
+          @input="$emit('update:modelValue', ($event.target as HTMLInputElement).value)"
+        />
+        <input
+          type="text"
+          :value="modelValue"
+          placeholder="#000000"
+          class="apple-input color-text-input"
+          @input="$emit('update:modelValue', ($event.target as HTMLInputElement).value)"
+        />
+      </div>
+
       <input
         v-else
         :type="type || 'text'"
@@ -80,7 +96,7 @@ defineEmits(['update:modelValue']);
   height: 34px;
   background: white;
   border: 1px solid rgba(0, 0, 0, 0.08);
-  border-radius: var(--r8);
+  border-radius: var(--radius-sm);
   padding: 0 12px;
   font-size: 13px;
   color: var(--g7);
@@ -100,12 +116,13 @@ defineEmits(['update:modelValue']);
 
 .fi-lg .apple-input {
   height: 40px;
-  border-radius: var(--r10);
+  border-radius: var(--radius-md);
 }
 
 .apple-input:focus {
   border-color: var(--blue);
-  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.12);
+  border: 1px solid var(--border);
+  
 }
 
 .apple-input::placeholder {
@@ -143,5 +160,41 @@ defineEmits(['update:modelValue']);
   font-size: 11px;
   color: var(--red);
   margin-top: 4px;
+}
+
+.color-input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.color-picker-box {
+  width: 36px;
+  height: 34px;
+  padding: 0;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  background: none;
+  flex-shrink: 0;
+}
+
+.fi-lg .color-picker-box {
+  height: 40px;
+  width: 40px;
+}
+
+.color-picker-box::-webkit-color-swatch-wrapper {
+  padding: 2px;
+}
+
+.color-picker-box::-webkit-color-swatch {
+  border: none;
+  border-radius: var(--radius-sm);
+}
+
+.color-text-input {
+  flex-grow: 1;
 }
 </style>

@@ -10,6 +10,22 @@
       </div>
     </div>
 
+    <!-- Analytics Cards -->
+    <v-row class="mb-8" v-if="!pending">
+      <v-col cols="12" sm="6" md="3">
+        <KpiCard label="Total Openings" :value="totalJobs" icon="mdi-briefcase-outline" color="blue" />
+      </v-col>
+      <v-col cols="12" sm="6" md="3">
+        <KpiCard label="New This Week" :value="newJobsThisWeek" icon="mdi-new-box" color="green" />
+      </v-col>
+      <v-col cols="12" sm="6" md="3">
+        <KpiCard label="Active Companies" :value="activeCompanies" icon="mdi-domain" color="purple" />
+      </v-col>
+      <v-col cols="12" sm="6" md="3">
+        <KpiCard label="Remote Roles" :value="remoteCount" icon="mdi-laptop" color="teal" />
+      </v-col>
+    </v-row>
+
     <v-row>
       <!-- Filter Sidebar -->
       <v-col cols="12" md="3">
@@ -173,6 +189,11 @@ const { data: jobsData, pending, refresh } = await useFetch<any>(() => {
 
 const jobs = computed(() => jobsData.value?.jobs || []);
 const totalJobs = computed(() => jobsData.value?.total || 0);
+
+// Basic stats computed from currently loaded jobs
+const newJobsThisWeek = computed(() => jobs.value.filter((j: any) => dayjs().diff(dayjs(j.created_at), 'day') <= 7).length);
+const activeCompanies = computed(() => new Set(jobs.value.map((j: any) => j.company)).size);
+const remoteCount = computed(() => jobs.value.filter((j: any) => j.is_remote).length);
 
 const debounceSearch = (() => {
   let timeout: any;

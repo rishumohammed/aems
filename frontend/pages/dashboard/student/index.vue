@@ -158,17 +158,12 @@
                         {{ course.instructor_name || 'AEMS Instructor' }}
                       </div>
                       
-                      <div class="d-flex align-center justify-space-between mb-2">
-                        <span class="text-caption font-weight-bold">{{ course.completion_percentage }}% Complete</span>
-                        <span class="text-caption text-grey">{{ course.completed_lessons || 0 }}/{{ course.total_lessons || 0 }} Lessons</span>
-                      </div>
-                      <v-progress-linear
-                        v-model="course.completion_percentage"
-                        color="primary"
-                        height="8"
-                        rounded
+                      <UiProgressFraction
+                        :current="course.completed_lessons || 0"
+                        :total="course.total_lessons || 100"
+                        label="Course Progress"
                         class="mb-6"
-                      ></v-progress-linear>
+                      />
 
                       <div class="d-flex gap-2">
                         <v-btn :color="course.status === 'completed' ? 'success' : 'primary'" variant="flat" rounded="lg" class="flex-grow-1 font-weight-bold text-none" @click="navigateToCourse(course)">
@@ -569,8 +564,9 @@ definePageMeta({
  
 .stat-card:hover {
   transform: translateY(-8px);
-  box-shadow: 0 15px 35px rgba(86, 36, 208, 0.15) !important;
+  
   border-color: rgba(86, 36, 208, 0.2) !important;
+  border: 1px solid var(--border);
 }
  
 .course-card {

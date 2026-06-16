@@ -3,8 +3,24 @@ import { ConfigService } from '../services/config.service.js';
 import { authenticateJWT, authorizeRoles } from '../middleware/auth.js';
 import { pool } from '../db/connection.js';
 import { v4 as uuidv4 } from 'uuid';
+import multer from 'multer';
+import path from 'path';
+import fs from 'fs';
 
 const router = express.Router();
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const uploadPath = 'uploads/branding';
+    if (!fs.existsSync(uploadPath)) fs.mkdirSync(uploadPath, { recursive: true });
+    cb(null, uploadPath);
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+    cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+  }
+});
+const upload = multer({ storage });
 
 // Get all config
 router.get('/', authenticateJWT, authorizeRoles('super_admin'), async (req, res) => {
@@ -32,6 +48,41 @@ router.post('/test-email', authenticateJWT, authorizeRoles('super_admin'), async
     // This would use a mail service to send a test email
     // For now, just a placeholder
     res.json({ message: 'Test email sent successfully' });
+});
+
+// Upload Branding Assets (logo, favicon, hero images)
+router.post('/branding/upload', authenticateJWT, authorizeRoles('super_admin'), upload.fields([
+  { name: 'logo', maxCount: 1 },
+  { name: 'favicon', maxCount: 1 },
+  { name: 'hero_image', maxCount: 1 },
+  { name: 'about_image', maxCount: 1 },
+  { name: 'aboutpage_who_image', maxCount: 1 }
+]), async (req, res) => {
+  try {
+    const updates = {};
+    if (req.files['logo']) {
+      updates.app_logo = `/uploads/branding/${req.files['logo'][0].filename}`;
+    }
+    if (req.files['favicon']) {
+      updates.app_favicon = `/uploads/branding/${req.files['favicon'][0].filename}`;
+    }
+    if (req.files['hero_image']) {
+      updates.homepage_hero_image = `/uploads/branding/${req.files['hero_image'][0].filename}`;
+    }
+    if (req.files['about_image']) {
+      updates.homepage_about_image = `/uploads/branding/${req.files['about_image'][0].filename}`;
+    }
+    if (req.files['aboutpage_who_image']) {
+      updates.aboutpage_who_image = `/uploads/branding/${req.files['aboutpage_who_image'][0].filename}`;
+    }
+    
+    if (Object.keys(updates).length > 0) {
+      await ConfigService.updateMultiple(updates);
+    }
+    res.json({ message: 'Branding assets uploaded successfully', updates });
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to upload branding assets', error: error.message });
+  }
 });
 
 // --- Dynamic Social Platforms Management ---
@@ -106,5 +157,14 @@ router.get('/terms-privacy-acceptances', authenticateJWT, authorizeRoles('super_
     res.status(500).json({ message: 'Failed to fetch terms/privacy acceptance history' });
   }
 });
+
+import { AdminCurrenciesController } from '../controllers/admin.config.currencies.controller.js';
+
+// --- Currency Management ---
+router.get('/currencies', authenticateJWT, authorizeRoles('super_admin'), AdminCurrenciesController.getCurrencies);
+router.post('/currencies', authenticateJWT, authorizeRoles('super_admin'), AdminCurrenciesController.addCurrency);
+router.put('/currencies/:id', authenticateJWT, authorizeRoles('super_admin'), AdminCurrenciesController.updateCurrency);
+router.delete('/currencies/:id', authenticateJWT, authorizeRoles('super_admin'), AdminCurrenciesController.deleteCurrency);
+router.patch('/currencies/:id/set-base', authenticateJWT, authorizeRoles('super_admin'), AdminCurrenciesController.setBaseCurrency);
 
 export default router;

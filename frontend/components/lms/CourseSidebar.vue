@@ -12,17 +12,11 @@
         Back to Dashboard
       </v-btn>
       <h3 class="text-subtitle-1 font-weight-bold">Course Content</h3>
-      <v-progress-linear
-        :model-value="completionPercentage"
-        color="primary"
-        height="6"
-        rounded
-        class="mt-2"
-      ></v-progress-linear>
-      <div class="text-caption mt-1 d-flex justify-space-between mb-4">
-        <span>{{ completionPercentage }}% Complete</span>
-        <span>{{ completedCount }}/{{ totalLessons }} Lessons</span>
-      </div>
+      <UiProgressFraction
+        :current="completedCount"
+        :total="totalLessons"
+        class="mt-2 mb-4"
+      />
 
       <v-btn
         v-if="completionPercentage === 100 && hasExam && !passedExam"
@@ -208,11 +202,13 @@ const onLessonSelect = (lesson) => {
   opacity: 0.8;
 }
 .shadow-glow {
-  box-shadow: 0 4px 14px 0 rgba(76, 175, 80, 0.4);
+  
   transition: all 0.3s ease;
+  border: 1px solid var(--border);
 }
 .shadow-glow:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px 0 rgba(76, 175, 80, 0.6);
+  border: 1px solid var(--border);
+  
 }
 </style>

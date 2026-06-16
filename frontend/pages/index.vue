@@ -6,50 +6,188 @@
 
 
 
-      <!-- Category Strip -->
-      <CategoryStrip :categories="categories" />
+      <!-- Feature and Stats Strip -->
+      <FeatureStats />
 
 
 
       <!-- Featured Courses -->
-      <div class="section-on-gradient section-default">
+      <div v-if="featuredCourses.length > 0" class="section-default bg-surface-light">
         <v-container>
           <div class="d-flex align-center justify-space-between mb-12">
             <div>
               <h2 class="section-title">Featured Courses</h2>
-              <p class="section-sub" style="max-width:none">Handpicked courses by our industry experts.</p>
+              <p class="section-sub" style="max-width:none">Handpicked premium programs by our experts.</p>
+            </div>
+          </div>
+
+          <v-row>
+            <v-col v-for="course in featuredCourses" :key="course.id" cols="12" sm="6" md="4">
+              <CourseCard :course="course" />
+            </v-col>
+          </v-row>
+        </v-container>
+      </div>
+
+      <!-- Latest Courses -->
+      <div class="section-default">
+        <v-container>
+          <div class="d-flex align-center justify-space-between mb-12">
+            <div>
+              <h2 class="section-title">Latest Courses</h2>
+              <p class="section-sub" style="max-width:none">Explore our most recently published programs.</p>
             </div>
             <v-btn variant="outlined" rounded="lg" color="primary" class="text-capitalize font-weight-bold" to="/courses">
               View All Courses
             </v-btn>
           </div>
 
-        <v-row>
-          <v-col v-for="course in featuredCourses" :key="course.id" cols="12" sm="6" md="4">
-            <CourseCard :course="course" />
-          </v-col>
-        </v-row>
+          <v-row>
+            <v-col v-for="course in latestCourses" :key="course.id" cols="12" sm="6" md="4">
+              <CourseCard :course="course" />
+            </v-col>
+          </v-row>
         
           <!-- Empty state if no courses -->
-          <div v-if="featuredCourses.length === 0" class="text-center py-10">
+          <div v-if="latestCourses.length === 0" class="text-center py-10">
             <v-icon size="64" color="grey-lighten-2">mdi-book-open-blank-variant</v-icon>
-            <p class="text-grey mt-4">No featured courses available at the moment.</p>
+            <p class="text-grey mt-4">No courses available at the moment.</p>
+          </div>
+        </v-container>
+      </div>
+
+
+
+      <!-- Why Brixify — Split Image Section -->
+      <div class="why-section section-default">
+        <v-container>
+          <v-row align="center" class="why-row">
+            <v-col cols="12" md="6" class="why-img-col">
+              <div class="why-img-wrap">
+                <img
+                  :src="aboutImgSrc"
+                  alt="Food safety experts at work"
+                  class="why-img"
+                />
+                <!-- floating badge -->
+                <div class="why-badge">
+                  <v-icon color="success" size="20" class="mr-2">mdi-check-decagram</v-icon>
+                  <div>
+                    <div class="why-badge-title">ISO Accredited</div>
+                    <div class="why-badge-sub">Internationally Recognized</div>
+                  </div>
+                </div>
+              </div>
+            </v-col>
+            <v-col cols="12" md="6" class="pl-md-12">
+              <div class="eyebrow-label mb-4">Why Brixify</div>
+              <h2 class="section-title mb-4" style="max-width:480px">Expert-Led Training Trusted Globally</h2>
+              <p class="text-body-1 text-grey-darken-1 mb-8" style="max-width:480px; line-height:1.8">
+                Brixify brings together experienced auditors, food scientists, and regulatory professionals passionate about ensuring the integrity of food products — from farm to table.
+              </p>
+              <v-row>
+                <v-col cols="12" sm="6" v-for="(f, i) in whyPoints" :key="i" class="pb-0 mb-4">
+                  <div class="why-point">
+                    <v-avatar :color="f.color" size="40" class="mr-3">
+                      <v-icon color="white" size="20">{{ f.icon }}</v-icon>
+                    </v-avatar>
+                    <div>
+                      <div class="text-subtitle-2 font-weight-bold">{{ f.title }}</div>
+                      <div class="text-caption text-grey-darken-1">{{ f.sub }}</div>
+                    </div>
+                  </div>
+                </v-col>
+              </v-row>
+              <v-btn color="primary" rounded="lg" class="mt-6 text-none font-weight-bold" size="large" to="/about">
+                Learn More About Us
+                <v-icon end>mdi-arrow-right</v-icon>
+              </v-btn>
+            </v-col>
+          </v-row>
+        </v-container>
+      </div>
+
+      <!-- Certification Standards -->
+      <div class="standards-section section-default" style="background:#f8f9fc;">
+        <v-container>
+          <div class="section-header section-header--center mb-12">
+            <div class="eyebrow-label mb-3">Our Standards</div>
+            <h2 class="section-title">Globally Recognized Certifications</h2>
+            <p class="section-sub">We work with the world's most trusted food safety and quality frameworks.</p>
+          </div>
+          <v-row justify="center">
+            <v-col cols="6" sm="4" md="2" v-for="std in standards" :key="std.name">
+              <div class="std-card">
+                <v-icon :color="std.color" size="36" class="mb-3">{{ std.icon }}</v-icon>
+                <div class="std-name">{{ std.name }}</div>
+                <div class="std-sub">{{ std.sub }}</div>
+              </div>
+            </v-col>
+          </v-row>
+        </v-container>
+      </div>
+
+      <!-- Information Panel (Notice Board) -->
+      <div class="section-default bg-surface-light">
+        <v-container>
+          <div class="d-flex align-center justify-space-between mb-8">
+            <div>
+              <h2 class="text-h4 font-weight-black mb-2">Upcoming Events</h2>
+              <p class="text-body-1 text-secondary">Latest webinars, workshops, and talent exams.</p>
+            </div>
+            <v-btn variant="tonal" rounded="lg" color="primary" class="text-capitalize font-weight-bold d-none d-sm-flex" to="/live-classes">
+              View All Events
+            </v-btn>
+          </div>
+
+          <v-row>
+            <v-col v-for="item in informationItems" :key="item.id" cols="12" md="6" lg="4">
+              <v-card variant="outlined" class="rounded-xl border-surface bg-white h-100 pa-0 d-flex flex-column transition-transform overflow-hidden" hover :href="item.link" :target="item.link?.startsWith('http') ? '_blank' : '_self'">
+                <v-img v-if="item.image_url" :src="baseUrl + item.image_url" height="140" cover></v-img>
+                <div class="pa-5 flex-grow-1 d-flex flex-column">
+                  <div class="d-flex align-center mb-3">
+                    <v-avatar v-if="!item.image_url" :color="getEventColor(item.event_type)" variant="tonal" rounded size="48" class="mr-4">
+                      <v-icon size="24">{{ getEventIcon(item.event_type) }}</v-icon>
+                    </v-avatar>
+                    <div>
+                      <v-chip size="x-small" :color="getEventColor(item.event_type)" class="font-weight-bold text-uppercase mb-1">{{ item.event_type }}</v-chip>
+                      <div class="text-caption font-weight-bold text-secondary">
+                        <v-icon size="14" start>mdi-calendar-clock</v-icon>
+                        {{ new Date(item.event_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) }}
+                      </div>
+                    </div>
+                  </div>
+                  <h3 class="text-subtitle-1 font-weight-bold line-clamp-2 mb-4 flex-grow-1" style="line-height: 1.4;">{{ item.title }}</h3>
+                  <div class="d-flex align-center text-primary font-weight-bold text-caption text-uppercase mt-auto">
+                    View Details
+                    <v-icon size="16" class="ml-1">mdi-arrow-right</v-icon>
+                  </div>
+                </div>
+              </v-card>
+            </v-col>
+          </v-row>
+          
+          <div v-if="informationItems.length === 0" class="text-center py-10">
+            <v-icon size="48" color="grey-lighten-2">mdi-information-outline</v-icon>
+            <p class="text-grey mt-3">No upcoming events or announcements.</p>
           </div>
         </v-container>
       </div>
 
       <!-- How it Works -->
-      <div class="how-it-works section-default section-frosted">
+      <div class="how-it-works section-default">
         <v-container>
           <div class="section-header section-header--center">
+            <div class="eyebrow-label mb-3">The Process</div>
             <h2 class="section-title">How it Works</h2>
             <p class="section-sub">Your journey from learning to professional success in three simple steps.</p>
           </div>
           
-          <v-row>
+          <v-row class="mt-4">
             <v-col v-for="(step, i) in steps" :key="i" cols="12" md="4">
-              <v-card class="pa-8 text-center h-100" flat border v-motion-fade-visible-once>
-                <v-avatar color="primary" size="64" class="mb-6">
+              <v-card class="pa-8 text-center h-100 step-card" flat border v-motion-fade-visible-once>
+                <div class="step-number mb-4">{{ i + 1 }}</div>
+                <v-avatar color="primary" size="64" class="mb-5">
                   <v-icon color="white" size="32">{{ step.icon }}</v-icon>
                 </v-avatar>
                 <h3 class="text-h6 font-weight-bold mb-3">{{ step.title }}</h3>
@@ -57,6 +195,30 @@
               </v-card>
             </v-col>
           </v-row>
+        </v-container>
+      </div>
+
+      <!-- Trusted By / Quote band -->
+      <div class="trust-band section-default" style="background: var(--primary, #211d71);">
+        <v-container>
+          <div class="trust-inner">
+            <div class="trust-left">
+              <div class="eyebrow-label mb-3" style="color:rgba(255,255,255,0.6)">Our Impact</div>
+              <h2 class="trust-headline">Hundreds of clients.<br/>One trusted partner.</h2>
+              <p class="trust-sub">From startups to enterprise food manufacturers, Brixify helps organisations achieve and maintain global standards.</p>
+              <v-btn color="white" variant="outlined" rounded="lg" class="mt-6 text-none font-weight-bold" to="/courses">
+                Explore Our Programs
+              </v-btn>
+            </div>
+            <div class="trust-right">
+              <v-row>
+                <v-col cols="6" v-for="stat in trustStats" :key="stat.label" class="text-center mb-4">
+                  <div class="trust-stat-value">{{ stat.value }}</div>
+                  <div class="trust-stat-label">{{ stat.label }}</div>
+                </v-col>
+              </v-row>
+            </div>
+          </div>
         </v-container>
       </div>
 
@@ -70,22 +232,22 @@
               <!-- Eyebrow -->
               <div class="lcc-badge">Free Counseling Session</div>
 
-              <h2 class="lcc-title">Ready to Start<br/>Your Journey?</h2>
-              <p class="lcc-sub">Talk to our career experts, explore the right course, and get placed — all with one inquiry.</p>
+              <h2 class="lcc-title">Ready to Elevate<br/>Your Standards?</h2>
+              <p class="lcc-sub">Talk to our food technology experts, explore the right certification, and ensure global compliance.</p>
 
               <!-- Trust badges -->
               <div class="lcc-trust">
                 <div class="lcc-trust-item">
                   <v-icon size="18" color="white">mdi-check-circle</v-icon>
-                  <span>94% Placement Rate</span>
+                  <span>Global Recognition</span>
                 </div>
                 <div class="lcc-trust-item">
                   <v-icon size="18" color="white">mdi-check-circle</v-icon>
-                  <span>10,000+ Students Placed</span>
+                  <span>Expert Auditors</span>
                 </div>
                 <div class="lcc-trust-item">
                   <v-icon size="18" color="white">mdi-check-circle</v-icon>
-                  <span>200+ Hiring Partners</span>
+                  <span>Industry Trusted</span>
                 </div>
               </div>
 
@@ -119,43 +281,239 @@
 </template>
 
 <script setup lang="ts">
+import { ref, onMounted } from 'vue';
+import { useApi } from '@/composables/useApi';
+
 definePageMeta({
   layout: 'public'
 });
 
+const api = useApi();
+
 const config = useRuntimeConfig();
 const apiBase = config.public.apiBase;
+const baseUrl = computed(() => apiBase.replace('/api', ''));
 
 // Fetch Data
-const { data: stats } = useLazyFetch<any>(`${apiBase}/public/stats`);
-const { data: categoriesData } = useLazyFetch<any[]>(`${apiBase}/public/categories`);
-const { data: coursesData } = useLazyFetch<any>(`${apiBase}/public/courses?limit=6`);
+const { data: latestData } = useLazyFetch<any>(`${apiBase}/public/courses?sort=newest&limit=6`);
+const latestCourses = computed(() => (latestData.value as any)?.courses || []);
 
-const categories = computed(() => categoriesData.value || []);
-const featuredCourses = computed(() => (coursesData.value as any)?.courses || []);
+const { data: featuredData } = useLazyFetch<any>(`${apiBase}/public/courses?is_featured=true&limit=6`);
+const featuredCourses = computed(() => (featuredData.value as any)?.courses || []);
+
+const { data: noticesData } = useLazyFetch<any>(`${apiBase}/notice-board`);
+const informationItems = computed(() => noticesData.value || []);
+
+const getEventColor = (type: string) => {
+  const t = type.toLowerCase();
+  if (t.includes('webinar') || t.includes('seminar')) return 'primary';
+  if (t.includes('exam')) return 'warning';
+  if (t.includes('workshop')) return 'success';
+  return 'info';
+};
+
+const getEventIcon = (type: string) => {
+  const t = type.toLowerCase();
+  if (t.includes('webinar') || t.includes('seminar')) return 'mdi-video-outline';
+  if (t.includes('exam')) return 'mdi-file-document-edit-outline';
+  if (t.includes('workshop')) return 'mdi-account-group-outline';
+  return 'mdi-bullhorn-outline';
+};
+
+// Homepage image config from global state
+const aboutImageConfig = useState('homepage_about_image', () => '');
+const aboutImageUrlConfig = useState('homepage_about_image_url', () => '');
+
+const aboutImgSrc = computed(() => {
+  if (aboutImageUrlConfig.value) return aboutImageUrlConfig.value;
+  if (aboutImageConfig.value) return baseUrl.value + aboutImageConfig.value;
+  return 'https://images.unsplash.com/photo-1600880292203-757bb62b4baf?q=80&w=900';
+});
 
 
 
 const steps = [
-  { title: 'Enroll', description: 'Choose from 50+ industry-relevant courses and enroll in minutes.', icon: 'mdi-account-plus' },
-  { title: 'Learn', description: 'Learn from industry experts with hands-on projects and mentorship.', icon: 'mdi-laptop' },
-  { title: 'Get Certified', description: 'Complete the course and exam to get globally recognized certificates.', icon: 'mdi-certificate' }
+  { title: 'Enroll', description: 'Choose from online, in-person, or hybrid courses tailored to your schedule.', icon: 'mdi-account-plus' },
+  { title: 'Learn', description: 'Learn from industry professionals with real-world experience and practical knowledge.', icon: 'mdi-laptop' },
+  { title: 'Get Certified', description: 'Adopt best practices, meet global standards, and foster a culture of safety.', icon: 'mdi-certificate' }
+];
+
+const whyPoints = [
+  { icon: 'mdi-shield-star', color: 'primary', title: 'Accredited Programs', sub: 'Internationally recognized' },
+  { icon: 'mdi-earth', color: 'teal', title: 'Global Reach', sub: 'Trusted worldwide' },
+  { icon: 'mdi-account-tie', color: 'orange', title: 'Industry Experts', sub: 'Real-world experience' },
+  { icon: 'mdi-tune', color: 'deep-purple', title: 'Flexible Learning', sub: 'Online, hybrid, in-person' },
+];
+
+const standards = ref<any[]>([]);
+
+const fetchStandards = async () => {
+  try {
+    const { data } = await api.get('/public/standards');
+    standards.value = data || [];
+  } catch (e) {
+    console.error('Failed to fetch standards');
+  }
+};
+
+onMounted(() => {
+  fetchStandards();
+});
+
+const trustStats = [
+  { value: '500+', label: 'Clients Served' },
+  { value: '98%', label: 'Satisfaction Rate' },
+  { value: '20+', label: 'Countries' },
+  { value: '15+', label: 'Years of Expertise' },
 ];
 
 const { generateWALink } = useWhatsApp();
 
 useSeoMeta({
-  title: 'AEMS Academy · Advanced Learning & Placements',
-  description: 'AEMS Academy is India\'s leading eLearning platform with a 94% placement rate. Enroll in industry-relevant courses and transform your career.'
+  title: 'Advanced Learning & Placements',
+  description: 'Brixify is a global leader in food technology training, certification, and consultancy. Elevate your standards and ensure global compliance.'
 });
 </script>
 
 <style scoped>
-/* ── Lead Capture Card ─────────────────────────────────── */
-.lead-capture-card {
-  /* Udemy purple gradient */
-  background: linear-gradient(135deg, #5624D0 0%, #7C3AED 55%, #A435F0 100%);
+/* ── Eyebrow Label ──────────────────────────────────── */
+.eyebrow-label {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--primary, #211d71);
+  opacity: 0.75;
+}
+
+/* ── Why Section ────────────────────────────────────── */
+.why-img-wrap {
+  position: relative;
   border-radius: 20px;
+  overflow: hidden;
+}
+.why-img {
+  width: 100%;
+  height: 420px;
+  object-fit: cover;
+  border-radius: 20px;
+  display: block;
+}
+.why-badge {
+  position: absolute;
+  bottom: 24px;
+  left: 24px;
+  background: white;
+  border-radius: 12px;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+  border: 1px solid rgba(0,0,0,0.06);
+}
+.why-badge-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1.2;
+}
+.why-badge-sub {
+  font-size: 11px;
+  color: #64748b;
+}
+.why-point {
+  display: flex;
+  align-items: center;
+}
+
+/* ── Standards Grid ─────────────────────────────────── */
+.std-card {
+  text-align: center;
+  padding: 24px 12px;
+  border-radius: 16px;
+  border: 1px solid rgba(0,0,0,0.06);
+  background: white;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  margin-bottom: 16px;
+}
+.std-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(0,0,0,0.08);
+}
+.std-name {
+  font-size: 15px;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.02em;
+}
+.std-sub {
+  font-size: 11px;
+  color: #64748b;
+  margin-top: 2px;
+}
+
+/* ── Step Number ────────────────────────────────────── */
+.step-number {
+  font-size: 3rem;
+  font-weight: 900;
+  color: rgba(33,29,113,0.05);
+  line-height: 1;
+  letter-spacing: -0.05em;
+}
+.step-card {
+  position: relative;
+  transition: transform 0.2s ease;
+}
+.step-card:hover {
+  transform: translateY(-4px);
+}
+
+/* ── Trust Band ─────────────────────────────────────── */
+.trust-band {
+  color: white;
+}
+.trust-inner {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 64px;
+  align-items: center;
+}
+@media (max-width: 900px) {
+  .trust-inner { grid-template-columns: 1fr; gap: 40px; }
+}
+.trust-headline {
+  font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+  font-weight: 900;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  color: white;
+  margin-bottom: 16px;
+}
+.trust-sub {
+  font-size: 1rem;
+  line-height: 1.7;
+  color: rgba(255,255,255,0.70);
+  max-width: 420px;
+}
+.trust-stat-value {
+  font-size: clamp(2.2rem, 4vw, 3.2rem);
+  font-weight: 900;
+  color: white;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  margin-bottom: 6px;
+}
+.trust-stat-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: rgba(255,255,255,0.55);
+}
+.lead-capture-card {
+  background: var(--ink);
+  border-radius: var(--radius-lg);
   overflow: hidden;
   position: relative;
   display: grid;
@@ -163,7 +521,7 @@ useSeoMeta({
   gap: 48px;
   align-items: center;
   padding: 64px 56px;
-  box-shadow: 0 24px 80px rgba(86, 36, 208, 0.30);
+  border: 1px solid var(--border);
 }
 
 @media (max-width: 960px) {
@@ -250,7 +608,6 @@ useSeoMeta({
   font-weight: 700;
   text-decoration: none;
   transition: background 0.18s ease, transform 0.18s ease;
-  box-shadow: 0 4px 16px rgba(37,211,102,0.35);
 }
 .lcc-wa-btn:hover {
   background: #1ebe5c;
@@ -268,10 +625,9 @@ useSeoMeta({
   background: #ffffff !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
-  border: none !important;
+  border: 1px solid var(--border) !important;
   border-radius: 16px;
   padding: 28px;
-  box-shadow: 0 8px 40px rgba(0,0,0,0.18);
 }
 
 .lcc-form-header {
@@ -286,7 +642,7 @@ useSeoMeta({
   font-size: 1.15rem;
   font-weight: 800;
   letter-spacing: -0.03em;
-  color: #5624D0;
+  color: var(--ink);
 }
 .lcc-form-subtitle {
   font-size: 12px;

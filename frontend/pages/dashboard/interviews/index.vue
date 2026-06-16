@@ -158,7 +158,8 @@ onMounted(fetchInterviews);
 
 .interview-card:hover {
   transform: translateY(-8px);
-  box-shadow: 0 20px 40px rgba(99, 102, 241, 0.15) !important;
+  border: 1px solid var(--border);
+  
 }
 
 .card-header {

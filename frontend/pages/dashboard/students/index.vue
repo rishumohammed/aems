@@ -106,15 +106,11 @@
         </template>
 
         <template v-slot:item.progress="{ item }">
-          <div class="d-flex align-center" style="min-width: 100px">
-            <v-progress-linear
-              v-model="item.avg_progress"
-              color="primary"
-              height="6"
-              rounded
-              class="mr-2"
-            ></v-progress-linear>
-            <span class="text-caption font-weight-bold">{{ Math.round(item.avg_progress || 0) }}%</span>
+          <div style="min-width: 100px">
+            <UiProgressFraction
+              :current="Math.round(item.avg_progress || 0)"
+              :total="100"
+            />
           </div>
         </template>
 

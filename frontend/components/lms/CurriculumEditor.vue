@@ -316,6 +316,52 @@
               ></v-select>
             </div>
 
+            <!-- Conditional Fields: Live Class -->
+            <div v-if="selectedContentType === 'live'">
+              <v-row>
+                <v-col cols="12" sm="6">
+                  <v-text-field
+                    v-model="lessonModal.data.live_date"
+                    label="Date"
+                    type="date"
+                    variant="outlined"
+                    rounded="lg"
+                    class="mb-4"
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="12" sm="6">
+                  <v-text-field
+                    v-model="lessonModal.data.live_time"
+                    label="Time"
+                    type="time"
+                    variant="outlined"
+                    rounded="lg"
+                    class="mb-4"
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="12" sm="6">
+                  <v-text-field
+                    v-model="lessonModal.data.duration_minutes"
+                    label="Duration (minutes)"
+                    type="number"
+                    variant="outlined"
+                    rounded="lg"
+                    class="mb-4"
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="12" sm="6">
+                  <v-text-field
+                    v-model="lessonModal.data.live_link"
+                    label="Meeting Link (Google Meet / Zoom)"
+                    placeholder="https://meet.google.com/..."
+                    variant="outlined"
+                    rounded="lg"
+                    class="mb-4"
+                  ></v-text-field>
+                </v-col>
+              </v-row>
+            </div>
+
             <!-- Description / Notes -->
             <v-textarea
               v-model="lessonModal.data.notes"
@@ -383,6 +429,7 @@ const assignments = ref([])
 
 const contentTypes = [
   { title: 'Video Lesson', value: 'video' },
+  { title: 'Live Class (Meet/Zoom)', value: 'live' },
   { title: 'PDF Document', value: 'pdf' },
   { title: 'Office Document (Word/Excel/PPT)', value: 'document' },
   { title: 'Assignment Task', value: 'assignment' },
@@ -409,6 +456,8 @@ const lessonModal = reactive({
     is_free_preview: false,
     live_date: '',
     live_time: '',
+    live_link: '',
+    duration_minutes: 60,
     zoom_link: '',
     thumbnail_url: '',
     duration_seconds: 0,
@@ -594,6 +643,22 @@ const openLessonModal = (section, module, lesson = null) => {
     lessonModal.data.quiz_id = lesson.quiz_id || null
     lessonModal.data.assignment_id = lesson.assignment_id || null
     lessonModal.data.is_mandatory = lesson.is_mandatory !== false
+
+    if (lesson.type === 'live' && lesson.scheduled_at) {
+      // Assuming scheduled_at is an ISO string like '2026-06-18T10:00:00.000Z'
+      try {
+        const d = new Date(lesson.scheduled_at)
+        // Adjust for local timezone
+        const offset = d.getTimezoneOffset() * 60000
+        const localISOTime = (new Date(d.getTime() - offset)).toISOString()
+        lessonModal.data.live_date = localISOTime.split('T')[0]
+        lessonModal.data.live_time = localISOTime.split('T')[1].substring(0, 5)
+      } catch(e) {
+        // Fallback
+        lessonModal.data.live_date = lesson.scheduled_at.split('T')[0] || ''
+        lessonModal.data.live_time = (lesson.scheduled_at.split('T')[1] || '').substring(0, 5)
+      }
+    }
   } else {
     lessonModal.isEdit = false
     selectedContentType.value = 'video'
@@ -608,6 +673,8 @@ const openLessonModal = (section, module, lesson = null) => {
       is_free_preview: false,
       live_date: '',
       live_time: '',
+      live_link: '',
+      duration_minutes: 60,
       zoom_link: '',
       thumbnail_url: '',
       duration_seconds: 0,
@@ -647,6 +714,18 @@ const saveLesson = async () => {
   } else {
     lessonModal.data.video_source = null
     lessonModal.data.video_id = null
+  }
+
+  // Format scheduled_at for live classes
+  if (dbType === 'live') {
+    if (lessonModal.data.live_date && lessonModal.data.live_time) {
+      // Create ISO string for backend
+      lessonModal.data.scheduled_at = `${lessonModal.data.live_date} ${lessonModal.data.live_time}:00`;
+    }
+  } else {
+    lessonModal.data.scheduled_at = null;
+    lessonModal.data.live_link = null;
+    lessonModal.data.duration_minutes = 0;
   }
 
   // Populate formData

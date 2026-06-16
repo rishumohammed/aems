@@ -63,7 +63,7 @@ const logout = async () => {
   z-index: 100;
 }
 .blocker-card {
-  box-shadow: 0 20px 40px rgba(0,0,0,0.1) !important;
+  
   border: 1px solid rgba(0,0,0,0.05);
 }
 </style>

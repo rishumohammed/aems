@@ -86,16 +86,17 @@ const formatDate = (date: string) => dayjs(date).format('MMM D, h:mm A');
 
 .session-card {
   background: white;
-  border-radius: var(--r16);
-  box-shadow: var(--s2);
+  border-radius: var(--radius-lg);
+  
   border: 1px solid rgba(0, 0, 0, 0.03);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.2s ease, border-color 0.2s ease;
   height: 100%;
 }
 
 .session-card:hover {
   transform: translateY(-4px);
-  box-shadow: var(--s3);
+  border: 1px solid var(--border);
+  
 }
 
 .session-title {

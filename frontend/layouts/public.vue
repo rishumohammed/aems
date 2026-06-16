@@ -5,8 +5,13 @@
       <v-container class="d-flex align-center pa-0">
         <!-- Logo -->
         <NuxtLink to="/" class="d-flex align-center cursor-pointer text-decoration-none color-inherit">
-          <v-icon color="primary" size="32" class="mr-2">mdi-rhombus-split</v-icon>
-          <span class="text-h6 font-weight-bold tracking-tight">{{ instituteName }}</span>
+          <template v-if="appLogo">
+            <img :src="fullLogoUrl" alt="Logo" style="max-height: 36px; object-fit: contain;" />
+          </template>
+          <template v-else>
+            <v-icon color="primary" size="32" class="mr-2">mdi-rhombus-split</v-icon>
+            <span class="text-h6 font-weight-bold tracking-tight">{{ instituteName }}</span>
+          </template>
         </NuxtLink>
 
         <v-spacer></v-spacer>
@@ -69,8 +74,13 @@
         <v-row>
           <v-col cols="12" md="4">
             <NuxtLink to="/" class="d-flex align-center mb-4 text-decoration-none color-inherit">
-              <v-icon color="primary" size="32" class="mr-2">mdi-rhombus-split</v-icon>
-              <span class="text-h6 font-weight-bold text-dark">{{ instituteName }}</span>
+              <template v-if="appLogo">
+                <img :src="fullLogoUrl" alt="Logo" style="max-height: 48px; object-fit: contain;" />
+              </template>
+              <template v-else>
+                <v-icon color="primary" size="32" class="mr-2">mdi-rhombus-split</v-icon>
+                <span class="text-h6 font-weight-bold text-dark">{{ instituteName }}</span>
+              </template>
             </NuxtLink>
             <p class="text-body-1 font-weight-bold text-dark mb-2 pr-md-10">
               Education, Skills, Certification & Careers — All in One Platform.
@@ -112,16 +122,16 @@
             <div class="d-flex align-start mb-4">
               <v-icon color="primary" size="20" class="mr-3 mt-1">mdi-map-marker</v-icon>
               <div class="text-body-2 text-secondary">
-                123 Education Lane, Knowledge City,<br/>Bangalore - 560001
+                Moozhikkal,<br/>Kozhikode
               </div>
             </div>
             <div class="d-flex align-center mb-4">
               <v-icon color="primary" size="20" class="mr-3">mdi-phone</v-icon>
-              <div class="text-body-2 text-secondary">+91 98765 43210</div>
+              <div class="text-body-2 text-secondary">+91 97460 87916<br/>+91 9746 118916</div>
             </div>
             <div class="d-flex align-center mb-4">
               <v-icon color="primary" size="20" class="mr-3">mdi-email</v-icon>
-              <div class="text-body-2 text-secondary">info@aems.local</div>
+              <div class="text-body-2 text-secondary">brixcouncil@gmail.com</div>
             </div>
           </v-col>
         </v-row>
@@ -144,12 +154,23 @@
 
 <script setup>
 import { useAuthStore } from '@/stores/auth';
+import { useTheme } from 'vuetify';
 
 const drawer = ref(false);
 const authStore = useAuthStore();
-const instituteName = useState('instituteName', () => 'AEMS Academy');
+const instituteName = useState('instituteName', () => '');
+const appLogo = useState('appLogo', () => '');
+const config = useRuntimeConfig();
+const theme = useTheme();
+
+const fullLogoUrl = computed(() => {
+  if (!appLogo.value) return '';
+  const baseUrl = config.public.apiBase.replace('/api', '');
+  return `${baseUrl}${appLogo.value}`;
+});
 
 onMounted(async () => {
+  theme.global.name.value = 'brand';
   if (!authStore.isAuthenticated && typeof window !== 'undefined' && localStorage.getItem('at')) {
     await authStore.initAuth();
   }
@@ -158,20 +179,15 @@ onMounted(async () => {
 
 <style scoped>
 .navbar-frosted {
-  background: rgba(255, 255, 255, 0.82) !important;
-  backdrop-filter: blur(20px) !important;
-  -webkit-backdrop-filter: blur(20px) !important;
-  border-bottom: 1px solid rgba(86, 36, 208, 0.10) !important;
-  box-shadow: 0 1px 0 rgba(86,36,208,0.06) !important;
+  background: #ffffff !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05) !important;
 }
 .tracking-tight {
   letter-spacing: -0.02em;
 }
 .footer-frosted {
-  background: rgba(255, 255, 255, 0.55) !important;
-  backdrop-filter: blur(16px) !important;
-  -webkit-backdrop-filter: blur(16px) !important;
-  border-top: 1px solid rgba(0, 0, 0, 0.07) !important;
+  background: #ffffff !important;
+  border-top: 1px solid rgba(0, 0, 0, 0.05) !important;
 }
 
 .footer-link {

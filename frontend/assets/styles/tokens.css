@@ -1,56 +1,53 @@
 :root {
-  /* ── Udemy Brand Palette ── */
-  --brand:       #5624D0;   /* Udemy primary purple */
-  --brand-d:     #3D1FA3;   /* deeper purple (hover) */
-  --brand-l:     #EDE8FB;   /* very light purple tint */
-  --brand-m:     #C5B5F2;   /* mid purple */
-  --brand-accent:#A435F0;   /* Udemy accent violet */
-  --brand-gold:  #E59819;   /* Udemy rating gold */
+  /* ── Dynamic Brand Palette ── */
+  /* These are meant to be overridden by the configuration. These defaults provide a clean fallback. */
+  --brand:       #111827;   /* Default to dark gray/black */
+  --brand-d:     #000000;   
+  --brand-l:     #F3F4F6;   
+  --brand-m:     #D1D5DB;   
+  --brand-accent:#4F46E5;   
+  --brand-gold:  #F59E0B;   
 
-  /* Semantic aliases that keep the rest of the codebase working */
-  --blue:    #5624D0;
-  --blue-d:  #3D1FA3;
-  --blue-l:  #EDE8FB;
-  --blue-m:  #C5B5F2;
-  --purple:  #A435F0;
-  --purple-l:#F3E8FF;
-  --green:   #1CA15B;
-  --green-l: #E6F7EE;
-  --red:     #D63D2D;
-  --red-l:   #FFF0EE;
-  --orange:  #E59819;
-  --orange-l:#FFF8EA;
-  --teal:    #2980B9;
-  --teal-l:  #E8F4FD;
+  /* Semantic aliases */
+  --blue:    var(--v-theme-primary, #111827);
+  --blue-d:  #000000;
+  --blue-l:  #F3F4F6;
+  --blue-m:  #D1D5DB;
+  --purple:  #4F46E5;
+  --purple-l:#EEF2FF;
+  --green:   #10B981;
+  --green-l: #ECFDF5;
+  --red:     #EF4444;
+  --red-l:   #FEF2F2;
+  --orange:  #F59E0B;
+  --orange-l:#FFFBEB;
+  --teal:    #0EA5E9;
+  --teal-l:  #F0F9FF;
 
-  /* Gray tokens — Udemy uses warmer greys */
-  --g1: #F7F9FA;   /* page bg */
-  --g2: #E8EAEC;   /* borders */
-  --g3: #C1C8CD;   /* disabled */
-  --g4: #6A6F73;   /* secondary label  (Udemy: #6A6F73) */
-  --g5: #6A6F73;   /* tertiary */
-  --g6: #3D3D3D;   /* body text */
-  --g7: #1C1D1F;   /* primary label  (Udemy: #1C1D1F) */
+  /* Clean minimal greys */
+  --g1: #F9FAFB;   /* page bg */
+  --g2: #F3F4F6;   /* borders */
+  --g3: #D1D5DB;   /* disabled */
+  --g4: #9CA3AF;   /* secondary label */
+  --g5: #6B7280;   /* tertiary */
+  --g6: #4B5563;   /* body text */
+  --g7: #111827;   /* primary label */
 
   /* Surface tokens */
   --bg:      #FFFFFF;
-  --surface: #F7F9FA;
+  --surface: #FFFFFF;
   --raised:  #FFFFFF;
 
-  /* ── Site-wide light gradient — Udemy purple tones ── */
-  --grad-start: #f0ebff;   /* soft purple */
-  --grad-mid:   #f8f5ff;   /* near-white purple */
-  --grad-end:   #fdf9ff;   /* barely tinted white */
-  --site-gradient: linear-gradient(135deg, var(--grad-start) 0%, var(--grad-mid) 55%, var(--grad-end) 100%);
-  --surface-frosted: rgba(255, 255, 255, 0.78);
-  --border-on-grad: rgba(0, 0, 0, 0.07);
+  /* ── Site-wide clean backgrounds ── */
+  --site-gradient: #FFFFFF;
+  --surface-frosted: rgba(255, 255, 255, 0.85);
+  --border-on-grad: rgba(0, 0, 0, 0.05);
 
-
-  /* Shadow tokens */
-  --s1: 0 1px 3px rgba(0,0,0,.07), 0 1px 2px rgba(0,0,0,.05);
-  --s2: 0 2px 8px rgba(0,0,0,.06), 0 4px 20px rgba(0,0,0,.05);
-  --s3: 0 8px 32px rgba(0,0,0,.10), 0 2px 8px rgba(0,0,0,.06);
-  --s-blue: 0 4px 14px rgba(0,122,255,.3);
+  /* Soft minimalist shadows */
+  --s1: 0 1px 2px rgba(0,0,0,.03);
+  --s2: 0 4px 12px rgba(0,0,0,.03), 0 1px 2px rgba(0,0,0,.02);
+  --s3: 0 12px 32px rgba(0,0,0,.04), 0 4px 12px rgba(0,0,0,.02);
+  --s-blue: 0 4px 14px rgba(0,0,0,.05);
 
   /* Radius tokens */
   --r4: 4px;

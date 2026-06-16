@@ -241,7 +241,8 @@ onMounted(() => {
 }
 
 .shadow-glow {
-  box-shadow: 0 10px 30px rgba(79, 70, 229, 0.3) !important;
+  border: 1px solid var(--border);
+  
 }
 
 .stat-card {
@@ -252,7 +253,8 @@ onMounted(() => {
 
 .stat-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 20px 40px rgba(0,0,0,0.1) !important;
+  border: 1px solid var(--border);
+  
 }
 
 .card-bg-circle {
@@ -266,7 +268,8 @@ onMounted(() => {
 }
 
 .shadow-soft {
-  box-shadow: 0 4px 20px rgba(0,0,0,0.05) !important;
+  border: 1px solid var(--border);
+  
 }
 
 .tracking-tight {

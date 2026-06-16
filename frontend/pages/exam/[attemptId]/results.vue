@@ -1,8 +1,8 @@
 <template>
   <div class="results-page">
     <div v-if="loading" class="loading-screen">
-      <v-progress-circular indeterminate color="primary" size="64" />
-      <p class="text-blue-grey-300 mt-4">Loading your results...</p>
+      <v-progress-circular indeterminate color="#F4791F" size="64" />
+      <p class="text-muted mt-4">Loading your results...</p>
     </div>
 
     <div v-else-if="result" class="results-content">
@@ -29,8 +29,8 @@
         </div>
 
         <div class="text-center mt-6">
-          <h1 class="text-h4 font-weight-black text-white mb-2">{{ result.exam_title }}</h1>
-          <p class="text-blue-grey-300">{{ result.course_title }}</p>
+          <h1 class="text-h4 font-weight-black text-ink mb-2">{{ result.exam_title }}</h1>
+          <p class="text-muted">{{ result.course_title }}</p>
         </div>
 
         <!-- Stats row -->
@@ -64,14 +64,7 @@
             </v-btn>
           </template>
           <template v-else>
-            <p class="text-blue-grey-300 text-center max-w-400 mb-4">Don't give up! Review the questions below, strengthen your knowledge, and come back stronger.</p>
-            <v-btn v-if="canRetry" color="primary" size="large" rounded="xl" @click="retryExam" :loading="retrying">
-              {{ retrying ? 'Preparing Exam...' : 'Retry Exam' }}
-            </v-btn>
-            <div v-else class="text-error text-body-1 font-weight-bold d-flex align-center">
-              <v-icon left class="mr-2">mdi-alert-circle</v-icon>
-              You have reached maximum attempts.
-            </div>
+            <p class="text-muted text-center max-w-400 mb-4">Don't give up! Review the questions below, strengthen your knowledge, and come back stronger.</p>
           </template>
           <v-btn variant="tonal" color="blue-grey" @click="router.push('/dashboard/exams')" size="large" rounded="xl">Back to Exams</v-btn>
         </div>
@@ -79,7 +72,7 @@
 
       <!-- Question Review -->
       <div v-if="result.show_result_detail && result.question_breakdown && result.question_breakdown.length > 0" class="review-section">
-        <h2 class="text-h5 font-weight-bold text-white mb-6">Question Review</h2>
+        <h2 class="text-h5 font-weight-bold text-ink mb-6">Question Review</h2>
         <div v-for="(q, i) in result.question_breakdown" :key="q.question_id" class="review-card" :class="q.is_correct === false ? 'wrong' : q.is_correct === true ? 'correct' : 'pending'">
           <div class="review-header">
             <span class="q-num">Q{{ i + 1 }}</span>
@@ -128,16 +121,16 @@
 
       <div v-else-if="result.pending_manual_review" class="pending-banner">
         <v-icon size="40" color="warning">mdi-clock-outline</v-icon>
-        <h3 class="text-h6 text-white font-weight-bold mt-3 mb-2">Awaiting Manual Review</h3>
-        <p class="text-blue-grey-300">Some of your answers require manual grading by your tutor. Your final result will be available shortly.</p>
+        <h3 class="text-h6 text-ink font-weight-bold mt-3 mb-2">Awaiting Manual Review</h3>
+        <p class="text-muted">Some of your answers require manual grading by your tutor. Your final result will be available shortly.</p>
       </div>
     </div>
     
     <div v-else class="text-center pt-16">
       <v-icon size="64" color="error" class="mb-4">mdi-file-hidden</v-icon>
-      <h2 class="text-h5 font-weight-bold text-white mb-2">This exam is unavailable.</h2>
-      <p class="text-blue-grey-300 mb-6">We couldn't load the results for this attempt.</p>
-      <v-btn color="primary" @click="router.push('/dashboard/exams')">Back to Exams</v-btn>
+      <h2 class="text-h5 font-weight-bold text-ink mb-2">This exam is unavailable.</h2>
+      <p class="text-muted mb-6">We couldn't load the results for this attempt.</p>
+      <v-btn color="#F4791F" class="text-white" @click="router.push('/dashboard/exams')">Back to Exams</v-btn>
     </div>
   </div>
 </template>
@@ -271,9 +264,10 @@ const downloadCertificate = async () => {
 <style scoped>
 .results-page {
   min-height: 100vh;
-  background: linear-gradient(160deg, #0a0a1a 0%, #0d1b3e 60%, #0a0a1a 100%);
-  color: #e8eaf6;
+  background: var(--paper);
+  color: var(--ink);
   padding: 40px 20px;
+  font-family: var(--font-body);
 }
 .loading-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; }
 
@@ -302,10 +296,10 @@ const downloadCertificate = async () => {
 
 .score-ring-wrap { position: relative; width: 180px; height: 180px; margin-bottom: 8px; }
 .score-ring { width: 100%; height: 100%; transform: rotate(-90deg); }
-.ring-bg { fill: none; stroke: rgba(255,255,255,0.07); stroke-width: 10; }
+.ring-bg { fill: none; stroke: var(--border); stroke-width: 10; }
 .ring-progress { fill: none; stroke-width: 10; stroke-linecap: round; transition: stroke-dashoffset 1s ease; stroke-dasharray: 326.7; }
 .ring-pass { stroke: #10b981; }
-.ring-fail { stroke: #ef4444; }
+.ring-fail { stroke: var(--accent); }
 .score-inner {
   position: absolute;
   top: 50%;
@@ -313,61 +307,67 @@ const downloadCertificate = async () => {
   transform: translate(-50%, -50%);
   text-align: center;
 }
-.score-pct { font-size: 32px; font-weight: 900; color: #fff; line-height: 1; }
-.score-label { font-size: 14px; color: rgba(255,255,255,0.5); margin-top: 4px; }
+.score-pct { font-size: 32px; font-weight: 900; color: var(--ink); line-height: 1; }
+.score-label { font-size: 14px; color: var(--muted); margin-top: 4px; font-weight: 600; }
 
 .stats-row { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; margin: 32px 0; }
 .stat-box {
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 16px;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
   padding: 20px 28px;
   text-align: center;
   min-width: 120px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.03);
 }
-.stat-val { font-size: 28px; font-weight: 800; color: #e8eaf6; }
-.stat-key { font-size: 12px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.06em; margin-top: 4px; }
+.stat-val { font-size: 28px; font-weight: 800; color: var(--ink); }
+.stat-key { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-top: 4px; font-weight: 600; }
 
 .cta-row { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; align-items: center; margin-top: 24px; }
 
 /* Review section */
 .review-section { margin-top: 40px; }
 .review-card {
-  border-radius: 16px;
+  border-radius: var(--radius-lg);
   padding: 24px;
   margin-bottom: 16px;
-  border: 1px solid rgba(255,255,255,0.06);
-  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  background: var(--white);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.02);
 }
-.review-card.correct { border-color: rgba(16,185,129,0.3); background: rgba(16,185,129,0.05); }
-.review-card.wrong   { border-color: rgba(239,68,68,0.3);  background: rgba(239,68,68,0.05); }
-.review-card.pending { border-color: rgba(245,158,11,0.3); background: rgba(245,158,11,0.05); }
+.review-card.correct { border-left: 4px solid #10b981; }
+.review-card.wrong   { border-left: 4px solid var(--accent); }
+.review-card.pending { border-left: 4px solid #f59e0b; }
 
 .review-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
-.q-num { font-size: 12px; font-weight: 700; color: rgba(255,255,255,0.3); text-transform: uppercase; letter-spacing: 0.08em; }
-.q-type { font-size: 11px; background: rgba(255,255,255,0.08); border-radius: 10px; padding: 2px 8px; color: rgba(255,255,255,0.4); text-transform: uppercase; }
+.q-num { font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
+.q-type { font-size: 11px; background: var(--panel); border-radius: 10px; padding: 2px 8px; color: var(--muted); text-transform: uppercase; font-weight: 600; }
 .q-score-badge { margin-left: auto; font-size: 12px; font-weight: 700; border-radius: 20px; padding: 3px 12px; }
-.badge-pass { background: rgba(16,185,129,0.2); color: #10b981; }
-.badge-fail { background: rgba(239,68,68,0.2); color: #ef4444; }
-.badge-pending { background: rgba(245,158,11,0.2); color: #f59e0b; }
+.badge-pass { background: rgba(16,185,129,0.1); color: #10b981; }
+.badge-fail { background: var(--accent-soft); color: var(--accent); }
+.badge-pending { background: rgba(245,158,11,0.1); color: #f59e0b; }
 
-.q-text { font-size: 15px; color: #e8eaf6; line-height: 1.6; margin-bottom: 16px; font-weight: 500; }
+.q-text { font-size: 15px; color: var(--ink); line-height: 1.6; margin-bottom: 16px; font-weight: 600; }
 
 .answer-row { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 12px; }
-.answer-block { flex: 1; min-width: 200px; background: rgba(255,255,255,0.04); border-radius: 10px; padding: 12px; }
-.answer-label { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: rgba(255,255,255,0.3); margin-bottom: 6px; font-weight: 600; }
-.answer-text { font-size: 14px; color: rgba(255,255,255,0.8); }
-.correct-answer { border: 1px solid rgba(16,185,129,0.2); }
+.answer-block { flex: 1; min-width: 200px; background: var(--panel); border-radius: var(--radius-md); padding: 12px; border: 1px solid var(--border); }
+.answer-label { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin-bottom: 6px; font-weight: 600; }
+.answer-text { font-size: 14px; color: var(--ink); font-weight: 500; }
+.correct-answer { border-color: #10b981; background: rgba(16,185,129,0.05); }
 
-.explanation { font-size: 13px; color: rgba(245,158,11,0.8); display: flex; align-items: flex-start; gap: 6px; margin-top: 8px; }
-.grade-row { display: flex; align-items: center; gap: 12px; margin-top: 16px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.07); }
+.explanation { font-size: 13px; color: var(--muted); display: flex; align-items: flex-start; gap: 6px; margin-top: 12px; padding: 12px; background: rgba(245,158,11,0.05); border-radius: var(--radius-md); }
+.grade-row { display: flex; align-items: center; gap: 12px; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); }
 
 .pending-banner {
   text-align: center;
   padding: 60px 20px;
-  background: rgba(245,158,11,0.07);
-  border: 1px solid rgba(245,158,11,0.2);
-  border-radius: 20px;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
   margin-top: 40px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.02);
 }
+
+.text-ink { color: var(--ink) !important; }
+.text-muted { color: var(--muted) !important; }
 </style>

@@ -41,6 +41,8 @@ export const useNavStore = defineStore('nav', {
       // ADMIN COURSES
       { label: 'Courses', icon: 'mdi-book-open-page-variant-outline', route: '/dashboard/courses', roles: ['super_admin'], section: 'LMS' },
       { label: 'Categories', icon: 'mdi-shape-outline', route: '/dashboard/admin/course-categories', roles: ['super_admin'], section: 'LMS' },
+      { label: 'Live Events', icon: 'mdi-video-outline', route: '/dashboard/admin/live-events', roles: ['super_admin'], section: 'LMS' },
+      { label: 'Live Events', icon: 'mdi-video-outline', route: '/dashboard/tutor/live-events', roles: ['tutor'], section: 'LMS' },
       { label: 'Course Approvals', icon: 'mdi-check-decagram-outline', route: '/dashboard/admin/course-approvals', roles: ['super_admin'], section: 'LMS', badge: undefined },
       
       // JOBS
@@ -69,6 +71,9 @@ export const useNavStore = defineStore('nav', {
       { label: 'Employers', icon: 'mdi-domain', route: '/dashboard/admin/employers', roles: ['super_admin'], section: 'JOBS' },
       { label: 'Employer Approvals', icon: 'mdi-domain-plus', route: '/dashboard/admin/employer-approvals', roles: ['super_admin'], section: 'JOBS', badge: undefined },
       
+      // ANNOUNCEMENTS
+      { label: 'Notice Board', icon: 'mdi-bullhorn-outline', route: '/dashboard/admin/notice-board', roles: ['super_admin'], section: 'ANNOUNCEMENTS' },
+
       // SETTINGS
       { label: 'System Users', icon: 'mdi-account-group', route: '/dashboard/admin/settings/system-users', roles: ['super_admin'], section: 'SETTINGS' },
       { label: 'Profile', icon: 'mdi-account-outline', route: '/dashboard/profile', roles: ['super_admin', 'sub_admin', 'tutor', 'student', 'employer', 'crm_agent', 'placement_coordinator', 'finance_staff', 'exam_manager', 'support_staff'], section: 'SETTINGS' },

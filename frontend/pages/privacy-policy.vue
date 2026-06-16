@@ -47,7 +47,7 @@ definePageMeta({
 });
 
 useSeoMeta({
-  title: 'Privacy Policy · AEMS Academy',
+  title: 'Privacy Policy',
   description: 'Understand how AEMS Academy protects and manages your personal data.'
 });
 </script>

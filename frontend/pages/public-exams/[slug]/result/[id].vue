@@ -477,12 +477,14 @@ onMounted(() => {
 
 .passed-bg {
   background: linear-gradient(135deg, #1ca15b 0%, #178b4d 100%) !important;
-  box-shadow: 0 12px 30px rgba(28, 161, 91, 0.25) !important;
+  border: 1px solid var(--border);
+  
 }
 
 .failed-bg {
   background: linear-gradient(135deg, #e57373 0%, #d32f2f 100%) !important;
-  box-shadow: 0 12px 30px rgba(211, 47, 47, 0.25) !important;
+  border: 1px solid var(--border);
+  
 }
 
 .correct-option {

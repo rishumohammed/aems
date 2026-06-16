@@ -139,8 +139,9 @@ onMounted(fetchNotifications);
 
 .notification-item:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08) !important;
+  
   background: #f8fafc;
+  border: 1px solid var(--border);
 }
 
 .notification-item.unread {

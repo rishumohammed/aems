@@ -92,10 +92,10 @@
 
           <template v-slot:item.progress="{ item }">
             <div style="width: 100px;">
-              <div class="d-flex align-center justify-space-between mb-1">
-                <span class="text-caption font-weight-black">{{ item.progress || 0 }}%</span>
-              </div>
-              <v-progress-linear :model-value="item.progress || 0" color="success" rounded height="6"></v-progress-linear>
+              <UiProgressFraction
+                :current="Math.round(item.progress || 0)"
+                :total="100"
+              />
             </div>
           </template>
 
@@ -205,7 +205,8 @@ definePageMeta({
 
 .stat-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 20px 40px rgba(0,0,0,0.1) !important;
+  border: 1px solid var(--border);
+  
 }
 
 .card-bg-circle {
@@ -230,10 +231,11 @@ definePageMeta({
 
 .av-ring {
   border: 2px solid #fff;
-  box-shadow: 0 0 0 1px var(--primary);
+  
 }
 
 .shadow-soft {
-  box-shadow: 0 4px 20px rgba(0,0,0,0.05) !important;
+  border: 1px solid var(--border);
+  
 }
 </style>

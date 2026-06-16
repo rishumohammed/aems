@@ -1,5 +1,5 @@
 <template>
-  <v-app theme="appleLight">
+  <v-app class="admin-shell">
     <AppHeader />
     <AppSidebar v-if="!isPending" />
     <v-main class="dashboard-main">
@@ -9,22 +9,22 @@
       </div>
     </v-main>
 
-    <!-- Global Floating Action Button -->
-    <QuickActionsFab v-if="canShowFab" />
   </v-app>
 </template>
 
 <script setup lang="ts">
+import '@/assets/css/admin-tokens.css';
 import AppHeader from '@/components/layout/AppHeader.vue';
 import AppSidebar from '@/components/layout/AppSidebar.vue';
-import QuickActionsFab from '@/components/layout/QuickActionsFab.vue';
 import PendingApprovalBlocker from '@/components/layout/PendingApprovalBlocker.vue';
 import { useAuthStore } from '@/stores/auth';
 import { useUIStore } from '@/stores/ui';
-import { computed, onMounted } from 'vue';
+import { computed, onMounted, onUnmounted } from 'vue';
+import { useTheme } from 'vuetify';
 
 const authStore = useAuthStore();
 const uiStore = useUIStore();
+const theme = useTheme();
 
 const isPending = computed(() => 
   authStore.user?.status === 'pending_review' || 
@@ -33,19 +33,20 @@ const isPending = computed(() =>
   authStore.user?.approval_status === 'rejected'
 );
 
-const canShowFab = computed(() => {
-  const role = authStore.userRole;
-  return role === 'super_admin' || role === 'crm_agent';
-});
+
 
 onMounted(() => {
+  theme.global.name.value = 'adminNeutral';
   uiStore.fetchCounts();
+});
+
+onUnmounted(() => {
+  theme.global.name.value = 'brand';
 });
 </script>
 
 <style scoped>
 .dashboard-main {
-  background: linear-gradient(180deg, #FFFFFF 0%, #F5F7FA 100%) !important;
   min-height: 100vh;
   padding-top: 64px !important; /* Matches AppHeader height */
 }

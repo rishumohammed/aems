@@ -246,7 +246,8 @@ const filteredResources = computed(() => {
 
 .resource-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 20px 40px rgba(0,0,0,0.1) !important;
+  border: 1px solid var(--border);
+  
 }
 
 .category-banner {
@@ -254,7 +255,8 @@ const filteredResources = computed(() => {
 }
 
 .shadow-soft {
-  box-shadow: 0 4px 20px rgba(0,0,0,0.05) !important;
+  border: 1px solid var(--border);
+  
 }
 
 .max-w-600 {

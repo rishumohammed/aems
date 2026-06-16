@@ -262,8 +262,9 @@ watch(() => [props.videoId, props.source], () => {
 .video-player-container {
   position: relative;
   width: 100%;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+  
   aspect-ratio: 16 / 9;
+  border: 1px solid var(--border);
 }
 .absolute {
   position: absolute;

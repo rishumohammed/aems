@@ -219,7 +219,7 @@ const getStatusColor = (status: string) => {
 
 <style scoped>
 .shadow-card {
-  box-shadow: 0 15px 40px rgba(0,0,0,0.2) !important;
+  
   border: 1px solid rgba(255,255,255,0.05) !important;
 }
 .stat-pill {
@@ -229,10 +229,12 @@ const getStatusColor = (status: string) => {
 }
 .stat-pill:hover {
   transform: translateY(-5px);
-  box-shadow: 0 10px 25px rgba(0,0,0,0.1) !important;
+  border: 1px solid var(--border);
+  
 }
 .shadow-glow {
-  box-shadow: 0 8px 25px rgba(86, 36, 208, 0.4) !important;
+  border: 1px solid var(--border);
+  
 }
 ::v-deep(.custom-table) {
   background: transparent !important;

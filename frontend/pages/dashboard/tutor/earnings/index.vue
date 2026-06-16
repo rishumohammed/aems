@@ -203,7 +203,8 @@ definePageMeta({
 
 .stat-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 20px 40px rgba(0,0,0,0.1) !important;
+  border: 1px solid var(--border);
+  
 }
 
 .card-bg-circle {
@@ -227,7 +228,8 @@ definePageMeta({
 }
 
 .shadow-soft {
-  box-shadow: 0 4px 20px rgba(0,0,0,0.05) !important;
+  border: 1px solid var(--border);
+  
 }
 
 .border-b-sm { border-bottom: 1px solid rgba(0,0,0,0.05); }

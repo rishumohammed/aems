@@ -266,7 +266,8 @@ useSeoMeta({ title: 'Candidate Login - AEMS Exam Portal' });
 }
 
 .login-card {
-  box-shadow: 0 4px 24px rgba(0,0,0,0.06) !important;
+  border: 1px solid var(--border);
+  
 }
 
 .login-shield-wrap {
@@ -277,8 +278,9 @@ useSeoMeta({ title: 'Candidate Login - AEMS Exam Portal' });
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 0 0 10px rgba(99,102,241,0.1);
+  
   animation: pop-in 0.4s cubic-bezier(0.34,1.56,0.64,1) both;
+  border: 1px solid var(--border);
 }
 
 @keyframes pop-in {

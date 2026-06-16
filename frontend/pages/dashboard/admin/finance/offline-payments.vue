@@ -312,7 +312,7 @@ const modeColor = (mode: string) => ({
   bank_transfer: 'blue',
   upi: 'purple',
   cash: 'green',
-  cheque: 'orange',
+  cheque: 'warning',
   card: 'indigo'
 }[mode] || 'grey');
 

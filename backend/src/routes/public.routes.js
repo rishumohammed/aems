@@ -12,10 +12,23 @@ const router = express.Router();
 // GET /api/public/config - Public system configuration (branding, contact)
 router.get('/config', async (req, res) => {
   try {
-    const [configs] = await pool.query('SELECT `key`, `value` FROM system_config WHERE `group` IN ("branding", "contact") AND `is_sensitive` = 0');
+    const [configs] = await pool.query(
+      'SELECT `key`, `value` FROM system_config WHERE (`group` IN ("branding", "contact") AND `is_sensitive` = 0) OR `key` IN ("homepage_hero_image", "homepage_hero_image_url", "homepage_about_image", "homepage_about_image_url", "aboutpage_who_image", "aboutpage_who_image_url")'
+    );
     const configMap = {};
     configs.forEach(c => configMap[c.key] = c.value);
     res.json(configMap);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// GET /api/public/standards - List all active standards
+router.get('/standards', async (req, res) => {
+  try {
+    const [standards] = await pool.query('SELECT * FROM master_standards WHERE is_active = 1 ORDER BY sort_order ASC');
+    res.json(standards);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Internal server error' });
@@ -74,7 +87,7 @@ router.get('/categories', async (req, res) => {
 
 // GET /api/public/courses - Paginated course listing
 router.get('/courses', async (req, res) => {
-  const { category, sort, page = 1, limit = 12 } = req.query;
+  const { category, sort, is_featured, page = 1, limit = 12 } = req.query;
   const offset = (page - 1) * limit;
 
   let query = `
@@ -89,6 +102,10 @@ router.get('/courses', async (req, res) => {
   if (category && category !== 'All') {
     query += ' AND cat.slug = ?';
     params.push(category);
+  }
+
+  if (is_featured === 'true') {
+    query += ' AND c.is_featured = 1';
   }
 
   if (sort === 'newest') {
@@ -106,7 +123,19 @@ router.get('/courses', async (req, res) => {
 
   try {
     const [courses] = await pool.query(query, params);
-    const [total] = await pool.query('SELECT COUNT(*) as count FROM courses WHERE status = ?', [COURSE_STATUS.PUBLISHED]);
+    
+    // Total count logic needs to respect category and is_featured
+    let countQuery = 'SELECT COUNT(*) as count FROM courses c LEFT JOIN course_categories cat ON c.category_id = cat.id WHERE c.status = ?';
+    let countParams = [COURSE_STATUS.PUBLISHED];
+    if (category && category !== 'All') {
+      countQuery += ' AND cat.slug = ?';
+      countParams.push(category);
+    }
+    if (is_featured === 'true') {
+      countQuery += ' AND c.is_featured = 1';
+    }
+    
+    const [total] = await pool.query(countQuery, countParams);
     
     res.json({
       courses,

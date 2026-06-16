@@ -693,7 +693,8 @@ function handleBeforeUnload(e: BeforeUnloadEvent) {
 .option-item-selected {
   border-color: #5624D0 !important;
   background-color: rgba(86, 36, 208, 0.06);
-  box-shadow: 0 4px 12px rgba(86, 36, 208, 0.05) !important;
+  border: 1px solid var(--border);
+  
 }
 
 .palette-btn {

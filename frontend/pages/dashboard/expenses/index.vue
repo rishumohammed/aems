@@ -222,9 +222,9 @@ const exportCSV = () => {
 .month-picker-pill {
   height: 40px;
   background: white;
-  border-radius: var(--r12);
+  border-radius: var(--radius-md);
   border: 1px solid rgba(0, 0, 0, 0.05);
-  box-shadow: var(--s1);
+  
 }
 
 .month-input {
@@ -238,14 +238,15 @@ const exportCSV = () => {
 
 .category-breakdown-card {
   background: white;
-  border-radius: var(--r16);
-  box-shadow: var(--s2);
+  border-radius: var(--radius-lg);
+  
   height: 100%;
+  border: 1px solid var(--border);
 }
 
 .cat-pill {
   background: var(--g1);
-  border-radius: var(--r12);
+  border-radius: var(--radius-md);
   min-width: 120px;
 }
 
@@ -257,9 +258,10 @@ const exportCSV = () => {
 
 .apple-table-card {
   background: white;
-  border-radius: var(--r16);
-  box-shadow: var(--s2);
+  border-radius: var(--radius-lg);
+  
   overflow: hidden;
+  border: 1px solid var(--border);
 }
 
 .border-b {

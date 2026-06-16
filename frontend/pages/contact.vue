@@ -11,23 +11,70 @@
       </div>
 
       <v-container class="py-12">
-        <v-row justify="center">
-          <v-col cols="12" md="8" lg="6">
-            <v-card flat border class="rounded-xl pa-8 bg-white">
+        <v-row>
+          <!-- Contact Details Sidebar -->
+          <v-col cols="12" md="4" lg="4" class="pr-md-8 mb-8 mb-md-0">
+            <h2 class="text-h4 font-weight-black mb-6">Get in Touch</h2>
+            <p class="text-body-1 text-grey-darken-1 mb-10" style="line-height:1.7;">
+              We'd love to hear from you. Please fill out the form or reach out directly using our contact details below.
+            </p>
+
+            <div class="d-flex mb-8">
+              <v-avatar color="primary" class="mr-4" size="48" variant="tonal">
+                <v-icon>mdi-map-marker</v-icon>
+              </v-avatar>
+              <div>
+                <h3 class="text-subtitle-1 font-weight-bold mb-1 text-dark">Location</h3>
+                <p class="text-body-1 text-grey-darken-1 mb-0">
+                  Moozhikkal<br/>
+                  Kozhikode
+                </p>
+              </div>
+            </div>
+
+            <div class="d-flex mb-8">
+              <v-avatar color="success" class="mr-4" size="48" variant="tonal">
+                <v-icon>mdi-email</v-icon>
+              </v-avatar>
+              <div>
+                <h3 class="text-subtitle-1 font-weight-bold mb-1 text-dark">Mail Us</h3>
+                <p class="text-body-1 mb-0">
+                  <a href="mailto:brixcouncil@gmail.com" class="text-decoration-none text-grey-darken-1 font-weight-medium">brixcouncil@gmail.com</a>
+                </p>
+              </div>
+            </div>
+
+            <div class="d-flex">
+              <v-avatar color="info" class="mr-4" size="48" variant="tonal">
+                <v-icon>mdi-phone</v-icon>
+              </v-avatar>
+              <div>
+                <h3 class="text-subtitle-1 font-weight-bold mb-1 text-dark">Call Us</h3>
+                <p class="text-body-1 mb-0">
+                  <a href="tel:+919746087916" class="text-decoration-none text-grey-darken-1 font-weight-medium d-block mb-1">+91 97460 87916</a>
+                  <a href="tel:+919746118916" class="text-decoration-none text-grey-darken-1 font-weight-medium d-block">+91 9746 118916</a>
+                </p>
+              </div>
+            </div>
+          </v-col>
+
+          <!-- Contact Form -->
+          <v-col cols="12" md="8" lg="8">
+            <v-card flat border class="rounded-xl pa-8 bg-white" style="box-shadow: 0 12px 32px rgba(0,0,0,0.03) !important;">
               <v-fade-transition mode="out-in">
-                <div v-if="success" key="success" class="text-center py-8">
-                  <v-icon size="64" color="success" class="mb-4">mdi-check-circle</v-icon>
-                  <h3 class="text-h5 font-weight-bold mb-2">Message Sent!</h3>
-                  <p class="text-body-1 text-medium-emphasis mb-6">
-                    We've received your message and will get back to you shortly.
+                <div v-if="success" key="success" class="text-center py-12">
+                  <v-icon size="80" color="success" class="mb-6">mdi-check-circle</v-icon>
+                  <h3 class="text-h4 font-weight-bold mb-4">Message Sent!</h3>
+                  <p class="text-body-1 text-grey-darken-1 mb-8 max-w-md mx-auto">
+                    We've received your message and will get back to you shortly. Thank you for reaching out to Brixify.
                   </p>
-                  <v-btn color="primary" @click="success = false" rounded="lg">Send Another Message</v-btn>
+                  <v-btn color="primary" size="large" @click="success = false" rounded="lg" class="text-none font-weight-bold px-8">Send Another Message</v-btn>
                 </div>
 
                 <form v-else key="form" @submit.prevent="handleSubmit">
                   <v-row>
                     <v-col cols="12" md="6">
-                      <label class="text-caption font-weight-medium mb-1 d-block">Name *</label>
+                      <label class="text-caption font-weight-bold mb-2 d-block text-grey-darken-2">Name *</label>
                       <v-text-field
                         v-model="formData.name"
                         :error-messages="getErrors('name')"
@@ -35,11 +82,11 @@
                         variant="outlined"
                         density="comfortable"
                         hide-details="auto"
-                        class="mb-4"
+                        class="mb-4 bg-grey-lighten-4 rounded-lg"
                       ></v-text-field>
                     </v-col>
                     <v-col cols="12" md="6">
-                      <label class="text-caption font-weight-medium mb-1 d-block">Email *</label>
+                      <label class="text-caption font-weight-bold mb-2 d-block text-grey-darken-2">Email *</label>
                       <v-text-field
                         v-model="formData.email"
                         :error-messages="getErrors('email')"
@@ -48,42 +95,42 @@
                         variant="outlined"
                         density="comfortable"
                         hide-details="auto"
-                        class="mb-4"
+                        class="mb-4 bg-grey-lighten-4 rounded-lg"
                       ></v-text-field>
                     </v-col>
                     <v-col cols="12" md="6">
-                      <label class="text-caption font-weight-medium mb-1 d-block">Phone</label>
+                      <label class="text-caption font-weight-bold mb-2 d-block text-grey-darken-2">Phone</label>
                       <v-text-field
                         v-model="formData.phone"
                         placeholder="Your phone number"
                         variant="outlined"
                         density="comfortable"
                         hide-details="auto"
-                        class="mb-4"
+                        class="mb-4 bg-grey-lighten-4 rounded-lg"
                       ></v-text-field>
                     </v-col>
                     <v-col cols="12" md="6">
-                      <label class="text-caption font-weight-medium mb-1 d-block">Subject</label>
+                      <label class="text-caption font-weight-bold mb-2 d-block text-grey-darken-2">Subject</label>
                       <v-text-field
                         v-model="formData.subject"
                         placeholder="What is this regarding?"
                         variant="outlined"
                         density="comfortable"
                         hide-details="auto"
-                        class="mb-4"
+                        class="mb-4 bg-grey-lighten-4 rounded-lg"
                       ></v-text-field>
                     </v-col>
                     <v-col cols="12">
-                      <label class="text-caption font-weight-medium mb-1 d-block">Message *</label>
+                      <label class="text-caption font-weight-bold mb-2 d-block text-grey-darken-2">Message *</label>
                       <v-textarea
                         v-model="formData.message"
                         :error-messages="getErrors('message')"
                         placeholder="How can we help you?"
                         variant="outlined"
                         density="comfortable"
-                        rows="4"
+                        rows="5"
                         hide-details="auto"
-                        class="mb-4"
+                        class="mb-4 bg-grey-lighten-4 rounded-lg"
                       ></v-textarea>
                     </v-col>
                   </v-row>
@@ -92,16 +139,16 @@
                     type="submit"
                     color="primary"
                     block
-                    size="large"
-                    class="mt-4"
+                    size="x-large"
+                    class="mt-6 font-weight-bold text-none"
                     rounded="lg"
                     :loading="submitting"
                     :disabled="submitting"
                   >
-                    Send Message
+                    Send Message <v-icon end>mdi-send</v-icon>
                   </v-btn>
                   
-                  <p v-if="errorMsg" class="text-error text-center mt-4 text-caption">
+                  <p v-if="errorMsg" class="text-error text-center mt-4 text-caption font-weight-bold">
                     {{ errorMsg }}
                   </p>
                 </form>
@@ -123,7 +170,7 @@ definePageMeta({
 });
 
 useSeoMeta({
-  title: 'Contact Us | AEMS Academy',
+  title: 'Contact Us',
   description: 'Get in touch with AEMS Academy.'
 });
 

@@ -81,7 +81,7 @@ const navStore = useNavStore();
 const uiStore = useUIStore();
 const authStore = useAuthStore();
 const display = useDisplay();
-const instituteName = useState('instituteName', () => 'AEMS Academy');
+const instituteName = useState('instituteName', () => '');
 
 const handleItemClick = (item: any) => {
   if (item.action === 'logout') {
@@ -135,7 +135,8 @@ watch(
 .search-pill:focus-within {
   background: white;
   border-color: #6366f1;
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.1);
+  border: 1px solid var(--border);
+  
 }
 
 .search-input {
@@ -199,7 +200,8 @@ watch(
 
 .nav-item-active::before {
   background-color: #4f46e5;
-  box-shadow: 2px 0 10px rgba(79, 70, 229, 0.4);
+  border: 1px solid var(--border);
+  
 }
 
 .nav-item-active .icon-wrapper {
