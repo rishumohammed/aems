@@ -40,6 +40,6 @@ INSERT IGNORE INTO system_config (`key`, `value`, `group`, `description`, `is_se
 
 -- Lead Forms Update
 ALTER TABLE lead_form_configs 
-ADD COLUMN IF NOT EXISTS description TEXT AFTER form_name,
-ADD COLUMN IF NOT EXISTS success_message TEXT AFTER fields_json,
-ADD COLUMN IF NOT EXISTS embed_code TEXT AFTER success_message;
+ADD COLUMN description TEXT AFTER form_name,
+ADD COLUMN success_message TEXT AFTER fields_json,
+ADD COLUMN embed_code TEXT AFTER success_message;

@@ -20,9 +20,9 @@ WHERE role = 'tutor' AND (status = '' OR status IS NULL OR status = 'pending');
 -- 3. Add rejection_reason to tutor_profiles if not exists
 --    (admin.routes.js already tries to write to this column)
 ALTER TABLE tutor_profiles 
-  ADD COLUMN IF NOT EXISTS rejection_reason TEXT AFTER approval_notes,
-  ADD COLUMN IF NOT EXISTS rejected_at DATETIME AFTER rejection_reason,
-  ADD COLUMN IF NOT EXISTS rejected_by CHAR(36) AFTER rejected_at;
+  ADD COLUMN rejection_reason TEXT AFTER approval_notes,
+  ADD COLUMN rejected_at DATETIME AFTER rejection_reason,
+  ADD COLUMN rejected_by CHAR(36) AFTER rejected_at;
 
 -- 4. Add foreign key for rejected_by (only if it doesn't exist)
 ALTER TABLE tutor_profiles 

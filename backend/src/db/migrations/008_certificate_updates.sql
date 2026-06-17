@@ -3,8 +3,8 @@
 
 -- 1. Update: certificates
 ALTER TABLE certificates 
-  ADD COLUMN IF NOT EXISTS pdf_path VARCHAR(255) AFTER cert_number,
-  ADD COLUMN IF NOT EXISTS revoked_at DATETIME AFTER status;
+  ADD COLUMN pdf_path VARCHAR(255) AFTER cert_number,
+  ADD COLUMN revoked_at DATETIME AFTER status;
 
 -- 2. New: cert_template_config
 CREATE TABLE IF NOT EXISTS cert_template_config (

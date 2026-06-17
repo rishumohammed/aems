@@ -2,9 +2,9 @@
 
 -- 1. Update course_lessons for live sessions
 ALTER TABLE course_lessons 
-ADD COLUMN IF NOT EXISTS scheduled_at DATETIME AFTER type,
-ADD COLUMN IF NOT EXISTS duration_minutes INT AFTER scheduled_at,
-ADD COLUMN IF NOT EXISTS live_link TEXT AFTER duration_minutes;
+ADD COLUMN scheduled_at DATETIME AFTER type,
+ADD COLUMN duration_minutes INT AFTER scheduled_at,
+ADD COLUMN live_link TEXT AFTER duration_minutes;
 
 -- 2. Course Q&A
 CREATE TABLE IF NOT EXISTS course_qa (

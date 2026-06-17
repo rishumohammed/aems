@@ -18,15 +18,15 @@ MODIFY COLUMN role ENUM(
 
 -- Add permissions_json column to store fine-grained RBAC rules
 ALTER TABLE users 
-ADD COLUMN IF NOT EXISTS permissions_json JSON DEFAULT NULL;
+ADD COLUMN permissions_json JSON DEFAULT NULL;
 
 -- Add force_password_change flag
 ALTER TABLE users 
-ADD COLUMN IF NOT EXISTS force_password_change BOOLEAN DEFAULT FALSE;
+ADD COLUMN force_password_change BOOLEAN DEFAULT FALSE;
 
 -- Add last_login_at timestamp
 ALTER TABLE users 
-ADD COLUMN IF NOT EXISTS last_login_at TIMESTAMP NULL DEFAULT NULL;
+ADD COLUMN last_login_at TIMESTAMP NULL DEFAULT NULL;
 
 -- Create Audit Logs table for administrative actions
 CREATE TABLE IF NOT EXISTS audit_logs (

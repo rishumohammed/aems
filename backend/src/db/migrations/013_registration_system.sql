@@ -22,9 +22,9 @@ CREATE TABLE IF NOT EXISTS tutor_profiles (
 
 -- 3. Ensure Student Profiles has missing fields
 ALTER TABLE student_profiles 
-ADD COLUMN IF NOT EXISTS education_level VARCHAR(100) AFTER current_status,
-ADD COLUMN IF NOT EXISTS interests TEXT AFTER skills,
-ADD COLUMN IF NOT EXISTS resume_url TEXT AFTER interests;
+ADD COLUMN education_level VARCHAR(100) AFTER current_status,
+ADD COLUMN interests TEXT AFTER skills,
+ADD COLUMN resume_url TEXT AFTER interests;
 
 -- 4. Create Auth Logs for security tracking
 CREATE TABLE IF NOT EXISTS auth_logs (

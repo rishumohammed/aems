@@ -13,4 +13,4 @@ CREATE TABLE IF NOT EXISTS lead_followups (
 );
 
 -- Add last_activity_at to leads for better sorting
-ALTER TABLE leads ADD COLUMN IF NOT EXISTS last_activity_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
+ALTER TABLE leads ADD COLUMN last_activity_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;

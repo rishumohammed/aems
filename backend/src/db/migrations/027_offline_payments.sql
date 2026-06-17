@@ -3,11 +3,11 @@
 
 -- 1. Add status, proof_path, remarks to invoice_payments
 ALTER TABLE invoice_payments
-  ADD COLUMN IF NOT EXISTS status ENUM('pending', 'approved', 'rejected') NOT NULL DEFAULT 'approved',
-  ADD COLUMN IF NOT EXISTS proof_path VARCHAR(255) NULL,
-  ADD COLUMN IF NOT EXISTS remarks TEXT NULL,
-  ADD COLUMN IF NOT EXISTS reviewed_by CHAR(36) NULL,
-  ADD COLUMN IF NOT EXISTS reviewed_at TIMESTAMP NULL;
+  ADD COLUMN status ENUM('pending', 'approved', 'rejected') NOT NULL DEFAULT 'approved',
+  ADD COLUMN proof_path VARCHAR(255) NULL,
+  ADD COLUMN remarks TEXT NULL,
+  ADD COLUMN reviewed_by CHAR(36) NULL,
+  ADD COLUMN reviewed_at TIMESTAMP NULL;
 
 -- 2. Expand mode ENUM to include UPI
 ALTER TABLE invoice_payments

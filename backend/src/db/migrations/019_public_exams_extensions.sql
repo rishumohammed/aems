@@ -2,28 +2,28 @@
 
 -- ─── 1. Extend: public_exam_categories ────────────────────────────────────────
 ALTER TABLE public_exam_categories 
-  ADD COLUMN IF NOT EXISTS description TEXT,
-  ADD COLUMN IF NOT EXISTS status ENUM('active', 'inactive') DEFAULT 'active';
+  ADD COLUMN description TEXT,
+  ADD COLUMN status ENUM('active', 'inactive') DEFAULT 'active';
 
 -- ─── 2. Extend: public_exams ──────────────────────────────────────────────────
 ALTER TABLE public_exams 
-  ADD COLUMN IF NOT EXISTS instructions TEXT,
-  ADD COLUMN IF NOT EXISTS pass_percentage INT DEFAULT 50,
-  ADD COLUMN IF NOT EXISTS negative_marking DECIMAL(5, 2) DEFAULT 0.00,
-  ADD COLUMN IF NOT EXISTS randomize_questions BOOLEAN DEFAULT FALSE,
-  ADD COLUMN IF NOT EXISTS randomize_options BOOLEAN DEFAULT FALSE,
-  ADD COLUMN IF NOT EXISTS show_correct_answers BOOLEAN DEFAULT TRUE,
-  ADD COLUMN IF NOT EXISTS show_explanations BOOLEAN DEFAULT TRUE,
-  ADD COLUMN IF NOT EXISTS allow_retake BOOLEAN DEFAULT TRUE,
-  ADD COLUMN IF NOT EXISTS enable_certificate BOOLEAN DEFAULT TRUE,
-  ADD COLUMN IF NOT EXISTS anonymous_access BOOLEAN DEFAULT TRUE,
-  ADD COLUMN IF NOT EXISTS require_name BOOLEAN DEFAULT TRUE,
-  ADD COLUMN IF NOT EXISTS require_email BOOLEAN DEFAULT FALSE,
-  ADD COLUMN IF NOT EXISTS require_mobile BOOLEAN DEFAULT FALSE;
+  ADD COLUMN instructions TEXT,
+  ADD COLUMN pass_percentage INT DEFAULT 50,
+  ADD COLUMN negative_marking DECIMAL(5, 2) DEFAULT 0.00,
+  ADD COLUMN randomize_questions BOOLEAN DEFAULT FALSE,
+  ADD COLUMN randomize_options BOOLEAN DEFAULT FALSE,
+  ADD COLUMN show_correct_answers BOOLEAN DEFAULT TRUE,
+  ADD COLUMN show_explanations BOOLEAN DEFAULT TRUE,
+  ADD COLUMN allow_retake BOOLEAN DEFAULT TRUE,
+  ADD COLUMN enable_certificate BOOLEAN DEFAULT TRUE,
+  ADD COLUMN anonymous_access BOOLEAN DEFAULT TRUE,
+  ADD COLUMN require_name BOOLEAN DEFAULT TRUE,
+  ADD COLUMN require_email BOOLEAN DEFAULT FALSE,
+  ADD COLUMN require_mobile BOOLEAN DEFAULT FALSE;
 
 -- ─── 3. Extend: public_exam_questions ─────────────────────────────────────────
 ALTER TABLE public_exam_questions 
-  ADD COLUMN IF NOT EXISTS difficulty_level ENUM('Easy', 'Medium', 'Hard') DEFAULT 'Medium';
+  ADD COLUMN difficulty_level ENUM('Easy', 'Medium', 'Hard') DEFAULT 'Medium';
 
 -- ─── 4. New Table: public_exam_certificates ──────────────────────────────────
 CREATE TABLE IF NOT EXISTS public_exam_certificates (

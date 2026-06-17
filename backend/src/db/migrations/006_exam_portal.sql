@@ -3,29 +3,29 @@
 -- and adds exam_slots and exam_answers tables.
 
 -- ─── Extend: exams ───────────────────────────────────────────────────────────
-ALTER TABLE exams ADD COLUMN IF NOT EXISTS randomize_questions BOOLEAN DEFAULT FALSE;
-ALTER TABLE exams ADD COLUMN IF NOT EXISTS randomize_options   BOOLEAN DEFAULT FALSE;
-ALTER TABLE exams ADD COLUMN IF NOT EXISTS created_by          CHAR(36);
-ALTER TABLE exams ADD COLUMN IF NOT EXISTS instructions        TEXT;
-ALTER TABLE exams ADD COLUMN IF NOT EXISTS min_submit_pct      INT DEFAULT 50 COMMENT 'Min % of questions answered before submit is enabled';
-ALTER TABLE exams ADD COLUMN IF NOT EXISTS requires_scheduling BOOLEAN DEFAULT FALSE COMMENT 'If true, student must book a slot';
-ALTER TABLE exams ADD COLUMN IF NOT EXISTS show_result_detail  BOOLEAN DEFAULT TRUE COMMENT 'Show per-question review on results page';
-ALTER TABLE exams ADD COLUMN IF NOT EXISTS created_at          TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
-ALTER TABLE exams ADD COLUMN IF NOT EXISTS updated_at          TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;
+ALTER TABLE exams ADD COLUMN randomize_questions BOOLEAN DEFAULT FALSE;
+ALTER TABLE exams ADD COLUMN randomize_options   BOOLEAN DEFAULT FALSE;
+ALTER TABLE exams ADD COLUMN created_by          CHAR(36);
+ALTER TABLE exams ADD COLUMN instructions        TEXT;
+ALTER TABLE exams ADD COLUMN min_submit_pct      INT DEFAULT 50 COMMENT 'Min % of questions answered before submit is enabled';
+ALTER TABLE exams ADD COLUMN requires_scheduling BOOLEAN DEFAULT FALSE COMMENT 'If true, student must book a slot';
+ALTER TABLE exams ADD COLUMN show_result_detail  BOOLEAN DEFAULT TRUE COMMENT 'Show per-question review on results page';
+ALTER TABLE exams ADD COLUMN created_at          TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
+ALTER TABLE exams ADD COLUMN updated_at          TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;
 
 -- ─── Extend: exam_questions ───────────────────────────────────────────────────
-ALTER TABLE exam_questions ADD COLUMN IF NOT EXISTS order_index INT DEFAULT 0;
-ALTER TABLE exam_questions ADD COLUMN IF NOT EXISTS explanation TEXT COMMENT 'Shown to student post-exam if result detail is enabled';
+ALTER TABLE exam_questions ADD COLUMN order_index INT DEFAULT 0;
+ALTER TABLE exam_questions ADD COLUMN explanation TEXT COMMENT 'Shown to student post-exam if result detail is enabled';
 
 -- ─── Extend: exam_attempts ────────────────────────────────────────────────────
 ALTER TABLE exam_attempts
-  ADD COLUMN IF NOT EXISTS status ENUM('scheduled','in_progress','submitted','graded','pending_manual_review') DEFAULT 'scheduled',
-  ADD COLUMN IF NOT EXISTS answers_json              JSON        COMMENT 'Full snapshot of submitted answers',
-  ADD COLUMN IF NOT EXISTS auto_score               INT DEFAULT 0,
-  ADD COLUMN IF NOT EXISTS total_marks              INT DEFAULT 0,
-  ADD COLUMN IF NOT EXISTS pending_manual_review    BOOLEAN DEFAULT FALSE,
-  ADD COLUMN IF NOT EXISTS exam_session_token_hash  VARCHAR(255),
-  ADD COLUMN IF NOT EXISTS session_expires_at       DATETIME;
+  ADD COLUMN status ENUM('scheduled','in_progress','submitted','graded','pending_manual_review') DEFAULT 'scheduled',
+  ADD COLUMN answers_json              JSON        COMMENT 'Full snapshot of submitted answers',
+  ADD COLUMN auto_score               INT DEFAULT 0,
+  ADD COLUMN total_marks              INT DEFAULT 0,
+  ADD COLUMN pending_manual_review    BOOLEAN DEFAULT FALSE,
+  ADD COLUMN exam_session_token_hash  VARCHAR(255),
+  ADD COLUMN session_expires_at       DATETIME;
 
 -- ─── New: exam_slots ─────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS exam_slots (
