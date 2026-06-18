@@ -23,6 +23,9 @@ importers:
       bcryptjs:
         specifier: ^3.0.3
         version: 3.0.3
+      cookie-parser:
+        specifier: ^1.4.7
+        version: 1.4.7
       cors:
         specifier: ^2.8.5
         version: 2.8.6
@@ -43,10 +46,10 @@ importers:
         version: 7.2.0
       ioredis:
         specifier: ^5.3.2
-        version: 5.10.1
+        version: 5.10.1(supports-color@5.5.0)
       ioredis-mock:
         specifier: ^8.13.1
-        version: 8.13.1(@types/ioredis-mock@8.2.7(ioredis@5.10.1))(ioredis@5.10.1)
+        version: 8.13.1(@types/ioredis-mock@8.2.7(ioredis@5.10.1(supports-color@5.5.0)))(ioredis@5.10.1(supports-color@5.5.0))
       jsonwebtoken:
         specifier: ^9.0.2
         version: 9.0.3
@@ -159,6 +162,9 @@ importers:
       nuxt-icon:
         specifier: ^0.6.10
         version: 0.6.10(magicast@0.5.2)(vite@7.3.2(@types/node@25.6.0)(jiti@2.6.1)(sass@1.99.0)(terser@5.46.1)(yaml@2.8.3))(vue@3.5.32)
+      papaparse:
+        specifier: ^5.4.1
+        version: 5.5.3
       pinia:
         specifier: ^2.1.7
         version: 2.3.1(vue@3.5.32)
@@ -196,6 +202,9 @@ importers:
       '@nuxtjs/sitemap':
         specifier: ^8.0.13
         version: 8.0.13(@nuxt/schema@3.21.2)(magicast@0.5.2)(nuxt@3.21.2(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@parcel/watcher@2.5.6)(@types/node@25.6.0)(@vue/compiler-sfc@3.5.32)(cac@6.7.14)(db0@0.3.4(mysql2@3.22.2(@types/node@25.6.0)))(ioredis@5.10.1)(magicast@0.5.2)(mysql2@3.22.2(@types/node@25.6.0))(rollup-plugin-visualizer@7.0.1(rollup@4.60.2))(rollup@4.60.2)(sass@1.99.0)(srvx@0.11.15)(supports-color@5.5.0)(terser@5.46.1)(vite@7.3.2(@types/node@25.6.0)(jiti@2.6.1)(sass@1.99.0)(terser@5.46.1)(yaml@2.8.3))(yaml@2.8.3))(vite@7.3.2(@types/node@25.6.0)(jiti@2.6.1)(sass@1.99.0)(terser@5.46.1)(yaml@2.8.3))(vue@3.5.32)(zod@3.25.76)
+      '@types/papaparse':
+        specifier: ^5.3.14
+        version: 5.5.2
       vuetify-nuxt-module:
         specifier: ^0.13.1
         version: 0.13.5(magicast@0.5.2)(vite@7.3.2(@types/node@25.6.0)(jiti@2.6.1)(sass@1.99.0)(terser@5.46.1)(yaml@2.8.3))(vue@3.5.32)
@@ -1694,6 +1703,9 @@ packages:
   '@types/offscreencanvas@2019.7.3':
     resolution: {integrity: sha512-ieXiYmgSRXUDeOntE1InxjWyvEelZGP63M+cGuquuRLuIKKT1osnkXjxev9B7d1nXSug5vpunx+gNlbVxMlC9A==}
 
+  '@types/papaparse@5.5.2':
+    resolution: {integrity: sha512-gFnFp/JMzLHCwRf7tQHrNnfhN4eYBVYYI897CGX4MY1tzY9l2aLkVyx2IlKZ/SAqDbB3I1AOZW5gTMGGsqWliA==}
+
   '@types/resolve@1.20.2':
     resolution: {integrity: sha512-60BCwRFOZCQhDncwQdxxeOEEkbc5dIMccYLwbxsS4TUNeVECQ/pBJ0j09mrHOl/JJvpRPGwO9SvE4nR2Nb/a4Q==}
 
@@ -2276,6 +2288,13 @@ packages:
 
   cookie-es@3.1.1:
     resolution: {integrity: sha512-UaXxwISYJPTr9hwQxMFYZ7kNhSXboMXP+Z3TRX6f1/NyaGPfuNUZOWP1pUEb75B2HjfklIYLVRfWiFZJyC6Npg==}
+
+  cookie-parser@1.4.7:
+    resolution: {integrity: sha512-nGUvgXnotP3BsjiLX2ypbQnWoGUPIIfHQNZkkC668ntrzGWEZVW70HDEB1qnNGMicPje6EttlIgzo51YSwNQGw==}
+    engines: {node: '>= 0.8.0'}
+
+  cookie-signature@1.0.6:
+    resolution: {integrity: sha512-QADzlaHc8icV8I7vbaJXJwod9HWYp8uCqf1xa4OfNu1T7JVxQIrUgOWtHdNDtPiywmFbiS12VjotIXLrKM3orQ==}
 
   cookie-signature@1.0.7:
     resolution: {integrity: sha512-NXdYc3dLr47pBkpUCHtKSwIOQXLVn8dZEuywboCOJY/osA0wFSLlSawr3KN8qXJEyX66FcONTH8EIlVuK0yyFA==}
@@ -3542,6 +3561,9 @@ packages:
 
   pako@1.0.11:
     resolution: {integrity: sha512-4hLB8Py4zZce5s4yd9XzopqwVv/yGNhV1Bl8NTmCq1763HeK2+EwVTv+leGeL13Dnh2wfbqowVPXCIO0z4taYw==}
+
+  papaparse@5.5.3:
+    resolution: {integrity: sha512-5QvjGxYVjxO59MGU2lHVYpRWBBtKHnlIAcSe1uNFCkkptUh63NFRj0FJQm7nR67puEruUci/ZkjmEFrjCAyP4A==}
 
   parseurl@1.3.3:
     resolution: {integrity: sha512-CiyeOxFT/JZyN5m0z9PfXw4SCBJ6Sygz1Dpl0wqjlhDEGGBP1GnsUVEL0p63hoG1fcj3fHynXi9NYO4nWOL+qQ==}
@@ -6357,9 +6379,9 @@ snapshots:
 
   '@types/estree@1.0.8': {}
 
-  '@types/ioredis-mock@8.2.7(ioredis@5.10.1)':
+  '@types/ioredis-mock@8.2.7(ioredis@5.10.1(supports-color@5.5.0))':
     dependencies:
-      ioredis: 5.10.1
+      ioredis: 5.10.1(supports-color@5.5.0)
 
   '@types/long@4.0.2': {}
 
@@ -6375,6 +6397,10 @@ snapshots:
   '@types/offscreencanvas@2019.3.0': {}
 
   '@types/offscreencanvas@2019.7.3': {}
+
+  '@types/papaparse@5.5.2':
+    dependencies:
+      '@types/node': 25.6.0
 
   '@types/resolve@1.20.2': {}
 
@@ -7040,6 +7066,13 @@ snapshots:
   cookie-es@2.0.1: {}
 
   cookie-es@3.1.1: {}
+
+  cookie-parser@1.4.7:
+    dependencies:
+      cookie: 0.7.2
+      cookie-signature: 1.0.6
+
+  cookie-signature@1.0.6: {}
 
   cookie-signature@1.0.7: {}
 
@@ -7756,17 +7789,17 @@ snapshots:
 
   ini@4.1.1: {}
 
-  ioredis-mock@8.13.1(@types/ioredis-mock@8.2.7(ioredis@5.10.1))(ioredis@5.10.1):
+  ioredis-mock@8.13.1(@types/ioredis-mock@8.2.7(ioredis@5.10.1(supports-color@5.5.0)))(ioredis@5.10.1(supports-color@5.5.0)):
     dependencies:
       '@ioredis/as-callback': 3.0.0
       '@ioredis/commands': 1.5.1
-      '@types/ioredis-mock': 8.2.7(ioredis@5.10.1)
+      '@types/ioredis-mock': 8.2.7(ioredis@5.10.1(supports-color@5.5.0))
       fengari: 0.1.5
       fengari-interop: 0.1.4(fengari@0.1.5)
-      ioredis: 5.10.1
+      ioredis: 5.10.1(supports-color@5.5.0)
       semver: 7.7.4
 
-  ioredis@5.10.1:
+  ioredis@5.10.1(supports-color@5.5.0):
     dependencies:
       '@ioredis/commands': 1.5.1
       cluster-key-slot: 1.1.2
@@ -8162,7 +8195,7 @@ snapshots:
       h3: 1.15.11
       hookable: 5.5.3
       httpxy: 0.5.0
-      ioredis: 5.10.1
+      ioredis: 5.10.1(supports-color@5.5.0)
       jiti: 2.6.1
       klona: 2.0.6
       knitwork: 1.3.0
@@ -8640,6 +8673,8 @@ snapshots:
   pako@0.2.9: {}
 
   pako@1.0.11: {}
+
+  papaparse@5.5.3: {}
 
   parseurl@1.3.3: {}
 
@@ -9663,7 +9698,7 @@ snapshots:
       ufo: 1.6.3
     optionalDependencies:
       db0: 0.3.4(mysql2@3.22.2(@types/node@25.6.0))
-      ioredis: 5.10.1
+      ioredis: 5.10.1(supports-color@5.5.0)
 
   untun@0.1.3:
     dependencies:

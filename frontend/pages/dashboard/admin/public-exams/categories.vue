@@ -21,21 +21,6 @@
       </div>
     </div>
 
-    <!-- Quick Navigation Links (Admin Submenu) -->
-    <v-card flat border class="pa-4 mb-8 rounded-xl bg-grey-lighten-4">
-      <div class="d-flex gap-2 flex-wrap">
-        <v-btn to="/dashboard/admin/public-exams" variant="text" rounded="lg" class="text-capitalize font-weight-bold text-secondary">
-          <v-icon start>mdi-card-text-outline</v-icon> All Exams
-        </v-btn>
-        <v-btn to="/dashboard/admin/public-exams/questions" variant="text" rounded="lg" class="text-capitalize font-weight-bold text-secondary">
-          <v-icon start>mdi-database-outline</v-icon> Question Bank
-        </v-btn>
-        <v-btn to="/dashboard/admin/public-exams/results" variant="text" rounded="lg" class="text-capitalize font-weight-bold text-secondary">
-          <v-icon start>mdi-chart-bar</v-icon> Results &amp; Analytics
-        </v-btn>
-      </div>
-    </v-card>
-
     <!-- Table -->
     <v-card variant="outlined" class="rounded-xl bg-white border-0 shadow-sm overflow-hidden">
       <div v-if="loading" class="pa-12 text-center">

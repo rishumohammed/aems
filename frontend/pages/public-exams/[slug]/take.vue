@@ -325,6 +325,34 @@
         </div>
       </v-card>
     </v-dialog>
+
+    <!-- Proctoring Warning Dialog -->
+    <v-dialog v-model="showProctorWarningDialog" max-width="450" persistent>
+      <v-card class="pa-6 rounded-xl border-error" style="border-width: 2px;">
+        <div class="d-flex align-center gap-3 mb-4 text-error">
+          <v-icon size="32">mdi-alert-octagon</v-icon>
+          <h3 class="text-h6 font-weight-bold mb-0">Violation Detected</h3>
+        </div>
+        <p class="text-body-1 font-weight-medium mb-2">{{ proctorViolationMessage }}</p>
+        <p class="text-body-2 text-secondary mb-6">
+          Warning {{ proctoringWarnings }} of {{ examConfig?.max_proctoring_warnings || 3 }}. 
+          If you reach the limit, your exam will be automatically submitted.
+        </p>
+        <v-btn color="error" rounded="lg" class="text-capitalize font-weight-bold px-6" block @click="dismissProctorWarning">
+          I Understand
+        </v-btn>
+      </v-card>
+    </v-dialog>
+
+    <!-- Fullscreen Enforcement Overlay -->
+    <v-overlay v-model="requiresFullscreen" class="align-center justify-center" persistent>
+      <v-card class="pa-8 text-center rounded-xl border" max-width="400" flat>
+        <v-icon size="64" color="primary" class="mb-4">mdi-fullscreen</v-icon>
+        <h3 class="text-h5 font-weight-bold mb-2">Full Screen Required</h3>
+        <p class="text-body-2 text-secondary mb-6">This exam requires you to be in full screen mode to continue.</p>
+        <v-btn color="primary" rounded="lg" size="large" @click="toggleFullScreen">Enter Full Screen</v-btn>
+      </v-card>
+    </v-overlay>
   </v-app>
 </template>
 
@@ -358,11 +386,17 @@ const attemptId = ref('');
 const guestName = ref('');
 
 // State
+const examConfig = ref<any>(null);
 const questions = ref<any[]>([]);
 const currentQuestionIndex = ref(0);
 const answers = ref<Record<string, any>>({}); // Map of question_id -> answers
 const markedForReview = ref<string[]>([]);    // List of marked question_ids
 const visitedQuestions = ref<string[]>([]);   // List of visited question_ids
+
+// Proctoring
+const proctoringWarnings = ref(0);
+const showProctorWarningDialog = ref(false);
+const proctorViolationMessage = ref('');
 
 // Timer details
 const timeLeftSeconds = ref(0);
@@ -380,6 +414,10 @@ const isFullScreen = ref(false);
 const exitDialog = ref(false);
 const confirmSubmitDialog = ref(false);
 const submittingExam = ref(false);
+
+const requiresFullscreen = computed(() => {
+  return examConfig.value?.enforce_fullscreen && !isFullScreen.value && attemptId.value !== '';
+});
 
 const currentQuestion = computed(() => {
   return questions.value[currentQuestionIndex.value];
@@ -478,6 +516,61 @@ function toggleFullScreen() {
     document.exitFullscreen().then(() => {
       isFullScreen.value = false;
     });
+  }
+}
+
+// Proctoring Logic
+function setupProctoring() {
+  if (!examConfig.value?.enable_proctoring && !examConfig.value?.enforce_fullscreen) return;
+  
+  if (examConfig.value?.enable_proctoring) {
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('blur', handleWindowBlur);
+  }
+  
+  if (examConfig.value?.enforce_fullscreen) {
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+  }
+}
+
+function handleVisibilityChange() {
+  if (document.hidden && examConfig.value?.enable_proctoring && !showProctorWarningDialog.value) {
+    triggerProctorViolation('Tab switching or minimizing the browser is strictly prohibited.');
+  }
+}
+
+function handleWindowBlur() {
+  if (examConfig.value?.enable_proctoring && !showProctorWarningDialog.value) {
+    triggerProctorViolation('Leaving the browser window is strictly prohibited.');
+  }
+}
+
+function handleFullscreenChange() {
+  isFullScreen.value = !!document.fullscreenElement;
+  if (!document.fullscreenElement && examConfig.value?.enforce_fullscreen && !showProctorWarningDialog.value) {
+    triggerProctorViolation('Exiting full screen mode is not allowed.');
+  }
+}
+
+function triggerProctorViolation(customMsg: string) {
+  // If exam has already been submitted or is being submitted, do nothing
+  if (submittingExam.value || !attemptId.value) return;
+
+  proctoringWarnings.value++;
+  const max = examConfig.value.max_proctoring_warnings || 3;
+  if (proctoringWarnings.value >= max) {
+    alert('You have exceeded the maximum allowed violations. Your exam will now be automatically submitted.');
+    submitOnTimeout();
+  } else {
+    proctorViolationMessage.value = customMsg;
+    showProctorWarningDialog.value = true;
+  }
+}
+
+function dismissProctorWarning() {
+  showProctorWarningDialog.value = false;
+  if (examConfig.value?.enforce_fullscreen && !document.fullscreenElement) {
+    toggleFullScreen();
   }
 }
 
@@ -636,7 +729,7 @@ function confirmExitForce() {
   router.push('/public-exams');
 }
 
-onMounted(() => {
+onMounted(async () => {
   // Verify JWT before allowing access
   const token = getAuthToken();
   if (!token) {
@@ -644,7 +737,15 @@ onMounted(() => {
     return;
   }
 
+  try {
+    const { data } = await api.get(`/public/exams/${examSlug.value}`);
+    examConfig.value = data;
+  } catch(e) {
+    console.error("Failed to fetch exam config", e);
+  }
+
   initializeAttempt();
+  setupProctoring();
   
   // Register window event listener to prevent direct closing
   window.addEventListener('beforeunload', handleBeforeUnload);
@@ -653,6 +754,11 @@ onMounted(() => {
 onBeforeUnmount(() => {
   clearInterval(timerInterval.value);
   window.removeEventListener('beforeunload', handleBeforeUnload);
+  
+  document.removeEventListener('visibilitychange', handleVisibilityChange);
+  window.removeEventListener('blur', handleWindowBlur);
+  document.removeEventListener('fullscreenchange', handleFullscreenChange);
+
   if (document.fullscreenElement) {
     document.exitFullscreen().catch(() => {});
   }

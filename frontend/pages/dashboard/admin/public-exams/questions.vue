@@ -89,18 +89,22 @@
 
           <div v-else>
             <p class="text-caption text-secondary mb-4 leading-relaxed">
-              Paste CSV text. Columns must map to: <strong class="text-dark">Question, Options (separated by |), Correct Answer (separated by | for MSQ), Explanation, Marks, Difficulty</strong>.<br/>
-              The first row is ignored as the header. Example:<br/>
-              <code>Question,Options,Correct Answer,Explanation,Marks,Difficulty<br/>"Which is a prime number?","2|4|6|8","2","2 is the only even prime.",4,"Easy"</code>
+              Upload a CSV file. Columns must map to: <strong class="text-dark">Type, Question, Options (separated by |), Correct Answer (separated by | for MSQ), Explanation, Marks, Difficulty</strong>.<br/>
+              The first row is ignored as the header. Valid Types: <code>mcq, msq, truefalse, fib</code>. Example:<br/>
+              <code>Type,Question,Options,Correct Answer,Explanation,Marks,Difficulty<br/>"mcq","Which is a prime number?","2|4|6|8","2","2 is the only even prime.",4,"Easy"</code>
             </p>
-            <v-textarea
-              v-model="importCsvText"
-              placeholder='"Question","Options","Correct Answer","Explanation","Marks","Difficulty"'
-              variant="outlined"
-              bg-color="white"
-              rows="8"
-              class="font-mono mb-4"
-            ></v-textarea>
+            <div class="d-flex gap-2 mb-4">
+              <v-btn color="primary" variant="outlined" class="text-none py-6 flex-grow-1" style="border-style: dashed" @click="$refs.csvFileInput.click()">
+                <v-icon left size="24" class="mr-2">mdi-cloud-upload</v-icon> Click to Select CSV File
+              </v-btn>
+              <v-btn color="info" variant="tonal" class="text-none py-6" @click="downloadSampleCsv">
+                <v-icon left size="24" class="mr-2">mdi-download</v-icon> Sample CSV
+              </v-btn>
+            </div>
+            <input type="file" ref="csvFileInput" accept=".csv" class="d-none" @change="handleCsvUpload" />
+            <div v-if="selectedCsvFileName" class="text-center text-caption text-success font-weight-bold mb-4">
+              <v-icon left>mdi-check-circle</v-icon> {{ selectedCsvFileName }} Selected
+            </div>
           </div>
 
           <div class="d-flex gap-2">
@@ -402,6 +406,7 @@
 import { ref, computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { useApi } from '@/composables/useApi';
+import Papa from 'papaparse';
 
 definePageMeta({
   layout: 'dashboard'
@@ -423,7 +428,9 @@ const difficultyFilter = ref('All Difficulties');
 const importOpen = ref(false);
 const importMode = ref<'json' | 'csv'>('json');
 const importJsonText = ref('');
-const importCsvText = ref('');
+const csvFileInput = ref(null);
+const selectedCsvFileName = ref('');
+const parsedCsvData = ref<any[]>([]);
 const importing = ref(false);
 
 // Question Dialog State
@@ -500,8 +507,91 @@ function onExamChange() {
 function openImportSection(mode: 'json' | 'csv') {
   importMode.value = mode;
   importJsonText.value = '';
-  importCsvText.value = '';
+  selectedCsvFileName.value = '';
+  parsedCsvData.value = [];
+  if (csvFileInput.value) (csvFileInput.value as any).value = '';
   importOpen.value = true;
+}
+
+function downloadSampleCsv() {
+  const headers = ['Type', 'Question', 'Options', 'Correct Answer', 'Explanation', 'Marks', 'Difficulty'];
+  const rows = [
+    ['mcq', 'Which is a prime number?', '2|4|6|8', '2', '2 is the only even prime.', '4', 'Easy'],
+    ['msq', 'Select all vowels.', 'A|B|C|E|F', 'A|E', 'A and E are vowels.', '4', 'Medium'],
+    ['truefalse', 'The earth is flat.', 'True|False', 'False', 'The earth is spherical.', '2', 'Easy'],
+    ['fib', 'The chemical symbol for water is __.', '', 'H2O', 'Water is composed of 2 hydrogen and 1 oxygen.', '4', 'Medium']
+  ];
+  
+  const csvContent = [
+    headers.join(','),
+    ...rows.map(r => r.map(cell => `"${cell.replace(/"/g, '""')}"`).join(','))
+  ].join('\n');
+
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+  const url = URL.createObjectURL(blob);
+  link.setAttribute('href', url);
+  link.setAttribute('download', 'sample_questions.csv');
+  link.style.visibility = 'hidden';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
+function handleCsvUpload(event: any) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  selectedCsvFileName.value = file.name;
+  
+  Papa.parse(file, {
+    header: true,
+    skipEmptyLines: true,
+    complete: (results) => {
+      if (results.errors.length > 0) {
+        alert('Error parsing CSV. Please ensure it follows the format.');
+        console.error(results.errors);
+        return;
+      }
+      
+      const newQuestions = results.data.map((row: any) => {
+        const rawOptions = row['Options'] || '';
+        const rawCorrect = row['Correct Answer'] || '';
+        
+        const options = rawOptions ? rawOptions.split('|').map((o: string) => o.trim()) : [];
+        let type = row['Type'] ? row['Type'].toLowerCase().trim() : 'fib';
+        let correctVal: any = rawCorrect;
+
+        if (options.length > 0) {
+          if (!row['Type']) {
+            if (options.length === 2 && options.includes('True') && options.includes('False')) {
+              type = 'truefalse';
+            } else if (rawCorrect.includes('|')) {
+              type = 'msq';
+            } else {
+              type = 'mcq';
+            }
+          }
+        }
+
+        if (type === 'msq' && typeof rawCorrect === 'string' && rawCorrect.includes('|')) {
+          correctVal = rawCorrect.split('|').map((o: string) => o.trim());
+        }
+
+        return {
+          question_text: row['Question'] || 'Untitled',
+          type,
+          options,
+          correct_answer: correctVal,
+          explanation: row['Explanation'] || '',
+          marks: parseInt(row['Marks']) || 4,
+          difficulty_level: row['Difficulty'] || 'Medium'
+        };
+      });
+
+      parsedCsvData.value = newQuestions;
+    }
+  });
 }
 
 async function runBulkImport() {
@@ -521,16 +611,19 @@ async function runBulkImport() {
       importing.value = false;
     }
   } else {
-    if (!importCsvText.value.trim()) return;
+    if (parsedCsvData.value.length === 0) {
+      alert('Please select a valid CSV file first.');
+      return;
+    }
     importing.value = true;
     try {
-      await api.post(`/admin/public-exams/${selectedExamId.value}/questions/bulk-csv`, { csvText: importCsvText.value });
-      alert('CSV Questions imported successfully!');
+      await api.post(`/admin/public-exams/${selectedExamId.value}/questions/bulk`, { questions: parsedCsvData.value });
+      alert(`Successfully imported ${parsedCsvData.value.length} questions from CSV!`);
       importOpen.value = false;
       fetchQuestions();
     } catch (err: any) {
       console.error('CSV import error:', err);
-      alert(err.response?.data?.message || 'Error occurred while parsing or uploading CSV.');
+      alert(err.response?.data?.message || 'Error occurred while uploading CSV.');
     } finally {
       importing.value = false;
     }

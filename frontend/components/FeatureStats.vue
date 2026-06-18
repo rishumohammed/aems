@@ -24,7 +24,7 @@
           
           <!-- Item 3 -->
           <v-col cols="12" md="4" class="d-flex align-center justify-center justify-md-start">
-            <v-icon size="48" class="mr-4">mdi-bullseye</v-icon>
+            <v-icon size="48" class="mr-4">mdi-infinity</v-icon>
             <div>
               <div class="text-h6 font-weight-bold mb-1" style="line-height: 1.2;">Lifetime access</div>
               <div class="text-body-2" style="opacity: 0.9;">Learn on your schedule</div>

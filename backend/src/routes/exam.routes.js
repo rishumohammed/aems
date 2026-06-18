@@ -57,11 +57,17 @@ router.get('/', authenticateJWT, isTutorOrAdmin, async (req, res) => {
       JOIN courses c ON e.course_id = c.id
       LEFT JOIN users u ON e.created_by = u.id
     `;
+    const conditions = ['e.deleted_at IS NULL'];
     const params = [];
     if (req.user.role === 'tutor') {
-      query += ' WHERE c.tutor_id = ?';
+      conditions.push('c.tutor_id = ?');
       params.push(req.user.id);
     }
+    
+    if (conditions.length > 0) {
+      query += ' WHERE ' + conditions.join(' AND ');
+    }
+    
     query += ' ORDER BY e.created_at DESC';
     const [exams] = await pool.query(query, params);
     res.json(exams);
@@ -88,7 +94,7 @@ router.get('/eligible', authenticateJWT, isStudent, async (req, res) => {
       FROM exams e
       JOIN courses c ON e.course_id = c.id
       JOIN enrollments en ON en.course_id = c.id AND en.student_id = ?
-      WHERE e.status = 'published'
+      WHERE e.status = 'published' AND e.deleted_at IS NULL
     `, [studentId, studentId, studentId, studentId]);
     res.json(exams);
   } catch (err) {
@@ -515,7 +521,7 @@ router.put('/:id', authenticateJWT, isTutorOrAdmin, async (req, res) => {
 // DELETE /api/exams/:id
 router.delete('/:id', authenticateJWT, isAdmin, async (req, res) => {
   try {
-    await pool.query('DELETE FROM exams WHERE id = ?', [req.params.id]);
+    await pool.query('UPDATE exams SET deleted_at = NOW(), status = "closed" WHERE id = ?', [req.params.id]);
     res.json({ message: 'Exam deleted' });
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -544,6 +550,37 @@ router.post('/:id/questions/import', authenticateJWT, isTutorOrAdmin, async (req
     res.json({ message: `Imported ${quizzes.length} questions`, count: quizzes.length });
   } catch (err) {
     res.status(500).json({ message: err.message });
+  }
+});
+
+// POST /api/exams/:id/questions/bulk
+router.post('/:id/questions/bulk', authenticateJWT, isTutorOrAdmin, async (req, res) => {
+  const connection = await pool.getConnection();
+  try {
+    const { questions } = req.body;
+    if (!questions || !Array.isArray(questions)) {
+      connection.release();
+      return res.status(400).json({ message: 'Invalid questions format. Expected an array.' });
+    }
+
+    const [maxOrder] = await connection.query('SELECT COALESCE(MAX(order_index),0) as max_order FROM exam_questions WHERE exam_id = ?', [req.params.id]);
+    let orderIdx = maxOrder[0].max_order;
+
+    await connection.beginTransaction();
+    for (const q of questions) {
+      orderIdx++;
+      await connection.query(
+        'INSERT INTO exam_questions (id, exam_id, question_text, type, options_json, correct_answer, marks, explanation, order_index) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        [uuidv4(), req.params.id, q.question_text, q.type || 'mcq', q.options ? JSON.stringify(q.options) : null, q.correct_answer || null, q.marks || 1, q.explanation || null, orderIdx]
+      );
+    }
+    await connection.commit();
+    res.status(201).json({ message: `Imported ${questions.length} questions successfully.` });
+  } catch (err) {
+    await connection.rollback();
+    res.status(500).json({ message: err.message });
+  } finally {
+    connection.release();
   }
 });
 

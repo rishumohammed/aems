@@ -11,7 +11,7 @@ router.get('/', async (req, res) => {
     const { search, courseId, status, paymentStatus, page = 1, limit = 25 } = req.query;
     const offset = (page - 1) * limit;
 
-    const conditions = [`u.role = 'student'`];
+    const conditions = [`u.role = 'student'`, `u.deleted_at IS NULL`];
     const params = [];
     const countParams = [];
 
@@ -388,6 +388,28 @@ router.post('/:id/send-welcome', async (req, res) => {
   } catch (err) {
     console.error('Resend welcome email error:', err);
     res.status(500).json({ message: 'Failed to send welcome email' });
+  }
+});
+
+// Soft Delete Student
+router.delete('/:id', async (req, res) => {
+  const targetId = req.params.id;
+  try {
+    const [existing] = await pool.query('SELECT email FROM users WHERE id = ? AND role = "student"', [targetId]);
+    if (existing.length === 0) return res.status(404).json({ message: 'Student not found' });
+
+    const emailSuffix = `.deleted.${Date.now()}`;
+    const newEmail = `${existing[0].email}${emailSuffix}`;
+
+    await pool.query(
+      "UPDATE users SET deleted_at = NOW(), status = 'inactive', email = ? WHERE id = ?",
+      [newEmail, targetId]
+    );
+
+    res.json({ message: 'Student deleted successfully' });
+  } catch (error) {
+    console.error('Error soft deleting student:', error);
+    res.status(500).json({ message: 'Internal server error' });
   }
 });
 

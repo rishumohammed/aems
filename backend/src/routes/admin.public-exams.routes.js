@@ -151,11 +151,11 @@ router.post('/:id/duplicate', async (req, res) => {
     // Insert duplicated exam
     await connection.query(`
       INSERT INTO public_exams (
-        id, name, category_id, description, syllabus, duration_minutes, total_questions, total_marks, passing_marks, difficulty_level, status, slug, instructions, pass_percentage, negative_marking, randomize_questions, randomize_options, show_correct_answers, show_explanations, allow_retake, enable_certificate, anonymous_access, require_name, require_email, require_mobile
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        id, name, category_id, description, syllabus, duration_minutes, total_questions, total_marks, passing_marks, difficulty_level, status, slug, instructions, pass_percentage, negative_marking, randomize_questions, randomize_options, show_correct_answers, show_explanations, allow_retake, enable_certificate, anonymous_access, require_name, require_email, require_mobile, enable_proctoring, max_proctoring_warnings, enforce_fullscreen
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `, [
       newExamId, newName, exam.category_id, exam.description, exam.syllabus, exam.duration_minutes, exam.total_questions, exam.total_marks, exam.passing_marks, exam.difficulty_level, 'draft', newSlug,
-      exam.instructions, exam.pass_percentage, exam.negative_marking, exam.randomize_questions, exam.randomize_options, exam.show_correct_answers, exam.show_explanations, exam.allow_retake, exam.enable_certificate, exam.anonymous_access, exam.require_name, exam.require_email, exam.require_mobile
+      exam.instructions, exam.pass_percentage, exam.negative_marking, exam.randomize_questions, exam.randomize_options, exam.show_correct_answers, exam.show_explanations, exam.allow_retake, exam.enable_certificate, exam.anonymous_access, exam.require_name, exam.require_email, exam.require_mobile, exam.enable_proctoring, exam.max_proctoring_warnings, exam.enforce_fullscreen
     ]);
 
     // Copy questions
@@ -233,9 +233,10 @@ router.post('/:id/certificate-settings', async (req, res) => {
 
 // ─── 4. ATTEMPTS & RESULTS MANAGEMENT ─────────────────────────────────────────
 
-// GET /api/admin/public-exams/attempts
-router.get('/attempts', async (req, res) => {
+// GET /api/admin/public-exams/:id/attempts
+router.get('/:id/attempts', async (req, res) => {
   try {
+    const examId = req.params.id;
     const { search, page = 1, limit = 10 } = req.query;
     const offset = (parseInt(page) - 1) * parseInt(limit);
 
@@ -245,14 +246,14 @@ router.get('/attempts', async (req, res) => {
       FROM public_exam_attempts a
       JOIN public_exams e ON a.exam_id = e.id
       LEFT JOIN public_exam_results r ON a.id = r.attempt_id
-      WHERE 1=1
+      WHERE a.exam_id = ?
     `;
-    const params = [];
+    const params = [examId];
 
     if (search) {
-      query += ' AND (a.guest_name LIKE ? OR a.guest_email LIKE ? OR e.name LIKE ?)';
+      query += ' AND (a.guest_name LIKE ? OR a.guest_email LIKE ?)';
       const searchPattern = `%${search}%`;
-      params.push(searchPattern, searchPattern, searchPattern);
+      params.push(searchPattern, searchPattern);
     }
 
     query += ' ORDER BY a.started_at DESC LIMIT ? OFFSET ?';
@@ -264,13 +265,12 @@ router.get('/attempts', async (req, res) => {
     let countQuery = `
       SELECT COUNT(*) as count 
       FROM public_exam_attempts a
-      JOIN public_exams e ON a.exam_id = e.id
-      WHERE 1=1
+      WHERE a.exam_id = ?
     `;
-    const countParams = [];
+    const countParams = [examId];
     if (search) {
-      countQuery += ' AND (a.guest_name LIKE ? OR a.guest_email LIKE ? OR e.name LIKE ?)';
-      countParams.push(`%${search}%`, `%${search}%`, `%${search}%`);
+      countQuery += ' AND (a.guest_name LIKE ? OR a.guest_email LIKE ?)';
+      countParams.push(`%${search}%`, `%${search}%`);
     }
     const [countRow] = await pool.query(countQuery, countParams);
 
@@ -297,17 +297,19 @@ router.delete('/attempts/:id', async (req, res) => {
   }
 });
 
-// GET /api/admin/public-exams/attempts/export
-router.get('/attempts/export', async (req, res) => {
+// GET /api/admin/public-exams/:id/attempts/export
+router.get('/:id/attempts/export', async (req, res) => {
   try {
+    const examId = req.params.id;
     const [rows] = await pool.query(`
       SELECT e.name as exam_name, a.guest_name, a.guest_email, a.guest_phone,
              r.score, r.percentage, r.passed, r.time_taken_seconds, a.started_at
       FROM public_exam_attempts a
       JOIN public_exams e ON a.exam_id = e.id
       LEFT JOIN public_exam_results r ON a.id = r.attempt_id
+      WHERE a.exam_id = ?
       ORDER BY a.started_at DESC
-    `);
+    `, [examId]);
 
     // Output raw CSV
     let csv = 'Exam Name,Candidate Name,Email,Phone,Score,Percentage,Status,Time Taken (sec),Date\n';
@@ -329,62 +331,50 @@ router.get('/attempts/export', async (req, res) => {
 
 // ─── 5. QUESTION BANK CRUD & BULK CSV IMPORT ──────────────────────────────────
 
-// GET /api/admin/public-exams/analytics
-router.get('/analytics', async (req, res) => {
+// GET /api/admin/public-exams/:id/analytics
+router.get('/:id/analytics', async (req, res) => {
   try {
-    const [totalAttemptsRow] = await pool.query('SELECT COUNT(*) as count FROM public_exam_attempts');
-    const [avgScoreRow] = await pool.query('SELECT AVG(percentage) as avg_pct FROM public_exam_results');
+    const examId = req.params.id;
+
+    const [totalAttemptsRow] = await pool.query('SELECT COUNT(*) as count FROM public_exam_attempts WHERE exam_id = ?', [examId]);
+    
+    const [avgScoreRow] = await pool.query(`
+      SELECT AVG(r.percentage) as avg_pct 
+      FROM public_exam_results r
+      JOIN public_exam_attempts a ON r.attempt_id = a.id
+      WHERE a.exam_id = ?
+    `, [examId]);
+    
     const [passPercentageRow] = await pool.query(`
       SELECT 
         CASE 
-          WHEN COUNT(*) > 0 THEN (SUM(CASE WHEN passed = 1 THEN 1 ELSE 0 END) / COUNT(*)) * 100 
+          WHEN COUNT(*) > 0 THEN (SUM(CASE WHEN r.passed = 1 THEN 1 ELSE 0 END) / COUNT(*)) * 100 
           ELSE 0 
         END as pass_rate 
-      FROM public_exam_results
-    `);
+      FROM public_exam_results r
+      JOIN public_exam_attempts a ON r.attempt_id = a.id
+      WHERE a.exam_id = ?
+    `, [examId]);
 
-    // Popular Exams: order by attempts
-    const [popularExams] = await pool.query(`
-      SELECT 
-        e.id, e.name, e.slug, e.difficulty_level,
-        COUNT(a.id) as attempts_count,
-        COALESCE(AVG(r.score), 0) as avg_score,
-        COALESCE(AVG(r.percentage), 0) as avg_percentage,
-        COALESCE(SUM(CASE WHEN r.passed = 1 THEN 1 ELSE 0 END) / COUNT(r.id) * 100, 0) as pass_rate
-      FROM public_exams e
-      LEFT JOIN public_exam_attempts a ON e.id = a.exam_id AND a.status = 'submitted'
-      LEFT JOIN public_exam_results r ON a.id = r.attempt_id
-      GROUP BY e.id
-      ORDER BY attempts_count DESC
-    `);
-
-    // Top Performing Exam: exam with highest avg score
-    let topExam = null;
-    if (popularExams.length > 0) {
-      const sortedByScore = [...popularExams].sort((a, b) => b.avg_score - a.avg_score);
-      topExam = sortedByScore[0];
-    }
-
-    // Question Difficulty Analysis
+    // Question Difficulty Analysis specifically for this exam
     const [questions] = await pool.query(`
       SELECT q.id, q.question_text, q.type, q.correct_answer, q.marks, e.name as exam_name
       FROM public_exam_questions q
       JOIN public_exams e ON q.exam_id = e.id
-    `);
+      WHERE q.exam_id = ?
+    `, [examId]);
 
     const [attempts] = await pool.query(`
-      SELECT exam_id, answers_json
+      SELECT answers_json
       FROM public_exam_attempts
-      WHERE status = 'submitted'
-    `);
+      WHERE status = 'submitted' AND exam_id = ?
+    `, [examId]);
 
     const questionStats = questions.map(q => {
       let correctCount = 0;
       let totalCount = 0;
 
       for (const attempt of attempts) {
-        if (attempt.exam_id !== q.exam_id) continue;
-        
         try {
           const answers = typeof attempt.answers_json === 'string' ? JSON.parse(attempt.answers_json) : attempt.answers_json;
           if (!Array.isArray(answers)) continue;
@@ -422,8 +412,6 @@ router.get('/analytics', async (req, res) => {
       totalAttempts: totalAttemptsRow[0].count,
       averageScore: parseFloat(parseFloat(avgScoreRow[0].avg_pct || 0).toFixed(2)),
       passPercentage: parseFloat(parseFloat(passPercentageRow[0].pass_rate || 0).toFixed(2)),
-      popularExams,
-      topExam,
       questionDifficulty: questionStats
     });
   } catch (error) {
@@ -471,6 +459,7 @@ router.get('/', async (req, res) => {
         (SELECT COUNT(*) FROM public_exam_candidates WHERE exam_id = e.id) as candidate_count
       FROM public_exams e
       JOIN public_exam_categories c ON e.category_id = c.id
+      WHERE e.deleted_at IS NULL
       ORDER BY e.created_at DESC
     `);
     res.json(exams);
@@ -483,7 +472,7 @@ router.get('/', async (req, res) => {
 // POST /api/admin/public-exams
 router.post('/', async (req, res) => {
   try {
-    const { name, category_id, description, syllabus, duration_minutes, total_questions, total_marks, passing_marks, difficulty_level, status, slug, instructions, pass_percentage, negative_marking, randomize_questions, randomize_options, show_correct_answers, show_explanations, allow_retake, enable_certificate, anonymous_access, require_name, require_email, require_mobile } = req.body;
+    const { name, category_id, description, syllabus, duration_minutes, total_questions, total_marks, passing_marks, difficulty_level, status, slug, instructions, pass_percentage, negative_marking, randomize_questions, randomize_options, show_correct_answers, show_explanations, allow_retake, enable_certificate, anonymous_access, require_name, require_email, require_mobile, enable_proctoring, max_proctoring_warnings, enforce_fullscreen } = req.body;
 
     if (!name || !category_id || !slug) {
       return res.status(400).json({ message: 'Name, Category, and SEO Slug are required' });
@@ -492,8 +481,8 @@ router.post('/', async (req, res) => {
     const id = uuidv4();
     await pool.query(`
       INSERT INTO public_exams (
-        id, name, category_id, description, syllabus, duration_minutes, total_questions, total_marks, passing_marks, difficulty_level, status, slug, instructions, pass_percentage, negative_marking, randomize_questions, randomize_options, show_correct_answers, show_explanations, allow_retake, enable_certificate, anonymous_access, require_name, require_email, require_mobile
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        id, name, category_id, description, syllabus, duration_minutes, total_questions, total_marks, passing_marks, difficulty_level, status, slug, instructions, pass_percentage, negative_marking, randomize_questions, randomize_options, show_correct_answers, show_explanations, allow_retake, enable_certificate, anonymous_access, require_name, require_email, require_mobile, enable_proctoring, max_proctoring_warnings, enforce_fullscreen
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `, [
       id, name, category_id, description || null, syllabus || null,
       duration_minutes || 60, total_questions || 0, total_marks || 0,
@@ -501,7 +490,8 @@ router.post('/', async (req, res) => {
       instructions || null, pass_percentage || 50, negative_marking || 0.00,
       !!randomize_questions, !!randomize_options, show_correct_answers !== false, show_explanations !== false,
       allow_retake !== false, enable_certificate !== false, anonymous_access !== false,
-      require_name !== false, !!require_name, !!require_email, !!require_mobile
+      require_name !== false, !!require_name, !!require_email, !!require_mobile,
+      !!enable_proctoring, max_proctoring_warnings !== undefined ? max_proctoring_warnings : 3, !!enforce_fullscreen
     ]);
 
     res.status(201).json({ id, message: 'Exam created successfully' });
@@ -519,7 +509,7 @@ router.put('/:id', async (req, res) => {
       'total_questions', 'total_marks', 'passing_marks', 'difficulty_level', 'status', 'slug',
       'instructions', 'pass_percentage', 'negative_marking', 'randomize_questions', 'randomize_options',
       'show_correct_answers', 'show_explanations', 'allow_retake', 'enable_certificate', 'anonymous_access',
-      'require_name', 'require_email', 'require_mobile'
+      'require_name', 'require_email', 'require_mobile', 'enable_proctoring', 'max_proctoring_warnings', 'enforce_fullscreen'
     ];
     const updates = fields.filter(f => req.body[f] !== undefined);
     
@@ -529,7 +519,7 @@ router.put('/:id', async (req, res) => {
 
     const setClause = updates.map(f => `${f} = ?`).join(', ');
     const values = updates.map(f => {
-      if (['randomize_questions', 'randomize_options', 'show_correct_answers', 'show_explanations', 'allow_retake', 'enable_certificate', 'anonymous_access', 'require_name', 'require_email', 'require_mobile'].includes(f)) {
+      if (['randomize_questions', 'randomize_options', 'show_correct_answers', 'show_explanations', 'allow_retake', 'enable_certificate', 'anonymous_access', 'require_name', 'require_email', 'require_mobile', 'enable_proctoring', 'enforce_fullscreen'].includes(f)) {
         return !!req.body[f];
       }
       return req.body[f];
@@ -546,7 +536,7 @@ router.put('/:id', async (req, res) => {
 // DELETE /api/admin/public-exams/:id
 router.delete('/:id', async (req, res) => {
   try {
-    await pool.query('DELETE FROM public_exams WHERE id = ?', [req.params.id]);
+    await pool.query('UPDATE public_exams SET deleted_at = NOW(), registration_status = "closed" WHERE id = ?', [req.params.id]);
     res.json({ message: 'Exam deleted successfully' });
   } catch (error) {
     console.error('Delete admin exam error:', error);

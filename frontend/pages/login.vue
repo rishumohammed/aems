@@ -96,8 +96,8 @@ const baseUrl = computed(() => config.public.apiBase.replace('/api', ''));
 const instituteName = useState('instituteName');
 const appLogo = useState('appLogo');
 
-const email = ref('admin@aems.local');
-const password = ref('Admin@1234');
+const email = ref('');
+const password = ref('');
 const loading = ref(false);
 const error = ref('');
 const showPassword = ref(false);

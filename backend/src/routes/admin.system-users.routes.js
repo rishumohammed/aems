@@ -31,7 +31,7 @@ router.get('/', authenticateJWT, authorizeRoles('super_admin'), async (req, res)
     const [users] = await pool.query(`
       SELECT id, name, email, phone, role, status, last_login_at, created_at, permissions_json 
       FROM users 
-      WHERE role IN (?)
+      WHERE role IN (?) AND deleted_at IS NULL
       ORDER BY created_at DESC
     `, [SYSTEM_ROLES]);
     
@@ -236,9 +236,13 @@ router.delete('/:id', authenticateJWT, authorizeRoles('super_admin'), async (req
     const [existing] = await connection.query('SELECT email FROM users WHERE id = ? AND role IN (?)', [targetId, SYSTEM_ROLES]);
     if (existing.length === 0) return res.status(404).json({ message: 'System user not found' });
 
-    // Assuming ON DELETE CASCADE in schema for related tables or soft-delete
-    await connection.query('DELETE FROM user_profiles WHERE user_id = ?', [targetId]);
-    await connection.query('DELETE FROM users WHERE id = ?', [targetId]);
+    const emailSuffix = `.deleted.${Date.now()}`;
+    const newEmail = `${existing[0].email}${emailSuffix}`;
+
+    await connection.query(
+      "UPDATE users SET deleted_at = NOW(), status = 'inactive', email = ? WHERE id = ?",
+      [newEmail, targetId]
+    );
 
     await logAudit(connection, req.user.id, 'DELETE_USER', existing[0].email, {});
 

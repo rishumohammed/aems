@@ -31,21 +31,6 @@
       </div>
     </div>
 
-    <!-- Quick Navigation Links (Admin Submenu) -->
-    <v-card flat border class="pa-4 mb-8 rounded-xl bg-grey-lighten-4">
-      <div class="d-flex gap-2 flex-wrap">
-        <v-btn to="/dashboard/admin/public-exams" color="primary" variant="flat" rounded="lg" class="text-capitalize font-weight-bold">
-          <v-icon start>mdi-card-text-outline</v-icon> All Exams
-        </v-btn>
-        <v-btn to="/dashboard/admin/public-exams/questions" variant="text" rounded="lg" class="text-capitalize font-weight-bold text-secondary">
-          <v-icon start>mdi-database-outline</v-icon> Question Bank
-        </v-btn>
-        <v-btn to="/dashboard/admin/public-exams/results" variant="text" rounded="lg" class="text-capitalize font-weight-bold text-secondary">
-          <v-icon start>mdi-chart-bar</v-icon> Results &amp; Analytics
-        </v-btn>
-      </div>
-    </v-card>
-
     <!-- Search & Filters -->
     <v-card flat border class="pa-4 mb-6 rounded-xl">
       <v-row align="center" no-gutters class="gap-4 flex-wrap">
@@ -164,7 +149,7 @@
         <template v-slot:item.actions="{ item }">
           <div class="d-flex justify-end py-2 px-2">
             <div class="d-flex flex-column gap-1">
-              <!-- First Row of Actions -->
+                <!-- First Row of Actions -->
               <div class="d-flex gap-1">
                 <!-- Manage Questions -->
                 <v-btn icon="mdi-database-outline" variant="tonal" size="small" color="blue-grey" :to="`/dashboard/admin/public-exams/questions?examId=${item.id}`" title="Manage Questions" />
@@ -172,6 +157,8 @@
                 <v-btn icon="mdi-link-variant" variant="tonal" size="small" color="teal" :to="`/public-exams/${item.slug}/register`" target="_blank" title="Registration Form" />
                 <!-- Candidates -->
                 <v-btn icon="mdi-account-group-outline" variant="tonal" size="small" color="purple" :to="`/dashboard/admin/public-exams/${item.id}/candidates`" title="Candidates" />
+                <!-- Analytics -->
+                <v-btn icon="mdi-chart-bar" variant="tonal" size="small" color="primary" :to="`/dashboard/admin/public-exams/${item.id}/analytics`" title="Results & Analytics" />
                 <!-- Share / Copy Link Modal -->
                 <v-btn icon="mdi-share-variant" variant="tonal" size="small" color="info" @click="openShareDialog(item)" title="Share Exam Link" />
                 <!-- Edit -->

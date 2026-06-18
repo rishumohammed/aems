@@ -71,7 +71,7 @@ router.get('/courses', authenticateJWT, async (req, res) => {
       LEFT JOIN course_categories cat ON c.category_id = cat.id
     `;
     const params = [];
-    const conditions = [];
+    const conditions = ['c.deleted_at IS NULL'];
 
     if (req.user.role === USER_ROLES.TUTOR) {
       conditions.push('c.tutor_id = ?');
@@ -476,6 +476,26 @@ router.put('/courses/:id/status', authenticateJWT, isTutorOrAdmin, async (req, r
     }
 
     res.json({ message: `Course status updated to ${status}` });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Soft Delete Course
+router.delete('/courses/:id', authenticateJWT, isTutorOrAdmin, async (req, res) => {
+  try {
+    // Tutors can only delete their own courses
+    if (req.user.role === USER_ROLES.TUTOR) {
+      const [course] = await pool.query('SELECT id FROM courses WHERE id = ? AND tutor_id = ?', [req.params.id, req.user.id]);
+      if (course.length === 0) return res.status(403).json({ message: 'Forbidden or Course not found' });
+    }
+
+    await pool.query(
+      "UPDATE courses SET deleted_at = NOW(), status = 'archived' WHERE id = ?",
+      [req.params.id]
+    );
+
+    res.json({ message: 'Course deleted successfully' });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

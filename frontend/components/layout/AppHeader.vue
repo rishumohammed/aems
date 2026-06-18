@@ -5,14 +5,6 @@
     height="56"
   >
     <div class="header-content d-flex align-center px-6 w-100">
-      <v-btn
-        v-if="$vuetify.display.mobile"
-        icon="mdi-menu"
-        variant="text"
-        size="small"
-        class="mr-2"
-        @click="uiStore.toggleSidebar()"
-      ></v-btn>
 
       <div class="d-flex align-center ml-2">
         <div class="logo-box d-flex align-center justify-center" :style="{ width: appLogo ? 'auto' : '32px', height: '32px' }">

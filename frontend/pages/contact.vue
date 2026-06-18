@@ -110,6 +110,23 @@
                       ></v-text-field>
                     </v-col>
                     <v-col cols="12" md="6">
+                      <label class="text-caption font-weight-bold mb-2 d-block text-grey-darken-2">Interested Courses (Optional)</label>
+                      <v-select
+                        v-model="formData.interested_courses"
+                        :items="coursesList"
+                        item-title="title"
+                        item-value="title"
+                        placeholder="Select courses you are interested in"
+                        multiple
+                        chips
+                        closable-chips
+                        variant="outlined"
+                        density="comfortable"
+                        hide-details="auto"
+                        class="mb-4 bg-grey-lighten-4 rounded-lg"
+                      ></v-select>
+                    </v-col>
+                    <v-col cols="12">
                       <label class="text-caption font-weight-bold mb-2 d-block text-grey-darken-2">Subject</label>
                       <v-text-field
                         v-model="formData.subject"
@@ -179,12 +196,21 @@ const config = useRuntimeConfig();
 const submitting = ref(false);
 const success = ref(false);
 const errorMsg = ref('');
+const coursesList = ref([]);
+
+// Fetch available courses for the dropdown
+useFetch(`${config.public.apiBase}/public/courses?limit=100`).then((res) => {
+  if (res.data.value && res.data.value.courses) {
+    coursesList.value = res.data.value.courses;
+  }
+});
 
 const formData = reactive({
   name: '',
   email: '',
   phone: '',
   subject: '',
+  interested_courses: [],
   message: ''
 });
 
@@ -208,9 +234,19 @@ const handleSubmit = async () => {
   errorMsg.value = '';
 
   try {
+    let finalMessage = formData.message;
+    if (formData.interested_courses && formData.interested_courses.length > 0) {
+      finalMessage = `Interested Courses: ${formData.interested_courses.join(', ')}\n\n${finalMessage}`;
+    }
+
+    const payload = {
+      ...formData,
+      message: finalMessage
+    };
+
     const response = await $fetch(`${config.public.apiBase}/public/contact`, {
       method: 'POST',
-      body: formData
+      body: payload
     });
 
     success.value = true;
@@ -218,6 +254,7 @@ const handleSubmit = async () => {
     formData.email = '';
     formData.phone = '';
     formData.subject = '';
+    formData.interested_courses = [];
     formData.message = '';
     v$.value.$reset();
   } catch (err: any) {

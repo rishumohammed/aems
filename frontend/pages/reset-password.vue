@@ -1,10 +1,13 @@
 <template>
   <div class="login-page">
     <div class="login-card-wrap">
-      <div class="login-brand">
-        <span class="brand-icon">◈</span>
-        <span class="brand-name">AEMS Academy</span>
-      </div>
+      <NuxtLink to="/" class="login-brand" style="text-decoration: none;">
+        <img v-if="appLogo" :src="baseUrl + appLogo" :alt="instituteName" style="max-height: 40px; max-width: 160px; object-fit: contain;" />
+        <template v-else>
+          <span class="brand-icon">◈</span>
+          <span class="brand-name">{{ instituteName || 'Brixify' }}</span>
+        </template>
+      </NuxtLink>
 
       <div class="login-card">
         <div class="login-card-header">
@@ -84,6 +87,11 @@ import { useRoute } from 'vue-router';
 definePageMeta({
   layout: false
 });
+
+const config = useRuntimeConfig();
+const baseUrl = computed(() => config.public.apiBase.replace('/api', ''));
+const instituteName = useState('instituteName');
+const appLogo = useState('appLogo');
 
 const api = useApi();
 const route = useRoute();

@@ -1,14 +1,10 @@
 <template>
   <v-navigation-drawer
-    v-model="uiStore.isSidebarOpen"
-    :rail="navStore.isCollapsed && !$vuetify.display.mobile"
-    :permanent="!$vuetify.display.mobile"
-    :temporary="$vuetify.display.mobile"
+    permanent
     :scrim="false"
     elevation="0"
     id="app-sidebar"
     :width="280"
-    :rail-width="80"
     class="sidebar-container"
   >
 
@@ -94,9 +90,6 @@ const handleItemClick = (item: any) => {
 
 onMounted(() => {
   navStore.initSidebar();
-  if (display.mobile.value) {
-    uiStore.isSidebarOpen = false;
-  }
   navStore.fetchBadges();
 });
 

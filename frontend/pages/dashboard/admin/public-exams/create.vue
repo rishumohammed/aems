@@ -153,6 +153,22 @@
             </v-row>
           </v-card>
 
+          <!-- 3. Proctoring & Integrity Settings -->
+          <v-card class="pa-6 border rounded-xl mb-6" flat>
+            <h3 class="text-h6 font-weight-bold text-dark mb-4">Proctoring & Integrity Settings</h3>
+            <v-row>
+              <v-col cols="12" sm="12" md="6" class="py-1">
+                <v-checkbox v-model="fields.enable_proctoring" label="Enable Tab/Browser Switching Detection" color="primary" hide-details></v-checkbox>
+              </v-col>
+              <v-col cols="12" sm="12" md="6" class="py-1">
+                <v-text-field v-if="fields.enable_proctoring" v-model.number="fields.max_proctoring_warnings" label="Max Switching Warnings" type="number" hint="Auto-submit after this many violations" persistent-hint class="mb-3"></v-text-field>
+              </v-col>
+              <v-col cols="12" class="py-1">
+                <v-checkbox v-model="fields.enforce_fullscreen" label="Enforce Full Screen Mode" color="primary" hide-details></v-checkbox>
+              </v-col>
+            </v-row>
+          </v-card>
+
           <!-- 3. Practice Certificate Customizer (Display conditionally) -->
           <v-slide-y-transition>
             <v-card class="pa-6 border rounded-xl mb-6" flat v-if="fields.enable_certificate">
@@ -313,6 +329,9 @@ const fields = ref<any>({
   require_name: true,
   require_email: false,
   require_mobile: false,
+  enable_proctoring: false,
+  max_proctoring_warnings: 3,
+  enforce_fullscreen: false,
   status: 'draft'
 });
 
@@ -367,6 +386,9 @@ async function fetchExamDetails() {
         require_name: !!examMatch.require_name,
         require_email: !!examMatch.require_email,
         require_mobile: !!examMatch.require_mobile,
+        enable_proctoring: !!examMatch.enable_proctoring,
+        max_proctoring_warnings: examMatch.max_proctoring_warnings !== undefined ? examMatch.max_proctoring_warnings : 3,
+        enforce_fullscreen: !!examMatch.enforce_fullscreen,
         status: examMatch.status
       };
       

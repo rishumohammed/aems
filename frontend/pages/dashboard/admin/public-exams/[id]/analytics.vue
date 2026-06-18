@@ -1,11 +1,13 @@
 <template>
   <v-container class="py-8 px-6" fluid style="max-width: 1600px;">
     <!-- Header -->
-    <div class="d-flex align-center justify-space-between mb-8 flex-wrap gap-4">
+    <div class="d-flex align-center mb-8 gap-4">
+      <v-btn icon="mdi-arrow-left" variant="tonal" class="mr-2" to="/dashboard/admin/public-exams"></v-btn>
       <div>
         <h1 class="text-h4 font-weight-black text-dark mb-1">Results &amp; Analytics</h1>
-        <p class="text-subtitle-2 text-secondary">Monitor guest entrance test scores, view analytics dashboards, and export candidate data.</p>
+        <p class="text-subtitle-2 text-secondary">Monitor guest entrance test scores and view analytics dashboards for this exam.</p>
       </div>
+      <v-spacer></v-spacer>
       <div>
         <v-btn
           color="indigo"
@@ -21,21 +23,6 @@
         </v-btn>
       </div>
     </div>
-
-    <!-- Quick Navigation Links (Admin Submenu) -->
-    <v-card flat border class="pa-4 mb-8 rounded-xl bg-grey-lighten-4">
-      <div class="d-flex gap-2 flex-wrap">
-        <v-btn to="/dashboard/admin/public-exams" variant="text" rounded="lg" class="text-capitalize font-weight-bold text-secondary">
-          <v-icon start>mdi-card-text-outline</v-icon> All Exams
-        </v-btn>
-        <v-btn to="/dashboard/admin/public-exams/questions" variant="text" rounded="lg" class="text-capitalize font-weight-bold text-secondary">
-          <v-icon start>mdi-database-outline</v-icon> Question Bank
-        </v-btn>
-        <v-btn to="/dashboard/admin/public-exams/results" color="primary" variant="flat" rounded="lg" class="text-capitalize font-weight-bold">
-          <v-icon start>mdi-chart-bar</v-icon> Results &amp; Analytics
-        </v-btn>
-      </div>
-    </v-card>
 
     <!-- Loading Analytics -->
     <div v-if="loadingAnalytics" class="text-center py-8">
@@ -55,7 +42,7 @@
         <v-col cols="12" sm="4">
           <v-card class="pa-6 border rounded-xl text-center" flat>
             <v-icon color="success" size="36" class="mb-2">mdi-trophy-outline</v-icon>
-            <div class="text-caption text-secondary font-weight-bold mb-1">Overall Pass Percentage</div>
+            <div class="text-caption text-secondary font-weight-bold mb-1">Pass Percentage</div>
             <div class="text-h4 font-weight-black text-dark">{{ analytics.passPercentage }}%</div>
           </v-card>
         </v-col>
@@ -70,58 +57,26 @@
 
       <!-- Advanced stats row -->
       <v-row>
-        <v-col cols="12" md="6" class="mb-4">
-          <v-card class="pa-6 border rounded-xl h-100" flat>
-            <h3 class="text-subtitle-1 font-weight-bold mb-4 text-dark">
-              <v-icon start color="primary" size="20">mdi-star-outline</v-icon> Popular &amp; Top Exams
-            </h3>
-            
-            <div v-if="analytics.popularExams && analytics.popularExams.length > 0">
-              <div class="d-flex align-center justify-space-between mb-3 bg-grey-lighten-4 pa-3 rounded-lg">
-                <div>
-                  <div class="text-caption text-secondary">Most Popular Practice Exam</div>
-                  <div class="font-weight-bold text-dark">{{ analytics.popularExams[0]?.name }}</div>
-                </div>
-                <div class="text-right">
-                  <div class="text-caption text-secondary">Attempts</div>
-                  <div class="font-weight-bold text-primary">{{ analytics.popularExams[0]?.attempts_count }}</div>
-                </div>
-              </div>
-
-              <div class="d-flex align-center justify-space-between bg-grey-lighten-4 pa-3 rounded-lg" v-if="analytics.topExam">
-                <div>
-                  <div class="text-caption text-secondary">Top Performing Exam (Highest Avg)</div>
-                  <div class="font-weight-bold text-dark">{{ analytics.topExam.name }}</div>
-                </div>
-                <div class="text-right">
-                  <div class="text-caption text-secondary">Avg Score</div>
-                  <div class="font-weight-bold text-success">{{ parseFloat(analytics.topExam.avg_percentage).toFixed(1) }}%</div>
-                </div>
-              </div>
-            </div>
-            <div v-else class="text-center py-8 text-secondary">No exam activity recorded.</div>
-          </v-card>
-        </v-col>
-
-        <v-col cols="12" md="6" class="mb-4">
+        <v-col cols="12">
           <v-card class="pa-6 border rounded-xl h-100" flat>
             <h3 class="text-subtitle-1 font-weight-bold mb-4 text-dark">
               <v-icon start color="primary" size="20">mdi-brain</v-icon> Question Success Rate
             </h3>
             <div v-if="analytics.questionDifficulty && analytics.questionDifficulty.length > 0">
-              <div v-for="q in analytics.questionDifficulty.slice(0, 3)" :key="q.id" class="mb-3">
-                <div class="d-flex justify-space-between align-center mb-1">
-                  <span class="text-body-2 text-truncate font-weight-bold text-dark" style="max-width: 75%">{{ q.question_text }}</span>
-                  <v-chip size="x-small" :color="getDifficultyColorBadge(q.perceived_difficulty)" variant="flat" class="text-white font-weight-bold text-uppercase">
-                    {{ q.perceived_difficulty }}
-                  </v-chip>
-                </div>
-                <v-progress-linear :model-value="q.success_rate" color="success" height="6" rounded></v-progress-linear>
-                <div class="d-flex justify-space-between text-xsmall text-secondary mt-1">
-                  <span>Exam: {{ q.exam_name }}</span>
-                  <span>{{ q.success_rate }}% Correct ({{ q.correct_count }}/{{ q.total_answers }})</span>
-                </div>
-              </div>
+              <v-row>
+                <v-col cols="12" md="6" v-for="q in analytics.questionDifficulty.slice(0, 6)" :key="q.id" class="mb-3">
+                  <div class="d-flex justify-space-between align-center mb-1">
+                    <span class="text-body-2 text-truncate font-weight-bold text-dark" style="max-width: 75%">{{ q.question_text }}</span>
+                    <v-chip size="x-small" :color="getDifficultyColorBadge(q.perceived_difficulty)" variant="flat" class="text-white font-weight-bold text-uppercase">
+                      {{ q.perceived_difficulty }}
+                    </v-chip>
+                  </div>
+                  <v-progress-linear :model-value="q.success_rate" color="success" height="6" rounded></v-progress-linear>
+                  <div class="d-flex justify-space-between text-xsmall text-secondary mt-1">
+                    <span>{{ q.success_rate }}% Correct ({{ q.correct_count }}/{{ q.total_answers }})</span>
+                  </div>
+                </v-col>
+              </v-row>
             </div>
             <div v-else class="text-center py-8 text-secondary">No question analytics recorded.</div>
           </v-card>
@@ -135,7 +90,7 @@
         <v-col cols="12" md="5" class="pa-0">
           <v-text-field
             v-model="search"
-            placeholder="Search attempts by candidate name, email, or exam..."
+            placeholder="Search attempts by candidate name or email..."
             prepend-inner-icon="mdi-magnify"
             hide-details
             clearable
@@ -169,14 +124,9 @@
         class="bg-transparent custom-table"
         @update:options="onOptionsChange"
       >
-        <!-- Exam Column -->
-        <template v-slot:item.exam_name="{ item }">
-          <div class="font-weight-bold text-dark py-2">{{ item.exam_name }}</div>
-        </template>
-
         <!-- Candidate Column -->
         <template v-slot:item.guest_name="{ item }">
-          <div>
+          <div class="py-2">
             <div class="font-weight-bold text-dark d-flex align-center">
               <v-icon size="14" class="mr-1 text-secondary" v-if="item.is_anonymous">mdi-incognito</v-icon>
               {{ item.guest_name }}
@@ -269,12 +219,15 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useApi } from '@/composables/useApi';
+import { useRoute } from 'vue-router';
 
 definePageMeta({
   layout: 'dashboard'
 });
 
 const api = useApi();
+const route = useRoute();
+const examId = route.params.id;
 
 const loadingAnalytics = ref(true);
 const analytics = ref<any>(null);
@@ -292,7 +245,6 @@ const targetAttempt = ref<any>(null);
 const deleting = ref(false);
 
 const headers = [
-  { title: 'Practice Exam', key: 'exam_name' },
   { title: 'Candidate', key: 'guest_name' },
   { title: 'Score', key: 'score', align: 'center' as const },
   { title: 'Percentage', key: 'percentage', align: 'center' as const },
@@ -304,7 +256,7 @@ const headers = [
 async function fetchAnalytics() {
   loadingAnalytics.value = true;
   try {
-    const { data } = await api.get('/admin/public-exams/analytics');
+    const { data } = await api.get(`/admin/public-exams/${examId}/analytics`);
     analytics.value = data;
   } catch (err) {
     console.error('Failed to load analytics:', err);
@@ -321,7 +273,7 @@ async function fetchAttempts() {
       page: currentPage.value,
       limit: itemsPerPage.value
     };
-    const { data } = await api.get('/admin/public-exams/attempts', { params });
+    const { data } = await api.get(`/admin/public-exams/${examId}/attempts`, { params });
     attempts.value = data.attempts;
     totalAttempts.value = data.total;
   } catch (err) {
@@ -366,12 +318,12 @@ async function deleteAttempt() {
 async function exportAttempts() {
   exporting.value = true;
   try {
-    const response = await api.get('/admin/public-exams/attempts/export', { responseType: 'blob' });
+    const response = await api.get(`/admin/public-exams/${examId}/attempts/export`, { responseType: 'blob' });
     const blob = new Blob([response.data], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.setAttribute('download', 'public-exam-attempts.csv');
+    link.setAttribute('download', `exam-${examId}-attempts.csv`);
     document.body.appendChild(link);
     link.click();
     link.remove();

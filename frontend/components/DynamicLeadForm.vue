@@ -135,6 +135,22 @@
                     v-bind="telOptions"
                   ></vue-tel-input>
                 </div>
+                <v-select
+                  v-model="formData.interested_courses"
+                  :items="coursesList"
+                  item-title="title"
+                  item-value="title"
+                  label="Interested Courses (Optional)"
+                  placeholder="Select courses you are interested in"
+                  multiple
+                  chips
+                  closable-chips
+                  variant="outlined"
+                  density="comfortable"
+                  color="primary"
+                  hide-details="auto"
+                  class="bg-white rounded-lg mb-4"
+                ></v-select>
                 <v-textarea
                   v-model="formData.message"
                   label="How can we help? *"
@@ -144,7 +160,7 @@
                   color="primary"
                   rows="3"
                   hide-details="auto"
-                  class="bg-white rounded-lg"
+                  class="bg-white rounded-lg mb-4"
                 ></v-textarea>
               </v-col>
             </template>
@@ -212,8 +228,16 @@ const { data: formConfig, pending: loading, error: fetchError } = await useFetch
 const submitting = ref(false);
 const success = ref(false);
 const errorMsg = ref('');
-const formData = ref({});
+const formData = ref({ interested_courses: [] });
 const waLink = ref('');
+const coursesList = ref([]);
+
+// Fetch available courses for the dropdown
+useFetch(`${config.public.apiBase}/public/courses?limit=100`).then((res) => {
+  if (res.data.value && res.data.value.courses) {
+    coursesList.value = res.data.value.courses;
+  }
+});
 
 // Watch formConfig to initialize formData
 watchEffect(() => {
@@ -287,13 +311,18 @@ const handleSubmit = async () => {
     const isFallback = !formConfig.value;
     const endpoint = isFallback ? `${config.public.apiBase}/public/contact` : `${config.public.apiBase}/public/leads`;
     
+    let finalMessage = formData.value.message || 'Interested in learning more.';
+    if (isFallback && formData.value.interested_courses && formData.value.interested_courses.length > 0) {
+      finalMessage = `Interested Courses: ${formData.value.interested_courses.join(', ')}\n\n${finalMessage}`;
+    }
+
     // Construct payload based on endpoint
     const payload = isFallback ? {
       name: formData.value.name,
       email: formData.value.email,
       phone: formData.value.phone,
       subject: 'Homepage Enquiry',
-      message: formData.value.message || 'Interested in learning more.'
+      message: finalMessage
     } : {
       name: formData.value.name || formData.value.full_name || 'Visitor',
       email: formData.value.email,

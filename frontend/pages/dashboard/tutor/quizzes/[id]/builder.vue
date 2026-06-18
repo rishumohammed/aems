@@ -10,6 +10,10 @@
           </div>
         </div>
         <div class="d-flex gap-3">
+          <input type="file" ref="fileInput" accept=".csv" class="d-none" @change="handleFileUpload" />
+          <v-btn color="white" variant="outlined" rounded="xl" class="text-white font-weight-black px-6" size="large" @click="$refs.fileInput.click()">
+            <v-icon left class="mr-2">mdi-upload</v-icon> Bulk Import CSV
+          </v-btn>
           <v-btn color="white" rounded="xl" class="text-primary font-weight-black px-6" size="large" @click="saveQuiz" :loading="saving">
             Save Changes
           </v-btn>
@@ -114,6 +118,7 @@
 <script setup>
 import QuizQuestionBuilder from '@/components/lms/QuizQuestionBuilder.vue';
 import { useApi } from '@/composables/useApi';
+import Papa from 'papaparse';
 
 definePageMeta({
   layout: 'dashboard',
@@ -127,6 +132,8 @@ const quizId = route.params.id;
 const loading = ref(true);
 const saving = ref(false);
 const successSnack = ref(false);
+const fileInput = ref(null);
+
 const quiz = ref({
   title: '',
   time_limit: 30,
@@ -166,6 +173,45 @@ const saveQuiz = async () => {
   } finally {
     saving.value = false;
   }
+};
+
+const handleFileUpload = (event) => {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  Papa.parse(file, {
+    header: true,
+    skipEmptyLines: true,
+    complete: (results) => {
+      if (results.errors.length > 0) {
+        alert('Error parsing CSV. Please check the format.');
+        console.error(results.errors);
+        return;
+      }
+      
+      const newQuestions = results.data.map(row => {
+        // Expected headers: Question, Option1, Option2, Option3, Option4, CorrectIndex (1-4)
+        const opts = [
+          row['Option1'] || row['Option 1'],
+          row['Option2'] || row['Option 2'],
+          row['Option3'] || row['Option 3'],
+          row['Option4'] || row['Option 4']
+        ].filter(Boolean);
+
+        const correctIdx = parseInt(row['CorrectIndex'] || row['Correct Index'] || '1') - 1;
+
+        return {
+          question_text: row['Question'] || 'Untitled Question',
+          options: opts.length >= 2 ? opts : ['Option 1', 'Option 2'],
+          correct_index: Math.max(0, Math.min(correctIdx, opts.length - 1))
+        };
+      });
+
+      questions.value = [...questions.value, ...newQuestions];
+      alert(`Successfully parsed ${newQuestions.length} questions. Don't forget to click 'Publish Updates' to save.`);
+      event.target.value = ''; // Reset file input
+    }
+  });
 };
 
 const isValid = computed(() => {
