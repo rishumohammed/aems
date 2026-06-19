@@ -275,7 +275,7 @@ router.post('/contact', async (req, res) => {
       name,
       email,
       phone: phone || null,
-      source: 'website_contact_form',
+      source: 'website',
       form_id: id,
       custom_fields: {
         subject: subject || '',
