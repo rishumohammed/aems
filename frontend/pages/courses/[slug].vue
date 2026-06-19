@@ -27,16 +27,7 @@
               <h1 class="text-h2 font-weight-black mb-4 tracking-tight leading-tight">{{ course.title }}</h1>
               
               <div class="d-flex align-center flex-wrap gap-4 mb-6">
-                <div class="d-flex align-center">
-                  <v-rating model-value="4.8" color="amber-darken-2" density="compact" size="small" readonly></v-rating>
-                  <span class="ml-2 font-weight-bold">4.8</span>
-                  <span class="ml-1 text-grey text-caption">(2.4k reviews)</span>
-                </div>
-                <v-divider vertical inset></v-divider>
-                <div class="text-body-2 text-grey-darken-1">
-                  <v-icon size="18" class="mr-1">mdi-account-group</v-icon>
-                  12,450 students enrolled
-                </div>
+                <!-- Removed fake ratings and student count -->
               </div>
 
               <div class="d-flex align-center gap-4">
@@ -83,7 +74,6 @@
               <v-tab value="overview" class="text-capitalize font-weight-bold">Overview</v-tab>
               <v-tab value="curriculum" class="text-capitalize font-weight-bold">Curriculum</v-tab>
               <v-tab value="instructor" class="text-capitalize font-weight-bold">Instructor</v-tab>
-              <v-tab value="reviews" class="text-capitalize font-weight-bold">Reviews</v-tab>
               <v-tab value="qa" class="text-capitalize font-weight-bold">Q&A</v-tab>
             </v-tabs>
 
@@ -92,16 +82,6 @@
               <v-window-item value="overview">
                 <div class="text-h5 font-weight-bold mb-4">About this course</div>
                 <div class="text-body-1 text-grey-darken-2 mb-8" v-html="course.description || 'No description available.'"></div>
-                
-                <v-card variant="outlined" border class="pa-6 rounded-xl bg-white mb-8">
-                  <div class="text-h6 font-weight-bold mb-4">What you'll learn</div>
-                  <v-row>
-                    <v-col v-for="i in 6" :key="i" cols="12" sm="6" class="d-flex align-start">
-                      <v-icon color="success" size="18" class="mr-3 mt-1">mdi-check-circle-outline</v-icon>
-                      <span class="text-body-2 text-grey-darken-1">Master industry-standard tools and workflows used by top pros.</span>
-                    </v-col>
-                  </v-row>
-                </v-card>
               </v-window-item>
 
               <!-- Curriculum -->
@@ -152,54 +132,19 @@
               <v-window-item value="instructor">
                 <div class="text-h5 font-weight-bold mb-6">About the Instructor</div>
                 <v-card flat border class="pa-6 rounded-xl">
-                    <div class="d-flex align-center gap-6 mb-6">
-                        <v-avatar size="100">
-                            <v-img src="https://i.pravatar.cc/200?u=tutor"></v-img>
+                    <div class="d-flex align-center gap-6">
+                        <v-avatar size="100" color="primary-lighten-4">
+                            <span class="text-h3 font-weight-black text-primary">{{ course.tutor_name ? course.tutor_name.charAt(0).toUpperCase() : 'T' }}</span>
                         </v-avatar>
                         <div>
-                            <h3 class="text-h5 font-weight-bold">{{ course.tutor_name || 'Expert Instructor' }}</h3>
-                            <p class="text-subtitle-2 text-primary">Senior Industry Expert & Mentor</p>
-                            <div class="d-flex gap-4 mt-2">
-                                <div class="text-center">
-                                    <div class="text-body-1 font-weight-bold">4.8</div>
-                                    <div class="text-caption text-grey">Rating</div>
-                                </div>
-                                <v-divider vertical inset></v-divider>
-                                <div class="text-center">
-                                    <div class="text-body-1 font-weight-bold">15k+</div>
-                                    <div class="text-caption text-grey">Students</div>
-                                </div>
-                                <v-divider vertical inset></v-divider>
-                                <div class="text-center">
-                                    <div class="text-body-1 font-weight-bold">12</div>
-                                    <div class="text-caption text-grey">Courses</div>
-                                </div>
-                            </div>
+                            <h3 class="text-h5 font-weight-bold">{{ course.tutor_name || 'Course Instructor' }}</h3>
+                            <p class="text-subtitle-2 text-primary">Instructor</p>
                         </div>
                     </div>
-                    <p class="text-body-2 text-grey-darken-1 leading-relaxed">
-                        With over 10 years of experience in the industry, our instructor brings practical knowledge and real-world projects to the classroom. Passionate about teaching and helping students bridge the gap between education and employment.
-                    </p>
                 </v-card>
               </v-window-item>
 
-              <!-- Reviews -->
-              <v-window-item value="reviews">
-                <div class="text-h5 font-weight-bold mb-6">Student Reviews</div>
-                <v-row class="mb-8">
-                    <v-col cols="12" sm="4" class="text-center">
-                        <div class="text-h1 font-weight-black text-primary">4.8</div>
-                        <v-rating model-value="4.8" color="amber-darken-2" density="compact" half-increments readonly></v-rating>
-                        <div class="text-subtitle-2 font-weight-bold mt-2">Course Rating</div>
-                    </v-col>
-                    <v-col cols="12" sm="8">
-                        <div v-for="i in 5" :key="i" class="d-flex align-center mb-2">
-                            <v-progress-linear :model-value="100 - (i-1)*20" color="primary" height="8" rounded class="mr-4"></v-progress-linear>
-                            <span class="text-caption text-grey" style="min-width: 40px;">{{ 6-i }} Star</span>
-                        </div>
-                    </v-col>
-                </v-row>
-              </v-window-item>
+
 
               <!-- Q&A Tab -->
               <v-window-item value="qa">
@@ -389,25 +334,8 @@
               <!-- Bank Details Card -->
               <v-alert type="info" variant="tonal" rounded="lg" class="mb-5" border="start">
                 <div class="text-subtitle-2 font-weight-bold mb-2">Payment Instructions</div>
-                <div class="text-body-2">Transfer the course fee to the following account and upload proof below.</div>
+                <div class="text-body-2">Please contact administration or your coordinator for our official bank and UPI details. Once you have transferred the course fee, upload your payment proof below.</div>
               </v-alert>
-
-              <v-card variant="outlined" rounded="lg" class="pa-4 mb-5 bg-grey-lighten-5">
-                <div class="text-subtitle-2 font-weight-bold mb-3 d-flex align-center">
-                  <v-icon size="18" color="primary" class="mr-2">mdi-bank</v-icon>
-                  Bank / UPI Details
-                </div>
-                <v-table density="compact" class="bg-transparent">
-                  <tbody>
-                    <tr><td class="text-caption text-grey py-1 pr-4">Bank Name</td><td class="text-caption font-weight-bold py-1">State Bank of India</td></tr>
-                    <tr><td class="text-caption text-grey py-1 pr-4">Account Name</td><td class="text-caption font-weight-bold py-1">AEMS Academy Pvt. Ltd.</td></tr>
-                    <tr><td class="text-caption text-grey py-1 pr-4">Account No.</td><td class="text-caption font-weight-bold py-1">12345678901234</td></tr>
-                    <tr><td class="text-caption text-grey py-1 pr-4">IFSC Code</td><td class="text-caption font-weight-bold py-1">SBIN0001234</td></tr>
-                    <tr><td class="text-caption text-grey py-1 pr-4">UPI ID</td><td class="text-caption font-weight-bold py-1">aems@okaxis</td></tr>
-                    <tr><td class="text-caption text-grey py-1 pr-4">Branch</td><td class="text-caption font-weight-bold py-1">MG Road, Bengaluru</td></tr>
-                  </tbody>
-                </v-table>
-              </v-card>
 
               <!-- Offline Payment Form -->
               <v-form ref="offlineFormRef">
@@ -626,10 +554,8 @@ onMounted(async () => {
 });
 
 const highlights = [
-  { icon: 'mdi-play-box-outline', text: '12.5 hours on-demand video' },
-  { icon: 'mdi-file-document-outline', text: '15 downloadable resources' },
   { icon: 'mdi-infinity', text: 'Full lifetime access' },
-  { icon: 'mdi-cellphone-link', text: 'Access on mobile and TV' },
+  { icon: 'mdi-cellphone-link', text: 'Access on mobile and desktop' },
   { icon: 'mdi-certificate-outline', text: 'Certificate of completion' }
 ];
 
