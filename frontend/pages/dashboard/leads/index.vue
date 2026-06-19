@@ -141,19 +141,23 @@
       </div>
       <div class="fr2 mb-4">
         <AppInput v-model="newLead.email" label="Email Address" type="email" placeholder="Enter email" :error="errors.email" large />
-        <v-autocomplete
-          v-model="newLead.course_interest_ids"
-          :items="courses"
-          item-title="label"
-          item-value="value"
-          label="Course Interests"
-          multiple
-          chips
-          closable-chips
-          variant="outlined"
-          density="comfortable"
-          :error-messages="errors.course_interest_ids"
-        ></v-autocomplete>
+        <div class="d-flex flex-column w-100">
+          <label style="font-size: 12px; font-weight: 600; color: var(--g5); margin-bottom: 6px; letter-spacing: 0.1px;">Course Interests</label>
+          <v-autocomplete
+            v-model="newLead.course_interest_ids"
+            :items="courses"
+            item-title="label"
+            item-value="value"
+            placeholder="Select course interests..."
+            multiple
+            chips
+            closable-chips
+            variant="outlined"
+            density="comfortable"
+            :error-messages="errors.course_interest_ids"
+            hide-details="auto"
+          ></v-autocomplete>
+        </div>
       </div>
       <AppInput v-model="newLead.notes" label="Initial Notes" type="textarea" placeholder="Add any initial details..." :error="errors.notes" large />
     </AppModal>
