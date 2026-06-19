@@ -1,16 +1,17 @@
 <template>
   <v-container fluid class="pa-0">
-    <!-- Header with Glassmorphism Effect -->
-    <div class="header-section pa-8 pb-15 mb-n10">
+    <!-- Header -->
+    <v-card class="pa-8 pb-15 mb-n10 border-b rounded-0" elevation="0" color="white">
       <div class="d-flex align-center justify-space-between mb-2">
         <div>
-          <h1 class="text-h4 font-weight-black text-white mb-1">Earnings Report</h1>
-          <p class="text-subtitle-1 text-white opacity-80">Track your revenue and financial performance.</p>
+          <h1 class="text-h4 font-weight-black text-primary-dark mb-1">Earnings Report</h1>
+          <p class="text-subtitle-1 text-secondary font-weight-medium">Track your revenue and financial performance.</p>
         </div>
         <v-btn 
-          color="white" 
-          rounded="xl" 
-          class="text-success font-weight-black px-6 shadow-glow" 
+          color="primary" 
+          variant="flat"
+          rounded="lg" 
+          class="font-weight-bold px-6" 
           size="large" 
           prepend-icon="mdi-download"
           @click="exportStatement"
@@ -19,7 +20,7 @@
           Export Statement
         </v-btn>
       </div>
-    </div>
+    </v-card>
 
     <v-container fluid class="pa-8">
       <!-- Financial Stats -->
@@ -190,11 +191,7 @@ definePageMeta({
 </script>
 
 <style scoped>
-.header-section {
-  background: linear-gradient(135deg, #30B94D 0%, #007AFF 100%);
-  position: relative;
-  overflow: hidden;
-}
+
 
 .stat-card {
   position: relative;

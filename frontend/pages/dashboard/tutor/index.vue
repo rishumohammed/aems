@@ -1,18 +1,17 @@
 <template>
   <v-container fluid class="pa-0">
-    <!-- Header Section with Gradient -->
-    <div class="header-section pa-10 pb-16 mb-n12 rounded-b-xl elevation-6">
-      <div class="d-flex align-center justify-space-between mb-2 position-relative" style="z-index: 2">
+    <!-- Header Section -->
+    <v-card class="pa-10 pb-16 mb-n12 rounded-b-xl border-b" elevation="0" color="white">
+      <div class="d-flex align-center justify-space-between mb-2 position-relative">
         <div>
-          <h1 class="text-h3 font-weight-black text-white mb-2">Instructor Studio</h1>
-          <p class="text-h6 text-white opacity-90">Manage your academy, interact with students, and track your growth.</p>
+          <h1 class="text-h3 font-weight-black text-primary-dark mb-2">Instructor Studio</h1>
+          <p class="text-h6 text-secondary font-weight-medium">Manage your academy, interact with students, and track your growth.</p>
         </div>
-        <v-btn color="amber-accent-2" rounded="xl" class="text-grey-darken-4 font-weight-black px-8 shadow-glow-amber" size="large" to="/dashboard/courses/create" prepend-icon="mdi-plus">
+        <v-btn color="primary" rounded="lg" variant="flat" class="font-weight-bold px-8" size="large" to="/dashboard/courses/create" prepend-icon="mdi-plus">
           New Course
         </v-btn>
       </div>
-      <div class="header-overlay"></div>
-    </div>
+    </v-card>
 
     <v-container fluid class="pa-8">
       <!-- Stats Row -->
@@ -252,21 +251,7 @@ onMounted(fetchDashboardData);
 </script>
 
 <style scoped>
-.header-section {
-  background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 50%, #6366f1 100%);
-  position: relative;
-  overflow: hidden;
-}
 
-.header-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: radial-gradient(circle at top right, rgba(255,255,255,0.1) 0%, transparent 70%);
-  z-index: 1;
-}
 
 .shadow-glow-amber {
   border: 1px solid var(--border);

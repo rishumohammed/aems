@@ -266,18 +266,18 @@
     <!-- Detail Dialog -->
     <v-dialog v-model="detailsDialog" max-width="820" scrollable>
       <v-card v-if="selectedTutor" rounded="xl" class="overflow-hidden">
-        <div class="detail-header pa-8 pb-6 d-flex align-center gap-6">
-          <v-avatar color="white" size="80" class="elevation-4" rounded="xl">
-            <span class="text-h4 font-weight-black text-indigo">{{ selectedTutor.name?.charAt(0)?.toUpperCase() }}</span>
+        <div class="pa-8 pb-6 d-flex align-center gap-6 bg-grey-lighten-4 border-b">
+          <v-avatar color="primary" size="80" class="elevation-2" rounded="xl">
+            <span class="text-h4 font-weight-black text-white">{{ selectedTutor.name?.charAt(0)?.toUpperCase() }}</span>
           </v-avatar>
           <div class="flex-grow-1">
-            <h2 class="text-h5 font-weight-black text-white mb-1">{{ selectedTutor.name }}</h2>
-            <div class="text-white opacity-80 text-body-2">{{ selectedTutor.email }}</div>
-            <v-chip size="small" color="warning" class="mt-2 font-weight-black" variant="flat">
+            <h2 class="text-h5 font-weight-black text-primary-dark mb-1">{{ selectedTutor.name }}</h2>
+            <div class="text-secondary text-body-2 font-weight-medium">{{ selectedTutor.email }}</div>
+            <v-chip size="small" color="warning" class="mt-2 font-weight-black" variant="tonal">
               <v-icon start size="14">mdi-clock-outline</v-icon> Pending Approval
             </v-chip>
           </div>
-          <v-btn icon="mdi-close" variant="tonal" color="white" size="small" @click="detailsDialog = false" />
+          <v-btn icon="mdi-close" variant="text" color="grey" size="small" @click="detailsDialog = false" />
         </div>
         <v-divider />
         <v-card-text class="pa-8">
@@ -561,7 +561,7 @@ onMounted(loadTutors);
 }
 .tutor-row { transition: background 0.15s ease; }
 .tutor-row:hover { background: rgba(99, 102, 241, 0.03) !important; }
-.detail-header { background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); }
+
 .detail-section-label { font-size: 0.7rem; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; color: #94a3b8; }
 .experience-box { background: #f8fafc; border: 1px solid rgba(0,0,0,0.06); min-height: 60px; line-height: 1.7; }
 .truncate-text { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; cursor: help; }
