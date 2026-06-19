@@ -10,7 +10,7 @@
           <v-chip size="small" color="primary" variant="flat" class="mb-4 font-weight-bold text-uppercase tracking-widest">Official Credentials</v-chip>
           <h1 class="text-h2 font-weight-black mb-4 tracking-tight" style="color: var(--g7);">Verify Certificate</h1>
           <p class="text-body-1 text-grey-darken-1 mx-auto" style="max-width: 600px; line-height: 1.8;">
-            Ensure the authenticity of any AEMS Academy certificate by entering its unique identification number below.
+            Ensure the authenticity of any Brixify certificate by entering its unique identification number below.
           </p>
         </div>
 
@@ -23,7 +23,7 @@
               hide-details
               rounded="lg"
               class="flex-grow-1"
-              placeholder="e.g. AEMS-2026-XXXX"
+              placeholder="e.g. BRX-2026-XXXX"
             ></v-text-field>
             <v-btn
               color="primary"
@@ -142,7 +142,7 @@ onMounted(() => {
 
 useSeoMeta({
   title: 'Verify Certificate',
-  description: 'Public verification portal for AEMS Academy certificates and credentials.'
+  description: 'Public verification portal for Brixify certificates and credentials.'
 });
 </script>
 
