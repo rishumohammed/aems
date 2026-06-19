@@ -184,14 +184,14 @@
       <v-container>
         <div class="trust-inner">
           <div class="trust-left">
-            <div class="eyebrow-label mb-3" style="color:rgba(255,255,255,0.6)">Get Started</div>
-            <h2 class="trust-headline">Join Our Learning Community</h2>
-            <p class="trust-sub">Whether you're a student, professional, or organisation — Brixify has the expertise to help you succeed and stay globally compliant.</p>
+            <div class="eyebrow-label mb-3">Get Started</div>
+            <h2 class="trust-headline text-ink">Join Our Learning Community</h2>
+            <p class="trust-sub text-secondary">Whether you're a student, professional, or organisation — Brixify has the expertise to help you succeed and stay globally compliant.</p>
             <div class="d-flex gap-3 flex-wrap mt-6">
-              <v-btn color="white" rounded="lg" class="text-none font-weight-bold" style="color:var(--primary, #211d71)" size="large" to="/register">
+              <v-btn color="primary" variant="flat" rounded="lg" class="text-none font-weight-bold px-8" size="large" to="/register">
                 Get Started Today <v-icon end>mdi-arrow-right</v-icon>
               </v-btn>
-              <v-btn variant="outlined" color="white" rounded="lg" class="text-none font-weight-bold" size="large" to="/courses">
+              <v-btn variant="outlined" color="primary" rounded="lg" class="text-none font-weight-bold px-8" size="large" to="/courses">
                 Browse Courses
               </v-btn>
             </div>
@@ -199,8 +199,8 @@
           <div class="trust-right">
             <v-row>
               <v-col cols="6" v-for="stat in ctaStats" :key="stat.label" class="text-center mb-4">
-                <div class="trust-stat-value">{{ stat.value }}</div>
-                <div class="trust-stat-label">{{ stat.label }}</div>
+                <div class="trust-stat-value text-primary">{{ stat.value }}</div>
+                <div class="trust-stat-label text-secondary">{{ stat.label }}</div>
               </v-col>
             </v-row>
           </div>
@@ -277,9 +277,8 @@ const ctaStats = [
 .about-hero-bg-overlay {
   position: absolute; inset: 0;
   background-image:
-    radial-gradient(circle at 85% 15%, rgba(33,29,113,0.04) 0%, transparent 55%),
-    radial-gradient(circle at 15% 85%, rgba(246,130,31,0.03) 0%, transparent 55%),
-    url("data:image/svg+xml,%3Csvg width='32' height='32' viewBox='0 0 32 32' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='2' cy='2' r='1.5' fill='%23211d71' fill-opacity='0.08'/%3E%3C/svg%3E");
+    radial-gradient(circle at 85% 15%, rgba(0, 102, 204, 0.04) 0%, transparent 55%),
+    radial-gradient(circle at 15% 85%, rgba(100, 116, 139, 0.03) 0%, transparent 55%);
   pointer-events: none;
 }
 .about-bg-shape {
@@ -289,8 +288,8 @@ const ctaStats = [
   pointer-events: none;
   opacity: 0.5;
 }
-.shape-a { width: 350px; height: 350px; background: rgba(33,29,113,0.05); top: -80px; right: -60px; }
-.shape-b { width: 280px; height: 280px; background: rgba(246,130,31,0.04); bottom: -80px; left: -60px; }
+.shape-a { width: 350px; height: 350px; background: rgba(0, 102, 204, 0.05); top: -80px; right: -60px; }
+.shape-b { width: 280px; height: 280px; background: rgba(100, 116, 139, 0.04); bottom: -80px; left: -60px; }
 
 /* ── Vector Decorations ────────────────────────────────────── */
 .vector-decor {
@@ -476,8 +475,8 @@ const ctaStats = [
 
 /* ── CTA Band ──────────────────────────────────────────────── */
 .about-cta-band {
-  background: var(--primary, #211d71) !important;
-  color: white;
+  background: var(--paper) !important;
+  border-top: 1px solid var(--border);
 }
 .trust-inner {
   display: grid;
@@ -493,19 +492,16 @@ const ctaStats = [
   font-weight: 900;
   line-height: 1.1;
   letter-spacing: -0.03em;
-  color: white;
   margin-bottom: 16px;
 }
 .trust-sub {
   font-size: 1rem;
   line-height: 1.7;
-  color: rgba(255,255,255,0.70);
   max-width: 420px;
 }
 .trust-stat-value {
   font-size: clamp(2.2rem, 4vw, 3rem);
   font-weight: 900;
-  color: white;
   letter-spacing: -0.04em;
   line-height: 1;
   margin-bottom: 6px;

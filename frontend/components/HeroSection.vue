@@ -143,8 +143,8 @@ const heroImgSrc = computed(() => {
   position: absolute;
   top: 0; left: 0; width: 100%; height: 100%;
   background-image: 
-    radial-gradient(circle at 80% 10%, rgba(33, 29, 113, 0.03) 0%, transparent 50%),
-    radial-gradient(circle at 20% 90%, rgba(246, 130, 31, 0.03) 0%, transparent 50%);
+    radial-gradient(circle at 80% 10%, rgba(0, 102, 204, 0.03) 0%, transparent 50%),
+    radial-gradient(circle at 20% 90%, rgba(100, 116, 139, 0.03) 0%, transparent 50%);
   z-index: 0;
   pointer-events: none;
 }
@@ -161,7 +161,7 @@ const heroImgSrc = computed(() => {
 .shape-1 {
   width: 300px;
   height: 300px;
-  background: rgba(33, 29, 113, 0.04);
+  background: rgba(0, 102, 204, 0.04);
   top: -50px;
   right: -50px;
 }
@@ -169,7 +169,7 @@ const heroImgSrc = computed(() => {
 .shape-2 {
   width: 400px;
   height: 400px;
-  background: rgba(246, 130, 31, 0.03);
+  background: rgba(100, 116, 139, 0.03);
   bottom: -100px;
   left: -100px;
 }
@@ -177,7 +177,7 @@ const heroImgSrc = computed(() => {
 .shape-3 {
   width: 200px;
   height: 200px;
-  background: rgba(33, 29, 113, 0.03);
+  background: rgba(0, 102, 204, 0.03);
   top: 40%;
   left: 30%;
 }

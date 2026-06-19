@@ -1,7 +1,7 @@
 <template>
   <div class="feature-stats-section">
     <!-- Blue Strip -->
-    <div class="blue-strip py-6 text-white" style="background-color: var(--primary, #211d71);">
+    <div class="blue-strip py-6 text-white" style="background-color: var(--primary);">
       <v-container>
         <v-row justify="center" align="center" class="text-center text-md-left">
           <!-- Item 1 -->

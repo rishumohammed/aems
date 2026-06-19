@@ -1,11 +1,11 @@
 :root {
---ink: #1B1B3A;
---paper: #FAFAF9;
---panel: #F4F4F6;
---accent: #F4791F;
---accent-soft: #FDEBDD;
---muted: #6B6B76;
---border: #E4E4E8;
+--ink: #1E293B;
+--paper: #F8FAFC;
+--panel: #F1F5F9;
+--accent: #0066CC;
+--accent-soft: #E0F2FE;
+--muted: #64748B;
+--border: #E2E8F0;
 --white: #FFFFFF;
 --font-body: 'Inter', sans-serif;
 --font-mono: 'JetBrains Mono', monospace;

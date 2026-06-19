@@ -199,22 +199,22 @@
       </div>
 
       <!-- Trusted By / Quote band -->
-      <div class="trust-band section-default" style="background: var(--primary, #211d71);">
+      <div class="trust-band section-default bg-white border-y">
         <v-container>
           <div class="trust-inner">
             <div class="trust-left">
-              <div class="eyebrow-label mb-3" style="color:rgba(255,255,255,0.6)">Our Impact</div>
-              <h2 class="trust-headline">Hundreds of clients.<br/>One trusted partner.</h2>
-              <p class="trust-sub">From startups to enterprise food manufacturers, Brixify helps organisations achieve and maintain global standards.</p>
-              <v-btn color="white" variant="outlined" rounded="lg" class="mt-6 text-none font-weight-bold" to="/courses">
+              <div class="eyebrow-label mb-3">Our Impact</div>
+              <h2 class="trust-headline text-ink">Hundreds of clients.<br/>One trusted partner.</h2>
+              <p class="trust-sub text-secondary">From startups to enterprise food manufacturers, Brixify helps organisations achieve and maintain global standards.</p>
+              <v-btn color="primary" variant="flat" rounded="lg" class="mt-6 text-none font-weight-bold px-8" size="large" to="/courses">
                 Explore Our Programs
               </v-btn>
             </div>
             <div class="trust-right">
               <v-row>
                 <v-col cols="6" v-for="stat in trustStats" :key="stat.label" class="text-center mb-4">
-                  <div class="trust-stat-value">{{ stat.value }}</div>
-                  <div class="trust-stat-label">{{ stat.label }}</div>
+                  <div class="trust-stat-value text-primary">{{ stat.value }}</div>
+                  <div class="trust-stat-label text-secondary">{{ stat.label }}</div>
                 </v-col>
               </v-row>
             </div>
@@ -235,18 +235,17 @@
               <h2 class="lcc-title">Ready to Elevate<br/>Your Standards?</h2>
               <p class="lcc-sub">Talk to our food technology experts, explore the right certification, and ensure global compliance.</p>
 
-              <!-- Trust badges -->
               <div class="lcc-trust">
                 <div class="lcc-trust-item">
-                  <v-icon size="18" color="white">mdi-check-circle</v-icon>
+                  <v-icon size="18" color="primary">mdi-check-circle</v-icon>
                   <span>Global Recognition</span>
                 </div>
                 <div class="lcc-trust-item">
-                  <v-icon size="18" color="white">mdi-check-circle</v-icon>
+                  <v-icon size="18" color="primary">mdi-check-circle</v-icon>
                   <span>Expert Auditors</span>
                 </div>
                 <div class="lcc-trust-item">
-                  <v-icon size="18" color="white">mdi-check-circle</v-icon>
+                  <v-icon size="18" color="primary">mdi-check-circle</v-icon>
                   <span>Industry Trusted</span>
                 </div>
               </div>
@@ -471,7 +470,7 @@ useSeoMeta({
 
 /* ── Trust Band ─────────────────────────────────────── */
 .trust-band {
-  color: white;
+  /* color handled in template */
 }
 .trust-inner {
   display: grid;
@@ -487,19 +486,16 @@ useSeoMeta({
   font-weight: 900;
   line-height: 1.1;
   letter-spacing: -0.03em;
-  color: white;
   margin-bottom: 16px;
 }
 .trust-sub {
   font-size: 1rem;
   line-height: 1.7;
-  color: rgba(255,255,255,0.70);
   max-width: 420px;
 }
 .trust-stat-value {
   font-size: clamp(2.2rem, 4vw, 3.2rem);
   font-weight: 900;
-  color: white;
   letter-spacing: -0.04em;
   line-height: 1;
   margin-bottom: 6px;
@@ -512,7 +508,7 @@ useSeoMeta({
   color: rgba(255,255,255,0.55);
 }
 .lead-capture-card {
-  background: var(--ink);
+  background: var(--paper);
   border-radius: var(--radius-lg);
   overflow: hidden;
   position: relative;
@@ -541,7 +537,6 @@ useSeoMeta({
 .lcc-copy {
   position: relative;
   z-index: 1;
-  color: white;
 }
 
 /* Eyebrow badge */
@@ -550,13 +545,13 @@ useSeoMeta({
   align-items: center;
   padding: 5px 14px;
   border-radius: 999px;
-  background: rgba(255,255,255,0.15);
-  border: 1px solid rgba(255,255,255,0.25);
+  background: rgba(0,0,0,0.05);
+  border: 1px solid rgba(0,0,0,0.1);
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.5px;
   text-transform: uppercase;
-  color: rgba(255,255,255,0.90);
+  color: var(--primary);
   margin-bottom: 20px;
 }
 
@@ -566,7 +561,7 @@ useSeoMeta({
   font-weight: 900;
   line-height: 1.05;
   letter-spacing: -0.04em;
-  color: white;
+  color: var(--ink);
   margin-bottom: 16px;
 }
 
@@ -574,7 +569,7 @@ useSeoMeta({
 .lcc-sub {
   font-size: 1rem;
   line-height: 1.7;
-  color: rgba(255,255,255,0.75);
+  color: var(--muted);
   max-width: 400px;
   margin-bottom: 28px;
 }
@@ -592,7 +587,7 @@ useSeoMeta({
   gap: 10px;
   font-size: 14px;
   font-weight: 600;
-  color: rgba(255,255,255,0.90);
+  color: var(--ink);
 }
 
 /* WhatsApp button */
@@ -653,7 +648,7 @@ useSeoMeta({
 /* ── Background orbs ───────────────────────────────────── */
 .shape {
   position: absolute;
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(0, 102, 204, 0.03); /* subtle primary color orb */
   border-radius: 50%;
   z-index: 0;
   pointer-events: none;
