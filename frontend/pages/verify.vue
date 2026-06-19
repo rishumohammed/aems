@@ -1,16 +1,21 @@
 <template>
-  <div class="verify-page-wrapper">
-    <div class="verify-page py-16 bg-background min-h-screen">
+  <div class="verify-page-wrapper position-relative overflow-hidden bg-surface-light min-h-screen">
+    <!-- Minimalist Background Shapes -->
+    <div class="bg-shape shape-1"></div>
+    <div class="bg-shape shape-2"></div>
+
+    <div class="verify-page py-16 position-relative z-1">
       <v-container>
         <div class="text-center mb-12">
-          <h1 class="text-h3 font-weight-black mb-4 tracking-tight">Verify Certificate</h1>
-          <p class="text-h6 text-grey-darken-1 mx-auto" style="max-width: 600px;">
-            Verify the authenticity of any AEMS Academy certificate by entering its unique identification number.
+          <v-chip size="small" color="primary" variant="flat" class="mb-4 font-weight-bold text-uppercase tracking-widest">Official Credentials</v-chip>
+          <h1 class="text-h2 font-weight-black mb-4 tracking-tight" style="color: var(--g7);">Verify Certificate</h1>
+          <p class="text-body-1 text-grey-darken-1 mx-auto" style="max-width: 600px; line-height: 1.8;">
+            Ensure the authenticity of any AEMS Academy certificate by entering its unique identification number below.
           </p>
         </div>
 
-        <v-card class="mx-auto pa-4 rounded-lg border mb-12 bg-surface" flat max-width="600">
-          <v-form @submit.prevent="verifyCert" class="d-flex align-center gap-4">
+        <v-card class="mx-auto pa-6 rounded-xl border mb-12 bg-white" elevation="2" max-width="600" style="box-shadow: 0 12px 32px rgba(0,0,0,0.04) !important;">
+          <v-form @submit.prevent="verifyCert" class="d-flex align-center flex-column flex-sm-row gap-4">
             <v-text-field
               v-model="certId"
               label="Enter Certificate ID"
@@ -24,7 +29,7 @@
               color="primary"
               size="x-large"
               rounded="lg"
-              class="px-8 font-weight-bold"
+              class="px-8 font-weight-bold w-100 w-sm-auto"
               :loading="loading"
               type="submit"
             >
@@ -71,9 +76,12 @@
         </v-alert>
 
         <!-- Placeholder -->
-        <div v-if="!verifiedCert && !error && !loading" class="text-center py-16 opacity-25">
-          <v-icon size="120">mdi-certificate-outline</v-icon>
-          <div class="text-h6 mt-4">Verification results will appear here</div>
+        <div v-if="!verifiedCert && !error && !loading" class="text-center py-16">
+          <v-avatar size="100" color="primary-lighten-4" class="mb-6">
+            <v-icon size="48" color="primary">mdi-shield-check-outline</v-icon>
+          </v-avatar>
+          <div class="text-h5 font-weight-bold text-g6 mb-2">Ready to Verify</div>
+          <p class="text-body-2 text-grey">Enter a certificate ID above to view the credentials.</p>
         </div>
       </v-container>
     </div>
@@ -140,6 +148,7 @@ useSeoMeta({
 
 <style scoped>
 .tracking-tight { letter-spacing: -0.04em; }
+.tracking-widest { letter-spacing: 0.15em; }
 .gap-4 { gap: 16px; }
 .max-width-600 { max-width: 600px; }
 
@@ -151,4 +160,29 @@ useSeoMeta({
   from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
+/* Background Shapes */
+.bg-shape {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.5;
+}
+.shape-1 {
+  width: 400px;
+  height: 400px;
+  background: rgba(33, 29, 113, 0.05); /* Primary */
+  top: -100px;
+  right: -100px;
+}
+.shape-2 {
+  width: 500px;
+  height: 500px;
+  background: rgba(246, 130, 31, 0.04); /* Secondary */
+  bottom: -150px;
+  left: -150px;
+}
+.text-g6 { color: var(--g6); }
 </style>

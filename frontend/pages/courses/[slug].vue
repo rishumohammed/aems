@@ -31,8 +31,8 @@
               </div>
 
               <div class="d-flex align-center gap-4">
-                <v-avatar size="48">
-                  <v-img src="https://i.pravatar.cc/150?u=instructor"></v-img>
+                <v-avatar size="48" color="primary" variant="tonal" class="border">
+                  <span class="text-h6 font-weight-black text-primary">{{ course.tutor_name ? course.tutor_name.charAt(0).toUpperCase() : 'T' }}</span>
                 </v-avatar>
                 <div>
                   <div class="text-caption text-grey">Created by</div>
@@ -133,7 +133,7 @@
                 <div class="text-h5 font-weight-bold mb-6">About the Instructor</div>
                 <v-card flat border class="pa-6 rounded-xl">
                     <div class="d-flex align-center gap-6">
-                        <v-avatar size="100" color="primary-lighten-4">
+                        <v-avatar size="100" color="primary" variant="tonal" class="border">
                             <span class="text-h3 font-weight-black text-primary">{{ course.tutor_name ? course.tutor_name.charAt(0).toUpperCase() : 'T' }}</span>
                         </v-avatar>
                         <div>
