@@ -3,12 +3,12 @@
     <!-- KPIs -->
     <v-row class="mb-6">
       <v-col v-for="kpi in kpis" :key="kpi.label" cols="12" sm="6" md="3">
-        <v-card variant="outlined" class="rounded-xl pa-4 text-center">
-          <div class="text-caption text-grey mb-1">{{ kpi.label }}</div>
-          <div class="text-h6 font-weight-black" :class="kpi.color ? `text-${kpi.color}` : ''">
-            INR {{ kpi.value }}
-          </div>
-        </v-card>
+        <KpiCard
+          :title="kpi.label"
+          :value="'INR ' + kpi.value"
+          :icon="kpi.icon || 'mdi-currency-inr'"
+          :color="kpi.color"
+        />
       </v-col>
     </v-row>
 

@@ -40,28 +40,16 @@
         <div class="pa-6 border-b bg-grey-lighten-5">
           <v-row>
             <v-col cols="12" sm="6" md="3">
-              <v-card flat class="border rounded-lg pa-4 bg-white">
-                <div class="text-caption text-grey font-weight-bold text-uppercase mb-1">Total Exams</div>
-                <div class="text-h4 font-weight-black">{{ totalExams }}</div>
-              </v-card>
+              <KpiCard title="Total Exams" :value="totalExams" icon="mdi-file-document-multiple" color="blue" />
             </v-col>
             <v-col cols="12" sm="6" md="3">
-              <v-card flat class="border rounded-lg pa-4 bg-white">
-                <div class="text-caption text-grey font-weight-bold text-uppercase mb-1">Published</div>
-                <div class="text-h4 font-weight-black text-success">{{ publishedExams }}</div>
-              </v-card>
+              <KpiCard title="Published" :value="publishedExams" icon="mdi-check-circle" color="green" />
             </v-col>
             <v-col cols="12" sm="6" md="3">
-              <v-card flat class="border rounded-lg pa-4 bg-white">
-                <div class="text-caption text-grey font-weight-bold text-uppercase mb-1">Submissions</div>
-                <div class="text-h4 font-weight-black text-primary">{{ totalSubmissions }}</div>
-              </v-card>
+              <KpiCard title="Submissions" :value="totalSubmissions" icon="mdi-text-box-check" color="purple" />
             </v-col>
             <v-col cols="12" sm="6" md="3">
-              <v-card flat class="border rounded-lg pa-4 bg-white">
-                <div class="text-caption text-grey font-weight-bold text-uppercase mb-1">Proctored</div>
-                <div class="text-h4 font-weight-black">{{ proctoredExams }}</div>
-              </v-card>
+              <KpiCard title="Proctored" :value="proctoredExams" icon="mdi-cctv" color="orange" />
             </v-col>
           </v-row>
         </div>

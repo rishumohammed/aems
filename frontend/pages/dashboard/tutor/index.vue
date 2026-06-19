@@ -17,23 +17,13 @@
       <!-- Stats Row -->
       <v-row class="mb-8">
         <v-col v-for="stat in stats" :key="stat.title" cols="12" sm="6" md="3" class="d-flex flex-column">
-          <v-card flat class="stat-card rounded-xl pa-6 border-0 overflow-hidden flex-grow-1 w-100" elevation="4">
-            <div class="d-flex align-center justify-space-between">
-              <div>
-                <div class="text-caption text-uppercase font-weight-black text-grey-darken-1 mb-1">{{ stat.title }}</div>
-                <div class="text-h3 font-weight-black mb-1 tracking-tight">{{ stat.value }}</div>
-                <div class="text-caption font-weight-bold d-flex align-center" :class="'text-' + (stat.trendColor || 'success')">
-                  <v-icon size="14" class="mr-1" :icon="stat.trendIcon || 'mdi-trending-up'"></v-icon>
-                  {{ stat.trendText }}
-                </div>
-              </div>
-              <v-avatar :color="stat.color" size="64" rounded="lg" class="elevation-10 stat-icon-box">
-                <v-icon color="white" size="32">{{ stat.icon }}</v-icon>
-              </v-avatar>
-            </div>
-            <!-- Decorative Background Circle -->
-            <div class="card-bg-circle" :class="'bg-' + stat.color"></div>
-          </v-card>
+          <KpiCard
+            :title="stat.title"
+            :value="stat.value"
+            :icon="stat.icon"
+            :color="stat.color === 'indigo' ? 'purple' : stat.color === 'teal' ? 'green' : stat.color === 'amber' ? 'orange' : stat.color"
+            :trend="{ value: parseFloat(stat.trendText), positive: stat.trendIcon === 'mdi-trending-up', label: 'vs last month' }"
+          />
         </v-col>
       </v-row>
 
@@ -258,34 +248,7 @@ onMounted(fetchDashboardData);
   
 }
 
-.stat-card {
-  position: relative;
-  transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
-  background: white;
-  border: 1px solid rgba(0,0,0,0.05) !important;
-}
 
-.stat-card:hover {
-  transform: translateY(-10px);
-  
-  border-color: rgba(59, 130, 246, 0.2) !important;
-  border: 1px solid var(--border);
-}
-
-.stat-icon-box {
-  z-index: 2;
-}
-
-.card-bg-circle {
-  position: absolute;
-  top: -20px;
-  right: -20px;
-  width: 100px;
-  height: 100px;
-  border-radius: 50%;
-  opacity: 0.05;
-  z-index: 1;
-}
 
 .shadow-soft {
   border: 1px solid var(--border);
