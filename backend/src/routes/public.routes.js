@@ -257,7 +257,7 @@ router.get('/about', async (req, res) => {
 
 // POST /api/public/contact - Contact form submission
 router.post('/contact', async (req, res) => {
-  const { name, email, phone, subject, message } = req.body;
+  const { name, email, phone, subject, message, course_interest_ids } = req.body;
 
   if (!name || !email || !message) {
     return res.status(400).json({ message: 'Name, email, and message are required' });
@@ -277,6 +277,7 @@ router.post('/contact', async (req, res) => {
       phone: phone || null,
       source: 'website',
       form_id: id,
+      course_interest_ids: course_interest_ids || [],
       custom_fields: {
         subject: subject || '',
         message: message || ''

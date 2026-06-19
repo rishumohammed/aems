@@ -2,7 +2,7 @@ import { pool } from '../db/connection.js';
 import { v4 as uuidv4 } from 'uuid';
 
 export const LeadService = {
-  async createLead({ name, email, phone, source, form_id, custom_fields = {} }) {
+  async createLead({ name, email, phone, source, form_id, course_interest_ids = [], custom_fields = {} }) {
     const connection = await pool.getConnection();
     try {
       await connection.beginTransaction();
@@ -31,8 +31,8 @@ export const LeadService = {
         assignedTo = await this.getNextAgent(connection);
 
         await connection.query(
-          'INSERT INTO leads (id, name, email, phone, source, form_id, assigned_to, status) VALUES (?, ?, ?, ?, ?, ?, ?, "open")',
-          [leadId, name, email, phone, source, form_id, assignedTo]
+          'INSERT INTO leads (id, name, email, phone, source, form_id, assigned_to, status, course_interest_ids) VALUES (?, ?, ?, ?, ?, ?, ?, "open", ?)',
+          [leadId, name, email, phone, source, form_id, assignedTo, JSON.stringify(course_interest_ids)]
         );
       }
 

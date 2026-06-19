@@ -136,10 +136,10 @@
                   ></vue-tel-input>
                 </div>
                 <v-select
-                  v-model="formData.interested_courses"
+                  v-model="formData.course_interest_ids"
                   :items="coursesList"
                   item-title="title"
-                  item-value="title"
+                  item-value="id"
                   label="Interested Courses (Optional)"
                   placeholder="Select courses you are interested in"
                   multiple
@@ -228,7 +228,7 @@ const { data: formConfig, pending: loading, error: fetchError } = await useFetch
 const submitting = ref(false);
 const success = ref(false);
 const errorMsg = ref('');
-const formData = ref({ interested_courses: [] });
+const formData = ref({ course_interest_ids: [] });
 const waLink = ref('');
 const coursesList = ref([]);
 
@@ -312,17 +312,15 @@ const handleSubmit = async () => {
     const endpoint = isFallback ? `${config.public.apiBase}/public/contact` : `${config.public.apiBase}/public/leads`;
     
     let finalMessage = formData.value.message || 'Interested in learning more.';
-    if (isFallback && formData.value.interested_courses && formData.value.interested_courses.length > 0) {
-      finalMessage = `Interested Courses: ${formData.value.interested_courses.join(', ')}\n\n${finalMessage}`;
-    }
-
+    
     // Construct payload based on endpoint
     const payload = isFallback ? {
       name: formData.value.name,
       email: formData.value.email,
       phone: formData.value.phone,
       subject: 'Homepage Enquiry',
-      message: finalMessage
+      message: finalMessage,
+      course_interest_ids: formData.value.course_interest_ids || []
     } : {
       name: formData.value.name || formData.value.full_name || 'Visitor',
       email: formData.value.email,
