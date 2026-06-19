@@ -1,10 +1,10 @@
 /* Admin-specific CSS overrides */
 
 .admin-shell .v-navigation-drawer .v-list-item--active {
-  background-color: #2563EB !important;
-  color: #FFFFFF !important;
+  background-color: #ffffff !important;
+  color: #007AFF !important;
 }
 
 .admin-shell .v-navigation-drawer .v-list-item--active .v-icon {
-  color: #FFFFFF !important;
+  color: #007AFF !important;
 }

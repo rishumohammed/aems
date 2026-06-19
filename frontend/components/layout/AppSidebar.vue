@@ -110,8 +110,8 @@ watch(
 }
 
 #app-sidebar {
-  background-color: #fcfdfe !important;
-  border-right: 1px solid rgba(0, 0, 0, 0.06) !important;
+  background-color: #f5f5f7 !important; /* Apple gray background */
+  border-right: 1px solid rgba(0, 0, 0, 0.05) !important;
   z-index: 1000 !important;
 }
 
@@ -160,46 +160,30 @@ watch(
 }
 
 .nav-item {
-  color: #64748b !important;
+  color: #86868b !important;
   font-size: 14px !important;
   font-weight: 600 !important;
-  min-height: 48px !important;
+  min-height: 44px !important;
   transition: all 0.2s ease !important;
   position: relative;
-  border-radius: 0 !important;
-}
-
-.nav-item::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 15%;
-  bottom: 15%;
-  width: 3px;
-  background-color: transparent;
-  border-radius: 0 4px 4px 0;
-  transition: all 0.2s ease;
+  border-radius: 10px !important;
+  margin-bottom: 4px !important;
 }
 
 .nav-item:hover {
-  background-color: #f8fafc !important;
-  color: #1e293b !important;
+  background-color: rgba(0, 0, 0, 0.04) !important;
+  color: #1d1d1f !important;
 }
 
 .nav-item-active {
-  background: linear-gradient(90deg, rgba(99, 102, 241, 0.08) 0%, rgba(99, 102, 241, 0.02) 100%) !important;
-  color: #4f46e5 !important;
-}
-
-.nav-item-active::before {
-  background-color: #4f46e5;
-  border: 1px solid var(--border);
-  
+  background: #ffffff !important;
+  color: #007aff !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04) !important;
 }
 
 .nav-item-active .icon-wrapper {
-  color: #4f46e5;
-  transform: scale(1.1);
+  color: #007aff;
+  transform: scale(1.05);
 }
 
 .icon-wrapper {

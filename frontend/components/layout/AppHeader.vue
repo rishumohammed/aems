@@ -191,9 +191,8 @@ const handleSearch = () => {
 
 .search-pill:focus-within {
   background: white;
-  border-color: var(--blue);
-  border: 1px solid var(--border);
-  
+  border-color: #007aff;
+  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
 }
 
 .search-input {
@@ -221,10 +220,9 @@ const handleSearch = () => {
 }
 
 .user-pill-avatar {
-  background: linear-gradient(135deg, var(--blue), var(--purple));
-  color: white;
+  background: #f1f5f9;
+  color: #1d1d1f;
   cursor: pointer;
-  border: 1px solid var(--border);
-  
+  border: 1px solid rgba(0, 0, 0, 0.05);
 }
 </style>

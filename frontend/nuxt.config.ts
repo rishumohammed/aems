@@ -87,15 +87,15 @@ export default defineNuxtConfig({
           adminNeutral: {
             dark: false,
             colors: {
-              primary: '#2563EB',
-              secondary: '#64748B',
-              accent: '#2563EB',
-              background: '#F8FAFC',
+              primary: '#007AFF',    /* Apple System Blue */
+              secondary: '#86868B',  /* Soft Gray */
+              accent: '#5E5CE6',     /* Indigo */
+              background: '#F5F5F7', /* Classic Apple Light Gray */
               surface: '#FFFFFF',
-              error: '#DC2626',
-              success: '#16A34A',
-              warning: '#D97706',
-              info: '#0EA5E9'
+              error: '#FF3B30',      /* Apple Red */
+              success: '#34C759',    /* Apple Green */
+              warning: '#FF9500',    /* Apple Orange */
+              info: '#32ADE6'        /* Light Blue */
             }
           }
         }
