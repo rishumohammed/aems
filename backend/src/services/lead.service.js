@@ -20,10 +20,10 @@ export const LeadService = {
         leadId = existingLeads[0].id;
         assignedTo = existingLeads[0].assigned_to;
         
-        // Update existing lead name/email if they were empty
+        // Update existing lead name/email if they were empty, append/update course interests, and reopen
         await connection.query(
-          'UPDATE leads SET name = COALESCE(NULLIF(name, ""), ?), email = COALESCE(NULLIF(email, ""), ?) WHERE id = ?',
-          [name, email, leadId]
+          'UPDATE leads SET name = COALESCE(NULLIF(name, ""), ?), email = COALESCE(NULLIF(email, ""), ?), status = "open", course_interest_ids = ? WHERE id = ?',
+          [name, email, JSON.stringify(course_interest_ids), leadId]
         );
       } else {
         leadId = uuidv4();
