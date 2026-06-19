@@ -3,8 +3,8 @@
     <!-- Header Section -->
     <div class="d-flex justify-space-between align-center mb-10">
       <div>
-        <h1 class="text-h3 font-weight-black text-grey-darken-4 mb-2">Lead Ecosystem</h1>
-        <p class="text-h6 text-secondary">Advanced tracking and conversion pipeline for AEMS Academy.</p>
+        <h1 class="page-title mb-1">Lead Ecosystem</h1>
+        <p class="text-subtitle-1 text-secondary">Advanced tracking and conversion pipeline for AEMS Academy.</p>
       </div>
       <div class="d-flex align-center gap-4">
         <TabsPill
@@ -310,10 +310,10 @@ watch(viewMode, (newVal) => {
 
 <style scoped>
 .page-title {
-  font-size: 32px;
-  font-weight: 900;
-  letter-spacing: -1px;
-  color: #1e293b;
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.6px;
+  color: var(--g7);
 }
 
 .filters-card {
