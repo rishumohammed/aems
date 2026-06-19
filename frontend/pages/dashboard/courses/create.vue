@@ -70,20 +70,18 @@
       </v-card>
     </v-dialog>
 
-    <!-- Gradient Header -->
-    <div class="create-header pa-8 pb-16 mb-n10">
-      <div class="d-flex align-center justify-space-between">
-        <div>
-          <h1 class="text-h4 font-weight-black text-white mb-1">Create New Course</h1>
-          <p class="text-subtitle-1 text-white opacity-80">Build your complete course with chapters, modules, and lessons.</p>
-        </div>
-        <v-btn variant="tonal" color="white" prepend-icon="mdi-arrow-left" class="text-capitalize font-weight-bold" to="/dashboard/courses">
-          Back
-        </v-btn>
+    <!-- Header -->
+    <div class="d-flex align-center justify-space-between mb-8 px-8 pt-8">
+      <div>
+        <h1 class="page-title mb-1">Create New Course</h1>
+        <p class="text-subtitle-1 text-secondary">Build your complete course with chapters, modules, and lessons.</p>
       </div>
+      <v-btn variant="tonal" color="primary" prepend-icon="mdi-arrow-left" class="text-capitalize font-weight-bold" to="/dashboard/courses">
+        Back
+      </v-btn>
     </div>
 
-    <v-container fluid class="pa-8">
+    <v-container fluid class="px-8 pb-8 pt-0">
       <!-- Step Progress Indicator -->
       <div class="step-progress d-flex align-center justify-center mb-8">
         <div v-for="(step, i) in steps" :key="step.value" class="d-flex align-center">
@@ -912,21 +910,11 @@ onMounted(fetchCategories);
 </script>
 
 <style scoped>
-/* ── Header ── */
-.create-header {
-  background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #3b82f6 100%);
-  position: relative;
-  overflow: hidden;
-}
-.create-header::before {
-  content: '';
-  position: absolute;
-  top: -50%;
-  right: -10%;
-  width: 400px;
-  height: 400px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(255,255,255,0.06) 0%, transparent 70%);
+.page-title {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.6px;
+  color: var(--g7);
 }
 
 /* ── Stepper ── */
