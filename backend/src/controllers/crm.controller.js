@@ -10,9 +10,8 @@ export const CRMController = {
       const offset = (page - 1) * limit;
 
       let query = `
-        SELECT l.*, c.title as course_interest_name, u.name as agent_name
+        SELECT l.*, u.name as agent_name
         FROM leads l
-        LEFT JOIN courses c ON l.course_interest_id = c.id
         LEFT JOIN users u ON l.assigned_to = u.id
         WHERE 1=1
       `;
@@ -49,6 +48,11 @@ export const CRMController = {
       // Get total count for pagination
       const [total] = await pool.query('SELECT COUNT(*) as count FROM leads WHERE 1=1' + (assigned_to ? ' AND assigned_to = ?' : ''), assigned_to ? [assigned_to] : []);
 
+      // Get all courses to map names
+      const [allCourses] = await pool.query('SELECT id, title FROM courses');
+      const courseMap = {};
+      allCourses.forEach(c => courseMap[c.id] = c.title);
+
       const parsedLeads = leads.map(l => {
         let parsedIds = l.course_interest_ids;
         if (typeof parsedIds === 'string') {
@@ -60,7 +64,11 @@ export const CRMController = {
         } else if (!parsedIds) {
             parsedIds = [];
         }
-        return { ...l, course_interest_ids: parsedIds };
+
+        const courseNames = parsedIds.map(id => courseMap[id]).filter(Boolean);
+        const course_interest_name = courseNames.join(', ');
+
+        return { ...l, course_interest_ids: parsedIds, course_interest_name };
       });
 
       res.json({
@@ -80,9 +88,8 @@ export const CRMController = {
       const { id } = req.params;
 
       const [leads] = await pool.query(`
-        SELECT l.*, c.title as course_interest_name, u.name as agent_name
+        SELECT l.*, u.name as agent_name
         FROM leads l
-        LEFT JOIN courses c ON l.course_interest_id = c.id
         LEFT JOIN users u ON l.assigned_to = u.id
         WHERE l.id = ?
       `, [id]);
@@ -101,6 +108,14 @@ export const CRMController = {
       } else if (!lead.course_interest_ids) {
         lead.course_interest_ids = [];
       }
+
+      // Map course names
+      const [allCourses] = await pool.query('SELECT id, title FROM courses');
+      const courseMap = {};
+      allCourses.forEach(c => courseMap[c.id] = c.title);
+      
+      const courseNames = lead.course_interest_ids.map(id => courseMap[id]).filter(Boolean);
+      lead.course_interest_name = courseNames.join(', ');
 
       // Get Custom Fields
       const [customFields] = await pool.query('SELECT * FROM lead_custom_fields WHERE lead_id = ?', [id]);
