@@ -74,7 +74,7 @@
     <div v-else class="fade-in">
       <v-row v-if="viewType === 'grid'">
         <v-col v-for="course in filteredCourses" :key="course.id" cols="12" sm="6" md="4" lg="3">
-          <CourseGrid :course="course" @edit="editCourse" />
+          <CourseGrid :course="course" @edit="editCourse" @delete="deleteCourse" />
         </v-col>
       </v-row>
 
@@ -85,6 +85,7 @@
           :course="course" 
           @edit="editCourse"
           @view="viewCourse"
+          @delete="deleteCourse"
           @toggle-featured="toggleFeatured"
         />
       </div>
@@ -161,6 +162,17 @@ const editCourse = (course: any) => {
 
 const viewCourse = (course: any) => {
   window.open(`/courses/${course.slug}`, '_blank');
+};
+
+const deleteCourse = async (course: any) => {
+  if (!confirm(`Are you sure you want to delete "${course.title}"?`)) return;
+  try {
+    await api.delete(`/lms/courses/${course.id}`);
+    courses.value = courses.value.filter(c => c.id !== course.id);
+  } catch (error) {
+    console.error('Delete course error:', error);
+    alert('Failed to delete course');
+  }
 };
 
 const toggleFeatured = async (course: any) => {

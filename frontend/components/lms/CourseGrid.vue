@@ -65,17 +65,26 @@
 
     <v-card-actions class="pa-2">
       <!-- Admin/Tutor Actions -->
-      <v-btn
-        v-if="userRole !== 'student'"
-        block
-        color="primary"
-        variant="tonal"
-        class="text-capitalize font-weight-bold rounded-lg"
-        @click="$emit('edit', course)"
-      >
-        <v-icon start>mdi-pencil</v-icon>
-        Edit Course
-      </v-btn>
+      <div v-if="userRole !== 'student'" class="d-flex w-100 gap-2">
+        <v-btn
+          color="primary"
+          variant="tonal"
+          class="text-capitalize font-weight-bold rounded-lg flex-grow-1"
+          @click="$emit('edit', course)"
+        >
+          <v-icon start>mdi-pencil</v-icon>
+          Edit
+        </v-btn>
+        <v-btn
+          color="error"
+          variant="tonal"
+          class="rounded-lg px-0"
+          style="min-width: 48px;"
+          @click="$emit('delete', course)"
+        >
+          <v-icon>mdi-delete-outline</v-icon>
+        </v-btn>
+      </div>
 
       <!-- Student Actions -->
       <v-btn
@@ -107,7 +116,7 @@ const authStore = useAuthStore();
 const userRole = computed(() => authStore.userRole);
 const router = useRouter();
 
-const emit = defineEmits(['edit', 'view'])
+const emit = defineEmits(['edit', 'view', 'delete'])
 
 const viewCourse = () => {
   router.push(`/courses/${props.course.slug}`);

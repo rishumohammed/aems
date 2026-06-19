@@ -61,7 +61,7 @@
           </template>
           <template v-if="userRole !== 'student'">
             <v-btn icon="mdi-pencil-outline" variant="tonal" color="primary" size="small" @click="$emit('edit', course)"></v-btn>
-            <v-btn icon="mdi-archive-outline" variant="text" color="grey" size="small" @click="$emit('archive', course)"></v-btn>
+            <v-btn icon="mdi-delete-outline" variant="text" color="error" size="small" @click="$emit('delete', course)"></v-btn>
           </template>
         </div>
       </div>
@@ -83,7 +83,7 @@ const props = defineProps({
 const authStore = useAuthStore();
 const userRole = computed(() => authStore.userRole);
 
-defineEmits(['edit', 'view', 'archive', 'toggle-featured'])
+defineEmits(['edit', 'view', 'delete', 'toggle-featured'])
 
 const getStatusColor = (course) => {
   if (course.status === 'published' && course.tutor_role === 'super_admin') return 'deep-purple-accent-2';
