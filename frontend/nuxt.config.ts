@@ -14,6 +14,11 @@ export default defineNuxtConfig({
     appManifest: false
   },
 
+  sourcemap: {
+    server: false,
+    client: false
+  },
+
   modules: [
     'vuetify-nuxt-module',
     '@pinia/nuxt',
