@@ -24,7 +24,12 @@ const statements = [
   "ALTER TABLE courses ADD COLUMN approved_by CHAR(36) AFTER approval_required",
   "ALTER TABLE courses ADD COLUMN published_at DATETIME AFTER approved_by",
   "ALTER TABLE courses ADD COLUMN rejection_reason TEXT AFTER published_at",
-  "ALTER TABLE courses ADD CONSTRAINT fk_courses_approved_by FOREIGN KEY (approved_by) REFERENCES users(id) ON DELETE SET NULL"
+  "ALTER TABLE courses ADD CONSTRAINT fk_courses_approved_by FOREIGN KEY (approved_by) REFERENCES users(id) ON DELETE SET NULL",
+  "ALTER TABLE courses ADD COLUMN is_featured BOOLEAN DEFAULT FALSE",
+  "ALTER TABLE courses ADD COLUMN deleted_at DATETIME NULL",
+  "ALTER TABLE users ADD COLUMN deleted_at DATETIME NULL",
+  "ALTER TABLE exams ADD COLUMN deleted_at DATETIME NULL",
+  "ALTER TABLE public_exams ADD COLUMN deleted_at DATETIME NULL"
 ];
 
 async function run() {

@@ -2,7 +2,7 @@
   <div class="pa-6 fade-in">
     <div class="d-flex align-center justify-space-between mb-8">
       <div>
-        <h1 class="page-title mb-1">Course Catalog</h1>
+        <h1 class="page-title mb-1">Courses</h1>
         <p class="text-subtitle-1 text-secondary">Manage and review all educational content.</p>
       </div>
       <div class="d-flex align-center gap-3">
