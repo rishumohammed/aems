@@ -38,35 +38,16 @@
       </div>
     </div>
 
-    <!-- KPI Row 1 -->
     <v-row class="mb-8" v-if="data.kpis && data.kpis.row1">
       <v-col cols="12" sm="6" md="3" v-for="stat in data.kpis.row1" :key="stat.title">
-        <v-card :color="stat.color" class="kpi-glow-card pa-0 rounded-lg overflow-hidden" elevation="0">
-          <div class="pa-6 text-white h-100 position-relative glass-overlay">
-            <div class="position-relative" style="z-index: 2">
-              <div class="text-caption font-weight-bold opacity-80 text-uppercase mb-1">{{ stat.title }}</div>
-              <div class="text-h4 font-weight-black">{{ stat.value }}</div>
-              <div class="text-caption mt-2 font-weight-medium d-flex align-center gap-1">
-                <!-- No trend data -->
-                <template v-if="!stat.trend || stat.trend.direction === 'neutral'">
-                  <v-icon size="13">mdi-minus</v-icon>
-                  <span>No change vs last month</span>
-                </template>
-                <!-- Up trend -->
-                <template v-else-if="stat.trend.direction === 'up'">
-                  <v-icon size="13">mdi-trending-up</v-icon>
-                  <span>+{{ stat.trend.change }}% vs last month</span>
-                </template>
-                <!-- Down trend -->
-                <template v-else>
-                  <v-icon size="13">mdi-trending-down</v-icon>
-                  <span>-{{ stat.trend.change }}% vs last month</span>
-                </template>
-              </div>
-            </div>
-            <v-icon :icon="stat.icon" class="kpi-icon-bg"></v-icon>
-          </div>
-        </v-card>
+        <KpiCard
+          :title="stat.title"
+          :value="stat.value"
+          :icon="stat.icon"
+          :color="stat.color === 'indigo' ? 'purple' : stat.color === 'emerald' ? 'green' : stat.color === 'amber' ? 'orange' : stat.color"
+          :trend="stat.trend && stat.trend.direction !== 'neutral' ? { value: stat.trend.change, positive: stat.trend.direction === 'up', label: 'vs last month' } : undefined"
+          :subtitle="(!stat.trend || stat.trend.direction === 'neutral') ? 'No change vs last month' : undefined"
+        />
       </v-col>
     </v-row>
 
@@ -381,25 +362,7 @@ onMounted(fetchData);
 </script>
 
 <style scoped>
-.kpi-glow-card {
-  transition: all 0.3s ease;
-  border: 1px solid var(--border);
-}
-.kpi-glow-card:hover {
-  transform: translateY(-5px) scale(1.02);
-}
-.kpi-icon-bg {
-  position: absolute;
-  right: -20px;
-  bottom: -20px;
-  font-size: 100px !important;
-  opacity: 0.15;
-  transform: rotate(-15deg);
-  z-index: 1;
-}
-.glass-overlay {
-  background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%);
-}
+
 .shadow-sm { border: 1px solid var(--border); }
 
 .fade-in {

@@ -1,22 +1,33 @@
 <template>
-  <div class="kpi-card">
-    <div class="d-flex align-center mb-4">
-      <div class="icon-box" :style="{ backgroundColor: iconBg }">
-        <v-icon :icon="icon" :style="{ color: iconColor }" size="20"></v-icon>
-      </div>
-      <v-spacer></v-spacer>
-      <div v-if="trendValue !== null" class="trend-badge" :class="trendPositive ? 'trend-up' : 'trend-down'">
-        <v-icon :icon="trendPositive ? 'mdi-trending-up' : 'mdi-trending-down'" size="12" class="mr-1"></v-icon>
-        {{ trendValue }}%
-      </div>
+  <div class="kpi-card" :style="{ backgroundColor: cardBg }">
+    <div class="kpi-decor-bg">
+      <svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="80" cy="20" r="40" :fill="iconColor" fill-opacity="0.05" />
+        <circle cx="90" cy="80" r="20" :fill="iconColor" fill-opacity="0.05" />
+        <path d="M0 100 Q 50 50 100 100" :stroke="iconColor" stroke-opacity="0.05" stroke-width="2" fill="none" />
+      </svg>
     </div>
-    <div class="kpi-label">{{ title || label }}</div>
-    <div class="kpi-value">{{ value }}</div>
-    <div v-if="trendLabel || subtitle" class="kpi-subtitle">{{ trendLabel || subtitle }}</div>
+    <div class="kpi-content">
+      <div class="d-flex align-center mb-4">
+        <div class="icon-box" :style="{ backgroundColor: iconBg }">
+          <v-icon :icon="icon" :style="{ color: iconColor }" size="20"></v-icon>
+        </div>
+        <v-spacer></v-spacer>
+        <div v-if="trendValue !== null" class="trend-badge" :class="trendPositive ? 'trend-up' : 'trend-down'">
+          <v-icon :icon="trendPositive ? 'mdi-trending-up' : 'mdi-trending-down'" size="12" class="mr-1"></v-icon>
+          {{ trendValue }}%
+        </div>
+      </div>
+      <div class="kpi-label" :style="{ color: iconColor }">{{ title || label }}</div>
+      <div class="kpi-value">{{ value }}</div>
+      <div v-if="trendLabel || subtitle" class="kpi-subtitle">{{ trendLabel || subtitle }}</div>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue';
+
 const props = defineProps<{
   title?: string;
   label?: string;
@@ -28,17 +39,20 @@ const props = defineProps<{
   subtitle?: string;
 }>();
 
-const colorMap: Record<string, { bg: string; text: string }> = {
-  blue:   { bg: 'var(--blue-l)',   text: '#007AFF' },
-  green:  { bg: 'var(--green-l)',  text: '#30B94D' },
-  red:    { bg: 'var(--red-l)',    text: '#FF3B30' },
-  orange: { bg: 'var(--orange-l)', text: '#FF9500' },
-  purple: { bg: 'var(--purple-l)', text: '#AF52DE' },
-  teal:   { bg: 'var(--teal-l)',   text: '#32ADE6' },
+const colorMap: Record<string, { bg: string; text: string; cardBg: string }> = {
+  blue:   { bg: 'var(--blue-l)',   text: '#007AFF', cardBg: '#f0f8ff' },
+  green:  { bg: 'var(--green-l)',  text: '#30B94D', cardBg: '#f0fff4' },
+  red:    { bg: 'var(--red-l)',    text: '#FF3B30', cardBg: '#fff5f5' },
+  orange: { bg: 'var(--orange-l)', text: '#FF9500', cardBg: '#fffaf0' },
+  purple: { bg: 'var(--purple-l)', text: '#AF52DE', cardBg: '#faf5ff' },
+  teal:   { bg: 'var(--teal-l)',   text: '#32ADE6', cardBg: '#f0fdfa' },
+  warning:{ bg: 'var(--orange-l)', text: '#FF9500', cardBg: '#fffaf0' }, // Map warning to orange
+  info:   { bg: 'var(--blue-l)',   text: '#007AFF', cardBg: '#f0f8ff' }, // Map info to blue
 };
 
 const iconBg = computed(() => colorMap[props.color || 'blue']?.bg || 'var(--blue-l)');
 const iconColor = computed(() => colorMap[props.color || 'blue']?.text || '#007AFF');
+const cardBg = computed(() => colorMap[props.color || 'blue']?.cardBg || '#f0f8ff');
 
 const trendValue = computed((): number | null => {
   if (!props.trend) return null;
@@ -60,19 +74,33 @@ const trendLabel = computed((): string | undefined => {
 
 <style scoped>
 .kpi-card {
-  background: white;
+  position: relative;
+  overflow: hidden;
   border-radius: var(--radius-lg);
-  
   padding: 20px 22px;
-  transition: transform 0.2s ease, border-color 0.2s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
   height: 100%;
-  border: 1px solid var(--border);
+  border: 1px solid rgba(0, 0, 0, 0.03);
 }
 
 .kpi-card:hover {
   transform: translateY(-2px);
-  border: 1px solid var(--border);
-  
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+.kpi-decor-bg {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 100px;
+  height: 100px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.kpi-content {
+  position: relative;
+  z-index: 1;
 }
 
 .icon-box {
