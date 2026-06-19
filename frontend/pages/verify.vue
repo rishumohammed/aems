@@ -36,13 +36,12 @@
           <v-form @submit.prevent="verifyCert" class="d-flex align-center gap-2 flex-column flex-sm-row">
             <v-text-field
               v-model="certId"
-              label="Enter Certificate ID"
               variant="solo"
               flat
               hide-details
               rounded="pill"
               class="flex-grow-1 search-input w-100"
-              placeholder="e.g. BRX-2026-XXXX"
+              placeholder="Enter Certificate ID (e.g. BRX-2026-XXXX)"
               prepend-inner-icon="mdi-magnify"
               bg-color="transparent"
             ></v-text-field>
