@@ -30,8 +30,11 @@
             </v-list>
           </v-card>
 
-          <v-chip color="warning" variant="tonal" class="font-weight-bold mb-8" size="small" prepend-icon="mdi-clock-check-outline">
+          <v-chip v-if="authStore.user?.role !== 'super_admin'" color="warning" variant="tonal" class="font-weight-bold mb-8" size="small" prepend-icon="mdi-clock-check-outline">
             Pending Admin Review
+          </v-chip>
+          <v-chip v-else color="success" variant="tonal" class="font-weight-bold mb-8" size="small" prepend-icon="mdi-check-circle-outline">
+            Published Live
           </v-chip>
 
           <div class="d-flex gap-3 justify-center flex-wrap">
@@ -39,9 +42,19 @@
               color="primary"
               rounded="lg"
               class="font-weight-bold px-8 shadow-glow"
+              :to="`/courses/${course.slug}`"
+              target="_blank"
+            >
+              <v-icon start>mdi-open-in-new</v-icon> View Public Page
+            </v-btn>
+            <v-btn
+              variant="tonal"
+              color="indigo"
+              rounded="lg"
+              class="font-weight-bold px-6"
               :to="`/dashboard/courses/${createdCourseId}/edit`"
             >
-              <v-icon start>mdi-eye-outline</v-icon> View Course
+              <v-icon start>mdi-pencil-outline</v-icon> Edit
             </v-btn>
             <v-btn
               variant="outlined"
@@ -50,7 +63,7 @@
               class="font-weight-bold px-6"
               to="/dashboard/courses"
             >
-              Back to Dashboard
+              Dashboard
             </v-btn>
           </div>
         </div>
