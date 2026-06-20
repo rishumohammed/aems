@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS `payment_webhook_logs` (
   `payload` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`payload`)),
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+);
 
 CREATE TABLE IF NOT EXISTS `proctoring_events` (
   `id` char(36) NOT NULL,
@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS `proctoring_events` (
   PRIMARY KEY (`id`),
   KEY `attempt_id` (`attempt_id`),
   CONSTRAINT `proctoring_events_ibfk_1` FOREIGN KEY (`attempt_id`) REFERENCES `exam_attempts` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+);
 
 CREATE TABLE IF NOT EXISTS `quizzes` (
   `id` char(36) NOT NULL,
@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS `quizzes` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+);
 
 CREATE TABLE IF NOT EXISTS `quiz_questions` (
   `id` char(36) NOT NULL,
@@ -42,7 +42,7 @@ CREATE TABLE IF NOT EXISTS `quiz_questions` (
   PRIMARY KEY (`id`),
   KEY `quiz_id` (`quiz_id`),
   CONSTRAINT `quiz_questions_ibfk_1` FOREIGN KEY (`quiz_id`) REFERENCES `quizzes` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+);
 
 -- 2. Missing Columns
 ALTER TABLE course_qa ADD COLUMN status enum('open','answered','pending_review','closed') DEFAULT 'open';
