@@ -74,7 +74,7 @@
     <div v-else class="fade-in">
       <v-row v-if="viewType === 'grid'">
         <v-col v-for="course in filteredCourses" :key="course.id" cols="12" sm="6" md="4" lg="3">
-          <CourseGrid :course="course" @edit="editCourse" @delete="deleteCourse" />
+          <CourseGrid :course="course" @edit="editCourse" @delete="deleteCourse" @toggle-featured="toggleFeatured" />
         </v-col>
       </v-row>
 

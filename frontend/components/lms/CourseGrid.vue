@@ -1,5 +1,5 @@
 <template>
-  <v-card class="course-grid-card h-100 d-flex flex-column" rounded="xl" flat border>
+  <v-card class="course-grid-card h-100 d-flex flex-column" rounded="xl" flat border :class="{ 'featured-ring': course.is_featured }">
     <div class="position-relative">
       <v-img
         :src="course.thumbnail_url ? ($config.public.apiBase.replace('/api', '') + course.thumbnail_url) : 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=800'"
@@ -23,6 +23,22 @@
       >
         {{ formatStatus(course) }}
       </v-chip>
+
+      <!-- Featured Badge -->
+      <v-tooltip v-if="userRole !== 'student'" :text="course.is_featured ? 'Remove from Featured' : 'Mark as Featured'" location="top">
+        <template v-slot:activator="{ props: tooltipProps }">
+          <v-btn
+            v-bind="tooltipProps"
+            :icon="course.is_featured ? 'mdi-star' : 'mdi-star-outline'"
+            :color="course.is_featured ? 'amber' : 'white'"
+            size="x-small"
+            variant="flat"
+            class="position-absolute top-0 left-0 ma-2"
+            style="opacity: 0.95;"
+            @click.stop="$emit('toggle-featured', course)"
+          />
+        </template>
+      </v-tooltip>
 
       <!-- Category Badge -->
       <v-chip
@@ -116,7 +132,7 @@ const authStore = useAuthStore();
 const userRole = computed(() => authStore.userRole);
 const router = useRouter();
 
-const emit = defineEmits(['edit', 'view', 'delete'])
+const emit = defineEmits(['edit', 'view', 'delete', 'toggle-featured'])
 
 const viewCourse = () => {
   router.push(`/courses/${props.course.slug}`);
@@ -149,6 +165,10 @@ const formatStatus = (course) => {
   transform: translateY(-4px);
   border: 1px solid var(--border);
   
+}
+.featured-ring {
+  border: 2px solid #FFC107 !important;
+  box-shadow: 0 0 0 3px rgba(255, 193, 7, 0.15);
 }
 .line-clamp-2 {
   display: -webkit-box;
