@@ -296,7 +296,7 @@ import { useApi } from '@/composables/useApi';
 definePageMeta({
   layout: 'dashboard',
   middleware: ['auth', 'role'],
-  role: ['super_admin']
+  role: ['super_admin', 'finance_staff']
 });
 
 const api = useApi();

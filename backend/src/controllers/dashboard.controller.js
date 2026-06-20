@@ -114,5 +114,84 @@ export const DashboardController = {
       console.error('Dashboard Error:', error);
       res.status(500).json({ message: error.message });
     }
+  },
+
+  async getPlacementDashboardStats(req, res) {
+    try {
+      const [activeJobs] = await pool.query('SELECT COUNT(*) as count FROM jobs WHERE status = "approved"');
+      const [totalEmployers] = await pool.query('SELECT COUNT(*) as count FROM users WHERE role = "employer" AND status = "active"');
+      const [totalApplications] = await pool.query('SELECT COUNT(*) as count FROM job_applications');
+      const [interviewsScheduled] = await pool.query('SELECT COUNT(*) as count FROM job_interviews WHERE status = "scheduled"');
+      
+      const [recentApplications] = await pool.query(`
+        SELECT ja.id, u.name as applicant_name, j.title as job_title, ja.status, ja.applied_at as created_at 
+        FROM job_applications ja
+        JOIN users u ON ja.student_id = u.id
+        JOIN jobs j ON ja.job_id = j.id
+        ORDER BY ja.applied_at DESC LIMIT 10
+      `);
+
+      const [statusDistribution] = await pool.query('SELECT status, COUNT(*) as count FROM job_applications GROUP BY status');
+
+      res.json({
+        kpis: [
+          { title: 'Active Jobs', value: activeJobs[0].count, icon: 'mdi-briefcase-check', color: 'success' },
+          { title: 'Active Employers', value: totalEmployers[0].count, icon: 'mdi-domain', color: 'primary' },
+          { title: 'Total Applications', value: totalApplications[0].count, icon: 'mdi-file-document-multiple-outline', color: 'info' },
+          { title: 'Upcoming Interviews', value: interviewsScheduled[0].count, icon: 'mdi-calendar-clock', color: 'warning' },
+        ],
+        recentApplications,
+        statusDistribution
+      });
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  },
+
+  async getLmsDashboardStats(req, res) {
+    try {
+      const [publishedCourses] = await pool.query('SELECT COUNT(*) as count FROM courses WHERE status = "published"');
+      const [activeStudents] = await pool.query('SELECT COUNT(*) as count FROM users WHERE role = "student" AND status = "active"');
+      const [pendingQa] = await pool.query('SELECT COUNT(*) as count FROM course_qa WHERE status IN ("open", "pending_review")');
+      const [activeTutors] = await pool.query('SELECT COUNT(*) as count FROM users WHERE role = "tutor" AND status = "active"');
+
+      const [recentEnrollments] = await pool.query(`
+        SELECT u.id as student_id, u.name, c.title as course, i.created_at as date, i.amount_paid as amount 
+        FROM invoices i 
+        JOIN users u ON i.student_id = u.id 
+        LEFT JOIN courses c ON i.course_id = c.id 
+        ORDER BY i.created_at DESC LIMIT 10
+      `);
+
+      // Mock upcoming events or query them if possible
+      const [upcomingEvents] = await pool.query(`
+        SELECT le.title, le.scheduled_at, u.name as host_name 
+        FROM live_events le
+        JOIN users u ON le.host_id = u.id
+        WHERE le.scheduled_at > NOW() AND le.status != 'cancelled'
+        ORDER BY le.scheduled_at ASC LIMIT 5
+      `);
+
+      const [enrollmentTrends] = await pool.query(`
+        SELECT DATE_FORMAT(enrolled_at, '%Y-%m') as month, COUNT(*) as count 
+        FROM enrollments 
+        WHERE enrolled_at >= DATE_SUB(CURDATE(), INTERVAL 6 MONTH)
+        GROUP BY month ORDER BY month ASC
+      `);
+
+      res.json({
+        kpis: [
+          { title: 'Published Courses', value: publishedCourses[0].count, icon: 'mdi-book-open-variant', color: 'primary' },
+          { title: 'Active Students', value: activeStudents[0].count, icon: 'mdi-school', color: 'info' },
+          { title: 'Pending Q&A', value: pendingQa[0].count, icon: 'mdi-forum-outline', color: 'warning' },
+          { title: 'Active Tutors', value: activeTutors[0].count, icon: 'mdi-account-tie', color: 'success' },
+        ],
+        recentEnrollments,
+        upcomingEvents,
+        enrollmentTrends
+      });
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
   }
 };

@@ -3,10 +3,10 @@
     <!-- Header -->
     <div class="d-flex justify-space-between align-center mb-6">
       <div>
-        <h1 class="text-h4 font-weight-bold text-primary mb-1">System Users</h1>
-        <p class="text-body-1 text-secondary">Manage internal staff accounts and permissions</p>
+        <h1 class="text-h4 font-weight-black text-grey-darken-4 mb-1">System Users</h1>
+        <p class="text-body-1 text-grey-darken-1">Manage internal staff accounts and permissions</p>
       </div>
-      <v-btn color="primary" rounded="lg" prepend-icon="mdi-account-plus" @click="openAddModal">
+      <v-btn color="primary" rounded="pill" elevation="0" size="large" class="px-6 font-weight-bold text-none" prepend-icon="mdi-account-plus" @click="openAddModal">
         Add System User
       </v-btn>
     </div>
@@ -181,6 +181,29 @@
         </v-card-text>
       </v-card>
     </v-dialog>
+
+    <!-- Password Reset Dialog -->
+    <v-dialog v-model="showPasswordDialog" max-width="400">
+      <v-card class="rounded-xl pa-2">
+        <v-card-title class="text-h6 font-weight-bold d-flex align-center">
+          <v-icon color="success" class="mr-2">mdi-check-circle</v-icon>
+          Password Reset
+        </v-card-title>
+        <v-card-text>
+          <p class="mb-4">The password has been reset successfully. It has also been emailed to the user.</p>
+          <div class="text-caption text-grey mb-1">New Temporary Password:</div>
+          <v-sheet color="grey-lighten-4" class="pa-3 rounded d-flex align-center justify-space-between mb-4">
+            <span class="text-h6 font-weight-medium" style="font-family: monospace;">{{ tempPassword }}</span>
+            <v-btn icon="mdi-content-copy" variant="text" size="small" color="primary" @click="copyPassword"></v-btn>
+          </v-sheet>
+          <v-alert v-if="copied" type="success" density="compact" variant="tonal" class="mb-0">Copied to clipboard!</v-alert>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="primary" variant="flat" @click="showPasswordDialog = false" class="px-6 rounded-pill">Close</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-container>
 </template>
 
@@ -204,6 +227,10 @@ const selectedUser = ref(null);
 const showAuditLogs = ref(false);
 const auditLogs = ref([]);
 const loadingAudit = ref(false);
+
+const showPasswordDialog = ref(false);
+const tempPassword = ref('');
+const copied = ref(false);
 
 const headers = [
   { title: 'User', key: 'name', align: 'start' },
@@ -230,10 +257,10 @@ const getRoleColor = (role) => {
   const map = {
     'super_admin': 'red',
     'sub_admin': 'info',
+    'lms_user': 'orange',
     'crm_agent': 'info',
     'placement_coordinator': 'purple',
     'finance_staff': 'green',
-    'exam_manager': 'teal',
     'support_staff': 'blue-grey'
   };
   return map[role] || 'grey';
@@ -295,11 +322,19 @@ const resetPassword = async (user) => {
   
   try {
     const { data } = await api.post(`/admin/system-users/${user.id}/reset-password`);
-    alert(`Password reset successfully!\n\nNew Temporary Password: ${data.tempPassword}\n\nPlease share this securely. It has also been emailed to the user.`);
+    tempPassword.value = data.tempPassword;
+    copied.value = false;
+    showPasswordDialog.value = true;
     fetchData();
   } catch (err) {
     alert(err.response?.data?.message || 'Failed to reset password');
   }
+};
+
+const copyPassword = () => {
+  navigator.clipboard.writeText(tempPassword.value);
+  copied.value = true;
+  setTimeout(() => { copied.value = false; }, 3000);
 };
 
 const confirmDelete = async (user) => {

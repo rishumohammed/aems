@@ -38,7 +38,7 @@ router.get('/', async (req, res) => {
         ORDER BY i.scheduled_at ASC
       `;
       params = [userId];
-    } else if (role === 'tutor' || role === 'super_admin') {
+    } else if (role === 'tutor' || role === 'super_admin' || role === 'placement_coordinator') {
       query = `
         SELECT i.*, j.title as job_title, j.company as job_company, u.name as applicant_name, u.email as applicant_email
         FROM job_interviews i
@@ -146,7 +146,7 @@ router.post('/', authorizeRoles('employer'), async (req, res) => {
 });
 
 // Update interview status
-router.patch('/:id/status', authorizeRoles('employer', 'super_admin'), async (req, res) => {
+router.patch('/:id/status', authorizeRoles('employer', 'super_admin', 'placement_coordinator'), async (req, res) => {
   const { status } = req.body;
   try {
     const [result] = await pool.query(

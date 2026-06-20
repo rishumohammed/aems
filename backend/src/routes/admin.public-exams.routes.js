@@ -1,7 +1,7 @@
 import express from 'express';
 import { v4 as uuidv4 } from 'uuid';
 import { pool } from '../db/connection.js';
-import { authenticateJWT, authorizeRoles } from '../middleware/auth.js';
+import { authenticateJWT, authorizeRoles, requirePermission } from '../middleware/auth.js';
 
 const router = express.Router();
 
@@ -39,7 +39,7 @@ function gradeQuestion(type, correct, submitted) {
 }
 
 // Apply admin protection to all routes in this file
-router.use(authenticateJWT, authorizeRoles('super_admin'));
+router.use(authenticateJWT, requirePermission('exams'));
 
 // ─── 1. CATEGORIES CRUD ────────────────────────────────────────────────────────
 

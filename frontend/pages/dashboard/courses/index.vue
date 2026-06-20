@@ -101,7 +101,7 @@ import CourseListRow from '~/components/lms/CourseListRow.vue';
 definePageMeta({
   layout: 'dashboard',
   middleware: ['auth', 'role'],
-  role: ['super_admin', 'tutor', 'student']
+  role: ['super_admin', 'sub_admin', 'lms_user', 'tutor', 'student']
 });
 
 const api = useApi();

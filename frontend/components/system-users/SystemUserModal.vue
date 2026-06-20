@@ -1,102 +1,89 @@
 <template>
-  <v-dialog v-model="isOpen" max-width="800px" persistent>
-    <v-card class="rounded-xl">
-      <v-toolbar color="primary" flat>
-        <v-toolbar-title class="text-h6 font-weight-bold text-white">
-          {{ isEdit ? 'Edit System User' : 'Add System User' }}
-        </v-toolbar-title>
-        <v-spacer></v-spacer>
-        <v-btn icon="mdi-close" color="white" variant="text" @click="close"></v-btn>
-      </v-toolbar>
+  <v-dialog v-model="isOpen" max-width="600px" persistent scrollable>
+    <v-card class="rounded-xl overflow-hidden bg-white text-grey-darken-4">
+      <v-card-title class="pa-6 bg-grey-lighten-5 d-flex justify-space-between align-center border-b">
+        <div>
+          <div class="text-h5 font-weight-black text-grey-darken-4">{{ isEdit ? 'Edit System User' : 'Add System User' }}</div>
+          <div class="text-subtitle-2 text-grey-darken-1 font-weight-medium">Manage user access and details</div>
+        </div>
+        <v-btn icon="mdi-close" variant="text" @click="close" color="grey-darken-1"></v-btn>
+      </v-card-title>
 
-      <v-tabs v-model="activeTab" color="primary" grow>
-        <v-tab value="personal">Personal Info</v-tab>
-        <v-tab value="account">Account Info</v-tab>
-        <v-tab value="permissions">Role & Permissions</v-tab>
-      </v-tabs>
-
-      <v-card-text class="pa-6" style="min-height: 400px; max-height: 60vh; overflow-y: auto;">
+      <v-card-text class="pa-6" style="max-height: 70vh; overflow-y: auto;">
         <v-form ref="form" v-model="isValid" @submit.prevent="submit">
-          <!-- PERSONAL INFO -->
-          <v-window v-model="activeTab">
-            <v-window-item value="personal">
-              <v-text-field
-                v-model="formData.name"
-                label="Full Name"
-                variant="outlined"
-                class="mb-4"
-                required
-                :rules="[v => !!v || 'Name is required']"
-              ></v-text-field>
-              <v-text-field
-                v-model="formData.email"
-                label="Email Address"
-                type="email"
-                variant="outlined"
-                class="mb-4"
-                required
-                :rules="[v => !!v || 'Email is required']"
-              ></v-text-field>
-              <v-text-field
-                v-model="formData.phone"
-                label="Phone Number"
-                variant="outlined"
-                class="mb-4"
-              ></v-text-field>
-            </v-window-item>
+          <v-text-field
+            v-model="formData.name"
+            label="Full Name"
+            variant="outlined"
+            required
+            class="mb-4"
+            :rules="[v => !!v || 'Name is required']"
+            bg-color="white"
+          ></v-text-field>
 
-            <!-- ACCOUNT INFO -->
-            <v-window-item value="account">
-              <v-alert
-                v-if="!isEdit"
-                type="info"
-                variant="tonal"
-                class="mb-4"
-              >
-                A temporary password will be automatically generated and emailed to the user. You can also set a specific password below.
-              </v-alert>
-              <v-alert
-                v-else
-                type="info"
-                variant="tonal"
-                class="mb-4"
-              >
-                Use the "Reset Password" action from the table to generate a new password for this user.
-              </v-alert>
+          <v-text-field
+            v-model="formData.email"
+            label="Email Address"
+            type="email"
+            variant="outlined"
+            required
+            class="mb-4"
+            :rules="[v => !!v || 'Email is required']"
+            bg-color="white"
+          ></v-text-field>
 
-              <div v-if="!isEdit">
-                <v-text-field
-                  v-model="formData.password"
-                  label="Password (Optional)"
-                  type="password"
-                  variant="outlined"
-                  class="mb-4"
-                  hint="Leave blank to auto-generate"
-                  persistent-hint
-                ></v-text-field>
-              </div>
-            </v-window-item>
+          <v-text-field
+            v-model="formData.phone"
+            label="Phone Number"
+            variant="outlined"
+            class="mb-4"
+            bg-color="white"
+          ></v-text-field>
 
-            <!-- ROLE & PERMISSIONS -->
-            <v-window-item value="permissions">
-              <v-select
-                v-model="formData.role"
-                :items="roles"
-                item-title="label"
-                item-value="value"
-                label="System Role"
-                variant="outlined"
-                class="mb-6"
-                required
-                :rules="[v => !!v || 'Role is required']"
-              ></v-select>
+          <v-select
+            v-model="formData.role"
+            :items="roles"
+            item-title="label"
+            item-value="value"
+            label="Assign System Role (User Type)"
+            variant="outlined"
+            required
+            :rules="[v => !!v || 'Role is required']"
+            bg-color="white"
+            class="mb-4"
+          ></v-select>
 
-              <div v-if="formData.role === 'sub_admin'">
-                <h3 class="text-subtitle-1 font-weight-bold mb-4">Module Permissions</h3>
-                <v-table density="compact" class="border rounded">
-                  <thead>
+          <div v-if="!isEdit">
+            <v-text-field
+              v-model="formData.password"
+              label="Password (Optional)"
+              type="password"
+              variant="outlined"
+              class="mb-4"
+              hint="Leave blank to auto-generate"
+              persistent-hint
+              bg-color="white"
+            ></v-text-field>
+          </div>
+
+          <v-alert
+            v-if="formData.role && formData.role !== 'sub_admin'"
+            type="info"
+            variant="tonal"
+            class="mb-4 bg-blue-lighten-5 text-blue-darken-2"
+          >
+            {{ getRoleDescription(formData.role) }}
+          </v-alert>
+
+          <!-- SUB-ADMIN CUSTOM PERMISSIONS -->
+          <v-expand-transition>
+            <div v-if="formData.role === 'sub_admin'" class="mt-2">
+              <p class="font-weight-bold mb-2">Module Permissions</p>
+              <v-card variant="outlined" class="rounded-lg border-grey-lighten-2">
+                <v-table density="compact">
+                  <thead class="bg-grey-lighten-5">
                     <tr>
-                      <th class="text-left">Module</th>
+                      <th class="text-left font-weight-bold">Module</th>
                       <th class="text-center">View</th>
                       <th class="text-center">Create</th>
                       <th class="text-center">Edit</th>
@@ -125,24 +112,15 @@
                     </tr>
                   </tbody>
                 </v-table>
-              </div>
-
-              <v-alert
-                v-else-if="formData.role"
-                type="info"
-                variant="tonal"
-                class="mt-4"
-              >
-                {{ getRoleDescription(formData.role) }}
-              </v-alert>
-            </v-window-item>
-          </v-window>
+              </v-card>
+            </div>
+          </v-expand-transition>
         </v-form>
       </v-card-text>
 
       <v-divider></v-divider>
-      <v-card-actions class="pa-6">
-        <v-btn variant="text" @click="close">Cancel</v-btn>
+      <v-card-actions class="pa-4 bg-grey-lighten-5">
+        <v-btn variant="text" @click="close" color="grey-darken-2" class="font-weight-medium rounded-pill px-6">Cancel</v-btn>
         <v-spacer></v-spacer>
         <v-btn
           color="primary"
@@ -150,10 +128,10 @@
           :loading="saving"
           :disabled="!isValid"
           elevation="0"
-          rounded="lg"
-          size="large"
+          rounded="pill"
+          class="px-6 font-weight-bold text-none"
         >
-          {{ isEdit ? 'Save Changes' : 'Create User' }}
+          {{ isEdit ? 'Save' : 'Create User' }}
         </v-btn>
       </v-card-actions>
     </v-card>
@@ -174,7 +152,6 @@ const isOpen = computed({
 });
 
 const isEdit = computed(() => !!props.user?.id);
-const activeTab = ref('personal');
 const isValid = ref(false);
 const saving = ref(false);
 const api = useApi();
@@ -192,11 +169,10 @@ const modules = [
 
 const roles = [
   { label: 'Sub Admin', value: 'sub_admin', desc: 'Configurable granular permissions.' },
+  { label: 'LMS User', value: 'lms_user', desc: 'Access to manage courses, exams, question banks, and student learning.' },
   { label: 'CRM User', value: 'crm_agent', desc: 'Access to Leads, Enquiries, Follow-ups, and Students only.' },
   { label: 'Placement Coordinator', value: 'placement_coordinator', desc: 'Access to Employers, Jobs, Applications, and Interviews.' },
-  { label: 'Finance Staff', value: 'finance_staff', desc: 'Access to Payments, Invoices, and Offline Payments.' },
-  { label: 'Exam Manager', value: 'exam_manager', desc: 'Access to Exams, Question Banks, and Proctoring Logs.' },
-  { label: 'Support Staff', value: 'support_staff', desc: 'General read-only or limited support access.' },
+  { label: 'Accounts / Finance', value: 'finance_staff', desc: 'Access to Payments, Invoices, and Offline Payments.' },
   { label: 'Super Admin', value: 'super_admin', desc: 'Full unrestricted system access.' }
 ];
 
@@ -223,7 +199,6 @@ const formData = ref({
 
 watch(() => props.modelValue, (val) => {
   if (val) {
-    activeTab.value = 'personal';
     if (props.user) {
       formData.value = {
         name: props.user.name || '',

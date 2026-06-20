@@ -104,7 +104,7 @@ import Badge from '@/components/ui/Badge.vue';
 definePageMeta({ 
   layout: 'dashboard', 
   middleware: ['auth', 'role'], 
-  role: ['super_admin', 'tutor'] 
+  role: ['super_admin', 'lms_user', 'tutor'] 
 });
 
 const route = useRoute();

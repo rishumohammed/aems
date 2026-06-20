@@ -381,7 +381,7 @@ import { useNavStore } from '@/stores/nav';
 definePageMeta({
   layout: 'dashboard',
   middleware: ['auth', 'role'],
-  role: ['super_admin']
+  role: ['super_admin', 'lms_user']
 });
 
 const api = useApi();

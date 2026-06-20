@@ -307,7 +307,9 @@ import { ref, computed, onMounted } from 'vue';
 import { useApi } from '@/composables/useApi';
 
 definePageMeta({
-  layout: 'dashboard'
+  layout: 'dashboard',
+  middleware: ['auth', 'role'],
+  role: ['super_admin', 'sub_admin', 'lms_user']
 });
 
 const api = useApi();

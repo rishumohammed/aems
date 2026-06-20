@@ -145,7 +145,7 @@ import ExternalCertificateModal from '@/components/certificates/ExternalCertific
 definePageMeta({
   layout: 'dashboard',
   middleware: ['auth', 'role'],
-  role: ['super_admin', 'tutor', 'student']
+  role: ['super_admin', 'lms_user', 'tutor', 'student']
 });
 
 const authStore = useAuthStore();

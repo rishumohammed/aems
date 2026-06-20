@@ -18,7 +18,7 @@ export const useNavStore = defineStore('nav', {
     isCollapsed: false,
     navItems: [
       // MAIN
-      { label: 'Dashboard', icon: 'mdi-view-dashboard-outline', route: '/dashboard', roles: ['super_admin', 'crm_agent', 'tutor', 'student', 'employer'] },
+      { label: 'Dashboard', icon: 'mdi-view-dashboard-outline', route: '/dashboard', roles: ['super_admin', 'sub_admin', 'crm_agent', 'tutor', 'student', 'employer', 'lms_user', 'placement_coordinator', 'finance_staff'] },
       // CRM
       { label: 'Leads', icon: 'mdi-account-group-outline', route: '/dashboard/leads', roles: ['super_admin', 'crm_agent'], section: 'CRM', badge: undefined },
       { label: 'Follow-ups', icon: 'mdi-calendar-check-outline', route: '/dashboard/leads/followups', roles: ['super_admin', 'crm_agent'], section: 'CRM', badge: undefined },
@@ -30,54 +30,56 @@ export const useNavStore = defineStore('nav', {
       { label: 'Assignments', icon: 'mdi-file-edit-outline', route: '/dashboard/student/assignments', roles: ['student'], section: 'LMS', badge: undefined },
       { label: 'Students', icon: 'mdi-school-outline', route: '/dashboard/students', roles: ['super_admin', 'crm_agent'], section: 'LMS' },
       
+      // ADMIN COURSES (LMS)
+      { label: 'Courses', icon: 'mdi-book-open-page-variant-outline', route: '/dashboard/courses', roles: ['super_admin', 'lms_user'], section: 'LMS' },
+      { label: 'Categories', icon: 'mdi-shape-outline', route: '/dashboard/admin/course-categories', roles: ['super_admin', 'lms_user'], section: 'LMS' },
+      { label: 'Live Events', icon: 'mdi-video-outline', route: '/dashboard/admin/live-events', roles: ['super_admin', 'lms_user'], section: 'LMS' },
+      { label: 'Live Events', icon: 'mdi-video-outline', route: '/dashboard/tutor/live-events', roles: ['tutor'], section: 'LMS' },
+      { label: 'Course Approvals', icon: 'mdi-check-decagram-outline', route: '/dashboard/admin/course-approvals', roles: ['super_admin', 'lms_user'], section: 'LMS', badge: undefined },
+      
       // EXAMS
-      { label: 'Exams', icon: 'mdi-file-document-edit-outline', route: '/dashboard/exams', roles: ['super_admin', 'tutor', 'student'], section: 'EXAMS' },
-      { label: 'Talent Hunt', icon: 'mdi-earth', route: '/dashboard/admin/public-exams', roles: ['super_admin'], section: 'EXAMS' },
-      { label: 'Results', icon: 'mdi-trophy-outline', route: '/dashboard/exams/grading', roles: ['super_admin', 'tutor'], section: 'EXAMS' },
-      { label: 'Certificates', icon: 'mdi-certificate-outline', route: '/dashboard/certificates', roles: ['super_admin', 'tutor', 'student'], section: 'EXAMS' },
-      { label: 'Proctoring Logs', icon: 'mdi-cctv', route: '/dashboard/admin/proctoring', roles: ['super_admin', 'tutor'], section: 'EXAMS' },
+      { label: 'Exams', icon: 'mdi-file-document-edit-outline', route: '/dashboard/exams', roles: ['super_admin', 'lms_user', 'tutor', 'student'], section: 'EXAMS' },
+      { label: 'Talent Hunt', icon: 'mdi-earth', route: '/dashboard/admin/public-exams', roles: ['super_admin', 'lms_user'], section: 'EXAMS' },
+      { label: 'Results', icon: 'mdi-trophy-outline', route: '/dashboard/exams/grading', roles: ['super_admin', 'lms_user', 'tutor'], section: 'EXAMS' },
+      { label: 'Certificates', icon: 'mdi-certificate-outline', route: '/dashboard/certificates', roles: ['super_admin', 'lms_user', 'tutor', 'student'], section: 'EXAMS' },
+      { label: 'Proctoring Logs', icon: 'mdi-cctv', route: '/dashboard/admin/proctoring', roles: ['super_admin', 'lms_user', 'tutor'], section: 'EXAMS' },
       { label: 'Results', icon: 'mdi-trophy-outline', route: '/dashboard/student/results', roles: ['student'], section: 'EXAMS' },
       
-      // ADMIN COURSES
-      { label: 'Courses', icon: 'mdi-book-open-page-variant-outline', route: '/dashboard/courses', roles: ['super_admin'], section: 'LMS' },
-      { label: 'Categories', icon: 'mdi-shape-outline', route: '/dashboard/admin/course-categories', roles: ['super_admin'], section: 'LMS' },
-      { label: 'Live Events', icon: 'mdi-video-outline', route: '/dashboard/admin/live-events', roles: ['super_admin'], section: 'LMS' },
-      { label: 'Live Events', icon: 'mdi-video-outline', route: '/dashboard/tutor/live-events', roles: ['tutor'], section: 'LMS' },
-      { label: 'Course Approvals', icon: 'mdi-check-decagram-outline', route: '/dashboard/admin/course-approvals', roles: ['super_admin'], section: 'LMS', badge: undefined },
-      
       // JOBS
-      { label: 'Job Board', icon: 'mdi-briefcase-outline', route: '/dashboard/jobs', roles: ['super_admin', 'student'], section: 'JOBS' },
-      { label: 'Manage Jobs', icon: 'mdi-briefcase-edit-outline', route: '/dashboard/admin/jobs', roles: ['super_admin'], section: 'JOBS' },
-      { label: 'Job Approvals', icon: 'mdi-briefcase-check', route: '/dashboard/admin/job-approvals', roles: ['super_admin'], section: 'JOBS', badge: undefined },
-      { label: 'Job Categories', icon: 'mdi-shape-outline', route: '/dashboard/admin/job-categories', roles: ['super_admin'], section: 'JOBS' },
+      { label: 'Job Board', icon: 'mdi-briefcase-outline', route: '/dashboard/jobs', roles: ['super_admin', 'placement_coordinator', 'student'], section: 'JOBS' },
+      { label: 'Manage Jobs', icon: 'mdi-briefcase-edit-outline', route: '/dashboard/admin/jobs', roles: ['super_admin', 'placement_coordinator'], section: 'JOBS' },
+      { label: 'Job Approvals', icon: 'mdi-briefcase-check', route: '/dashboard/admin/job-approvals', roles: ['super_admin', 'placement_coordinator'], section: 'JOBS', badge: undefined },
+      { label: 'Job Categories', icon: 'mdi-shape-outline', route: '/dashboard/admin/job-categories', roles: ['super_admin', 'placement_coordinator'], section: 'JOBS' },
       { label: 'Manage Jobs', icon: 'mdi-briefcase-edit-outline', route: '/dashboard/employer/jobs', roles: ['employer'], section: 'JOBS' },
       { label: 'Applications', icon: 'mdi-briefcase-check-outline', route: '/dashboard/student/applications', roles: ['student'], section: 'JOBS' },
       { label: 'Candidates', icon: 'mdi-account-search', route: '/dashboard/employer/applications', roles: ['employer'], section: 'JOBS' },
-      { label: 'Interviews', icon: 'mdi-account-clock-outline', route: '/dashboard/interviews', roles: ['super_admin', 'student'], section: 'JOBS' },
+      { label: 'Interviews', icon: 'mdi-account-clock-outline', route: '/dashboard/admin/interviews', roles: ['super_admin', 'placement_coordinator'], section: 'JOBS' },
+      { label: 'Interviews', icon: 'mdi-account-clock-outline', route: '/dashboard/interviews', roles: ['student'], section: 'JOBS' },
       { label: 'Interviews', icon: 'mdi-account-clock-outline', route: '/dashboard/employer/interviews', roles: ['employer'], section: 'JOBS' },
       { label: 'Placements', icon: 'mdi-medal-outline', route: '/dashboard/placements', roles: ['student'], section: 'JOBS' },
       
       // FINANCE
       { label: 'Analytics', icon: 'mdi-chart-line', route: '/dashboard/admin/finance', roles: ['super_admin'], section: 'FINANCE' },
-      { label: 'Invoices', icon: 'mdi-receipt', route: '/dashboard/admin/invoices', roles: ['super_admin'], section: 'FINANCE' },
-      { label: 'Offline Payments', icon: 'mdi-bank-transfer', route: '/dashboard/admin/finance/offline-payments', roles: ['super_admin'], badge: undefined, section: 'FINANCE' },
+      { label: 'Student Accounts', icon: 'mdi-account-group-outline', route: '/dashboard/students', roles: ['finance_staff'], section: 'FINANCE' },
+      { label: 'Invoices', icon: 'mdi-receipt', route: '/dashboard/admin/invoices', roles: ['super_admin', 'finance_staff'], section: 'FINANCE' },
+      { label: 'Offline Payments', icon: 'mdi-bank-transfer', route: '/dashboard/admin/finance/offline-payments', roles: ['super_admin', 'finance_staff'], badge: undefined, section: 'FINANCE' },
       { label: 'Payments', icon: 'mdi-receipt', route: '/dashboard/student/payments', roles: ['student'], section: 'FINANCE' },
       
       // USERS
-      { label: 'Tutors', icon: 'mdi-account-tie', route: '/dashboard/admin/tutors', roles: ['super_admin'], section: 'LMS' },
-      { label: 'Tutor Approvals', icon: 'mdi-account-clock', route: '/dashboard/admin/tutor-approvals', roles: ['super_admin'], section: 'LMS', badge: undefined },
+      { label: 'Tutors', icon: 'mdi-account-tie', route: '/dashboard/admin/tutors', roles: ['super_admin', 'lms_user'], section: 'LMS' },
+      { label: 'Tutor Approvals', icon: 'mdi-account-clock', route: '/dashboard/admin/tutor-approvals', roles: ['super_admin', 'lms_user'], section: 'LMS', badge: undefined },
       { label: 'Course Q&A', icon: 'mdi-forum', route: '/dashboard/tutor/qa', roles: ['tutor'], section: 'LMS', badge: undefined },
-      { label: 'Course Q&A', icon: 'mdi-forum', route: '/dashboard/admin/qa', roles: ['super_admin'], section: 'LMS', badge: undefined },
-      { label: 'Employers', icon: 'mdi-domain', route: '/dashboard/admin/employers', roles: ['super_admin'], section: 'JOBS' },
-      { label: 'Employer Approvals', icon: 'mdi-domain-plus', route: '/dashboard/admin/employer-approvals', roles: ['super_admin'], section: 'JOBS', badge: undefined },
+      { label: 'Course Q&A', icon: 'mdi-forum', route: '/dashboard/admin/qa', roles: ['super_admin', 'lms_user'], section: 'LMS', badge: undefined },
+      { label: 'Employers', icon: 'mdi-domain', route: '/dashboard/admin/employers', roles: ['super_admin', 'placement_coordinator'], section: 'JOBS' },
+      { label: 'Employer Approvals', icon: 'mdi-domain-plus', route: '/dashboard/admin/employer-approvals', roles: ['super_admin', 'placement_coordinator'], section: 'JOBS', badge: undefined },
       
       // ANNOUNCEMENTS
       { label: 'Notice Board', icon: 'mdi-bullhorn-outline', route: '/dashboard/admin/notice-board', roles: ['super_admin'], section: 'ANNOUNCEMENTS' },
 
       // SETTINGS
       { label: 'System Users', icon: 'mdi-account-group', route: '/dashboard/admin/settings/system-users', roles: ['super_admin'], section: 'SETTINGS' },
-      { label: 'Profile', icon: 'mdi-account-outline', route: '/dashboard/profile', roles: ['super_admin', 'sub_admin', 'tutor', 'student', 'employer', 'crm_agent', 'placement_coordinator', 'finance_staff', 'exam_manager', 'support_staff'], section: 'SETTINGS' },
-      { label: 'Logout', icon: 'mdi-logout', action: 'logout', roles: ['super_admin', 'sub_admin', 'tutor', 'student', 'employer', 'crm_agent', 'placement_coordinator', 'finance_staff', 'exam_manager', 'support_staff'], section: 'SETTINGS' },
+      { label: 'Profile', icon: 'mdi-account-outline', route: '/dashboard/profile', roles: ['super_admin', 'sub_admin', 'tutor', 'student', 'employer', 'crm_agent', 'placement_coordinator', 'finance_staff', 'lms_user', 'support_staff'], section: 'SETTINGS' },
+      { label: 'Logout', icon: 'mdi-logout', action: 'logout', roles: ['super_admin', 'sub_admin', 'tutor', 'student', 'employer', 'crm_agent', 'placement_coordinator', 'finance_staff', 'lms_user', 'support_staff'], section: 'SETTINGS' },
     ] as NavItem[]
   }),
   getters: {
@@ -89,12 +91,6 @@ export const useNavStore = defineStore('nav', {
         .filter(item => {
           // Check standard roles
           if (item.roles.includes(role)) return true;
-          
-          // Role-specific wide access
-          if (role === 'finance_staff' && item.section === 'FINANCE') return true;
-          if (role === 'placement_coordinator' && item.section === 'JOBS') return true;
-          if (role === 'crm_agent' && item.section === 'CRM') return true;
-          if (role === 'exam_manager' && item.section === 'EXAMS') return true;
           
           // Sub Admin dynamic permissions
           if (role === 'sub_admin') {
@@ -116,11 +112,14 @@ export const useNavStore = defineStore('nav', {
           // Dynamically point "Dashboard" to the role-specific landing page
           if (item.label === 'Dashboard' && item.route === '/dashboard') {
             let roleRoute = '/dashboard';
-            if (role === 'super_admin') roleRoute = '/dashboard/admin';
+            if (role === 'super_admin' || role === 'sub_admin') roleRoute = '/dashboard/admin';
             else if (role === 'tutor') roleRoute = '/dashboard/tutor';
             else if (role === 'student') roleRoute = '/dashboard/student';
             else if (role === 'employer') roleRoute = '/dashboard/employer';
-            else if (role === 'crm_agent') roleRoute = '/dashboard/leads';
+            else if (role === 'crm_agent') roleRoute = '/dashboard/crm';
+            else if (role === 'lms_user') roleRoute = '/dashboard/lms';
+            else if (role === 'placement_coordinator') roleRoute = '/dashboard/admin/placements';
+            else if (role === 'finance_staff') roleRoute = '/dashboard/admin/finance';
             return { ...item, route: roleRoute };
           }
 
@@ -136,7 +135,7 @@ export const useNavStore = defineStore('nav', {
             let profileRoute = '/dashboard/profile';
             if (role === 'student') profileRoute = '/dashboard/student/settings';
             else if (role === 'tutor') profileRoute = '/dashboard/tutor/settings';
-            else if (role === 'super_admin' || role === 'sub_admin' || role === 'crm_agent' || role === 'placement_coordinator' || role === 'finance_staff' || role === 'exam_manager' || role === 'support_staff') profileRoute = '/dashboard/admin/settings';
+            else if (role === 'super_admin' || role === 'sub_admin' || role === 'crm_agent' || role === 'placement_coordinator' || role === 'finance_staff' || role === 'lms_user' || role === 'support_staff') profileRoute = '/dashboard/admin/settings';
             else if (role === 'employer') profileRoute = '/dashboard/employer/company/profile';
             return { ...item, route: profileRoute };
           }

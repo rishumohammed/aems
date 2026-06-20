@@ -21,12 +21,12 @@
     <v-card class="rounded-xl mt-8 overflow-hidden border" elevation="0">
       <v-tabs v-model="tab" color="primary" class="border-b bg-grey-lighten-5">
         <v-tab value="overview" class="text-capitalize font-weight-bold">Overview</v-tab>
-        <v-tab value="courses" class="text-capitalize font-weight-bold">Courses</v-tab>
+        <v-tab value="courses" class="text-capitalize font-weight-bold" v-if="authStore.userRole !== 'finance_staff'">Courses</v-tab>
         <v-tab value="payments" class="text-capitalize font-weight-bold">Payments</v-tab>
-        <v-tab value="exams" class="text-capitalize font-weight-bold">Exams</v-tab>
-        <v-tab value="certificates" class="text-capitalize font-weight-bold">Certificates</v-tab>
-        <v-tab value="jobs" class="text-capitalize font-weight-bold">Job Applications</v-tab>
-        <v-tab value="social" class="text-capitalize font-weight-bold">Social Follows</v-tab>
+        <v-tab value="exams" class="text-capitalize font-weight-bold" v-if="authStore.userRole !== 'finance_staff'">Exams</v-tab>
+        <v-tab value="certificates" class="text-capitalize font-weight-bold" v-if="authStore.userRole !== 'finance_staff'">Certificates</v-tab>
+        <v-tab value="jobs" class="text-capitalize font-weight-bold" v-if="authStore.userRole !== 'finance_staff'">Job Applications</v-tab>
+        <v-tab value="social" class="text-capitalize font-weight-bold" v-if="authStore.userRole !== 'finance_staff'">Social Follows</v-tab>
       </v-tabs>
 
       <v-card-text class="pa-6 pa-md-8">
@@ -117,6 +117,7 @@ import SocialFollowsTab from '@/components/students/tabs/SocialFollowsTab.vue';
 const route = useRoute();
 const { id } = route.params;
 const { $api } = useNuxtApp();
+const authStore = useAuthStore();
 
 const tab = ref('overview');
 const loading = ref(true);
@@ -288,6 +289,6 @@ onMounted(() => {
 definePageMeta({
   layout: 'dashboard',
   middleware: ['auth', 'role'],
-  role: ['super_admin', 'crm_agent', 'tutor']
+  role: ['super_admin', 'crm_agent', 'tutor', 'finance_staff']
 });
 </script>

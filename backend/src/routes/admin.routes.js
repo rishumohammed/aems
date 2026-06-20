@@ -10,7 +10,7 @@ import enrollmentService from '../services/enrollment.service.js';
 const router = express.Router();
 
 router.use(authenticateJWT);
-router.use(authorizeRoles('super_admin'));
+router.use(authorizeRoles('super_admin', 'lms_user'));
 
 router.get('/users', async (req, res) => {
   try {

@@ -218,7 +218,7 @@ import AppButton from '@/components/ui/AppButton.vue';
 definePageMeta({ 
   layout: 'dashboard', 
   middleware: ['auth', 'role'], 
-  role: ['super_admin', 'tutor'] 
+  role: ['super_admin', 'lms_user', 'tutor'] 
 });
 
 const api = useApi();

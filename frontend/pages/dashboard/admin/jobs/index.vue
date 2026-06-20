@@ -106,7 +106,7 @@
 <script setup lang="ts">
 import { useApi } from '@/composables/useApi';
 
-definePageMeta({ layout: 'dashboard', middleware: ['auth', 'role'], role: ['super_admin'] });
+definePageMeta({ layout: 'dashboard', middleware: ['auth', 'role'], role: ['super_admin', 'sub_admin', 'placement_coordinator'] });
 
 const api = useApi();
 const activeTab = ref('all');

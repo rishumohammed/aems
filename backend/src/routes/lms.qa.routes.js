@@ -146,7 +146,7 @@ router.post('/qa/:questionId/replies', async (req, res) => {
 
 // Get all Q&A for Admin
 router.get('/admin/qa', async (req, res) => {
-  if (req.user.role !== 'super_admin') return res.status(403).json({ message: 'Forbidden' });
+  if (req.user.role !== 'super_admin' && req.user.role !== 'lms_user') return res.status(403).json({ message: 'Forbidden' });
   try {
     const { status, courseId } = req.query;
     let query = `
@@ -171,7 +171,7 @@ router.get('/admin/qa', async (req, res) => {
 
 // Admin Q&A Stats
 router.get('/admin/qa/stats', async (req, res) => {
-  if (req.user.role !== 'super_admin') return res.status(403).json({ message: 'Forbidden' });
+  if (req.user.role !== 'super_admin' && req.user.role !== 'lms_user') return res.status(403).json({ message: 'Forbidden' });
   try {
     const [[{ total }]] = await pool.query('SELECT COUNT(*) as total FROM course_qa');
     const [[{ pending }]] = await pool.query('SELECT COUNT(*) as pending FROM course_qa WHERE status = "open" OR status = "pending_review"');
@@ -255,7 +255,7 @@ router.put('/qa/:id/status', async (req, res) => {
 
 // Delete Question (Admin)
 router.delete('/qa/:id', async (req, res) => {
-  if (req.user.role !== 'super_admin') return res.status(403).json({ message: 'Forbidden' });
+  if (req.user.role !== 'super_admin' && req.user.role !== 'lms_user') return res.status(403).json({ message: 'Forbidden' });
   try {
     await pool.query('DELETE FROM course_qa WHERE id = ?', [req.params.id]);
     res.json({ message: 'Question deleted successfully' });
@@ -266,7 +266,7 @@ router.delete('/qa/:id', async (req, res) => {
 
 // Delete Reply (Admin)
 router.delete('/qa/replies/:id', async (req, res) => {
-  if (req.user.role !== 'super_admin') return res.status(403).json({ message: 'Forbidden' });
+  if (req.user.role !== 'super_admin' && req.user.role !== 'lms_user') return res.status(403).json({ message: 'Forbidden' });
   try {
     await pool.query('DELETE FROM course_qa_replies WHERE id = ?', [req.params.id]);
     res.json({ message: 'Reply deleted successfully' });

@@ -219,7 +219,7 @@ import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { useApi } from '@/composables/useApi';
 
-definePageMeta({ layout: 'dashboard', middleware: ['auth', 'role'], role: ['super_admin'] });
+definePageMeta({ layout: 'dashboard', middleware: ['auth', 'role'], role: ['super_admin', 'lms_user'] });
 
 const api = useApi();
 const route = useRoute();

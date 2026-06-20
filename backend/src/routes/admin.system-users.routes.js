@@ -22,7 +22,7 @@ const logAudit = async (connection, userId, action, target, metadata) => {
 const SYSTEM_ROLES = [
   'super_admin', 'sub_admin', 'crm_agent', 
   'placement_coordinator', 'finance_staff', 
-  'exam_manager', 'support_staff'
+  'exam_manager', 'lms_user'
 ];
 
 // 1. Get all system users

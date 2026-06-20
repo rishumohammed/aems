@@ -1,13 +1,13 @@
 import express from 'express';
 import { CRMController } from '../controllers/crm.controller.js';
-import { authenticateJWT, authorizeRoles } from '../middleware/auth.js';
+import { authenticateJWT, requirePermission } from '../middleware/auth.js';
 
 const router = express.Router();
 
 // All CRM routes require authentication
 router.use(authenticateJWT);
-// Accessible by crm_agent and super_admin
-router.use(authorizeRoles('crm_agent', 'super_admin'));
+// Accessible by crm_agent, super_admin, and sub_admin with CRM access
+router.use(requirePermission('crm'));
 
 router.get('/agents', CRMController.getAgents);
 router.get('/leads', CRMController.getLeads);

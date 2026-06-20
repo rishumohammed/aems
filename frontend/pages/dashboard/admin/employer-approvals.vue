@@ -164,7 +164,7 @@ import { useRouter } from 'vue-router';
 definePageMeta({
   layout: 'dashboard',
   middleware: ['auth', 'role'],
-  role: ['super_admin']
+  role: ['super_admin', 'placement_coordinator']
 });
 
 const api = useApi();

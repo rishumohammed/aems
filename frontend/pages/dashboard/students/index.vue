@@ -5,12 +5,28 @@
         <h1 class="text-h4 font-weight-black mb-1">Students</h1>
         <p class="text-grey-darken-1">Manage student lifecycles, progress, and billing.</p>
       </div>
-      <div class="d-flex gap-3">
+      <div class="d-flex gap-3" v-if="authStore.userRole !== 'finance_staff'">
         <v-btn variant="outlined" rounded="lg" prepend-icon="mdi-file-import-outline">Import CSV</v-btn>
         <v-btn color="primary" variant="tonal" rounded="lg" prepend-icon="mdi-account-plus" @click="showAddModal = true">Add Student</v-btn>
         <v-btn color="primary" rounded="lg" prepend-icon="mdi-plus" @click="enrollModal = true">Enroll Student</v-btn>
       </div>
     </div>
+
+    <!-- KPI Cards for Super Admin -->
+    <v-row class="mb-6" v-if="authStore.userRole === 'super_admin'">
+      <v-col cols="12" sm="6" md="3">
+        <KpiCard title="Total Students" :value="totalStudents" icon="mdi-account-group" color="blue" />
+      </v-col>
+      <v-col cols="12" sm="6" md="3">
+        <KpiCard title="Active Learners" :value="students.filter(s => s.status === 'active').length" icon="mdi-book-open-variant" color="green" subtitle="On this page" />
+      </v-col>
+      <v-col cols="12" sm="6" md="3">
+        <KpiCard title="Avg Progress" :value="Math.round(students.reduce((acc, s) => acc + (s.avg_progress || 0), 0) / (students.length || 1)) + '%'" icon="mdi-chart-line" color="purple" subtitle="On this page" />
+      </v-col>
+      <v-col cols="12" sm="6" md="3">
+        <KpiCard title="Pending Dues" :value="'₹' + students.reduce((acc, s) => acc + (Number(s.remaining_amount) || 0), 0).toLocaleString()" icon="mdi-cash-clock" color="orange" subtitle="On this page" />
+      </v-col>
+    </v-row>
 
     <!-- Filters -->
     <v-card class="rounded-xl mb-6 pa-4" variant="outlined">
@@ -245,14 +261,21 @@ const submitAddStudent = async () => {
   }
 };
 
-const headers = [
-  { title: 'Student', key: 'name', align: 'start' },
-  { title: 'Courses', key: 'courses', align: 'start', sortable: false },
-  { title: 'Avg. Progress', key: 'progress', align: 'center' },
-  { title: 'Status', key: 'status', align: 'center' },
-  { title: 'Joined Date', key: 'created_at', align: 'center', value: v => new Date(v.created_at).toLocaleDateString() },
-  { title: 'Actions', key: 'actions', align: 'end', sortable: false }
-];
+const headers = computed(() => {
+  const cols = [
+    { title: 'Student', key: 'name', align: 'start' },
+    { title: 'Courses', key: 'courses', align: 'start', sortable: false }
+  ];
+  if (authStore.userRole !== 'finance_staff') {
+    cols.push({ title: 'Avg. Progress', key: 'progress', align: 'center' });
+  }
+  cols.push(
+    { title: 'Status', key: 'status', align: 'center' },
+    { title: 'Joined Date', key: 'created_at', align: 'center', value: v => new Date(v.created_at).toLocaleDateString() },
+    { title: 'Actions', key: 'actions', align: 'end', sortable: false }
+  );
+  return cols;
+});
 
 const fetchStudents = async () => {
   loading.value = true;
@@ -339,7 +362,7 @@ onMounted(() => {
 definePageMeta({
   layout: 'dashboard',
   middleware: ['auth', 'role'],
-  role: ['super_admin', 'crm_agent']
+  role: ['super_admin', 'crm_agent', 'finance_staff']
 });
 </script>
 

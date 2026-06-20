@@ -1,7 +1,7 @@
 import express from 'express';
 import { v4 as uuidv4 } from 'uuid';
 import { pool } from '../db/connection.js';
-import { authenticateJWT, authorizeRoles } from '../middleware/auth.js';
+import { authenticateJWT, authorizeRoles, requirePermission } from '../middleware/auth.js';
 import { validateExamSession } from '../middleware/examSession.js';
 import examService from '../services/exam.service.js';
 import courseCompletionService from '../services/course-completion.service.js';
@@ -38,9 +38,12 @@ async function autoCompleteLessonForExam(connection, studentId, courseId, enroll
 
 const router = express.Router();
 
-const isTutorOrAdmin = authorizeRoles('tutor', 'super_admin');
-const isAdmin = authorizeRoles('super_admin');
 const isStudent = authorizeRoles('student');
+const isAdmin = requirePermission('exams');
+const isTutorOrAdmin = (req, res, next) => {
+  if (req.user && req.user.role === 'tutor') return next();
+  return isAdmin(req, res, next);
+};
 
 // ────────────────────────────────────────────────────────────────────────────────
 // STATIC ROUTES — must come before wildcard /:id

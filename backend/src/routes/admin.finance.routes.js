@@ -1,16 +1,16 @@
 import express from 'express';
-import { authenticateJWT, authorizeRoles } from '../middleware/auth.js';
+import { authenticateJWT, authorizeRoles, requirePermission } from '../middleware/auth.js';
 import { pool } from '../db/connection.js';
 import invoiceService from '../services/invoice.service.js';
 import { createNotification } from '../services/notification.service.js';
 
 const router = express.Router();
-const isAdmin = authorizeRoles('super_admin');
+const hasAccess = requirePermission('finance');
 
 import financeService from '../services/finance.service.js';
 
 // Admin: Finance Summary
-router.get('/summary', authenticateJWT, isAdmin, async (req, res) => {
+router.get('/summary', authenticateJWT, hasAccess, async (req, res) => {
   try {
     const summary = await financeService.getSummary();
     res.json(summary);
@@ -20,7 +20,7 @@ router.get('/summary', authenticateJWT, isAdmin, async (req, res) => {
 });
 
 // Admin: Monthly Revenue (Last 12 months)
-router.get('/monthly-revenue', authenticateJWT, isAdmin, async (req, res) => {
+router.get('/monthly-revenue', authenticateJWT, hasAccess, async (req, res) => {
   try {
     const [rows] = await pool.query(`
       SELECT 
@@ -39,7 +39,7 @@ router.get('/monthly-revenue', authenticateJWT, isAdmin, async (req, res) => {
 });
 
 // Admin: Outstanding Dues
-router.get('/outstanding', authenticateJWT, isAdmin, async (req, res) => {
+router.get('/outstanding', authenticateJWT, hasAccess, async (req, res) => {
   try {
     const [rows] = await pool.query(`
       SELECT 
@@ -59,7 +59,7 @@ router.get('/outstanding', authenticateJWT, isAdmin, async (req, res) => {
 });
 
 // Admin: Invoice Management - List all
-router.get('/invoices', authenticateJWT, isAdmin, async (req, res) => {
+router.get('/invoices', authenticateJWT, hasAccess, async (req, res) => {
   try {
     const { status, course_id } = req.query;
     let query = `
@@ -94,7 +94,7 @@ router.get('/invoices', authenticateJWT, isAdmin, async (req, res) => {
 });
 
 // Admin: Get Invoice Payments
-router.get('/invoices/:id/payments', authenticateJWT, isAdmin, async (req, res) => {
+router.get('/invoices/:id/payments', authenticateJWT, hasAccess, async (req, res) => {
   try {
     const [rows] = await pool.query(
       `SELECT * FROM invoice_payments WHERE invoice_id = ? ORDER BY paid_at DESC`,
@@ -107,7 +107,7 @@ router.get('/invoices/:id/payments', authenticateJWT, isAdmin, async (req, res) 
 });
 
 // Admin: Record Offline Payment
-router.post('/invoices/:id/record-payment', authenticateJWT, isAdmin, async (req, res) => {
+router.post('/invoices/:id/record-payment', authenticateJWT, hasAccess, async (req, res) => {
   const { amount, mode, reference } = req.body;
   try {
     const result = await invoiceService.recordPayment(req.params.id, amount, mode, reference);
@@ -118,7 +118,7 @@ router.post('/invoices/:id/record-payment', authenticateJWT, isAdmin, async (req
 });
 
 // Admin: Void Invoice
-router.put('/invoices/:id/void', authenticateJWT, isAdmin, async (req, res) => {
+router.put('/invoices/:id/void', authenticateJWT, hasAccess, async (req, res) => {
   const { reason } = req.body;
   try {
     await invoiceService.voidInvoice(req.params.id, reason);
@@ -129,7 +129,7 @@ router.put('/invoices/:id/void', authenticateJWT, isAdmin, async (req, res) => {
 });
 
 // Admin: Generate PDF
-router.post('/invoices/:id/generate-pdf', authenticateJWT, isAdmin, async (req, res) => {
+router.post('/invoices/:id/generate-pdf', authenticateJWT, hasAccess, async (req, res) => {
   try {
     const pdfUrl = await invoiceService.generatePDF(req.params.id);
     res.json({ pdf_path: pdfUrl, message: 'PDF generated successfully' });
@@ -139,7 +139,7 @@ router.post('/invoices/:id/generate-pdf', authenticateJWT, isAdmin, async (req, 
 });
 
 // Admin: Update Invoice Details Manually
-router.put('/invoices/:id/payment-details', authenticateJWT, isAdmin, async (req, res) => {
+router.put('/invoices/:id/payment-details', authenticateJWT, hasAccess, async (req, res) => {
   const { total_fee, amount_paid, balance_amount, payment_status, last_payment_date, payment_reference } = req.body;
   try {
     // Perform direct database update
@@ -226,7 +226,7 @@ router.put('/invoices/:id/payment-details', authenticateJWT, isAdmin, async (req
 // ─── Admin: Offline Payments Management ───────────────────────────────────────
 
 // GET /api/admin/finance/offline-payments — list all pending/offline payments
-router.get('/offline-payments', authenticateJWT, isAdmin, async (req, res) => {
+router.get('/offline-payments', authenticateJWT, hasAccess, async (req, res) => {
   try {
     const { status } = req.query;
     let where = `ip.mode IN ('bank_transfer', 'upi', 'cash', 'cheque')`;
@@ -260,7 +260,7 @@ router.get('/offline-payments', authenticateJWT, isAdmin, async (req, res) => {
 });
 
 // PUT /api/admin/finance/offline-payments/:id/approve
-router.put('/offline-payments/:id/approve', authenticateJWT, isAdmin, async (req, res) => {
+router.put('/offline-payments/:id/approve', authenticateJWT, hasAccess, async (req, res) => {
   const connection = await pool.getConnection();
   try {
     const { id } = req.params;
@@ -342,7 +342,7 @@ router.put('/offline-payments/:id/approve', authenticateJWT, isAdmin, async (req
 });
 
 // PUT /api/admin/finance/offline-payments/:id/reject
-router.put('/offline-payments/:id/reject', authenticateJWT, isAdmin, async (req, res) => {
+router.put('/offline-payments/:id/reject', authenticateJWT, hasAccess, async (req, res) => {
   const connection = await pool.getConnection();
   try {
     const { id } = req.params;

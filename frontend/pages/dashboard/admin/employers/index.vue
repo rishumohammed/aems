@@ -72,6 +72,29 @@
         </template>
       </v-data-table>
     </v-card>
+
+    <!-- Password Reset Dialog -->
+    <v-dialog v-model="showPasswordDialog" max-width="400">
+      <v-card class="rounded-xl pa-2">
+        <v-card-title class="text-h6 font-weight-bold d-flex align-center">
+          <v-icon color="success" class="mr-2">mdi-check-circle</v-icon>
+          Password Reset
+        </v-card-title>
+        <v-card-text>
+          <p class="mb-4">The password has been reset successfully. It has also been emailed to the user.</p>
+          <div class="text-caption text-grey mb-1">New Temporary Password:</div>
+          <v-sheet color="grey-lighten-4" class="pa-3 rounded d-flex align-center justify-space-between mb-4">
+            <span class="text-h6 font-weight-medium" style="font-family: monospace;">{{ tempPassword }}</span>
+            <v-btn icon="mdi-content-copy" variant="text" size="small" color="primary" @click="copyPassword"></v-btn>
+          </v-sheet>
+          <v-alert v-if="copied" type="success" density="compact" variant="tonal" class="mb-0">Copied to clipboard!</v-alert>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="primary" variant="flat" @click="showPasswordDialog = false" class="px-6 rounded-pill">Close</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </div>
 </template>
 
@@ -79,11 +102,15 @@
 import { ref, onMounted } from 'vue';
 import { useApi } from '@/composables/useApi';
 
-definePageMeta({ layout: 'dashboard', middleware: ['auth', 'role'], role: ['super_admin'] });
+definePageMeta({ layout: 'dashboard', middleware: ['auth', 'role'], role: ['super_admin', 'placement_coordinator'] });
 
 const api = useApi();
 const employers = ref<any[]>([]);
 const loading = ref(false);
+
+const showPasswordDialog = ref(false);
+const tempPassword = ref('');
+const copied = ref(false);
 
 const headers: any[] = [
   { title: 'Company', key: 'company', sortable: false },
@@ -146,12 +173,20 @@ const resetPassword = async (employer: any) => {
   if (!confirm(`Generate a new temporary password for ${employer.company_name || 'this employer'}?`)) return;
   try {
     const { data } = await api.post(`/admin/users/${employer.id}/reset-password`);
-    alert(`Password reset successfully!\n\nNew Temporary Password: ${data.temp_password}\n\nPlease share this securely. It has also been emailed to the user.`);
+    tempPassword.value = data.temp_password || data.tempPassword;
+    copied.value = false;
+    showPasswordDialog.value = true;
     loadEmployers();
   } catch (err) {
     console.error('Failed to reset password', err);
     alert('Failed to reset password');
   }
+};
+
+const copyPassword = () => {
+  navigator.clipboard.writeText(tempPassword.value);
+  copied.value = true;
+  setTimeout(() => { copied.value = false; }, 3000);
 };
 </script>
 

@@ -117,7 +117,7 @@ ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale)
 definePageMeta({
   layout: 'dashboard',
   middleware: ['auth', 'role'],
-  role: ['super_admin']
+  role: ['super_admin', 'sub_admin', 'finance_staff']
 });
 
 const api = useApi();

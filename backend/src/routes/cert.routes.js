@@ -308,7 +308,7 @@ router.get('/:id/download', authenticateJWT, async (req, res) => {
 // ────────────────────────────────────────────────────────────────────────────────
 // ADMIN ROUTES
 // ────────────────────────────────────────────────────────────────────────────────
-const isAdmin = authorizeRoles('super_admin', 'tutor');
+const isAdmin = authorizeRoles('super_admin', 'lms_user', 'tutor');
 
 // Get all certificates
 router.get('/admin', authenticateJWT, isAdmin, async (req, res) => {

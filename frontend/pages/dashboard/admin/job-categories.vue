@@ -111,7 +111,7 @@
 import { ref, onMounted } from 'vue';
 import { useApi } from '@/composables/useApi';
 
-definePageMeta({ layout: 'dashboard', middleware: ['auth', 'role'], role: ['super_admin'] });
+definePageMeta({ layout: 'dashboard', middleware: ['auth', 'role'], role: ['super_admin', 'placement_coordinator'] });
 
 const api = useApi();
 const categories = ref<any[]>([]);

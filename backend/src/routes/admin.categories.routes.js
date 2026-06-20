@@ -8,7 +8,7 @@ const router = express.Router();
 
 // Middleware to ensure only admins can manage these
 router.use(authenticateJWT);
-router.use(authorizeRoles(USER_ROLES.SUPER_ADMIN));
+router.use(authorizeRoles(USER_ROLES.SUPER_ADMIN, USER_ROLES.LMS_USER));
 
 // Get all categories (including inactive ones for admin)
 router.get('/', async (req, res) => {

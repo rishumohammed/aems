@@ -20,9 +20,6 @@ MODIFY COLUMN role ENUM(
 ALTER TABLE users 
 ADD COLUMN permissions_json JSON DEFAULT NULL;
 
--- Add force_password_change flag
-ALTER TABLE users 
-ADD COLUMN force_password_change BOOLEAN DEFAULT FALSE;
 
 -- Add last_login_at timestamp
 ALTER TABLE users 

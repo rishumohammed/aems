@@ -44,7 +44,7 @@
           :title="stat.title"
           :value="stat.value"
           :icon="stat.icon"
-          :color="stat.color === 'indigo' ? 'purple' : stat.color === 'emerald' ? 'green' : stat.color === 'amber' ? 'orange' : stat.color"
+          :color="stat.color === 'error' ? 'red' : stat.color === 'warning' ? 'orange' : stat.color === 'primary' ? 'green' : stat.color === 'info' ? 'purple' : stat.color === 'success' ? 'teal' : stat.color"
           :trend="stat.trend && stat.trend.direction !== 'neutral' ? { value: stat.trend.change, positive: stat.trend.direction === 'up', label: 'vs last month' } : undefined"
           :subtitle="(!stat.trend || stat.trend.direction === 'neutral') ? 'No change vs last month' : undefined"
         />

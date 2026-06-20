@@ -81,7 +81,7 @@ router.post('/violation-screenshot', authenticateJWT, uploadScreenshot.single('i
 // ────────────────────────────────────────────────────────────────────────────────
 // ADMIN ROUTES
 // ────────────────────────────────────────────────────────────────────────────────
-const isAdminOrTutor = authorizeRoles('super_admin', 'tutor');
+const isAdminOrTutor = authorizeRoles('super_admin', 'lms_user', 'tutor');
 
 // GET /api/proctoring/admin/attempts
 router.get('/admin/attempts', authenticateJWT, isAdminOrTutor, async (req, res) => {

@@ -295,7 +295,9 @@ import { useRoute, useRouter } from 'vue-router';
 import { useApi } from '@/composables/useApi';
 
 definePageMeta({
-  layout: 'dashboard'
+  layout: 'dashboard',
+  middleware: ['auth', 'role'],
+  role: ['super_admin', 'sub_admin', 'lms_user']
 });
 
 const route = useRoute();

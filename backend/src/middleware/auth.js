@@ -47,13 +47,13 @@ export const requirePermission = (module, action = 'view') => {
       return next();
     }
 
-    // Role-based full access checks (can be expanded)
+    // Role-based full access checks
     const role = req.user.role;
     if (role === 'finance_staff' && module === 'finance') return next();
-    if (role === 'placement_coordinator' && module === 'jobs') return next();
+    if (role === 'placement_coordinator' && (module === 'jobs' || module === 'employers')) return next();
     if (role === 'crm_agent' && module === 'crm') return next();
-    if (role === 'exam_manager' && module === 'exams') return next();
-    
+    if (role === 'lms_user' && (module === 'courses' || module === 'students' || module === 'tutors' || module === 'exams')) return next();
+
     // Check specific sub_admin permissions if present in JWT payload
     // Note: permissions_json should be included in JWT sign payload during login
     const perms = req.user.permissions;

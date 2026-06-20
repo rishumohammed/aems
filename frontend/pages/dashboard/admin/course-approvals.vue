@@ -319,7 +319,7 @@
 import { ref, computed, onMounted } from 'vue';
 import { useApi } from '@/composables/useApi';
 
-definePageMeta({ layout: 'dashboard', middleware: ['auth', 'role'], role: ['super_admin'] });
+definePageMeta({ layout: 'dashboard', middleware: ['auth', 'role'], role: ['super_admin', 'lms_user'] });
 
 const api = useApi();
 const config = useRuntimeConfig();

@@ -40,14 +40,14 @@ const props = defineProps<{
 }>();
 
 const colorMap: Record<string, { bg: string; text: string; cardBg: string }> = {
-  blue:   { bg: 'var(--blue-l)',   text: '#007AFF', cardBg: '#f0f8ff' },
-  green:  { bg: 'var(--green-l)',  text: '#30B94D', cardBg: '#f0fff4' },
-  red:    { bg: 'var(--red-l)',    text: '#FF3B30', cardBg: '#fff5f5' },
-  orange: { bg: 'var(--orange-l)', text: '#FF9500', cardBg: '#fffaf0' },
-  purple: { bg: 'var(--purple-l)', text: '#AF52DE', cardBg: '#faf5ff' },
-  teal:   { bg: 'var(--teal-l)',   text: '#32ADE6', cardBg: '#f0fdfa' },
-  warning:{ bg: 'var(--orange-l)', text: '#FF9500', cardBg: '#fffaf0' }, // Map warning to orange
-  info:   { bg: 'var(--blue-l)',   text: '#007AFF', cardBg: '#f0f8ff' }, // Map info to blue
+  blue:   { bg: 'var(--blue-l)',   text: '#007AFF', cardBg: 'rgba(0, 122, 255, 0.30)' },
+  green:  { bg: 'var(--green-l)',  text: '#30B94D', cardBg: 'rgba(48, 185, 77, 0.30)' },
+  red:    { bg: 'var(--red-l)',    text: '#FF3B30', cardBg: 'rgba(255, 59, 48, 0.30)' },
+  orange: { bg: 'var(--orange-l)', text: '#FF9500', cardBg: 'rgba(255, 149, 0, 0.30)' },
+  purple: { bg: 'var(--purple-l)', text: '#AF52DE', cardBg: 'rgba(175, 82, 222, 0.30)' },
+  teal:   { bg: 'var(--teal-l)',   text: '#32ADE6', cardBg: 'rgba(50, 173, 230, 0.30)' },
+  warning:{ bg: 'var(--orange-l)', text: '#FF9500', cardBg: 'rgba(255, 149, 0, 0.30)' }, 
+  info:   { bg: 'var(--blue-l)',   text: '#007AFF', cardBg: 'rgba(0, 122, 255, 0.30)' }, 
 };
 
 const iconBg = computed(() => colorMap[props.color || 'blue']?.bg || 'var(--blue-l)');

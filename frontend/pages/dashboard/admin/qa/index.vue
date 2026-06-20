@@ -194,7 +194,8 @@ onMounted(fetchData);
 
 definePageMeta({
   layout: 'dashboard',
-  middleware: ['auth', 'role']
+  middleware: ['auth', 'role'],
+  role: ['super_admin', 'lms_user']
 });
 </script>
 

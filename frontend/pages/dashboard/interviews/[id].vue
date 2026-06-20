@@ -230,7 +230,7 @@ import { ref, onMounted, onUnmounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { useApi } from '@/composables/useApi';
 
-definePageMeta({ layout: 'dashboard', middleware: ['auth'] });
+definePageMeta({ layout: 'dashboard', middleware: ['auth', 'role'], role: ['student'] });
 
 const route = useRoute();
 const api = useApi();

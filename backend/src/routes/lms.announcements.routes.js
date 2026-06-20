@@ -27,7 +27,7 @@ router.get('/:courseId', async (req, res) => {
 });
 
 // Post a new announcement (Tutor only)
-router.post('/:courseId', authorizeRoles(USER_ROLES.TUTOR, USER_ROLES.SUPER_ADMIN), async (req, res) => {
+router.post('/:courseId', authorizeRoles(USER_ROLES.TUTOR, USER_ROLES.SUPER_ADMIN, USER_ROLES.LMS_USER), async (req, res) => {
   try {
     const { courseId } = req.params;
     const { title, body } = req.body;

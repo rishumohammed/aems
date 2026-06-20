@@ -24,7 +24,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 // Role Gates
-const isHost = authorizeRoles(USER_ROLES.TUTOR, USER_ROLES.SUPER_ADMIN);
+const isHost = authorizeRoles(USER_ROLES.TUTOR, USER_ROLES.SUPER_ADMIN, USER_ROLES.LMS_USER);
 
 // PUBLIC: Get all upcoming/live events
 router.get('/', async (req, res) => {

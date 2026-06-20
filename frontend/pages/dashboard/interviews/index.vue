@@ -119,7 +119,8 @@ import dayjs from 'dayjs';
 
 definePageMeta({
   layout: 'dashboard',
-  middleware: ['auth']
+  middleware: ['auth', 'role'],
+  role: ['student']
 });
 
 const api = useApi();

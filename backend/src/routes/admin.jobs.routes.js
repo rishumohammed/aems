@@ -1,16 +1,16 @@
 import express from 'express';
 import { v4 as uuidv4 } from 'uuid';
 import { pool } from '../db/connection.js';
-import { authenticateJWT, authorizeRoles } from '../middleware/auth.js';
+import { authenticateJWT, authorizeRoles, requirePermission } from '../middleware/auth.js';
 import emailService from '../services/email.service.js';
 
 const router = express.Router();
-const isAdmin = authorizeRoles('super_admin', 'tutor');
+const hasAccess = requirePermission('jobs');
 
 // ────────────────────────────────────────────────────────────────────────────────
 // JOB CATEGORIES
 // ────────────────────────────────────────────────────────────────────────────────
-router.get('/job-categories', authenticateJWT, isAdmin, async (req, res) => {
+router.get('/job-categories', authenticateJWT, hasAccess, async (req, res) => {
   try {
     const [categories] = await pool.query(`
       SELECT jc.*, COUNT(j.id) as active_job_count 
@@ -25,7 +25,7 @@ router.get('/job-categories', authenticateJWT, isAdmin, async (req, res) => {
   }
 });
 
-router.post('/job-categories', authenticateJWT, isAdmin, async (req, res) => {
+router.post('/job-categories', authenticateJWT, hasAccess, async (req, res) => {
   const { name, slug, icon } = req.body;
   try {
     const id = uuidv4();
@@ -39,7 +39,7 @@ router.post('/job-categories', authenticateJWT, isAdmin, async (req, res) => {
   }
 });
 
-router.put('/job-categories/:id', authenticateJWT, isAdmin, async (req, res) => {
+router.put('/job-categories/:id', authenticateJWT, hasAccess, async (req, res) => {
   const { name, slug, icon, is_active } = req.body;
   try {
     await pool.query(
@@ -52,7 +52,7 @@ router.put('/job-categories/:id', authenticateJWT, isAdmin, async (req, res) => 
   }
 });
 
-router.delete('/job-categories/:id', authenticateJWT, isAdmin, async (req, res) => {
+router.delete('/job-categories/:id', authenticateJWT, hasAccess, async (req, res) => {
   try {
     await pool.query('DELETE FROM job_categories WHERE id=?', [req.params.id]);
     res.json({ message: 'Category deleted' });
@@ -64,7 +64,7 @@ router.delete('/job-categories/:id', authenticateJWT, isAdmin, async (req, res) 
 // ────────────────────────────────────────────────────────────────────────────────
 // JOBS APPROVAL & MANAGEMENT
 // ────────────────────────────────────────────────────────────────────────────────
-router.get('/jobs', authenticateJWT, isAdmin, async (req, res) => {
+router.get('/jobs', authenticateJWT, hasAccess, async (req, res) => {
   try {
     const status = req.query.status;
     let query = `
@@ -89,7 +89,7 @@ router.get('/jobs', authenticateJWT, isAdmin, async (req, res) => {
 });
 
 // Fetch only jobs pending approval
-router.get('/job-approvals', authenticateJWT, isAdmin, async (req, res) => {
+router.get('/job-approvals', authenticateJWT, hasAccess, async (req, res) => {
   try {
     let query = `
       SELECT j.*, jc.name as category_name, jc.slug as category_slug, 
@@ -108,7 +108,7 @@ router.get('/job-approvals', authenticateJWT, isAdmin, async (req, res) => {
   }
 });
 
-router.post('/jobs', authenticateJWT, isAdmin, async (req, res) => {
+router.post('/jobs', authenticateJWT, hasAccess, async (req, res) => {
   const { title, company, category_id, location, is_remote, type, salary_range, description, required_skills, nice_to_have_skills, deadline, apply_url } = req.body;
   try {
     const jobId = uuidv4();
@@ -128,7 +128,7 @@ router.post('/jobs', authenticateJWT, isAdmin, async (req, res) => {
   }
 });
 
-router.put('/jobs/:id/approve', authenticateJWT, isAdmin, async (req, res) => {
+router.put('/jobs/:id/approve', authenticateJWT, hasAccess, async (req, res) => {
   try {
     await pool.query("UPDATE jobs SET status = 'approved', approved_by = ?, approved_at = NOW() WHERE id = ?", [req.user.id, req.params.id]);
     
@@ -148,7 +148,7 @@ router.put('/jobs/:id/approve', authenticateJWT, isAdmin, async (req, res) => {
   }
 });
 
-router.put('/jobs/:id/reject', authenticateJWT, isAdmin, async (req, res) => {
+router.put('/jobs/:id/reject', authenticateJWT, hasAccess, async (req, res) => {
   const { reason } = req.body;
   try {
     await pool.query("UPDATE jobs SET status = 'rejected', rejection_reason = ? WHERE id = ?", [reason || 'No reason provided', req.params.id]);
@@ -172,7 +172,7 @@ router.put('/jobs/:id/reject', authenticateJWT, isAdmin, async (req, res) => {
 // ────────────────────────────────────────────────────────────────────────────────
 // APPLICANTS PER JOB
 // ────────────────────────────────────────────────────────────────────────────────
-router.get('/jobs/:id/applicants', authenticateJWT, isAdmin, async (req, res) => {
+router.get('/jobs/:id/applicants', authenticateJWT, hasAccess, async (req, res) => {
   try {
     // Basic job details
     const [jobs] = await pool.query('SELECT title, company, location FROM jobs WHERE id = ?', [req.params.id]);
@@ -196,7 +196,7 @@ router.get('/jobs/:id/applicants', authenticateJWT, isAdmin, async (req, res) =>
   }
 });
 
-router.put('/job-applications/:id/status', authenticateJWT, isAdmin, async (req, res) => {
+router.put('/job-applications/:id/status', authenticateJWT, hasAccess, async (req, res) => {
   const { status } = req.body;
   try {
     await pool.query('UPDATE job_applications SET status = ? WHERE id = ?', [status, req.params.id]);
@@ -206,7 +206,7 @@ router.put('/job-applications/:id/status', authenticateJWT, isAdmin, async (req,
   }
 });
 
-router.delete('/jobs/:id', authenticateJWT, isAdmin, async (req, res) => {
+router.delete('/jobs/:id', authenticateJWT, hasAccess, async (req, res) => {
   try {
     await pool.query('DELETE FROM jobs WHERE id = ?', [req.params.id]);
     res.json({ message: 'Job deleted successfully' });

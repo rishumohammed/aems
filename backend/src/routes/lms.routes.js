@@ -4,7 +4,7 @@ import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
 import { pool } from '../db/connection.js';
-import { authenticateJWT, authorizeRoles } from '../middleware/auth.js';
+import { authenticateJWT, authorizeRoles, requirePermission } from '../middleware/auth.js';
 import { USER_ROLES } from '@aems/shared';
 import { parseVideoUrl, fetchVideoMetadata } from '../utils/videoParser.js';
 import { createNotification } from '../services/notification.service.js';
@@ -39,8 +39,11 @@ const sanitizeBody = (req, res, next) => {
 };
 
 // Role Gates
-const isTutorOrAdmin = authorizeRoles(USER_ROLES.TUTOR, USER_ROLES.SUPER_ADMIN);
-const isAdmin = authorizeRoles(USER_ROLES.SUPER_ADMIN);
+const isAdmin = requirePermission('courses');
+const isTutorOrAdmin = (req, res, next) => {
+  if (req.user && req.user.role === USER_ROLES.TUTOR) return next();
+  return isAdmin(req, res, next);
+};
 
 // --- Metadata ---
 
