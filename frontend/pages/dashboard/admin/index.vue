@@ -172,7 +172,7 @@
                 <td class="text-grey">{{ formatDate(e.date) }}</td>
                 <td class="font-weight-bold">₹{{ e.amount.toLocaleString() }}</td>
                 <td class="text-right">
-                  <Badge :color="e.amount > 0 ? 'success' : 'warning'">Paid</Badge>
+                  <Badge :color="e.amount > 0 ? 'green' : 'orange'">Paid</Badge>
                   <v-btn icon="mdi-eye-outline" variant="text" size="small" :to="`/dashboard/students/${e.student_id}`"></v-btn>
                 </td>
               </tr>
@@ -206,6 +206,10 @@ interface KPI {
   value: string | number;
   icon: string;
   color: string;
+  trend?: {
+    direction: 'up' | 'down' | 'neutral';
+    change: number;
+  };
 }
 
 interface FunnelStage {
@@ -295,7 +299,7 @@ const funnelChartData = computed(() => {
 const chartOptions = computed(() => ({
   responsive: true,
   maintainAspectRatio: false,
-  animation: { duration: 900, easing: 'easeOutQuart' },
+  animation: { duration: 900, easing: 'easeOutQuart' as const },
   plugins: {
     legend: { display: false },
     tooltip: {
@@ -314,8 +318,8 @@ const chartOptions = computed(() => ({
       }
     },
     datalabels: {
-      anchor: 'end',
-      align: 'top',
+      anchor: 'end' as const,
+      align: 'top' as const,
       color: '#374151',
       font: { weight: 'bold', size: 12 },
       formatter: (value: number) => value > 0 ? value : ''

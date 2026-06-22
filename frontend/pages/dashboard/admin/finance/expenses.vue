@@ -575,7 +575,7 @@ const formatDate = (d: string) => {
   return new Date(d).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
 };
 
-const categoryLabel = (val: string) => categories.find(c => c.value === val)?.title || val;
+const categoryLabel = (val: string) => categories.value.find((c: any) => c.value === val)?.title || val;
 
 const categoryColor = (cat: string) => {
   const colors: Record<string, string> = {
