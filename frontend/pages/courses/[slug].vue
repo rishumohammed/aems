@@ -26,6 +26,17 @@
               </v-chip>
               <h1 class="text-h2 font-weight-black mb-4 tracking-tight leading-tight">{{ course.title }}</h1>
               
+              <!-- Live Course Countdown -->
+              <div v-if="course.course_type === 'live'" class="mt-4 mb-6 pa-6 rounded-xl border" style="background: var(--v-theme-primary-lighten-5); border-color: rgba(var(--v-theme-primary), 0.3) !important;">
+                <div class="d-flex align-center mb-2">
+                  <v-icon color="primary" class="mr-2" size="28">mdi-broadcast</v-icon>
+                  <h3 class="text-h5 font-weight-black text-primary mb-0">Live Class Starting In</h3>
+                </div>
+                <div class="text-h4 font-weight-bold tracking-tight" style="color: rgba(var(--v-theme-primary), 0.9);">
+                  {{ countdownText }}
+                </div>
+              </div>
+              
               <div class="d-flex align-center flex-wrap gap-4 mb-6">
                 <!-- Removed fake ratings and student count -->
               </div>
@@ -464,6 +475,8 @@ const paymentMethodTab = ref('online');
 const offlineFormRef = ref<any>(null);
 const offlineSubmitting = ref(false);
 const offlineSubmitSuccess = ref(false);
+const countdownText = ref('Calculating...');
+let timerInterval: any = null;
 const offlineForm = reactive({
   paymentMode: '',
   amountPaid: null as number | null,
@@ -533,6 +546,28 @@ const formatDuration = (seconds: number) => {
 
 const { data: course, pending } = await useFetch<any>(`${apiBase}/public/courses/${route.params.slug}`);
 
+const updateCountdown = () => {
+  if (!course.value?.start_date) {
+    countdownText.value = 'Start date not scheduled yet.';
+    return;
+  }
+  const targetDate = new Date(course.value.start_date).getTime();
+  const now = new Date().getTime();
+  const distance = targetDate - now;
+
+  if (distance <= 0) {
+    countdownText.value = 'Class is Live Now!';
+    return;
+  }
+
+  const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+  const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+  countdownText.value = `${days}d ${hours}h ${minutes}m ${seconds}s`;
+};
+
 onMounted(async () => {
   if (!course.value && authStore.isAuthenticated && ['tutor', 'super_admin'].includes(authStore.userRole)) {
     try {
@@ -551,6 +586,13 @@ onMounted(async () => {
       console.error('Failed to check enrollment', e);
     }
   }
+
+  updateCountdown();
+  timerInterval = setInterval(updateCountdown, 1000);
+});
+
+onBeforeUnmount(() => {
+  if (timerInterval) clearInterval(timerInterval);
 });
 
 const highlights = [

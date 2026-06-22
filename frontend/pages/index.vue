@@ -55,8 +55,29 @@
           </div>
         </v-container>
       </div>
+      <!-- Upcoming Live Courses -->
+      <div v-if="liveCourses.length > 0" class="section-default bg-primary-lighten-5">
+        <v-container>
+          <div class="d-flex align-center justify-space-between mb-12">
+            <div>
+              <div class="d-flex align-center gap-2 mb-2">
+                <v-icon color="error" class="animate-pulse">mdi-record-circle</v-icon>
+                <h2 class="section-title mb-0">Upcoming Live Courses</h2>
+              </div>
+              <p class="section-sub" style="max-width:none">Join interactive real-time classes led by our experts.</p>
+            </div>
+            <v-btn variant="outlined" rounded="lg" color="primary" class="text-capitalize font-weight-bold" to="/live-courses">
+              View All Live Courses
+            </v-btn>
+          </div>
 
-
+          <v-row>
+            <v-col v-for="course in liveCourses" :key="course.id" cols="12" sm="6" md="4">
+              <CourseCard :course="course" />
+            </v-col>
+          </v-row>
+        </v-container>
+      </div>
 
       <!-- Why Brixify — Split Image Section -->
       <div class="why-section section-default">
@@ -295,11 +316,14 @@ const apiBase = config.public.apiBase;
 const baseUrl = computed(() => apiBase.replace('/api', ''));
 
 // Fetch Data
-const { data: latestData } = useLazyFetch<any>(`${apiBase}/public/courses?sort=newest&limit=6`);
+const { data: latestData } = useLazyFetch<any>(`${apiBase}/public/courses?course_type=recorded&sort=newest&limit=6`);
 const latestCourses = computed(() => (latestData.value as any)?.courses || []);
 
-const { data: featuredData } = useLazyFetch<any>(`${apiBase}/public/courses?is_featured=true&limit=6`);
+const { data: featuredData } = useLazyFetch<any>(`${apiBase}/public/courses?course_type=recorded&is_featured=true&limit=6`);
 const featuredCourses = computed(() => (featuredData.value as any)?.courses || []);
+
+const { data: liveData } = useLazyFetch<any>(`${apiBase}/public/courses?course_type=live&sort=newest&limit=3`);
+const liveCourses = computed(() => (liveData.value as any)?.courses || []);
 
 const { data: noticesData } = useLazyFetch<any>(`${apiBase}/notice-board`);
 const informationItems = computed(() => noticesData.value || []);

@@ -351,9 +351,9 @@
                 </v-col>
                 <v-col cols="12" sm="6">
                   <v-text-field
-                    v-model="lessonModal.data.live_link"
-                    label="Meeting Link (Google Meet / Zoom)"
-                    placeholder="https://meet.google.com/..."
+                    v-model="lessonModal.data.zoom_link"
+                    label="Meeting Link (Zoom / Google Meet)"
+                    placeholder="https://zoom.us/j/..."
                     variant="outlined"
                     rounded="lg"
                     class="mb-4"
@@ -724,7 +724,7 @@ const saveLesson = async () => {
     }
   } else {
     lessonModal.data.scheduled_at = null;
-    lessonModal.data.live_link = null;
+    lessonModal.data.zoom_link = null;
     lessonModal.data.duration_minutes = 0;
   }
 

@@ -20,6 +20,7 @@
         <div class="d-none d-md-flex align-center">
           <v-btn variant="text" to="/" class="text-capitalize px-4 font-weight-medium">Home</v-btn>
           <v-btn variant="text" to="/courses" class="text-capitalize px-4 font-weight-medium">Courses</v-btn>
+          <v-btn variant="text" to="/live-courses" class="text-capitalize px-4 font-weight-medium text-primary">Live Courses</v-btn>
           <v-btn variant="text" to="/about" class="text-capitalize px-4 font-weight-medium">About</v-btn>
           <v-btn variant="text" to="/verify" class="text-capitalize px-4 font-weight-medium">Verify Certificate</v-btn>
           <v-btn variant="text" to="/jobs" class="text-capitalize px-4 font-weight-medium">Jobs</v-btn>
@@ -47,6 +48,7 @@
       <v-list nav class="pa-4">
         <v-list-item to="/" prepend-icon="mdi-home" title="Home" class="rounded-lg mb-2"></v-list-item>
         <v-list-item to="/courses" prepend-icon="mdi-book-open-variant" title="Courses" class="rounded-lg mb-2"></v-list-item>
+        <v-list-item to="/live-courses" prepend-icon="mdi-video-account" title="Live Courses" class="rounded-lg mb-2 text-primary"></v-list-item>
         <v-list-item to="/about" prepend-icon="mdi-information" title="About" class="rounded-lg mb-2"></v-list-item>
         <v-list-item to="/verify" prepend-icon="mdi-certificate" title="Verify Certificate" class="rounded-lg mb-2"></v-list-item>
         <v-list-item to="/jobs" prepend-icon="mdi-briefcase" title="Jobs" class="rounded-lg mb-2"></v-list-item>
@@ -100,6 +102,7 @@
             <h4 class="text-subtitle-1 font-weight-bold mb-4 tracking-tight">Learn</h4>
             <v-list density="compact" class="bg-transparent pa-0 footer-list">
               <v-list-item to="/courses" class="footer-link">Browse Courses</v-list-item>
+              <v-list-item to="/live-courses" class="footer-link">Live Courses</v-list-item>
               <v-list-item to="/courses?category=web" class="footer-link">Web Development</v-list-item>
               <v-list-item to="/courses?category=data" class="footer-link">Data Science</v-list-item>
               <v-list-item to="/courses?category=finance" class="footer-link">Finance</v-list-item>

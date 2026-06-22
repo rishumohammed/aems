@@ -87,7 +87,7 @@ router.get('/categories', async (req, res) => {
 
 // GET /api/public/courses - Paginated course listing
 router.get('/courses', async (req, res) => {
-  const { category, sort, is_featured, page = 1, limit = 12 } = req.query;
+  const { category, sort, is_featured, course_type, page = 1, limit = 12 } = req.query;
   const offset = (page - 1) * limit;
 
   let query = `
@@ -102,6 +102,11 @@ router.get('/courses', async (req, res) => {
   if (category && category !== 'All') {
     query += ' AND cat.slug = ?';
     params.push(category);
+  }
+
+  if (course_type) {
+    query += ' AND c.course_type = ?';
+    params.push(course_type);
   }
 
   if (is_featured === 'true') {
@@ -130,6 +135,10 @@ router.get('/courses', async (req, res) => {
     if (category && category !== 'All') {
       countQuery += ' AND cat.slug = ?';
       countParams.push(category);
+    }
+    if (course_type) {
+      countQuery += ' AND c.course_type = ?';
+      countParams.push(course_type);
     }
     if (is_featured === 'true') {
       countQuery += ' AND c.is_featured = 1';
@@ -194,7 +203,12 @@ router.get('/courses/:slug', async (req, res) => {
       section.modules = modules;
       for (let module of modules) {
         const [lessons] = await pool.query('SELECT * FROM course_lessons WHERE module_id = ? ORDER BY order_index', [module.id]);
-        module.lessons = lessons;
+        
+        // Strip sensitive info from public API
+        module.lessons = lessons.map(lesson => {
+          const { zoom_link, live_link, ...safeLesson } = lesson;
+          return safeLesson;
+        });
       }
     }
 

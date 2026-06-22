@@ -180,6 +180,26 @@
                     ></v-select>
 
                     <v-select
+                      v-model="course.course_type"
+                      :items="[{title: 'Recorded Course', value: 'recorded'}, {title: 'Live Course', value: 'live'}]"
+                      label="Course Type *"
+                      variant="outlined"
+                      rounded="lg"
+                      class="mb-4"
+                    ></v-select>
+
+                    <v-text-field
+                      v-if="course.course_type === 'live'"
+                      v-model="course.start_date"
+                      label="Course Start Date & Time *"
+                      type="datetime-local"
+                      variant="outlined"
+                      rounded="lg"
+                      class="mb-4"
+                      :rules="[v => !!v || 'Start date is required for live courses']"
+                    ></v-text-field>
+
+                    <v-select
                       v-model="course.level"
                       :items="['beginner', 'intermediate', 'advanced']"
                       label="Difficulty Level"
@@ -616,6 +636,8 @@ const course = reactive({
   description: '',
   short_description: '',
   category_id: null,
+  course_type: 'recorded',
+  start_date: null,
   level: 'beginner',
   language: 'English',
   price_type: 'fixed',
@@ -751,6 +773,10 @@ const saveBasicAndContinue = async () => {
     formData.append('description', course.description || '');
     formData.append('short_description', course.short_description || '');
     formData.append('category_id', course.category_id);
+    formData.append('course_type', course.course_type);
+    if (course.course_type === 'live' && course.start_date) {
+      formData.append('start_date', course.start_date);
+    }
     formData.append('level', course.level);
     formData.append('language', course.language);
     formData.append('price_type', course.price_type);

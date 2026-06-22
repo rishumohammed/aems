@@ -1,4 +1,8 @@
 import express from 'express';
+import multer from 'multer';
+import path from 'path';
+import fs from 'fs';
+import { v4 as uuidv4 } from 'uuid';
 import { authenticateJWT, authorizeRoles, requirePermission } from '../middleware/auth.js';
 import { pool } from '../db/connection.js';
 import invoiceService from '../services/invoice.service.js';
@@ -8,6 +12,30 @@ const router = express.Router();
 const hasAccess = requirePermission('finance');
 
 import financeService from '../services/finance.service.js';
+
+// ─── File Upload Setup for Expenses ─────────────────────────────────────────
+const expenseStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const uploadPath = 'uploads/expenses';
+    if (!fs.existsSync(uploadPath)) fs.mkdirSync(uploadPath, { recursive: true });
+    cb(null, uploadPath);
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+    cb(null, 'expense-' + uniqueSuffix + path.extname(file.originalname));
+  }
+});
+
+const expenseUpload = multer({
+  storage: expenseStorage,
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
+  fileFilter: (req, file, cb) => {
+    const allowed = ['.jpg', '.jpeg', '.png', '.pdf'];
+    const ext = path.extname(file.originalname).toLowerCase();
+    if (allowed.includes(ext)) cb(null, true);
+    else cb(new Error('Only JPG, PNG, and PDF files are allowed'));
+  }
+});
 
 // Admin: Finance Summary
 router.get('/summary', authenticateJWT, hasAccess, async (req, res) => {
@@ -396,6 +424,212 @@ router.put('/offline-payments/:id/reject', authenticateJWT, hasAccess, async (re
     res.status(500).json({ message: error.message });
   } finally {
     connection.release();
+  }
+});
+
+// ─── Admin: Expense Categories ────────────────────────────────────────────────
+
+// GET /api/admin/finance/expense-categories
+router.get('/expense-categories', authenticateJWT, hasAccess, async (req, res) => {
+  try {
+    const [rows] = await pool.query('SELECT * FROM expense_categories ORDER BY name ASC');
+    res.json(rows);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// POST /api/admin/finance/expense-categories
+router.post('/expense-categories', authenticateJWT, hasAccess, async (req, res) => {
+  try {
+    const { name } = req.body;
+    if (!name) return res.status(400).json({ message: 'Category name is required' });
+    
+    const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+    const id = uuidv4();
+    
+    await pool.query(
+      'INSERT INTO expense_categories (id, name, slug) VALUES (?, ?, ?)',
+      [id, name, slug]
+    );
+    res.status(201).json({ message: 'Category created successfully', id });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// PUT /api/admin/finance/expense-categories/:id
+router.put('/expense-categories/:id', authenticateJWT, hasAccess, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, is_active } = req.body;
+    
+    if (!name) return res.status(400).json({ message: 'Category name is required' });
+    const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+    
+    await pool.query(
+      'UPDATE expense_categories SET name = ?, slug = ?, is_active = ? WHERE id = ?',
+      [name, slug, is_active !== undefined ? is_active : true, id]
+    );
+    res.json({ message: 'Category updated successfully' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// DELETE /api/admin/finance/expense-categories/:id
+router.delete('/expense-categories/:id', authenticateJWT, hasAccess, async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    // Check if category is used
+    const [category] = await pool.query('SELECT slug FROM expense_categories WHERE id = ?', [id]);
+    if (category.length === 0) return res.status(404).json({ message: 'Category not found' });
+    
+    const [expenses] = await pool.query('SELECT id FROM expenses WHERE category = ? LIMIT 1', [category[0].slug]);
+    if (expenses.length > 0) {
+      // Soft delete by deactivating it
+      await pool.query('UPDATE expense_categories SET is_active = FALSE WHERE id = ?', [id]);
+      return res.json({ message: 'Category deactivated because it is in use.' });
+    } else {
+      await pool.query('DELETE FROM expense_categories WHERE id = ?', [id]);
+      return res.json({ message: 'Category deleted successfully' });
+    }
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// ─── Admin: Expenses Management ───────────────────────────────────────────────
+
+// GET /api/admin/finance/expenses
+router.get('/expenses', authenticateJWT, hasAccess, async (req, res) => {
+  try {
+    const { category, type, search, sort = 'date_desc' } = req.query;
+    
+    let where = 'WHERE e.deleted_at IS NULL';
+    const params = [];
+
+    if (category) {
+      where += ' AND e.category = ?';
+      params.push(category);
+    }
+    
+    if (type) {
+      where += ' AND e.type = ?';
+      params.push(type);
+    }
+    
+    if (search) {
+      where += ' AND (e.description LIKE ? OR e.reference_number LIKE ?)';
+      params.push(`%${search}%`, `%${search}%`);
+    }
+
+    let order = 'ORDER BY e.date DESC, e.created_at DESC';
+    if (sort === 'date_asc') order = 'ORDER BY e.date ASC, e.created_at ASC';
+    if (sort === 'amount_desc') order = 'ORDER BY e.amount DESC';
+    if (sort === 'amount_asc') order = 'ORDER BY e.amount ASC';
+
+    const [rows] = await pool.query(`
+      SELECT e.*, u.name as recorded_by_name
+      FROM expenses e
+      LEFT JOIN users u ON e.recorded_by = u.id
+      ${where}
+      ${order}
+    `, params);
+
+    res.json(rows);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// POST /api/admin/finance/expenses
+router.post('/expenses', authenticateJWT, hasAccess, expenseUpload.single('receipt'), async (req, res) => {
+  try {
+    const { category, amount, type, description, payment_mode, reference_number, date } = req.body;
+    
+    if (!category || !amount || !date) {
+      return res.status(400).json({ message: 'Category, amount, and date are required' });
+    }
+
+    const id = uuidv4();
+    const receiptPath = req.file ? `/uploads/expenses/${req.file.filename}` : null;
+    
+    await pool.query(
+      `INSERT INTO expenses (id, category, amount, type, description, payment_mode, reference_number, receipt_path, date, recorded_by)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        id, 
+        category, 
+        parseFloat(amount), 
+        type || 'debit', 
+        description || null, 
+        payment_mode || 'bank_transfer', 
+        reference_number || null, 
+        receiptPath, 
+        date, 
+        req.user.id
+      ]
+    );
+
+    res.status(201).json({ message: 'Expense recorded successfully', id });
+  } catch (error) {
+    console.error('Add expense error:', error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// PUT /api/admin/finance/expenses/:id
+router.put('/expenses/:id', authenticateJWT, hasAccess, expenseUpload.single('receipt'), async (req, res) => {
+  try {
+    const { category, amount, type, description, payment_mode, reference_number, date } = req.body;
+    const { id } = req.params;
+    
+    const [existing] = await pool.query('SELECT id, receipt_path FROM expenses WHERE id = ? AND deleted_at IS NULL', [id]);
+    if (existing.length === 0) return res.status(404).json({ message: 'Expense not found' });
+
+    let receiptPath = existing[0].receipt_path;
+    if (req.file) {
+      receiptPath = `/uploads/expenses/${req.file.filename}`;
+    }
+
+    await pool.query(
+      `UPDATE expenses 
+       SET category = ?, amount = ?, type = ?, description = ?, payment_mode = ?, reference_number = ?, receipt_path = ?, date = ?
+       WHERE id = ?`,
+      [
+        category, 
+        parseFloat(amount), 
+        type, 
+        description || null, 
+        payment_mode, 
+        reference_number || null, 
+        receiptPath, 
+        date, 
+        id
+      ]
+    );
+
+    res.json({ message: 'Expense updated successfully' });
+  } catch (error) {
+    console.error('Update expense error:', error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// DELETE /api/admin/finance/expenses/:id
+router.delete('/expenses/:id', authenticateJWT, hasAccess, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const [existing] = await pool.query('SELECT id FROM expenses WHERE id = ? AND deleted_at IS NULL', [id]);
+    if (existing.length === 0) return res.status(404).json({ message: 'Expense not found' });
+
+    await pool.query('UPDATE expenses SET deleted_at = NOW() WHERE id = ?', [id]);
+    
+    res.json({ message: 'Expense deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 });
 

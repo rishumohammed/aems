@@ -360,7 +360,7 @@ router.get('/courses/:id', authenticateJWT, async (req, res) => {
 
 // Create Course
 router.post('/courses', authenticateJWT, isTutorOrAdmin, upload.single('thumbnail'), sanitizeBody, async (req, res) => {
-  const { title, slug, description, short_description, category_id, level, language, price_type, price } = req.body;
+  const { title, slug, description, short_description, category_id, level, language, price_type, price, course_type, start_date } = req.body;
   const id = uuidv4();
   const tutor_id = req.user.id;
   const thumbnail_url = req.file ? `/uploads/thumbnails/${req.file.filename}` : null;
@@ -368,9 +368,9 @@ router.post('/courses', authenticateJWT, isTutorOrAdmin, upload.single('thumbnai
   try {
     const isApprovalRequired = req.user.role === USER_ROLES.TUTOR;
     await pool.query(
-      `INSERT INTO courses (id, title, slug, description, short_description, tutor_id, category_id, level, language, price_type, price, thumbnail_url, status, approval_required) 
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'draft', ?)`,
-      [id, title, slug, description, short_description, tutor_id, category_id, level, language, price_type, price, thumbnail_url, isApprovalRequired]
+      `INSERT INTO courses (id, title, slug, description, short_description, tutor_id, category_id, level, language, price_type, price, thumbnail_url, status, approval_required, course_type, start_date) 
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'draft', ?, ?, ?)`,
+      [id, title, slug, description, short_description, tutor_id, category_id, level, language, price_type, price, thumbnail_url, isApprovalRequired, course_type || 'recorded', start_date || null]
     );
     res.status(201).json({ id, message: 'Course created as draft' });
   } catch (error) {
@@ -384,7 +384,7 @@ router.put('/courses/:id', authenticateJWT, isTutorOrAdmin, upload.single('thumb
   const courseId = req.params.id;
   
   try {
-    const fields = ['title', 'slug', 'description', 'short_description', 'category_id', 'level', 'language', 'price_type', 'price', 'intro_video_source', 'intro_video_id', 'is_featured'];
+    const fields = ['title', 'slug', 'description', 'short_description', 'category_id', 'level', 'language', 'price_type', 'price', 'intro_video_source', 'intro_video_id', 'is_featured', 'course_type', 'start_date'];
     let updateStr = fields.filter(f => data[f] !== undefined).map(f => `${f} = ?`).join(', ');
     let values = fields.filter(f => data[f] !== undefined).map(f => data[f]);
 

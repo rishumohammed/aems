@@ -184,7 +184,7 @@
           </p>
           
           <div v-if="isSessionJoinable">
-            <v-btn color="primary" size="large" rounded="xl" prepend-icon="mdi-video" :href="currentLesson.live_link" target="_blank" elevation="8" class="px-8 font-weight-bold">
+            <v-btn color="primary" size="large" rounded="xl" prepend-icon="mdi-video" :href="currentLesson.zoom_link || currentLesson.live_link" target="_blank" elevation="8" class="px-8 font-weight-bold">
               Join Now
             </v-btn>
             <p class="text-caption mt-4 text-success font-weight-bold animate-pulse">Session is currently live!</p>

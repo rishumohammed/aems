@@ -63,6 +63,8 @@
             </v-col>
             <v-col cols="12" md="4">
               <v-select v-model="course.category_id" :items="categories" item-title="name" item-value="id" label="Category *" variant="outlined" rounded="lg" class="mb-4" :rules="[v => !!v || 'Please select a course category.']"></v-select>
+              <v-select v-model="course.course_type" :items="[{title: 'Recorded Course', value: 'recorded'}, {title: 'Live Course', value: 'live'}]" label="Course Type *" variant="outlined" rounded="lg" class="mb-4"></v-select>
+              <v-text-field v-if="course.course_type === 'live'" v-model="course.start_date" label="Course Start Date & Time *" type="datetime-local" variant="outlined" rounded="lg" class="mb-4" :rules="[v => !!v || 'Start date is required for live courses']"></v-text-field>
               <v-select v-model="course.level" :items="['beginner', 'intermediate', 'advanced']" label="Level" variant="outlined" rounded="lg" class="mb-4 text-capitalize"></v-select>
               <v-select v-model="course.language" :items="['English', 'Hindi', 'Spanish']" label="Language" variant="outlined" rounded="lg" class="mb-4"></v-select>
             </v-col>
@@ -194,6 +196,11 @@ const editor = useEditor({
 const fetchCourse = async () => {
   try {
     const { data } = await api.get(`/lms/courses/${route.params.id}`)
+    if (data.start_date) {
+      // Convert to YYYY-MM-DDThh:mm for datetime-local input
+      const d = new Date(data.start_date);
+      data.start_date = new Date(d.getTime() - (d.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);
+    }
     course.value = data
     if (editor.value) editor.value.commands.setContent(data.description || '')
     

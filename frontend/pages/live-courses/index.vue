@@ -3,7 +3,7 @@
     <v-container class="section-compact">
       <!-- Header & Filters -->
         <div class="mb-12">
-          <h1 class="section-title mb-3">Our Courses</h1>
+          <h1 class="section-title mb-3">Live Courses</h1>
         
         <!-- Category Chips -->
         <div class="d-flex align-center flex-wrap gap-2 mb-8">
@@ -25,7 +25,7 @@
         <!-- Controls -->
         <div class="d-flex flex-column flex-sm-row align-center justify-space-between gap-4">
           <div class="text-body-2 text-secondary-color">
-            Showing <span class="font-weight-bold" style="color:var(--g7)">{{ courses.length }}</span> of {{ totalCourses }} courses
+            Showing <span class="font-weight-bold" style="color:var(--g7)">{{ courses.length }}</span> of {{ totalCourses }} live courses
           </div>
           
           <div class="d-flex align-center gap-4">
@@ -81,7 +81,7 @@
         <v-avatar color="grey-lighten-4" size="120" class="mb-6">
           <v-icon size="64" color="grey-lighten-1">mdi-magnify-remove-outline</v-icon>
         </v-avatar>
-        <h3 class="text-h5 font-weight-bold mb-2">No courses found</h3>
+        <h3 class="text-h5 font-weight-bold mb-2">No live courses found</h3>
         <p class="text-grey mb-6">Try adjusting your filters or category selection.</p>
         <v-btn color="primary" variant="flat" rounded="lg" @click="resetFilters">Reset Filters</v-btn>
       </div>
@@ -130,7 +130,7 @@ const allCategories = computed(() => {
 
 // Courses
 const { data: coursesData, pending, refresh } = await useFetch(() => 
-  `${apiBase}/public/courses?course_type=recorded&category=${selectedCategory.value}&sort=${sortBy.value}&page=${page.value}&limit=${limit}`,
+  `${apiBase}/public/courses?course_type=live&category=${selectedCategory.value}&sort=${sortBy.value}&page=${page.value}&limit=${limit}`,
   { watch: [selectedCategory, sortBy, page] }
 );
 
@@ -144,8 +144,8 @@ const resetFilters = () => {
 };
 
 useSeoMeta({
-  title: 'Browse Courses',
-  description: 'Explore our wide range of industry-led courses and certifications.'
+  title: 'Live Classes',
+  description: 'Join our real-time interactive live online classes.'
 });
 </script>
 
