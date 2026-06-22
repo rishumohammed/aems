@@ -39,11 +39,11 @@
     </v-row>
 
     <!-- Filters -->
-    <v-row class="mb-4">
-      <v-col cols="12" sm="4" md="3">
+    <v-row class="mb-4" dense>
+      <v-col cols="12" sm="6" md="2">
         <v-select
           v-model="filters.flow_type"
-          :items="[{title: 'All Transactions', value: ''}, {title: 'Money In (Credit)', value: 'credit'}, {title: 'Money Out (Debit)', value: 'debit'}]"
+          :items="[{title: 'All Flow Types', value: ''}, {title: 'Money In (Credit)', value: 'credit'}, {title: 'Money Out (Debit)', value: 'debit'}]"
           item-title="title"
           item-value="value"
           label="Flow Type"
@@ -52,10 +52,10 @@
           hide-details
         ></v-select>
       </v-col>
-      <v-col cols="12" sm="4" md="3">
+      <v-col cols="12" sm="6" md="2">
         <v-select
           v-model="filters.source"
-          :items="[{title: 'All Sources', value: ''}, {title: 'Revenue / Invoices', value: 'revenue'}, {title: 'Operational Expenses', value: 'expense'}]"
+          :items="[{title: 'All Sources', value: ''}, {title: 'Revenue / Invoices', value: 'revenue'}, {title: 'Expenses', value: 'expense'}]"
           item-title="title"
           item-value="value"
           label="Source"
@@ -64,7 +64,29 @@
           hide-details
         ></v-select>
       </v-col>
-      <v-col cols="12" sm="4" md="6">
+      <v-col cols="12" sm="6" md="2">
+        <v-text-field
+          v-model="filters.startDate"
+          label="Start Date"
+          type="date"
+          variant="outlined"
+          density="compact"
+          clearable
+          hide-details
+        ></v-text-field>
+      </v-col>
+      <v-col cols="12" sm="6" md="2">
+        <v-text-field
+          v-model="filters.endDate"
+          label="End Date"
+          type="date"
+          variant="outlined"
+          density="compact"
+          clearable
+          hide-details
+        ></v-text-field>
+      </v-col>
+      <v-col cols="12" md="4">
         <v-text-field
           v-model="filters.search"
           label="Search description or reference..."
@@ -152,7 +174,9 @@ const transactions = ref<any[]>([]);
 const filters = ref({
   flow_type: '',
   source: '',
-  search: ''
+  search: '',
+  startDate: '',
+  endDate: ''
 });
 
 const headers = [
@@ -184,6 +208,14 @@ const filteredTransactions = computed(() => {
   return transactions.value.filter(t => {
     if (filters.value.flow_type && t.flow_type !== filters.value.flow_type) return false;
     if (filters.value.source && t.source !== filters.value.source) return false;
+    if (filters.value.startDate) {
+      if (new Date(t.transaction_date) < new Date(filters.value.startDate)) return false;
+    }
+    if (filters.value.endDate) {
+      const end = new Date(filters.value.endDate);
+      end.setHours(23, 59, 59, 999);
+      if (new Date(t.transaction_date) > end) return false;
+    }
     if (filters.value.search) {
       const q = filters.value.search.toLowerCase();
       const desc = (t.description || '').toLowerCase();
