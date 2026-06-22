@@ -21,7 +21,7 @@
         <KpiCard title="Active Learners" :value="students.filter(s => s.status === 'active').length" icon="mdi-book-open-variant" color="green" subtitle="On this page" />
       </v-col>
       <v-col cols="12" sm="6" md="3">
-        <KpiCard title="Avg Progress" :value="Math.round(students.reduce((acc, s) => acc + (s.avg_progress || 0), 0) / (students.length || 1)) + '%'" icon="mdi-chart-line" color="purple" subtitle="On this page" />
+        <KpiCard title="Avg Progress" :value="Math.round(students.reduce((acc, s) => acc + (Number(s.avg_progress) || 0), 0) / (students.length || 1)) + '%'" icon="mdi-chart-line" color="purple" subtitle="On this page" />
       </v-col>
       <v-col cols="12" sm="6" md="3">
         <KpiCard title="Pending Dues" :value="'₹' + students.reduce((acc, s) => acc + (Number(s.remaining_amount) || 0), 0).toLocaleString()" icon="mdi-cash-clock" color="orange" subtitle="On this page" />
