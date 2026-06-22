@@ -427,6 +427,50 @@ router.put('/offline-payments/:id/reject', authenticateJWT, hasAccess, async (re
   }
 });
 
+// ─── Admin: Transactions Ledger ───────────────────────────────────────────────
+
+// GET /api/admin/finance/transactions
+router.get('/transactions', authenticateJWT, hasAccess, async (req, res) => {
+  try {
+    const [rows] = await pool.query(`
+      SELECT 
+        id as transaction_id,
+        'revenue' as source,
+        'credit' as flow_type,
+        amount,
+        mode as payment_mode,
+        reference as reference_number,
+        paid_at as transaction_date,
+        'Course Enrollment Payment' as description,
+        created_at
+      FROM invoice_payments
+      WHERE status IN ('approved', 'successful')
+
+      UNION ALL
+
+      SELECT
+        id as transaction_id,
+        'expense' as source,
+        type as flow_type,
+        amount,
+        payment_mode,
+        reference_number,
+        date as transaction_date,
+        description,
+        created_at
+      FROM expenses
+      WHERE deleted_at IS NULL
+
+      ORDER BY transaction_date DESC, created_at DESC
+    `);
+    
+    res.json(rows);
+  } catch (error) {
+    console.error('Fetch transactions error:', error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
 // ─── Admin: Expense Categories ────────────────────────────────────────────────
 
 // GET /api/admin/finance/expense-categories

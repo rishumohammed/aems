@@ -60,6 +60,7 @@ export const useNavStore = defineStore('nav', {
       
       // FINANCE
       { label: 'Analytics', icon: 'mdi-chart-line', route: '/dashboard/admin/finance', roles: ['super_admin'], section: 'FINANCE' },
+      { label: 'Transactions', icon: 'mdi-swap-horizontal', route: '/dashboard/admin/finance/transactions', roles: ['super_admin', 'finance_staff'], section: 'FINANCE' },
       { label: 'Expenses', icon: 'mdi-currency-usd-off', route: '/dashboard/admin/finance/expenses', roles: ['super_admin', 'finance_staff'], section: 'FINANCE' },
       { label: 'Student Accounts', icon: 'mdi-account-group-outline', route: '/dashboard/students', roles: ['finance_staff'], section: 'FINANCE' },
       { label: 'Invoices', icon: 'mdi-receipt', route: '/dashboard/admin/invoices', roles: ['super_admin', 'finance_staff'], section: 'FINANCE' },
