@@ -321,7 +321,7 @@ const chartOptions = computed(() => ({
       anchor: 'end' as const,
       align: 'top' as const,
       color: '#374151',
-      font: { weight: 'bold', size: 12 },
+      font: { weight: 'bold' as const, size: 12 },
       formatter: (value: number) => value > 0 ? value : ''
     }
   },
