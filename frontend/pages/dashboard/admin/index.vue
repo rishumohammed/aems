@@ -333,7 +333,7 @@ const chartOptions = computed(() => ({
       border: { display: false }
     },
     x: {
-      ticks: { color: '#6B7280', font: { size: 11, weight: 'bold' } },
+      ticks: { color: '#6B7280', font: { size: 11, weight: 'bold' as const } },
       grid: { display: false },
       border: { display: false }
     }
