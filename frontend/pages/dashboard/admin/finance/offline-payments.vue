@@ -77,16 +77,14 @@
 
         <template v-slot:item.actions="{ item }">
           <div class="d-flex align-center gap-2 py-2">
-            <!-- View Proof -->
+            <!-- View Details -->
             <v-btn
-              v-if="item.proof_path"
               icon="mdi-eye-outline"
               size="small"
               variant="tonal"
               color="primary"
-              :href="apiBase.replace('/api', '') + item.proof_path"
-              target="_blank"
-              title="View Payment Proof"
+              title="View Payment Details"
+              @click="openView(item)"
             ></v-btn>
 
             <!-- Approve -->
@@ -114,6 +112,86 @@
         </template>
       </v-data-table>
     </v-card>
+
+    <!-- View Details Dialog -->
+    <v-dialog v-model="viewDialog" max-width="600" persistent>
+      <v-card rounded="xl" class="pa-2">
+        <v-card-title class="d-flex align-center justify-space-between pb-2">
+          <span class="text-h6 font-weight-black">Payment Details</span>
+          <v-btn icon="mdi-close" variant="text" @click="viewDialog = false"></v-btn>
+        </v-card-title>
+        <v-card-text class="pt-2">
+          <v-row>
+            <v-col cols="6">
+              <div class="text-caption text-grey">Student</div>
+              <div class="font-weight-bold">{{ selectedPayment?.student_name }}</div>
+              <div class="text-caption text-grey mt-2">Course</div>
+              <div class="font-weight-bold">{{ selectedPayment?.course_title }}</div>
+            </v-col>
+            <v-col cols="6" class="text-right">
+              <div class="text-caption text-grey">Amount</div>
+              <div class="font-weight-black text-primary text-h6">₹{{ Number(selectedPayment?.amount || 0).toLocaleString() }}</div>
+              <div class="text-caption text-grey mt-2">Date Submitted</div>
+              <div class="font-weight-bold">{{ formatDate(selectedPayment?.paid_at) }}</div>
+            </v-col>
+          </v-row>
+          
+          <v-divider class="my-4"></v-divider>
+          
+          <v-row>
+            <v-col cols="6">
+              <div class="text-caption text-grey">Payment Mode</div>
+              <div class="font-weight-bold text-capitalize">{{ selectedPayment?.mode?.replace('_', ' ') || 'N/A' }}</div>
+            </v-col>
+            <v-col cols="6">
+              <div class="text-caption text-grey">Reference / UTR Number</div>
+              <div class="font-weight-bold">{{ selectedPayment?.reference || 'N/A' }}</div>
+            </v-col>
+            <v-col cols="12" v-if="selectedPayment?.remarks">
+              <div class="text-caption text-grey">Student Remarks</div>
+              <div class="font-weight-medium bg-grey-lighten-4 pa-3 rounded">{{ selectedPayment?.remarks }}</div>
+            </v-col>
+          </v-row>
+
+          <v-divider class="my-4"></v-divider>
+
+          <div v-if="selectedPayment?.proof_path">
+            <div class="text-caption text-grey mb-2">Payment Proof</div>
+            <v-img 
+              v-if="selectedPayment.proof_path.match(/\.(jpeg|jpg|gif|png)$/i)"
+              :src="apiBase.replace('/api', '') + selectedPayment.proof_path" 
+              max-height="300"
+              contain
+              class="bg-grey-lighten-4 rounded-lg border"
+            ></v-img>
+            <v-btn 
+              v-else
+              color="primary" 
+              variant="tonal" 
+              prepend-icon="mdi-download" 
+              :href="apiBase.replace('/api', '') + selectedPayment.proof_path" 
+              target="_blank"
+              class="mt-2"
+            >
+              Download Proof File
+            </v-btn>
+          </div>
+          <div v-else class="text-center pa-4 bg-grey-lighten-5 rounded-lg border">
+            <v-icon color="grey">mdi-file-hidden</v-icon>
+            <div class="text-caption text-grey mt-1">No proof file attached</div>
+          </div>
+        </v-card-text>
+        <v-card-actions class="px-6 pb-6 pt-0" v-if="selectedPayment?.payment_status === 'pending'">
+          <v-spacer></v-spacer>
+          <v-btn color="error" variant="tonal" rounded="lg" @click="() => { viewDialog = false; openReject(selectedPayment); }">
+            Reject
+          </v-btn>
+          <v-btn color="success" variant="flat" rounded="lg" @click="() => { viewDialog = false; openApprove(selectedPayment); }">
+            Approve
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
 
     <!-- Approve Dialog -->
     <v-dialog v-model="approveDialog" max-width="400" persistent>
@@ -204,6 +282,7 @@ const apiBase = config.public.apiBase;
 const loading = ref(false);
 const payments = ref<any[]>([]);
 const filterStatus = ref('');
+const viewDialog = ref(false);
 const approveDialog = ref(false);
 const rejectDialog = ref(false);
 const selectedPayment = ref<any>(null);
@@ -245,6 +324,11 @@ const fetchPayments = async () => {
 };
 
 onMounted(fetchPayments);
+
+const openView = (item: any) => {
+  selectedPayment.value = item;
+  viewDialog.value = true;
+};
 
 const openApprove = (item: any) => {
   selectedPayment.value = item;
