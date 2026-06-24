@@ -386,7 +386,11 @@ router.put('/courses/:id', authenticateJWT, isTutorOrAdmin, upload.single('thumb
   try {
     const fields = ['title', 'slug', 'description', 'short_description', 'category_id', 'level', 'language', 'price_type', 'price', 'intro_video_source', 'intro_video_id', 'is_featured', 'course_type', 'start_date'];
     let updateStr = fields.filter(f => data[f] !== undefined).map(f => `${f} = ?`).join(', ');
-    let values = fields.filter(f => data[f] !== undefined).map(f => data[f]);
+    let values = fields.filter(f => data[f] !== undefined).map(f => {
+      if (f === 'is_featured') return data[f] === 'true' || data[f] === true || data[f] === 1 || data[f] === '1' ? 1 : 0;
+      if (f === 'start_date') return data[f] ? data[f] : null;
+      return data[f];
+    });
 
     if (req.file) {
       updateStr += (updateStr ? ', ' : '') + 'thumbnail_url = ?';
