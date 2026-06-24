@@ -323,20 +323,21 @@ const liveCourses = ref<any[]>([]);
 const informationItems = ref<any[]>([]);
 
 const fetchHomepageData = async () => {
-  try {
-    const [latestRes, featuredRes, liveRes, noticesRes] = await Promise.all([
-      api.get('/public/courses?course_type=recorded&sort=newest&limit=6'),
-      api.get('/public/courses?course_type=recorded&is_featured=true&limit=6'),
-      api.get('/public/courses?course_type=live&sort=newest&limit=3'),
-      api.get('/notice-board')
-    ]);
-    latestCourses.value = latestRes.data?.courses || [];
-    featuredCourses.value = featuredRes.data?.courses || [];
-    liveCourses.value = liveRes.data?.courses || [];
-    informationItems.value = noticesRes.data || [];
-  } catch (err) {
-    console.error('Failed to load homepage data', err);
-  }
+  api.get('/public/courses?course_type=recorded&sort=newest&limit=6')
+    .then(res => { latestCourses.value = res.data?.courses || []; })
+    .catch(err => console.error('Failed to load latest courses', err));
+
+  api.get('/public/courses?course_type=recorded&is_featured=true&limit=6')
+    .then(res => { featuredCourses.value = res.data?.courses || []; })
+    .catch(err => console.error('Failed to load featured courses', err));
+
+  api.get('/public/courses?course_type=live&sort=newest&limit=3')
+    .then(res => { liveCourses.value = res.data?.courses || []; })
+    .catch(err => console.error('Failed to load live courses', err));
+
+  api.get('/notice-board')
+    .then(res => { informationItems.value = res.data || []; })
+    .catch(err => console.error('Failed to load notice board', err));
 };
 
 const getEventColor = (type: string) => {
