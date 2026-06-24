@@ -317,17 +317,27 @@ const apiBase = config.public.apiBase;
 const baseUrl = computed(() => apiBase.replace('/api', ''));
 
 // Fetch Data
-const { data: latestData } = useLazyFetch<any>(`${apiBase}/public/courses?course_type=recorded&sort=newest&limit=6`);
-const latestCourses = computed(() => (latestData.value as any)?.courses || []);
+const latestCourses = ref<any[]>([]);
+const featuredCourses = ref<any[]>([]);
+const liveCourses = ref<any[]>([]);
+const informationItems = ref<any[]>([]);
 
-const { data: featuredData } = useLazyFetch<any>(`${apiBase}/public/courses?course_type=recorded&is_featured=true&limit=6`);
-const featuredCourses = computed(() => (featuredData.value as any)?.courses || []);
-
-const { data: liveData } = useLazyFetch<any>(`${apiBase}/public/courses?course_type=live&sort=newest&limit=3`);
-const liveCourses = computed(() => (liveData.value as any)?.courses || []);
-
-const { data: noticesData } = useLazyFetch<any>(`${apiBase}/notice-board`);
-const informationItems = computed(() => noticesData.value || []);
+const fetchHomepageData = async () => {
+  try {
+    const [latestRes, featuredRes, liveRes, noticesRes] = await Promise.all([
+      api.get('/public/courses?course_type=recorded&sort=newest&limit=6'),
+      api.get('/public/courses?course_type=recorded&is_featured=true&limit=6'),
+      api.get('/public/courses?course_type=live&sort=newest&limit=3'),
+      api.get('/notice-board')
+    ]);
+    latestCourses.value = latestRes.data?.courses || [];
+    featuredCourses.value = featuredRes.data?.courses || [];
+    liveCourses.value = liveRes.data?.courses || [];
+    informationItems.value = noticesRes.data || [];
+  } catch (err) {
+    console.error('Failed to load homepage data', err);
+  }
+};
 
 const getEventColor = (type: string) => {
   const t = type.toLowerCase();
@@ -383,6 +393,7 @@ const fetchStandards = async () => {
 
 onMounted(() => {
   fetchStandards();
+  fetchHomepageData();
 });
 
 const trustStats = [
