@@ -64,7 +64,7 @@
                   aspect-ratio="16/9"
                   cover
                 >
-                  <div class="d-flex align-center justify-center fill-height bg-black-overlay">
+                  <div class="d-flex align-center justify-center fill-height">
                     <v-btn icon size="large" color="white" class="play-btn">
                       <v-icon size="32" color="primary">mdi-play</v-icon>
                     </v-btn>
