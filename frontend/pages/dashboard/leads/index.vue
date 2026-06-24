@@ -14,7 +14,25 @@
             { label: 'Kanban', value: 'kanban' }
           ]"
         />
+        <AppButton
+          icon="mdi-download"
+          variant="text"
+          size="small"
+          class="text-secondary mr-2"
+          @click="downloadSampleCSV"
+        >
+          Sample CSV
+        </AppButton>
         
+        <AppButton
+          icon="mdi-upload"
+          variant="tonal"
+          @click="triggerFileInput"
+        >
+          Import CSV
+        </AppButton>
+        <input type="file" ref="csvInput" accept=".csv" @change="handleFileUpload" style="display: none;" />
+
         <AppButton
           icon="mdi-plus"
           @click="showAddLeadModal = true"
@@ -172,6 +190,7 @@ import LeadTable from '@/components/crm/LeadTable.vue';
 import LeadCard from '@/components/crm/LeadCard.vue';
 import Badge from '@/components/ui/Badge.vue';
 import { VueDraggable } from 'vue-draggable-plus';
+import Papa from 'papaparse';
 
 definePageMeta({
   layout: 'dashboard',
@@ -187,6 +206,78 @@ const viewMode = ref('table');
 const showAddLeadModal = ref(false);
 const saving = ref(false);
 const dismissFollowupAlert = ref(false);
+const csvInput = ref<HTMLInputElement | null>(null);
+
+const downloadSampleCSV = () => {
+  const csvContent = "name,email,phone,source,status,notes\nJohn Doe,john@example.com,+1234567890,manual,open,Interested in certification\nJane Smith,jane@example.com,,whatsapp,interested,Available on weekends\nUnknown Lead,,+0987654321,website,called,Custom Field: Some custom data here";
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+  const url = URL.createObjectURL(blob);
+  link.setAttribute('href', url);
+  link.setAttribute('download', 'sample_leads.csv');
+  link.style.visibility = 'hidden';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+};
+
+const triggerFileInput = () => {
+  if (csvInput.value) {
+    csvInput.value.value = ''; // Reset to allow same file re-selection
+    csvInput.value.click();
+  }
+};
+
+const handleFileUpload = (event: any) => {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  Papa.parse(file, {
+    header: true,
+    skipEmptyLines: true,
+    complete: async (results) => {
+      const parsedLeads = results.data.map((row: any) => {
+        // Collect extra columns into notes if they don't map directly
+        const mapped: any = {
+          name: row.name || row.Name || row.NAME || 'Unknown Lead',
+          email: row.email || row.Email || row.EMAIL || '',
+          phone: row.phone || row.Phone || row.PHONE || '',
+          source: row.source || row.Source || row.SOURCE || 'manual',
+          status: row.status || row.Status || row.STATUS || 'open',
+          notes: row.notes || row.Notes || row.NOTES || ''
+        };
+        
+        // Add unmapped columns to notes
+        const knownKeys = ['name', 'Name', 'NAME', 'email', 'Email', 'EMAIL', 'phone', 'Phone', 'PHONE', 'source', 'Source', 'SOURCE', 'status', 'Status', 'STATUS', 'notes', 'Notes', 'NOTES'];
+        const extras = Object.keys(row)
+          .filter(k => !knownKeys.includes(k) && row[k])
+          .map(k => `${k}: ${row[k]}`)
+          .join('\\n');
+          
+        if (extras) {
+          mapped.notes += (mapped.notes ? '\\n\\n' : '') + '-- Extra Data --\\n' + extras;
+        }
+        
+        return mapped;
+      });
+
+      if (parsedLeads.length === 0) {
+        alert('No valid rows found in CSV');
+        return;
+      }
+
+      if (confirm(`Are you sure you want to import ${parsedLeads.length} leads?`)) {
+        try {
+          await api.post('/crm/leads/bulk', { leads: parsedLeads });
+          alert(`Successfully imported leads!`);
+          fetchData();
+        } catch (err) {
+          alert('Failed to import leads. Check format and try again.');
+        }
+      }
+    }
+  });
+};
 
 interface KanbanColumn {
   id: string;

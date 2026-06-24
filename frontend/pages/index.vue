@@ -128,6 +128,61 @@
         </v-container>
       </div>
 
+      <!-- Lead Capture -->
+      <div class="section-default">
+        <v-container>
+          <div class="lead-capture-card" v-motion-slide-visible-bottom>
+
+            <!-- Left: Copy -->
+            <div class="lcc-copy">
+              <!-- Eyebrow -->
+              <div class="lcc-badge">Free Counseling Session</div>
+
+              <h2 class="lcc-title">Ready to Elevate<br/>Your Standards?</h2>
+              <p class="lcc-sub">Talk to our food technology experts, explore the right certification, and ensure global compliance.</p>
+
+              <!-- Trust badges -->
+              <div class="lcc-trust">
+                <div class="lcc-trust-item">
+                  <v-icon size="18" color="white">mdi-check-circle</v-icon>
+                  <span>Global Recognition</span>
+                </div>
+                <div class="lcc-trust-item">
+                  <v-icon size="18" color="white">mdi-check-circle</v-icon>
+                  <span>Expert Auditors</span>
+                </div>
+                <div class="lcc-trust-item">
+                  <v-icon size="18" color="white">mdi-check-circle</v-icon>
+                  <span>Industry Trusted</span>
+                </div>
+              </div>
+
+              <!-- WhatsApp CTA -->
+              <a :href="generateWALink()" target="_blank" class="lcc-wa-btn">
+                <v-icon size="20">mdi-whatsapp</v-icon>
+                Chat on WhatsApp
+              </a>
+            </div>
+
+            <!-- Right: Form -->
+            <div class="lcc-form-wrap">
+              <div class="lcc-form-card">
+                <div class="lcc-form-header">
+                  <span class="lcc-form-title">Enquire Now</span>
+                  <span class="lcc-form-subtitle">We'll get back within 24 hours</span>
+                </div>
+                <DynamicLeadForm form-id="default-inquiry-form" source="homepage_quote" />
+              </div>
+            </div>
+
+            <!-- BG shapes -->
+            <div class="shape shape-1"></div>
+            <div class="shape shape-2"></div>
+          </div>
+        </v-container>
+      </div>
+
+
       <!-- Certification Standards -->
       <div class="standards-section section-default" style="background:#f8f9fc;">
         <v-container>
@@ -243,60 +298,6 @@
         </v-container>
       </div>
 
-      <!-- Lead Capture -->
-      <div class="section-default">
-        <v-container>
-          <div class="lead-capture-card" v-motion-slide-visible-bottom>
-
-            <!-- Left: Copy -->
-            <div class="lcc-copy">
-              <!-- Eyebrow -->
-              <div class="lcc-badge">Free Counseling Session</div>
-
-              <h2 class="lcc-title">Ready to Elevate<br/>Your Standards?</h2>
-              <p class="lcc-sub">Talk to our food technology experts, explore the right certification, and ensure global compliance.</p>
-
-              <!-- Trust badges -->
-              <div class="lcc-trust">
-                <div class="lcc-trust-item">
-                  <v-icon size="18" color="white">mdi-check-circle</v-icon>
-                  <span>Global Recognition</span>
-                </div>
-                <div class="lcc-trust-item">
-                  <v-icon size="18" color="white">mdi-check-circle</v-icon>
-                  <span>Expert Auditors</span>
-                </div>
-                <div class="lcc-trust-item">
-                  <v-icon size="18" color="white">mdi-check-circle</v-icon>
-                  <span>Industry Trusted</span>
-                </div>
-              </div>
-
-              <!-- WhatsApp CTA -->
-              <a :href="generateWALink()" target="_blank" class="lcc-wa-btn">
-                <v-icon size="20">mdi-whatsapp</v-icon>
-                Chat on WhatsApp
-              </a>
-            </div>
-
-            <!-- Right: Form -->
-            <div class="lcc-form-wrap">
-              <div class="lcc-form-card">
-                <div class="lcc-form-header">
-                  <span class="lcc-form-title">Enquire Now</span>
-                  <span class="lcc-form-subtitle">We'll get back within 24 hours</span>
-                </div>
-                <DynamicLeadForm form-id="default-inquiry-form" source="homepage_quote" />
-              </div>
-            </div>
-
-            <!-- BG shapes -->
-            <div class="shape shape-1"></div>
-            <div class="shape shape-2"></div>
-          </div>
-        </v-container>
-      </div>
-
       </div><!-- /homepage -->
   </div>
 </template>
@@ -351,7 +352,7 @@ const aboutImageUrlConfig = useState('homepage_about_image_url', () => '');
 const aboutImgSrc = computed(() => {
   if (aboutImageUrlConfig.value) return aboutImageUrlConfig.value;
   if (aboutImageConfig.value) return baseUrl.value + aboutImageConfig.value;
-  return 'https://images.unsplash.com/photo-1600880292203-757bb62b4baf?q=80&w=900';
+  return '/img/commercial-food-processing.png';
 });
 
 

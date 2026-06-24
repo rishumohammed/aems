@@ -55,7 +55,7 @@ export const useApi = () => {
         } catch (refreshError) {
           // Only logout if we were previously authenticated and refresh failed
           if (authStore.accessToken || authStore.user) {
-            authStore.logout();
+            authStore.logout(false);
           }
           return Promise.reject(refreshError);
         }

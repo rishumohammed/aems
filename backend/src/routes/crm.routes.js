@@ -12,6 +12,7 @@ router.use(requirePermission('crm'));
 router.get('/agents', CRMController.getAgents);
 router.get('/leads', CRMController.getLeads);
 router.post('/leads', CRMController.createLead);
+router.post('/leads/bulk', CRMController.bulkImportLeads);
 router.get('/leads/:id', CRMController.getLeadDetail);
 router.put('/leads/:id', CRMController.updateLead);
 router.patch('/leads/:id/status', CRMController.updateLeadStatus);

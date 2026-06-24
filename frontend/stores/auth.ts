@@ -33,7 +33,7 @@ export const useAuthStore = defineStore('auth', {
         throw error;
       }
     },
-    async logout() {
+    async logout(shouldRedirect: boolean = true) {
       const api = useApi();
       try {
         await api.post('/auth/logout');
@@ -42,7 +42,9 @@ export const useAuthStore = defineStore('auth', {
       } finally {
         this.user = null;
         this.setAccessToken(null);
-        navigateTo('/login');
+        if (shouldRedirect) {
+          navigateTo('/login');
+        }
       }
     },
     async fetchUser() {
@@ -51,7 +53,7 @@ export const useAuthStore = defineStore('auth', {
         const { data } = await api.get('/auth/me');
         this.setUser(data);
       } catch (error) {
-        this.logout();
+        this.logout(false);
       }
     },
     async initAuth() {

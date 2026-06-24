@@ -211,6 +211,42 @@ export const CRMController = {
     }
   },
 
+  // POST /api/crm/leads/bulk
+  async bulkImportLeads(req, res) {
+    try {
+      const { leads } = req.body;
+      if (!leads || !Array.isArray(leads)) return res.status(400).json({ message: 'Invalid payload' });
+
+      const connection = await pool.getConnection();
+      try {
+        await connection.beginTransaction();
+        const agentId = req.user.role === 'crm_agent' ? req.user.id : null;
+        let imported = 0;
+
+        for (const lead of leads) {
+          // Require at least a name and either an email or phone
+          if (!lead.name || (!lead.email && !lead.phone)) continue;
+
+          const id = uuidv4();
+          await connection.query(
+            'INSERT INTO leads (id, name, email, phone, source, status, course_interest_ids, notes, assigned_to) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            [id, lead.name, lead.email || '', lead.phone || '', lead.source || 'manual', lead.status || 'open', JSON.stringify(lead.course_interest_ids || []), lead.notes || '', agentId]
+          );
+          imported++;
+        }
+        await connection.commit();
+        res.status(201).json({ message: `Successfully imported ${imported} leads` });
+      } catch (err) {
+        await connection.rollback();
+        throw err;
+      } finally {
+        connection.release();
+      }
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  },
+
   // PUT /api/crm/leads/:id
   async updateLead(req, res) {
     try {
