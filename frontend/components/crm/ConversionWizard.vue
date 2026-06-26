@@ -309,8 +309,8 @@
           @click="submit"
           :loading="submitting"
           elevation="0"
-          rounded="lg"
-        >Confirm & Convert</v-btn>
+          
+         class="px-6" variant="flat" rounded="lg">Confirm & Convert</v-btn>
       </v-card-actions>
       <v-card-actions class="pa-6" v-else>
         <v-spacer></v-spacer>

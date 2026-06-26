@@ -1,11 +1,11 @@
 <template>
-  <div class="my-courses-page bg-grey-lighten-4 min-vh-100">
+  <v-container fluid class="pa-6">
     <v-container class="py-8">
       <!-- Header -->
       <header class="mb-10 d-flex align-center justify-space-between">
         <div>
-          <h1 class="text-h4 font-weight-black text-grey-darken-4 mb-1">My Enrolled Courses</h1>
-          <p class="text-subtitle-1 text-grey-darken-1">Manage your active learning and review completed courses.</p>
+          <h1 class="text-h4 font-weight-bold mb-1 text-primary">My Enrolled Courses</h1>
+          <p class="text-subtitle-1 text-medium-emphasis mb-6">Manage your active learning and review completed courses.</p>
         </div>
         <v-btn color="primary" prepend-icon="mdi-magnify" variant="flat" rounded="pill" class="px-6" to="/dashboard/courses">
           Browse Catalog
@@ -29,7 +29,7 @@
         <v-row v-if="filteredCourses.length > 0">
           <v-col v-for="course in filteredCourses" :key="course.id" cols="12" md="4" lg="3">
             <v-card class="course-card rounded-xl border-0 overflow-hidden" elevation="2">
-              <v-img :src="course.thumbnail_url || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800'" height="160" cover class="align-end">
+              <v-img :src="course.thumbnail_url" height="160" cover class="align-end">
                 <div class="pa-3 bg-gradient-overlay">
                   <v-chip size="x-small" :color="course.status === 'completed' ? 'success' : 'primary'" variant="flat" class="font-weight-black">
                     {{ course.status.toUpperCase() }}
@@ -78,7 +78,7 @@
         </div>
       </div>
     </v-container>
-  </div>
+  </v-container>
 </template>
 
 <script setup>

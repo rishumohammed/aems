@@ -1,12 +1,12 @@
 <template>
-  <v-container fluid class="pa-0">
+  <v-container fluid class="pa-6">
     <div class="header-section pa-8 pb-15 mb-n10">
       <div class="d-flex align-center justify-space-between mb-2">
         <div class="d-flex align-center">
           <v-btn icon="mdi-arrow-left" variant="text" color="white" class="mr-4" @click="$router.back()"></v-btn>
           <div>
-            <h1 class="text-h4 font-weight-black text-white mb-1">Question Management</h1>
-            <p class="text-subtitle-1 text-white opacity-80">{{ question?.course_title || 'Loading...' }}</p>
+            <h1 class="text-h4 font-weight-bold mb-1 text-primary">Question Management</h1>
+            <p class="text-subtitle-1 text-medium-emphasis mb-6">{{ question?.course_title || 'Loading...' }}</p>
           </div>
         </div>
         <div v-if="question">

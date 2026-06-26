@@ -1,10 +1,10 @@
 <template>
-  <div class="pa-6 fade-in">
+  <v-container fluid class="pa-6">
     <!-- Header -->
     <div class="d-flex align-center justify-space-between mb-8">
       <div>
-        <h1 class="page-title mb-1">Offline Payments</h1>
-        <p class="text-subtitle-1 text-secondary">Review, approve, or reject student offline payment submissions.</p>
+        <h1 class="text-h4 font-weight-bold mb-1 text-primary">Offline Payments</h1>
+        <p class="text-subtitle-1 text-medium-emphasis mb-6">Review, approve, or reject student offline payment submissions.</p>
       </div>
     </div>
 
@@ -222,7 +222,7 @@
         </v-card-text>
         <v-card-actions class="px-4 pb-4">
           <v-spacer></v-spacer>
-          <v-btn variant="text" @click="approveDialog = false">Cancel</v-btn>
+          <v-btn  @click="approveDialog = false" variant="text">Cancel</v-btn>
           <v-btn color="success" variant="flat" rounded="lg" :loading="actionLoading" @click="doApprove">
             Confirm Approval
           </v-btn>
@@ -251,7 +251,7 @@
         </v-card-text>
         <v-card-actions class="px-4 pb-4">
           <v-spacer></v-spacer>
-          <v-btn variant="text" @click="rejectDialog = false">Cancel</v-btn>
+          <v-btn  @click="rejectDialog = false" variant="text">Cancel</v-btn>
           <v-btn color="error" variant="flat" rounded="lg" :loading="actionLoading" :disabled="!rejectReason" @click="doReject">
             Confirm Rejection
           </v-btn>
@@ -263,7 +263,7 @@
     <v-snackbar v-model="snackbar" :color="snackbarColor" rounded="lg" timeout="3000">
       {{ snackbarMsg }}
     </v-snackbar>
-  </div>
+  </v-container>
 </template>
 
 <script setup lang="ts">
@@ -408,17 +408,4 @@ const statusColor = (status: string) => ({
 </script>
 
 <style scoped>
-.page-title {
-  font-size: 28px;
-  font-weight: 800;
-  letter-spacing: -0.6px;
-  color: var(--g7);
-}
-.fade-in {
-  animation: fadeIn 0.4s ease-out;
-}
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
 </style>

@@ -1,10 +1,10 @@
 <template>
-  <div class="applications-page bg-grey-lighten-4 min-vh-100">
+  <v-container fluid class="pa-6">
     <v-container class="py-8">
       <!-- Header -->
       <header class="mb-10">
-        <h1 class="text-h4 font-weight-black text-grey-darken-4 mb-1">My Job Applications</h1>
-        <p class="text-subtitle-1 text-grey-darken-1">Track the status of your career opportunities.</p>
+        <h1 class="text-h4 font-weight-bold mb-1 text-primary">My Job Applications</h1>
+        <p class="text-subtitle-1 text-medium-emphasis mb-6">Track the status of your career opportunities.</p>
       </header>
 
       <v-row v-if="loading">
@@ -49,7 +49,7 @@
         <v-btn color="primary" rounded="pill" class="px-8" to="/dashboard/jobs">Browse Jobs</v-btn>
       </div>
     </v-container>
-  </div>
+  </v-container>
 </template>
 
 <script setup>

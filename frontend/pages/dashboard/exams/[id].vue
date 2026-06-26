@@ -3,7 +3,7 @@
     <div class="d-flex align-center gap-3 mb-8">
       <v-btn icon="mdi-arrow-left" variant="text" to="/dashboard/exams"></v-btn>
       <div>
-        <h1 class="text-h4 font-weight-bold">Edit Exam</h1>
+        <h1 class="text-h4 font-weight-bold mb-1 text-primary">Edit Exam</h1>
         <p class="text-grey">Editing: <span class="font-weight-black text-primary">{{ form.title }}</span></p>
       </div>
     </div>

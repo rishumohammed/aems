@@ -43,7 +43,7 @@
       </v-card-text>
 
       <v-card-actions class="pa-4">
-        <v-btn variant="text" rounded="lg" @click="show = false">Cancel</v-btn>
+        <v-btn   @click="show = false" variant="text">Cancel</v-btn>
         <v-spacer></v-spacer>
         <v-btn
           color="primary"

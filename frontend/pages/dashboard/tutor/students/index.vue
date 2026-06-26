@@ -1,11 +1,11 @@
 <template>
-  <v-container fluid class="pa-0">
+  <v-container fluid class="pa-6">
     <!-- Header -->
     <v-card class="pa-8 pb-15 mb-n10 border-b rounded-0" elevation="0" color="white">
       <div class="d-flex align-center justify-space-between mb-2">
         <div>
-          <h1 class="text-h4 font-weight-black text-primary-dark mb-1">My Students</h1>
-          <p class="text-subtitle-1 text-secondary font-weight-medium">Track and support your student community.</p>
+          <h1 class="text-h4 font-weight-bold mb-1 text-primary">My Students</h1>
+          <p class="text-subtitle-1 text-medium-emphasis mb-6">Track and support your student community.</p>
         </div>
       </div>
     </v-card>

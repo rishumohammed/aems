@@ -1,8 +1,8 @@
 <template>
-  <div class="pa-6 d-flex justify-center align-center h-100">
+  <v-container fluid class="pa-6">
     <v-progress-circular indeterminate color="primary"></v-progress-circular>
     <span class="ml-4">Redirecting to Job Post form...</span>
-  </div>
+  </v-container>
 </template>
 
 <script setup lang="ts">

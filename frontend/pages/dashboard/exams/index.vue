@@ -1,10 +1,10 @@
 <template>
-  <div class="pa-6 fade-in">
+  <v-container fluid class="pa-6">
     <!-- Header -->
     <div class="d-flex align-center justify-space-between mb-8">
       <div>
-        <h1 class="page-title mb-1">Exams</h1>
-        <p class="text-subtitle-1 text-secondary">
+        <h1 class="text-h4 font-weight-bold mb-1 text-primary">Exams</h1>
+        <p class="text-subtitle-1 text-medium-emphasis mb-6">
           {{ isStudent ? 'Your exam eligibility and upcoming tests' : 'Manage course exams and review results' }}
         </p>
       </div>
@@ -97,11 +97,11 @@
                 title="Delete Exam"
               ></AppButton>
             </div>
-          </template>
+</template>
         </v-data-table>
       </div>
     </div>
-  </div>
+  </v-container>
 </template>
 
 <script setup lang="ts">
@@ -177,12 +177,7 @@ onMounted(fetchData);
 </script>
 
 <style scoped>
-.page-title {
-  font-size: 28px;
-  font-weight: 800;
-  letter-spacing: -0.6px;
-  color: var(--g7);
-}
+
 
 .apple-table-card {
   background: white;
@@ -218,14 +213,5 @@ onMounted(fetchData);
   border-radius: var(--radius-lg);
   border: 1px solid var(--border);
   
-}
-
-.fade-in {
-  animation: fadeIn 0.3s ease-out;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
 }
 </style>

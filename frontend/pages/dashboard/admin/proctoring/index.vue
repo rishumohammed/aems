@@ -1,9 +1,9 @@
 <template>
-  <div class="pa-6 fade-in">
+  <v-container fluid class="pa-6">
     <div class="d-flex justify-space-between align-center mb-6">
       <div>
-        <h1 class="page-title mb-1">Proctoring Logs</h1>
-        <p class="text-subtitle-1 text-secondary">Review proctoring violations and integrity checks grouped by exam.</p>
+        <h1 class="text-h4 font-weight-bold mb-1 text-primary">Proctoring Logs</h1>
+        <p class="text-subtitle-1 text-medium-emphasis mb-6">Review proctoring violations and integrity checks grouped by exam.</p>
       </div>
     </div>
 
@@ -126,7 +126,7 @@
 
             <template v-slot:item.student_name="{ item }">
               <div class="font-weight-bold text-black">{{ item.student_name }}</div>
-            </template>
+</template>
             
             <template v-slot:item.student_id="{ item }">
               <span class="text-caption text-secondary">#{{ String(item.student_id).substring(0,6) }}</span>
@@ -206,7 +206,7 @@
         </v-card-text>
       </v-card>
     </v-dialog>
-  </div>
+  </v-container>
 </template>
 
 <script setup lang="ts">
@@ -339,12 +339,7 @@ const getStatusColor = (status: string) => {
 </script>
 
 <style scoped>
-.page-title {
-  font-size: 28px;
-  font-weight: 800;
-  letter-spacing: -0.6px;
-  color: var(--g7);
-}
+
 
 .filter-card {
   border: 1px solid rgba(0, 0, 0, 0.06);
@@ -395,14 +390,5 @@ const getStatusColor = (status: string) => {
   color: var(--g6) !important;
   border-bottom: 1px solid rgba(0, 0, 0, 0.03) !important;
   background: white !important;
-}
-
-.fade-in {
-  animation: fadeIn 0.3s ease-out;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
 }
 </style>

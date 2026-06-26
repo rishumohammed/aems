@@ -1,8 +1,8 @@
 <template>
-  <div class="pa-6 fade-in min-vh-100 bg-grey-lighten-4">
+  <v-container fluid class="pa-6">
     <div class="mb-8">
       <h1 class="text-h3 font-weight-black mb-2 text-grey-darken-4">My Placements</h1>
-      <p class="text-subtitle-1 text-grey-darken-1">Track your job offers and placement status.</p>
+      <p class="text-subtitle-1 text-medium-emphasis mb-6">Track your job offers and placement status.</p>
     </div>
 
     <div v-if="loading" class="d-flex justify-center py-12">
@@ -83,7 +83,7 @@
         </v-col>
       </v-row>
     </div>
-  </div>
+  </v-container>
 </template>
 
 <script setup lang="ts">
@@ -124,12 +124,5 @@ onMounted(fetchPlacements);
   transform: translateY(-4px);
   border: 1px solid var(--border);
   
-}
-.fade-in {
-  animation: fadeIn 0.4s ease-out;
-}
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
 }
 </style>

@@ -1,8 +1,8 @@
 <template>
-  <div class="pa-6 fade-in">
+  <v-container fluid class="pa-6">
     <div class="mb-8">
-      <h1 class="page-title mb-1">My Interviews</h1>
-      <p class="text-subtitle-1 text-secondary">Manage your upcoming career opportunities and interview schedule.</p>
+      <h1 class="text-h4 font-weight-bold mb-1 text-primary">My Interviews</h1>
+      <p class="text-subtitle-1 text-medium-emphasis mb-6">Manage your upcoming career opportunities and interview schedule.</p>
     </div>
 
     <div v-if="loading" class="d-flex justify-center py-12">
@@ -110,7 +110,7 @@
         </v-col>
       </v-row>
     </div>
-  </div>
+  </v-container>
 </template>
 
 <script setup lang="ts">
@@ -145,12 +145,7 @@ onMounted(fetchInterviews);
 </script>
 
 <style scoped>
-.page-title {
-  font-size: 32px;
-  font-weight: 900;
-  letter-spacing: -1px;
-  color: #1e293b;
-}
+
 
 .interview-card {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -171,14 +166,5 @@ onMounted(fetchInterviews);
   background: white;
   border-radius: 20px;
   border: 2px dashed #e2e8f0;
-}
-
-.fade-in {
-  animation: fadeIn 0.4s ease-out;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
 }
 </style>

@@ -1,9 +1,9 @@
 <template>
-  <div class="pa-6 fade-in">
+  <v-container fluid class="pa-6">
     <div class="d-flex align-center justify-space-between mb-8">
       <div>
-        <h1 class="page-title mb-1">My Job Postings</h1>
-        <p class="text-subtitle-1 text-secondary">Manage the jobs you have posted for students.</p>
+        <h1 class="text-h4 font-weight-bold mb-1 text-primary">My Job Postings</h1>
+        <p class="text-subtitle-1 text-medium-emphasis mb-6">Manage the jobs you have posted for students.</p>
       </div>
       <v-btn color="primary" rounded="lg" prepend-icon="mdi-plus" to="/dashboard/employer/jobs/create">Post New Job</v-btn>
     </div>
@@ -21,7 +21,7 @@
             <v-icon size="small">mdi-briefcase-outline</v-icon> {{ item.category_name || 'General' }}
             <v-icon size="small" class="ml-2">mdi-map-marker-outline</v-icon> {{ item.is_remote ? 'Remote' : item.location }}
           </div>
-        </template>
+</template>
 
         <template v-slot:item.type="{ item }">
           <v-chip size="small" variant="tonal" color="info" class="text-capitalize font-weight-bold">
@@ -54,7 +54,7 @@
         </template>
       </v-data-table>
     </v-card>
-  </div>
+  </v-container>
 </template>
 
 <script setup lang="ts">

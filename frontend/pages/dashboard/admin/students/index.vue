@@ -1,9 +1,9 @@
 <template>
-  <div class="pa-6 fade-in">
+  <v-container fluid class="pa-6">
     <div class="d-flex justify-space-between align-center mb-8">
       <div>
-        <h1 class="page-title mb-1">Student Management</h1>
-        <p class="text-subtitle-1 text-secondary">View and manage all enrolled students.</p>
+        <h1 class="text-h4 font-weight-bold mb-1 text-primary">Student Management</h1>
+        <p class="text-subtitle-1 text-medium-emphasis mb-6">View and manage all enrolled students.</p>
       </div>
       <AppButton icon="mdi-account-plus" @click="showAddModal = true">
         Add Student
@@ -136,7 +136,7 @@
               <div class="user-email">{{ item.email }}</div>
             </div>
           </div>
-        </template>
+</template>
 
         <template #[`item.enrolled_courses`]="{ item }">
           <div class="d-flex flex-wrap gap-1">
@@ -181,7 +181,7 @@
         </template>
       </v-data-table>
     </div>
-  </div>
+  </v-container>
 </template>
 
 <script setup lang="ts">
@@ -366,12 +366,7 @@ const statusColor = (status: string) => {
 </script>
 
 <style scoped>
-.page-title {
-  font-size: 28px;
-  font-weight: 800;
-  letter-spacing: -0.6px;
-  color: var(--g7);
-}
+
 
 .filters-card {
   background: white;
@@ -428,14 +423,5 @@ const statusColor = (status: string) => {
 
 .av-sq {
   border-radius: 12px !important;
-}
-
-.fade-in {
-  animation: fadeIn 0.3s ease-out;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
 }
 </style>

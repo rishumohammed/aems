@@ -15,7 +15,7 @@
             </v-avatar>
             <div class="flex-grow-1">
               <div class="d-flex align-center gap-2 mb-1">
-                <h1 class="text-h5 font-weight-bold">{{ lead.name }}</h1>
+                <h1 class="text-h4 font-weight-bold mb-1 text-primary">{{ lead.name }}</h1>
                 <v-chip :color="getStatusColor(lead.status)" size="small" class="text-uppercase font-weight-bold">
                   {{ lead.status }}
                 </v-chip>
@@ -313,7 +313,7 @@
               <v-divider></v-divider>
               <v-card-actions class="pa-6">
                 <v-spacer></v-spacer>
-                <v-btn variant="text" @click="showAssignModal = false">Cancel</v-btn>
+                <v-btn  @click="showAssignModal = false" variant="text">Cancel</v-btn>
                 <v-btn
                   color="primary"
                   variant="flat"
@@ -465,7 +465,14 @@ const confirmAssignment = async () => {
   }
 };
 
-const statusOptions = ['open', 'called', 'interested', 'not_interested', 'rejected', 'converted'];
+const statusOptions = computed(() => {
+  const options = ['open', 'called', 'interested', 'not_interested', 'rejected'];
+  if (lead.value?.status === 'converted') {
+    options.push('converted');
+  }
+  return options;
+});
+
 const activityTypes = [
   { label: 'Call', value: 'call' },
   { label: 'Note', value: 'note' },

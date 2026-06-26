@@ -1,7 +1,7 @@
 <template>
-  <div class="d-flex align-center justify-center fill-height">
+  <v-container fluid class="pa-6">
     <v-progress-circular indeterminate color="primary"></v-progress-circular>
-  </div>
+  </v-container>
 </template>
 
 <script setup lang="ts">

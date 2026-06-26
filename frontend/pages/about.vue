@@ -61,6 +61,7 @@
           <v-col cols="12" md="6">
             <div class="who-img-wrap">
               <img
+                v-if="aboutWhoImageUrl"
                 :src="aboutWhoImageUrl"
                 alt="Brixify food science lab"
                 class="who-img"
@@ -228,7 +229,7 @@ const aboutpageWhoImageUrl = useState<string | null>('aboutpage_who_image_url');
 const aboutWhoImageUrl = computed(() => {
   if (aboutpageWhoImage.value) return `${config.public.apiBase.replace('/api', '')}${aboutpageWhoImage.value}`;
   if (aboutpageWhoImageUrl.value) return aboutpageWhoImageUrl.value;
-  return 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?q=80&w=900';
+  return '';
 });
 
 const whoPoints = [

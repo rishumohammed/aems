@@ -1,7 +1,7 @@
 <template>
-  <div class="pa-6">
+  <v-container fluid class="pa-6">
     <div class="mb-8">
-      <h1 class="text-h4 font-weight-bold">Account Settings</h1>
+      <h1 class="text-h4 font-weight-bold mb-1 text-primary">Account Settings</h1>
       <p class="text-secondary">Manage your profile, preferences, and security.</p>
     </div>
 
@@ -392,7 +392,7 @@
     <v-snackbar v-model="snackbar" :color="snackbarColor" rounded="lg">
       {{ snackbarText }}
     </v-snackbar>
-  </div>
+  </v-container>
 </template>
 
 <script setup lang="ts">

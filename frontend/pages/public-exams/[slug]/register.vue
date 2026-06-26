@@ -181,7 +181,7 @@
                   <v-btn variant="text" color="primary" to="/terms-and-conditions" target="_blank" class="text-capitalize pl-0">
                     View Full Terms <v-icon end size="14">mdi-open-in-new</v-icon>
                   </v-btn>
-                  <v-btn color="primary" variant="flat" rounded="lg" class="px-6" @click="termsModal.show = false">Close</v-btn>
+                  <v-btn    class="" @click="termsModal.show = false" variant="text">Close</v-btn>
                 </v-card-actions>
               </v-card>
             </v-dialog>
@@ -200,7 +200,7 @@
                   <v-btn variant="text" color="primary" to="/privacy-policy" target="_blank" class="text-capitalize pl-0">
                     View Full Privacy Policy <v-icon end size="14">mdi-open-in-new</v-icon>
                   </v-btn>
-                  <v-btn color="primary" variant="flat" rounded="lg" class="px-6" @click="privacyModal.show = false">Close</v-btn>
+                  <v-btn    class="" @click="privacyModal.show = false" variant="text">Close</v-btn>
                 </v-card-actions>
               </v-card>
             </v-dialog>

@@ -1,5 +1,5 @@
 <template>
-  <v-container class="py-8 px-6" fluid style="max-width: 1200px;">
+  <v-container fluid class="pa-6">
     <!-- Breadcrumbs / Back -->
     <div class="mb-6">
       <v-btn to="/dashboard/admin/public-exams" variant="text" color="primary" class="text-capitalize pl-0 font-weight-bold">
@@ -9,7 +9,7 @@
 
     <!-- Header -->
     <div class="mb-8">
-      <h1 class="text-h4 font-weight-black text-dark mb-1">
+      <h1 class="text-h4 font-weight-bold mb-1 text-primary">
         {{ isEditMode ? 'Edit Public Exam Settings' : 'Create Public Exam' }}
       </h1>
       <p class="text-subtitle-2 text-secondary">

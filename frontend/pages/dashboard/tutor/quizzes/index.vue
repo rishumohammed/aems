@@ -1,11 +1,11 @@
 <template>
-  <v-container fluid class="pa-0">
+  <v-container fluid class="pa-6">
     <!-- Header -->
     <v-card class="pa-8 pb-15 mb-n10 border-b rounded-0" elevation="0" color="white">
       <div class="d-flex align-center justify-space-between mb-2">
         <div>
-          <h1 class="text-h4 font-weight-black text-primary-dark mb-1">Quiz Management</h1>
-          <p class="text-subtitle-1 text-secondary font-weight-medium">Create and manage assessments for your students.</p>
+          <h1 class="text-h4 font-weight-bold mb-1 text-primary">Quiz Management</h1>
+          <p class="text-subtitle-1 text-medium-emphasis mb-6">Create and manage assessments for your students.</p>
         </div>
         <v-btn color="primary" variant="flat" rounded="lg" class="font-weight-bold px-6" size="large" @click="showCreateDialog = true" prepend-icon="mdi-plus">
           Create New Quiz
@@ -128,8 +128,8 @@
         </v-card-text>
         <v-card-actions class="pa-4">
           <v-spacer></v-spacer>
-          <v-btn variant="text" color="grey" class="text-capitalize font-weight-bold" @click="showCreateDialog = false">Cancel</v-btn>
-          <v-btn color="primary" rounded="lg" class="text-capitalize font-weight-bold px-8 shadow-glow" @click="handleCreate">Create Quiz</v-btn>
+          <v-btn   class="text-capitalize font-weight-bold" @click="showCreateDialog = false" variant="text">Cancel</v-btn>
+          <v-btn color="primary"  class="text-capitalize font-weight-bold px-8 shadow-glow px-6" @click="handleCreate" variant="flat" rounded="lg">Create Quiz</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>

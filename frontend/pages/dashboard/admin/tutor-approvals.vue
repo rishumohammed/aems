@@ -3,8 +3,8 @@
     <!-- Header -->
     <div class="d-flex align-center justify-space-between mb-8">
       <div>
-        <h1 class="text-h4 font-weight-black mb-1">Tutor Approvals</h1>
-        <p class="text-subtitle-1 text-grey">Review and process tutor applications</p>
+        <h1 class="text-h4 font-weight-bold mb-1 text-primary">Tutor Approvals</h1>
+        <p class="text-subtitle-1 text-medium-emphasis mb-6">Review and process tutor applications</p>
       </div>
       <v-btn icon="mdi-refresh" variant="tonal" color="primary" @click="loadTutors" :loading="loading || loadingApproved || loadingRejected" />
     </div>
@@ -324,7 +324,7 @@
         </v-card-text>
         <v-divider />
         <v-card-actions class="pa-6 gap-3">
-          <v-btn variant="text" color="grey" class="font-weight-bold" @click="detailsDialog = false">Cancel</v-btn>
+          <v-btn   class="font-weight-bold" @click="detailsDialog = false" variant="text">Cancel</v-btn>
           <v-spacer />
           <v-btn color="error" variant="tonal" class="font-weight-black px-6" prepend-icon="mdi-close-circle" @click="handleApproval(selectedTutor, 'rejected')" :loading="actionLoading === selectedTutor.id + '_reject'">Reject Application</v-btn>
           <v-btn color="success" variant="flat" class="font-weight-black px-6 text-white" prepend-icon="mdi-check-circle" @click="handleApproval(selectedTutor, 'active')" :loading="actionLoading === selectedTutor.id + '_approve'">Approve Tutor</v-btn>

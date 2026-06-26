@@ -1,9 +1,9 @@
 <template>
-  <div class="pa-6 fade-in">
+  <v-container fluid class="pa-6">
     <div class="d-flex align-center justify-space-between mb-8">
       <div>
-        <h1 class="page-title mb-1">Notifications</h1>
-        <p class="text-subtitle-1 text-secondary">Stay updated with your learning and career progress.</p>
+        <h1 class="text-h4 font-weight-bold mb-1 text-primary">Notifications</h1>
+        <p class="text-subtitle-1 text-medium-emphasis mb-6">Stay updated with your learning and career progress.</p>
       </div>
       <AppButton variant="g" icon="mdi-check-all" @click="markAllAsRead" v-if="notifications.length > 0">
         Mark all as read
@@ -44,7 +44,7 @@
         </v-card-text>
       </v-card>
     </div>
-  </div>
+  </v-container>
 </template>
 
 <script setup lang="ts">
@@ -124,12 +124,7 @@ onMounted(fetchNotifications);
 </script>
 
 <style scoped>
-.page-title {
-  font-size: 32px;
-  font-weight: 900;
-  letter-spacing: -1px;
-  color: #1e293b;
-}
+
 
 .notification-item {
   border: 1px solid rgba(0, 0, 0, 0.05) !important;
@@ -160,14 +155,5 @@ onMounted(fetchNotifications);
   background: white;
   border-radius: 20px;
   border: 2px dashed #e2e8f0;
-}
-
-.fade-in {
-  animation: fadeIn 0.4s ease-out;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
 }
 </style>

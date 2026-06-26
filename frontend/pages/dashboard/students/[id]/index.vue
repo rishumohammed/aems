@@ -1,5 +1,5 @@
 <template>
-  <v-container class="py-8" v-if="student">
+  <v-container v-if="!loading" fluid class="pa-6">
     <div class="mb-6">
       <v-btn variant="text" color="primary" prepend-icon="mdi-arrow-left" class="px-0 font-weight-bold" @click="navigateTo('/dashboard/students')">
         Back to Students

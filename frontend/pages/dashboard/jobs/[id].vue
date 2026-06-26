@@ -1,5 +1,5 @@
 <template>
-  <div class="pa-6 fade-in">
+  <v-container fluid class="pa-6">
     <div v-if="job">
       <v-btn variant="text" prepend-icon="mdi-arrow-left" class="mb-4 text-capitalize font-weight-bold" @click="$router.back()">Back to Jobs</v-btn>
       
@@ -11,7 +11,7 @@
                 <v-icon size="40">mdi-office-building</v-icon>
               </v-avatar>
               <div>
-                <h1 class="text-h4 font-weight-black mb-1">{{ job.title }}</h1>
+                <h1 class="text-h4 font-weight-bold mb-1 text-primary">{{ job.title }}</h1>
                 <div class="d-flex align-center gap-4 text-subtitle-1 text-secondary">
                   <span class="font-weight-bold text-primary">{{ job.company }}</span>
                   <v-divider vertical inset class="mx-1"></v-divider>
@@ -69,7 +69,7 @@
         @submitted="onApplySuccess"
       />
     </div>
-  </div>
+  </v-container>
 </template>
 
 <script setup lang="ts">
@@ -113,6 +113,4 @@ const onApplySuccess = () => {
 .gap-4 { gap: 16px; }
 .gap-3 { gap: 12px; }
 .uppercase { text-transform: uppercase; letter-spacing: 0.5px; }
-.fade-in { animation: fadeIn 0.4s ease-out; }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 </style>

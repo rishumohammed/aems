@@ -1,9 +1,9 @@
 <template>
-  <div class="pa-6 fade-in">
+  <v-container fluid class="pa-6">
     <div class="d-flex align-center justify-space-between mb-8">
       <div>
-        <h1 class="page-title mb-1">Job Approvals</h1>
-        <p class="text-subtitle-1 text-secondary">Review employer submissions and manage live jobs.</p>
+        <h1 class="text-h4 font-weight-bold mb-1 text-primary">Job Approvals</h1>
+        <p class="text-subtitle-1 text-medium-emphasis mb-6">Review employer submissions and manage live jobs.</p>
       </div>
       <div class="d-flex align-center gap-3">
         <TabsPill
@@ -44,7 +44,7 @@
               <div class="company-name">{{ item.company }} • {{ item.category_name }}</div>
             </div>
           </div>
-        </template>
+</template>
 
         <template v-slot:item.location="{ item }">
           <Badge :color="item.is_remote ? 'blue' : 'gray'">
@@ -100,7 +100,7 @@
         large
       />
     </AppModal>
-  </div>
+  </v-container>
 </template>
 
 <script setup lang="ts">
@@ -216,12 +216,7 @@ async function deleteJob(job: any) {
 </script>
 
 <style scoped>
-.page-title {
-  font-size: 28px;
-  font-weight: 800;
-  letter-spacing: -0.6px;
-  color: var(--g7);
-}
+
 
 .apple-table-card {
   background: white;
@@ -269,15 +264,6 @@ async function deleteJob(job: any) {
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-.fade-in {
-  animation: fadeIn 0.3s ease-out;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
 }
 
 .no-scrollbar::-webkit-scrollbar { display: none; }

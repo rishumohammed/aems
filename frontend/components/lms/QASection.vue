@@ -102,7 +102,7 @@
         </v-card-text>
         <v-card-actions class="pa-6">
           <v-spacer></v-spacer>
-          <v-btn variant="text" @click="showQuestionDialog = false">Cancel</v-btn>
+          <v-btn  @click="showQuestionDialog = false" variant="text">Cancel</v-btn>
           <v-btn color="primary" @click="postQuestion" :loading="postingQuestion" elevation="0" rounded="lg" class="px-8">Post Question</v-btn>
         </v-card-actions>
       </v-card>

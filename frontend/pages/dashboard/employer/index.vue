@@ -1,5 +1,5 @@
 <template>
-  <div class="pa-6">
+  <v-container fluid class="pa-6">
     <!-- Dashboard Header -->
 
     <div class="d-flex align-center justify-space-between mb-10">
@@ -89,7 +89,7 @@
             <v-icon size="small">mdi-briefcase-outline</v-icon> {{ item.category_name }}
             <v-icon size="small" class="ml-2">mdi-map-marker-outline</v-icon> {{ item.is_remote ? 'Remote' : item.location }}
           </div>
-        </template>
+</template>
 
         <template v-slot:item.type="{ item }">
           <v-chip size="small" variant="tonal" color="info" class="text-capitalize">
@@ -145,7 +145,7 @@
         </template>
       </v-data-table>
     </v-card>
-  </div>
+  </v-container>
 </template>
 
 <script setup lang="ts">

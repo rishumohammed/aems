@@ -1,10 +1,10 @@
 <template>
-  <v-container class="py-8 px-6" fluid style="max-width: 1600px;">
+  <v-container fluid class="pa-6">
     <!-- Header -->
     <div class="d-flex align-center mb-8 gap-4">
       <v-btn icon="mdi-arrow-left" variant="tonal" class="mr-2" to="/dashboard/admin/public-exams"></v-btn>
       <div>
-        <h1 class="text-h4 font-weight-black text-dark mb-1">Results &amp; Analytics</h1>
+        <h1 class="text-h4 font-weight-bold mb-1 text-primary">Results &amp; Analytics</h1>
         <p class="text-subtitle-2 text-secondary">Monitor guest entrance test scores and view analytics dashboards for this exam.</p>
       </div>
       <v-spacer></v-spacer>

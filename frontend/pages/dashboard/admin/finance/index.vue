@@ -1,9 +1,9 @@
 <template>
-  <div class="pa-6 fade-in">
+  <v-container fluid class="pa-6">
     <div class="d-flex align-center justify-space-between mb-8">
       <div>
-        <h1 class="page-title mb-1">Financial Reports</h1>
-        <p class="text-subtitle-1 text-secondary">Analyze revenue trends, P&L performance, and outstanding dues.</p>
+        <h1 class="text-h4 font-weight-bold mb-1 text-primary">Financial Reports</h1>
+        <p class="text-subtitle-1 text-medium-emphasis mb-6">Analyze revenue trends, P&L performance, and outstanding dues.</p>
       </div>
       <AppButton variant="g" icon="mdi-download-outline" @click="exportFullReport">
         Export Report
@@ -61,7 +61,7 @@
                 <div class="font-weight-bold">{{ item.student_name }}</div>
                 <div class="text-caption text-secondary">{{ item.invoice_number }}</div>
               </div>
-            </template>
+</template>
             <template #item.balance_due="{ item }">
               <span class="font-weight-bold text-red">₹{{ item.balance_due.toLocaleString() }}</span>
             </template>
@@ -104,7 +104,7 @@
         </div>
       </v-col>
     </v-row>
-  </div>
+  </v-container>
 </template>
 
 <script setup lang="ts">
@@ -244,12 +244,7 @@ const exportFullReport = () => {
 </script>
 
 <style scoped>
-.page-title {
-  font-size: 28px;
-  font-weight: 800;
-  letter-spacing: -0.6px;
-  color: var(--g7);
-}
+
 
 .apple-table-card {
   background: white;
@@ -283,14 +278,5 @@ const exportFullReport = () => {
   height: 100%;
   background: var(--blue);
   border-radius: 4px;
-}
-
-.fade-in {
-  animation: fadeIn 0.3s ease-out;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
 }
 </style>

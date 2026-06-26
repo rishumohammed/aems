@@ -1,10 +1,10 @@
 <template>
-  <div class="pa-6 fade-in">
+  <v-container fluid class="pa-6">
     <!-- Header -->
     <div class="d-flex align-center justify-space-between mb-8">
       <div>
-        <h1 class="page-title mb-1">Transactions Ledger</h1>
-        <p class="text-subtitle-1 text-secondary">A consolidated view of all cash inflows and outflows.</p>
+        <h1 class="text-h4 font-weight-bold mb-1 text-primary">Transactions Ledger</h1>
+        <p class="text-subtitle-1 text-medium-emphasis mb-6">A consolidated view of all cash inflows and outflows.</p>
       </div>
     </div>
 
@@ -122,7 +122,7 @@
       >
         <template v-slot:item.transaction_date="{ item }">
           <div class="font-weight-medium text-no-wrap">{{ formatDate(item.transaction_date) }}</div>
-        </template>
+</template>
 
         <template v-slot:item.source="{ item }">
           <v-chip size="small" variant="tonal" :color="item.source === 'revenue' ? 'primary' : 'warning'" class="text-capitalize font-weight-bold">
@@ -154,7 +154,7 @@
         </template>
       </v-data-table>
     </v-card>
-  </div>
+  </v-container>
 </template>
 
 <script setup lang="ts">
@@ -246,20 +246,8 @@ const formatDate = (d: string) => {
 </script>
 
 <style scoped>
-.page-title {
-  font-size: 28px;
-  font-weight: 800;
-  letter-spacing: -0.6px;
-  color: var(--g7);
-}
+
 .shadow-sm { border: 1px solid var(--border); }
 .border-t-green { border-top: 4px solid rgb(var(--v-theme-success)) !important; }
 .border-t-red { border-top: 4px solid rgb(var(--v-theme-error)) !important; }
-.fade-in {
-  animation: fadeIn 0.4s ease-out;
-}
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
 </style>

@@ -1,9 +1,9 @@
 <template>
-  <div class="pa-6 fade-in">
+  <v-container fluid class="pa-6">
     <div class="d-flex align-center justify-space-between mb-8">
       <div>
-        <h1 class="page-title mb-1">Courses</h1>
-        <p class="text-subtitle-1 text-secondary">Manage and review all educational content.</p>
+        <h1 class="text-h4 font-weight-bold mb-1 text-primary">Courses</h1>
+        <p class="text-subtitle-1 text-medium-emphasis mb-6">Manage and review all educational content.</p>
       </div>
       <div class="d-flex align-center gap-3">
         <SegmentControl
@@ -90,7 +90,7 @@
         />
       </div>
     </div>
-  </div>
+  </v-container>
 </template>
 
 <script setup lang="ts">
@@ -192,12 +192,7 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.page-title {
-  font-size: 28px;
-  font-weight: 800;
-  letter-spacing: -0.6px;
-  color: var(--g7);
-}
+
 
 .filters-card {
   background: white;
@@ -230,15 +225,6 @@ onMounted(() => {
   border-radius: var(--radius-lg);
   border: 1px solid var(--border);
   
-}
-
-.fade-in {
-  animation: fadeIn 0.3s ease-out;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
 }
 
 .no-scrollbar::-webkit-scrollbar { display: none; }

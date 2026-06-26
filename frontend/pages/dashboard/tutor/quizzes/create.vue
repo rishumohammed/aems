@@ -1,5 +1,5 @@
 <template>
-  <v-container fluid class="pa-0">
+  <v-container fluid class="pa-6">
     <!-- Header with Breadcrumbs -->
     <div class="header-section pa-8 pb-15 mb-n10">
       <div class="d-flex align-center justify-space-between mb-2">
@@ -8,8 +8,8 @@
             <v-icon size="14" class="mr-1">mdi-home</v-icon>
             Dashboard / Quizzes / <span class="font-weight-black ml-1">New Quiz</span>
           </div>
-          <h1 class="text-h4 font-weight-black text-white mb-1">Create Assessment</h1>
-          <p class="text-subtitle-1 text-white opacity-80">Design your quiz and add interactive questions.</p>
+          <h1 class="text-h4 font-weight-bold mb-1 text-primary">Create Assessment</h1>
+          <p class="text-subtitle-1 text-medium-emphasis mb-6">Design your quiz and add interactive questions.</p>
         </div>
         <div class="d-flex gap-3">
           <v-btn variant="text" color="white" class="font-weight-bold" to="/dashboard/tutor/quizzes">Discard</v-btn>

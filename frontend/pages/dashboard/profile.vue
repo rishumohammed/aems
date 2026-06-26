@@ -1,5 +1,5 @@
 <template>
-  <div class="pa-6 fade-in">
+  <v-container fluid class="pa-6">
     <!-- Header with dynamic design -->
     <div class="profile-header mb-8 pa-8 rounded-xl d-flex align-center justify-space-between flex-wrap gap-4">
       <div class="d-flex align-center flex-wrap gap-4">
@@ -7,7 +7,7 @@
           <span class="text-h4 font-weight-black text-white">{{ userInitials }}</span>
         </v-avatar>
         <div>
-          <h1 class="text-h4 font-weight-black text-white mb-1">{{ userName }}</h1>
+          <h1 class="text-h4 font-weight-bold mb-1 text-primary">{{ userName }}</h1>
           <div class="d-flex align-center flex-wrap gap-2">
             <v-chip size="small" class="font-weight-black text-uppercase mr-2 text-white" :color="roleColor">
               {{ userRoleName }}
@@ -164,7 +164,7 @@
         </v-card>
       </v-col>
     </v-row>
-  </div>
+  </v-container>
 </template>
 
 <script setup lang="ts">
@@ -336,15 +336,6 @@ const openSupport = () => {
 
 .settings-highlight:hover {
   text-decoration: underline !important;
-}
-
-.fade-in {
-  animation: fadeIn 0.4s ease-out;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
 }
 
 .gap-2 { gap: 8px; }

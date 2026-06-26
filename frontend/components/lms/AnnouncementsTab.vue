@@ -49,7 +49,7 @@
         </v-card-text>
         <v-card-actions class="pa-6">
           <v-spacer></v-spacer>
-          <v-btn variant="text" @click="showDialog = false">Cancel</v-btn>
+          <v-btn  @click="showDialog = false" variant="text">Cancel</v-btn>
           <v-btn color="primary" @click="postAnnouncement" :loading="loading" elevation="0" rounded="lg" class="px-8">Send Announcement</v-btn>
         </v-card-actions>
       </v-card>

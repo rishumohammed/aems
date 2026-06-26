@@ -9,7 +9,7 @@
     <div :class="viewType === 'list' ? 'd-flex align-center pa-2' : ''">
       <!-- Thumbnail -->
       <v-img
-        :src="course.thumbnail_url || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=800'"
+        :src="imageUrl"
         :aspect-ratio="viewType === 'list' ? 1 : 16/9"
         :width="viewType === 'list' ? 120 : '100%'"
         cover
@@ -22,7 +22,7 @@
         </template>
         
         <!-- Badges on image -->
-        <div v-if="viewType !== 'list'" class="pa-2">
+        <div v-if="viewType !== 'list'" class="pa-2 d-flex flex-wrap gap-2 justify-space-between">
           <v-chip
             v-if="course.category_name"
             size="x-small"
@@ -31,6 +31,17 @@
             class="text-primary font-weight-bold"
           >
             {{ course.category_name }}
+          </v-chip>
+
+          <v-chip
+            v-if="course.course_type === 'live' && course.start_date"
+            size="x-small"
+            color="error"
+            variant="flat"
+            class="font-weight-bold"
+          >
+            <v-icon start size="12">mdi-clock-outline</v-icon>
+            {{ countdownText }}
           </v-chip>
         </div>
       </v-img>
@@ -86,7 +97,9 @@
 </template>
 
 <script setup>
-defineProps({
+import { ref, computed, onMounted, onUnmounted } from 'vue'
+
+const props = defineProps({
   course: {
     type: Object,
     required: true
@@ -95,6 +108,48 @@ defineProps({
     type: String,
     default: 'grid'
   }
+})
+
+const config = useRuntimeConfig()
+
+const imageUrl = computed(() => {
+  if (!props.course.thumbnail_url) return ''
+  if (props.course.thumbnail_url.startsWith('http')) return props.course.thumbnail_url
+  return config.public.apiBase.replace('/api', '') + props.course.thumbnail_url
+})
+
+const timeRemaining = ref(0)
+let timer = null
+
+const updateCountdown = () => {
+  if (!props.course.start_date) return
+  const start = new Date(props.course.start_date).getTime()
+  const now = new Date().getTime()
+  timeRemaining.value = start - now
+}
+
+onMounted(() => {
+  if (props.course.course_type === 'live' && props.course.start_date) {
+    updateCountdown()
+    timer = setInterval(updateCountdown, 1000)
+  }
+})
+
+onUnmounted(() => {
+  if (timer) clearInterval(timer)
+})
+
+const countdownText = computed(() => {
+  if (timeRemaining.value <= 0) return 'Class Started'
+  
+  const d = Math.floor(timeRemaining.value / (1000 * 60 * 60 * 24))
+  const h = Math.floor((timeRemaining.value % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
+  const m = Math.floor((timeRemaining.value % (1000 * 60 * 60)) / (1000 * 60))
+  const s = Math.floor((timeRemaining.value % (1000 * 60)) / 1000)
+
+  if (d > 0) return `Starts in ${d}d ${h}h`
+  if (h > 0) return `Starts in ${h}h ${m}m`
+  return `Starts in ${m}m ${s}s`
 })
 </script>
 

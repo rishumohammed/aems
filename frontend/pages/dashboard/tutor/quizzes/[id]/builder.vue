@@ -1,12 +1,12 @@
 <template>
-  <v-container fluid class="pa-0 builder-page">
+  <v-container fluid class="pa-6">
     <div class="header-section pa-8 pb-15 mb-n10">
       <div class="d-flex align-center justify-space-between mb-2">
         <div class="d-flex align-center">
           <v-btn icon="mdi-arrow-left" variant="tonal" color="white" class="mr-4" to="/dashboard/tutor/quizzes"></v-btn>
           <div>
-            <h1 class="text-h4 font-weight-black text-white mb-1">Question Builder</h1>
-            <p class="text-subtitle-1 text-white opacity-80" v-if="quiz">{{ quiz.title }} • {{ quiz.course_title }}</p>
+            <h1 class="text-h4 font-weight-bold mb-1 text-primary">Question Builder</h1>
+            <p class="text-subtitle-1 text-medium-emphasis mb-6" v-if="quiz">{{ quiz.title }} • {{ quiz.course_title }}</p>
           </div>
         </div>
         <div class="d-flex gap-3">

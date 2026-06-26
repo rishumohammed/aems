@@ -2,7 +2,7 @@
   <v-container fluid class="pa-6">
     <div class="d-flex justify-space-between align-center mb-8">
       <div>
-        <h1 class="text-h4 font-weight-bold mb-2">Lead Forms</h1>
+        <h1 class="text-h4 font-weight-bold mb-1 text-primary">Lead Forms</h1>
         <p class="text-secondary">Manage drag-and-drop forms for your website.</p>
       </div>
       <v-btn color="primary" prepend-icon="mdi-plus" size="large" rounded="pill" @click="createForm">

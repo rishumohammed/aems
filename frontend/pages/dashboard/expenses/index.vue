@@ -1,9 +1,9 @@
 <template>
-  <div class="pa-6 fade-in">
+  <v-container fluid class="pa-6">
     <div class="d-flex align-center justify-space-between mb-8">
       <div>
-        <h1 class="page-title mb-1">Expenses</h1>
-        <p class="text-subtitle-1 text-secondary">Track operational costs and categorize business spending.</p>
+        <h1 class="text-h4 font-weight-bold mb-1 text-primary">Expenses</h1>
+        <p class="text-subtitle-1 text-medium-emphasis mb-6">Track operational costs and categorize business spending.</p>
       </div>
       <div class="d-flex align-center gap-3">
         <div class="month-picker-pill px-3 d-flex align-center">
@@ -104,7 +104,7 @@
         <AppButton variant="danger" @click="deleteExpense">Delete Record</AppButton>
       </div>
     </AppModal>
-  </div>
+  </v-container>
 </template>
 
 <script setup lang="ts">
@@ -212,12 +212,7 @@ const exportCSV = () => {
 </script>
 
 <style scoped>
-.page-title {
-  font-size: 28px;
-  font-weight: 800;
-  letter-spacing: -0.6px;
-  color: var(--g7);
-}
+
 
 .month-picker-pill {
   height: 40px;
@@ -266,14 +261,5 @@ const exportCSV = () => {
 
 .border-b {
   border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-}
-
-.fade-in {
-  animation: fadeIn 0.3s ease-out;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
 }
 </style>

@@ -1,8 +1,8 @@
 <template>
-  <div class="pa-6">
+  <v-container fluid class="pa-6">
     <div class="d-flex align-center justify-space-between mb-6">
       <div>
-        <h1 class="text-h4 font-weight-bold text-white">Certificate Management</h1>
+        <h1 class="text-h4 font-weight-bold mb-1 text-primary">Certificate Management</h1>
         <p class="text-blue-grey-300">View, revoke, and re-issue student certificates</p>
       </div>
       <div class="d-flex gap-2">
@@ -56,7 +56,7 @@
             <div class="font-weight-bold">{{ item.student_name }}</div>
             <div class="text-caption text-blue-grey-300">{{ item.email }}</div>
           </div>
-        </template>
+</template>
         
         <template v-slot:item.issued_at="{ item }">
           {{ new Date(item.issued_at).toLocaleDateString() }}
@@ -96,7 +96,7 @@
         </template>
       </v-data-table>
     </v-card>
-  </div>
+  </v-container>
 </template>
 
 <script setup lang="ts">

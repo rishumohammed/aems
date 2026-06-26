@@ -1,8 +1,8 @@
 <template>
-  <div class="pa-6">
+  <v-container fluid class="pa-6">
     <div class="d-flex align-center justify-space-between mb-8">
       <div>
-        <h1 class="text-h4 font-weight-bold text-grey-darken-4 mb-2">Employers</h1>
+        <h1 class="text-h4 font-weight-bold mb-1 text-primary">Employers</h1>
         <p class="text-blue-grey-300">Manage all registered companies and their job postings.</p>
       </div>
       <v-btn icon="mdi-refresh" variant="tonal" color="primary" @click="loadEmployers" :loading="loading"></v-btn>
@@ -27,7 +27,7 @@
               <div class="text-caption text-grey">{{ item.industry || 'Not specified' }}</div>
             </div>
           </div>
-        </template>
+</template>
 
         <!-- Contact Column -->
         <template v-slot:item.contact="{ item }">
@@ -91,11 +91,11 @@
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="primary" variant="flat" @click="showPasswordDialog = false" class="px-6 rounded-pill">Close</v-btn>
+          <v-btn   @click="showPasswordDialog = false" class=" rounded-pill" variant="text">Close</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
-  </div>
+  </v-container>
 </template>
 
 <script setup lang="ts">

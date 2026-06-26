@@ -109,8 +109,8 @@
       <v-divider></v-divider>
       <v-card-actions class="pa-6">
         <v-spacer></v-spacer>
-        <v-btn variant="text" @click="$emit('update:modelValue', false)" :disabled="loading">Cancel</v-btn>
-        <v-btn color="primary" @click="save" :loading="loading" elevation="0" rounded="lg" class="px-8">Save Changes</v-btn>
+        <v-btn  @click="$emit('update:modelValue', false)" :disabled="loading" variant="text">Cancel</v-btn>
+        <v-btn color="primary" @click="save" :loading="loading" elevation="0"  class="px-8 px-6" variant="flat" rounded="lg">Save Changes</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>

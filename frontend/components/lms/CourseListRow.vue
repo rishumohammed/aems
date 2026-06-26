@@ -11,7 +11,7 @@
       <div class="d-flex align-center pa-3">
         <!-- Thumbnail Icon -->
         <v-img
-          :src="course.thumbnail_url ? ($config.public.apiBase + course.thumbnail_url) : 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=200'"
+          :src="course.thumbnail_url ? ($config.public.apiBase + course.thumbnail_url) : ''"
           width="56"
           height="56"
           cover

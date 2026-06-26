@@ -1,5 +1,5 @@
 <template>
-  <v-container fluid class="pa-0">
+  <v-container fluid class="pa-6">
 
     <!-- ═══ SUCCESS DIALOG ═══ -->
     <v-dialog v-model="successDialog.show" max-width="560" persistent>
@@ -22,7 +22,7 @@
                 <template v-slot:title>{{ categories.find(c => c.id === course.category_id)?.name }}</template>
               </v-list-item>
               <v-list-item prepend-icon="mdi-book-open-outline">
-                <template v-slot:title>{{ curriculumStats.chapters }} Chapters · {{ curriculumStats.modules }} Modules · {{ curriculumStats.lessons }} Lessons</template>
+                <template v-slot:title>{{ curriculumStats.modules }} Modules · {{ curriculumStats.lessons }} Lessons</template>
               </v-list-item>
               <v-list-item prepend-icon="mdi-clock-outline">
                 <template v-slot:title>{{ new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }) }}</template>
@@ -73,8 +73,8 @@
     <!-- Header -->
     <div class="d-flex align-center justify-space-between mb-8 px-8 pt-8">
       <div>
-        <h1 class="page-title mb-1">Create New Course</h1>
-        <p class="text-subtitle-1 text-secondary">Build your complete course with chapters, modules, and lessons.</p>
+        <h1 class="text-h4 font-weight-bold mb-1 text-primary">Create New Course</h1>
+        <p class="text-subtitle-1 text-medium-emphasis mb-6">Build your complete course with chapters, modules, and lessons.</p>
       </div>
       <v-btn variant="tonal" color="primary" prepend-icon="mdi-arrow-left" class="text-capitalize font-weight-bold" to="/dashboard/courses">
         Back
@@ -142,17 +142,6 @@
                       </template>
                     </v-text-field>
 
-                    <v-textarea
-                      v-model="course.short_description"
-                      label="Short Description"
-                      placeholder="A brief overview of what this course covers..."
-                      variant="outlined"
-                      rounded="lg"
-                      rows="2"
-                      class="mb-4"
-                      counter="200"
-                    ></v-textarea>
-
                     <div class="mb-2 text-subtitle-2 font-weight-bold">Full Description</div>
                     <div class="rich-text-area border rounded-lg mb-4">
                       <v-textarea
@@ -210,7 +199,7 @@
 
                     <v-select
                       v-model="course.language"
-                      :items="['English', 'Hindi', 'Spanish', 'French', 'German']"
+                      :items="availableLanguages"
                       label="Primary Language"
                       variant="outlined"
                       rounded="lg"
@@ -367,7 +356,7 @@
                   closable
                   @click:close="showCurriculumWarning = false"
                 >
-                  <strong>Incomplete curriculum:</strong> You need at least 1 Chapter, 1 Module, and 1 Lesson before you can publish.
+                  <strong>Incomplete curriculum:</strong> You need at least 1 Module and 1 Lesson before you can publish.
                 </v-alert>
               </div>
             </div>
@@ -433,18 +422,7 @@
                         <template v-slot:subtitle>Level</template>
                       </v-list-item>
                       <v-divider></v-divider>
-                      <v-list-item prepend-icon="mdi-book-open-outline" class="border-b">
-                        <template v-slot:title>
-                          <span :class="curriculumStats.chapters > 0 ? 'text-success font-weight-bold' : 'text-error'">
-                            {{ curriculumStats.chapters }} {{ curriculumStats.chapters === 1 ? 'Chapter' : 'Chapters' }}
-                          </span>
-                        </template>
-                        <template v-slot:append>
-                          <v-icon size="18" :color="curriculumStats.chapters > 0 ? 'success' : 'error'">
-                            {{ curriculumStats.chapters > 0 ? 'mdi-check-circle' : 'mdi-close-circle' }}
-                          </v-icon>
-                        </template>
-                      </v-list-item>
+
                       <v-list-item prepend-icon="mdi-package-variant-closed" class="border-b">
                         <template v-slot:title>
                           <span :class="curriculumStats.modules > 0 ? 'text-success font-weight-bold' : 'text-error'">
@@ -614,6 +592,7 @@ const submitting = ref(false);
 const validBasic = ref(false);
 const formBasic = ref(null);
 const categories = ref([]);
+const availableLanguages = ref(['English', 'Hindi', 'Spanish', 'French', 'German']);
 const createdCourseId = ref(null);
 const persistedSections = ref([]); // Sections loaded from DB for CurriculumEditor
 const curriculumLoaded = ref(false); // Prevent double-fetching
@@ -628,13 +607,12 @@ const successDialog = reactive({
 });
 
 // ── Curriculum stats — sourced from DB fetch + editor events ──
-const curriculumStats = reactive({ chapters: 0, modules: 0, lessons: 0 });
+const curriculumStats = reactive({ modules: 0, lessons: 0 });
 
 const course = reactive({
   title: '',
   slug: '',
   description: '',
-  short_description: '',
   category_id: null,
   course_type: 'recorded',
   start_date: null,
@@ -771,7 +749,6 @@ const saveBasicAndContinue = async () => {
     formData.append('title', course.title);
     formData.append('slug', course.slug);
     formData.append('description', course.description || '');
-    formData.append('short_description', course.short_description || '');
     formData.append('category_id', course.category_id);
     formData.append('course_type', course.course_type);
     if (course.course_type === 'live' && course.start_date) {
@@ -830,18 +807,16 @@ const onCurriculumUpdated = (stats) => {
   if (!stats) return;
 
   const incoming = {
-    chapters: stats.chapters || 0,
     modules: stats.modules || 0,
     lessons: stats.lessons || 0
   };
 
   // Accept the stats from the editor — it is the source of truth
   // while the CurriculumEditor is mounted (eager keeps it alive)
-  curriculumStats.chapters = incoming.chapters;
   curriculumStats.modules = incoming.modules;
   curriculumStats.lessons = incoming.lessons;
 
-  if (incoming.chapters > 0 && incoming.modules > 0 && incoming.lessons > 0) {
+  if (incoming.modules > 0 && incoming.lessons > 0) {
     completedSteps.value.add('curriculum');
   }
 };
@@ -932,16 +907,24 @@ watch(createdCourseId, async (id) => {
   }
 });
 
-onMounted(fetchCategories);
+const fetchConfig = async () => {
+  try {
+    const res = await api.get('/public/config');
+    const data = res.data || res;
+    if (data.course_languages) {
+      availableLanguages.value = data.course_languages.split(',').map(s => s.trim()).filter(Boolean);
+    }
+  } catch (e) { console.error(e); }
+};
+
+onMounted(() => {
+  fetchCategories();
+  fetchConfig();
+});
 </script>
 
 <style scoped>
-.page-title {
-  font-size: 28px;
-  font-weight: 800;
-  letter-spacing: -0.6px;
-  color: var(--g7);
-}
+
 
 /* ── Stepper ── */
 .step-progress { gap: 0; }

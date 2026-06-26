@@ -60,7 +60,7 @@
             <v-col cols="12" md="5" class="d-none d-md-block">
               <v-card class="overflow-hidden rounded-xl" elevation="0" border>
                 <v-img
-                  :src="course.thumbnail_url ? (apiBase.replace('/api', '') + course.thumbnail_url) : 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=800'"
+                  :src="course.thumbnail_url ? (apiBase.replace('/api', '') + course.thumbnail_url) : ''"
                   aspect-ratio="16/9"
                   cover
                 >
@@ -99,7 +99,7 @@
               <v-window-item value="curriculum">
                 <div class="text-h5 font-weight-bold mb-4">Course Content</div>
                 <div class="d-flex align-center justify-space-between mb-6 text-caption text-grey">
-                  <span>{{ course.sections?.length || 0 }} chapters • {{ totalLessonsCount }} lessons</span>
+                  <span>{{ course.sections?.length || 0 }} modules • {{ totalLessonsCount }} lessons</span>
                   <v-btn variant="text" color="primary" density="compact" class="text-capitalize">Expand All</v-btn>
                 </div>
                 
@@ -108,31 +108,25 @@
                     <v-expansion-panel-title class="font-weight-bold">
                       {{ section.title }}
                       <template v-slot:actions="{ expanded }">
-                        <span class="text-caption text-grey mr-4">{{ getChapterLessonsCount(section) }} lessons</span>
+                        <span class="text-caption text-grey mr-4">{{ getModuleLessonsCount(section) }} lessons</span>
                         <v-icon :icon="expanded ? 'mdi-minus' : 'mdi-plus'"></v-icon>
                       </template>
                     </v-expansion-panel-title>
                     <v-expansion-panel-text class="pa-0">
-                      <div v-for="module in section.modules" :key="module.id" class="border-b bg-grey-lighten-5">
-                        <div class="px-4 py-2 font-weight-bold text-caption text-grey-darken-2 d-flex align-center">
-                          <v-icon size="16" class="mr-2" color="teal">mdi-package-variant-closed</v-icon>
-                          {{ module.title }}
-                        </div>
-                        <v-list density="compact" class="pa-0 bg-white">
-                          <v-list-item v-for="lesson in module.lessons" :key="lesson.id" class="px-6 py-2 border-b">
-                            <template v-slot:prepend>
-                              <v-icon size="18" class="mr-4">{{ lesson.is_free_preview ? 'mdi-play-circle-outline' : 'mdi-lock-outline' }}</v-icon>
-                            </template>
-                            <v-list-item-title class="text-body-2">{{ lesson.title }}</v-list-item-title>
-                            <template v-slot:append>
-                              <v-btn v-if="lesson.is_free_preview" variant="text" color="primary" density="compact" class="text-capitalize" :to="`/learn/${course.slug}/${lesson.id}`">Preview</v-btn>
-                              <span v-if="lesson.duration_seconds" class="text-caption text-grey ml-4">{{ formatDuration(lesson.duration_seconds) }}</span>
-                            </template>
-                          </v-list-item>
-                        </v-list>
-                      </div>
-                      <div v-if="!section.modules?.length" class="pa-4 text-center text-caption text-grey">
-                        No modules in this chapter yet.
+                      <v-list density="compact" class="pa-0 bg-white">
+                        <v-list-item v-for="lesson in section.lessons" :key="lesson.id" class="px-6 py-2 border-b">
+                          <template v-slot:prepend>
+                            <v-icon size="18" class="mr-4">{{ lesson.is_free_preview ? 'mdi-play-circle-outline' : 'mdi-lock-outline' }}</v-icon>
+                          </template>
+                          <v-list-item-title class="text-body-2">{{ lesson.title }}</v-list-item-title>
+                          <template v-slot:append>
+                            <v-btn v-if="lesson.is_free_preview" variant="text" color="primary" density="compact" class="text-capitalize" :to="`/learn/${course.slug}/${lesson.id}`">Preview</v-btn>
+                            <span v-if="lesson.duration_seconds" class="text-caption text-grey ml-4">{{ formatDuration(lesson.duration_seconds) }}</span>
+                          </template>
+                        </v-list-item>
+                      </v-list>
+                      <div v-if="!section.lessons?.length" class="pa-4 text-center text-caption text-grey">
+                        No lessons in this module yet.
                       </div>
                     </v-expansion-panel-text>
                   </v-expansion-panel>
@@ -530,12 +524,12 @@ const router = useRouter();
 
 const layoutName = computed(() => authStore.isAuthenticated ? 'dashboard' : 'public');
 
-const getChapterLessonsCount = (section: any) => {
-  return (section.modules || []).reduce((acc: number, m: any) => acc + (m.lessons || []).length, 0);
+const getModuleLessonsCount = (section: any) => {
+  return (section.lessons || []).length;
 };
 
 const totalLessonsCount = computed(() => {
-  return (course.value?.sections || []).reduce((acc: number, s: any) => acc + getChapterLessonsCount(s), 0);
+  return (course.value?.sections || []).reduce((acc: number, s: any) => acc + getModuleLessonsCount(s), 0);
 });
 
 const formatDuration = (seconds: number) => {

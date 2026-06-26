@@ -51,8 +51,8 @@
           </v-form>
         </v-card-text>
         <v-card-actions class="pa-6 pt-0 border-t justify-end">
-          <v-btn variant="text" @click="dialog = false">Cancel</v-btn>
-          <v-btn color="primary" variant="elevated" @click="save" :loading="saving">Save</v-btn>
+          <v-btn  @click="dialog = false" variant="text">Cancel</v-btn>
+          <v-btn color="primary"  @click="save" :loading="saving" class="px-6" variant="flat" rounded="lg">Save</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>

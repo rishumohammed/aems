@@ -1,9 +1,9 @@
 <template>
-  <div class="pa-6 fade-in">
+  <v-container fluid class="pa-6">
     <div class="d-flex justify-space-between align-center mb-8">
       <div>
-        <h1 class="page-title mb-1">Follow-ups</h1>
-        <p class="text-subtitle-1 text-secondary">Manage your scheduled calls and tasks.</p>
+        <h1 class="text-h4 font-weight-bold mb-1 text-primary">Follow-ups</h1>
+        <p class="text-subtitle-1 text-medium-emphasis mb-6">Manage your scheduled calls and tasks.</p>
       </div>
       <div class="d-flex gap-2">
         <TabsPill
@@ -32,7 +32,7 @@
               <div class="text-caption text-secondary">{{ item.phone }}</div>
             </div>
           </div>
-        </template>
+</template>
         
         <template #item.scheduled_at="{ item }">
           <div :class="{ 'text-red font-weight-bold': isOverdue(item.scheduled_at) && activeTab !== 'completed' }">
@@ -55,7 +55,7 @@
         </template>
       </AppTable>
     </div>
-  </div>
+  </v-container>
 </template>
 
 <script setup lang="ts">
@@ -111,12 +111,7 @@ watch(activeTab, fetchData);
 </script>
 
 <style scoped>
-.page-title {
-  font-size: 28px;
-  font-weight: 800;
-  letter-spacing: -0.6px;
-  color: var(--g7);
-}
+
 
 .apple-table-card {
   background: white;
@@ -133,14 +128,5 @@ watch(activeTab, fetchData);
 
 .av-sq {
   border-radius: 10px !important;
-}
-
-.fade-in {
-  animation: fadeIn 0.3s ease-out;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
 }
 </style>

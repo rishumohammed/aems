@@ -1,10 +1,10 @@
 <template>
-  <div class="pa-6 fade-in">
+  <v-container fluid class="pa-6">
     <!-- Header Section -->
     <div class="d-flex justify-space-between align-center mb-10">
       <div>
-        <h1 class="page-title mb-1">Lead Ecosystem</h1>
-        <p class="text-subtitle-1 text-secondary">Advanced tracking and conversion pipeline for AEMS Academy.</p>
+        <h1 class="text-h4 font-weight-bold mb-1 text-primary">Lead Ecosystem</h1>
+        <p class="text-subtitle-1 text-medium-emphasis mb-6">Advanced tracking and conversion pipeline for AEMS Academy.</p>
       </div>
       <div class="d-flex align-center gap-4">
         <TabsPill
@@ -179,7 +179,7 @@
       </div>
       <AppInput v-model="newLead.notes" label="Initial Notes" type="textarea" placeholder="Add any initial details..." :error="errors.notes" large />
     </AppModal>
-  </div>
+  </v-container>
 </template>
 
 <script setup lang="ts">
@@ -339,6 +339,12 @@ const organizeKanban = () => {
 };
 
 const onDragEnd = async (event: any, newStatus: string) => {
+  if (newStatus === 'converted') {
+    snackbar.value = { show: true, text: 'To convert a lead, please open the lead details and use the "Convert to Student" button.', color: 'warning' };
+    fetchData(); // Revert the UI state
+    return;
+  }
+  
   const lead = kanbanColumns.value.find(c => c.id === newStatus)?.leads.find(l => (l.status as string) !== newStatus);
   if (lead) {
     try {
@@ -404,12 +410,7 @@ watch(viewMode, (newVal) => {
 </script>
 
 <style scoped>
-.page-title {
-  font-size: 28px;
-  font-weight: 800;
-  letter-spacing: -0.6px;
-  color: var(--g7);
-}
+
 
 .filters-card {
   background: white;
@@ -480,15 +481,6 @@ watch(viewMode, (newVal) => {
   padding: 16px;
   z-index: 100;
   border: 1px solid rgba(0, 0, 0, 0.05);
-}
-
-.fade-in {
-  animation: fadeIn 0.3s ease-out;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
 }
 
 .fr2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }

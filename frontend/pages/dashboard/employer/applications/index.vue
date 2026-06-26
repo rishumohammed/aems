@@ -1,8 +1,8 @@
 <template>
-  <div class="pa-6">
+  <v-container fluid class="pa-6">
     <div class="d-flex align-center justify-space-between mb-8">
       <div>
-        <h1 class="text-h4 font-weight-black text-grey-darken-4 mb-2">Candidate Applications</h1>
+        <h1 class="text-h4 font-weight-bold mb-1 text-primary">Candidate Applications</h1>
         <p class="text-blue-grey-300">Review, shortlist, and manage job applicants.</p>
       </div>
     </div>
@@ -234,13 +234,13 @@
         </v-card-text>
         <v-card-actions class="px-4 pb-4">
           <v-spacer></v-spacer>
-          <v-btn variant="text" @click="interviewDialog = false">Cancel</v-btn>
+          <v-btn  @click="interviewDialog = false" variant="text">Cancel</v-btn>
           <v-btn color="primary" variant="flat" :loading="interviewLoading" @click="submitInterview">Send Invitation</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
 
-  </div>
+  </v-container>
 </template>
 
 <script setup lang="ts">

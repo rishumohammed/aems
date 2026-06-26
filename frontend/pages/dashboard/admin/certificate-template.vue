@@ -1,9 +1,9 @@
 <template>
-  <div class="pa-6">
+  <v-container fluid class="pa-6">
     <div class="d-flex align-center gap-4 mb-6">
       <v-btn icon="mdi-arrow-left" variant="text" @click="$router.back()"></v-btn>
       <div>
-        <h1 class="text-h4 font-weight-bold text-white">Certificate Template Editor</h1>
+        <h1 class="text-h4 font-weight-bold mb-1 text-primary">Certificate Template Editor</h1>
         <p class="text-blue-grey-300">Customize the design of automatically generated certificates</p>
       </div>
     </div>
@@ -79,7 +79,7 @@
         </v-card>
       </v-col>
     </v-row>
-  </div>
+  </v-container>
 </template>
 
 <script setup lang="ts">

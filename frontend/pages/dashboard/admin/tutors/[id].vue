@@ -1,11 +1,11 @@
 <template>
-  <div class="pa-6" v-if="tutor">
+  <v-container fluid class="pa-6">
     <!-- Header -->
     <div class="d-flex align-center justify-space-between mb-8">
       <div class="d-flex align-center gap-4">
         <v-btn icon="mdi-arrow-left" variant="tonal" to="/dashboard/admin/tutors" size="small"></v-btn>
         <div>
-          <h1 class="text-h4 font-weight-bold text-grey-darken-4 mb-1">Tutor Profile</h1>
+          <h1 class="text-h4 font-weight-bold mb-1 text-primary">Tutor Profile</h1>
           <p class="text-blue-grey-300">Detailed performance and course statistics</p>
         </div>
       </div>
@@ -159,7 +159,7 @@
             <!-- Title -->
             <template v-slot:item.title="{ item }">
               <div class="font-weight-bold">{{ item.title }}</div>
-            </template>
+</template>
             <!-- Status -->
             <template v-slot:item.status="{ item }">
               <v-chip size="small" :color="getCourseStatusColor(item.status)" class="font-weight-bold text-uppercase" variant="flat">
@@ -184,7 +184,7 @@
         </v-card>
       </v-col>
     </v-row>
-  </div>
+  </v-container>
 
   <!-- Reject Dialog -->
   <v-dialog v-model="rejectDialog" max-width="480">

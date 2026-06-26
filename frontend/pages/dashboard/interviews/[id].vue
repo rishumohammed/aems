@@ -1,5 +1,5 @@
 <template>
-  <div class="pa-6 fade-in">
+  <v-container fluid class="pa-6">
     <div v-if="loading" class="d-flex justify-center py-12">
       <v-progress-circular indeterminate color="primary" size="48"></v-progress-circular>
     </div>
@@ -23,7 +23,7 @@
                   <v-icon color="indigo" size="32">mdi-account-tie-voice</v-icon>
                 </v-avatar>
                 <div>
-                  <h1 class="text-h4 font-weight-black mb-1">{{ interview.job_title }}</h1>
+                  <h1 class="text-h4 font-weight-bold mb-1 text-primary">{{ interview.job_title }}</h1>
                   <div class="text-subtitle-1 text-primary font-weight-bold">{{ interview.company_name }}</div>
                 </div>
               </div>
@@ -221,7 +221,7 @@
         </v-col>
       </v-row>
     </div>
-  </div>
+  </v-container>
 </template>
 
 <script setup lang="ts">
@@ -359,6 +359,4 @@ onUnmounted(() => {
 ::v-deep(.timeline-custom .v-timeline-item__body) {
   padding-bottom: 24px !important;
 }
-.fade-in { animation: fadeIn 0.4s ease-out; }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 </style>

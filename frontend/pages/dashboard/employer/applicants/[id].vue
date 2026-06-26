@@ -1,10 +1,10 @@
 <template>
-  <div class="pa-6">
+  <v-container fluid class="pa-6">
     <div class="d-flex align-center justify-space-between mb-6">
       <div class="d-flex align-center">
         <v-btn icon="mdi-arrow-left" variant="text" class="mr-4" @click="goBack"></v-btn>
         <div>
-          <h1 class="text-h4 font-weight-black text-grey-darken-4 mb-1">Applicant Profile</h1>
+          <h1 class="text-h4 font-weight-bold mb-1 text-primary">Applicant Profile</h1>
           <p class="text-blue-grey-300">Detailed ATS view for candidate assessment</p>
         </div>
       </div>
@@ -136,7 +136,7 @@
                             :total="en.total_lessons || 100"
                           />
                         </div>
-                      </template>
+</template>
                       <template v-slot:append>
                         <v-chip size="small" :color="en.status === 'completed' ? 'success' : 'info'">{{ en.status }}</v-chip>
                       </template>
@@ -244,8 +244,8 @@
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn variant="text" @click="rejectDialog = false">Cancel</v-btn>
-          <v-btn color="error" variant="flat" @click="submitDecision('rejected')" :loading="actionLoading" :disabled="!decisionNotes.trim()">Confirm Reject</v-btn>
+          <v-btn  @click="rejectDialog = false" variant="text">Cancel</v-btn>
+          <v-btn color="error"  @click="submitDecision('rejected')" :loading="actionLoading" :disabled="!decisionNotes.trim()" class="px-6" variant="flat" rounded="lg">Confirm Reject</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -260,8 +260,8 @@
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn variant="text" @click="holdDialog = false">Cancel</v-btn>
-          <v-btn color="warning" variant="flat" @click="submitDecision('hold')" :loading="actionLoading" :disabled="!decisionNotes.trim()">Confirm Hold</v-btn>
+          <v-btn  @click="holdDialog = false" variant="text">Cancel</v-btn>
+          <v-btn color="warning"  @click="submitDecision('hold')" :loading="actionLoading" :disabled="!decisionNotes.trim()" class="px-6" variant="flat" rounded="lg">Confirm Hold</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -278,8 +278,8 @@
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn variant="text" @click="selectDialog = false">Cancel</v-btn>
-          <v-btn color="success" variant="flat" @click="submitDecision('selected')" :loading="actionLoading">Confirm Hire</v-btn>
+          <v-btn  @click="selectDialog = false" variant="text">Cancel</v-btn>
+          <v-btn color="success"  @click="submitDecision('selected')" :loading="actionLoading" class="px-6" variant="flat" rounded="lg">Confirm Hire</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -357,12 +357,12 @@
         </v-card-text>
         <v-card-actions class="px-4 pb-4">
           <v-spacer></v-spacer>
-          <v-btn variant="text" @click="scheduleDialog = false">Cancel</v-btn>
+          <v-btn  @click="scheduleDialog = false" variant="text">Cancel</v-btn>
           <v-btn color="primary" variant="flat" :loading="actionLoading" @click="submitSchedule">Schedule Interview</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
-  </div>
+  </v-container>
 </template>
 
 <script setup lang="ts">

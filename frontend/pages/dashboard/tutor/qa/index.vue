@@ -1,11 +1,11 @@
 <template>
-  <v-container fluid class="pa-0">
+  <v-container fluid class="pa-6">
     <!-- Header -->
     <div class="pa-8 pb-4">
       <div class="d-flex align-center justify-space-between mb-2">
         <div>
-          <h1 class="text-h4 font-weight-black mb-1">Course Q&A</h1>
-          <p class="text-subtitle-1 text-secondary">Manage and answer student questions across your courses.</p>
+          <h1 class="text-h4 font-weight-bold mb-1 text-primary">Course Q&A</h1>
+          <p class="text-subtitle-1 text-medium-emphasis mb-6">Manage and answer student questions across your courses.</p>
         </div>
       </div>
     </div>

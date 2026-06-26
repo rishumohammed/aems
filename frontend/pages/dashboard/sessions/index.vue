@@ -1,9 +1,9 @@
 <template>
-  <div class="pa-6 fade-in">
+  <v-container fluid class="pa-6">
     <div class="d-flex justify-space-between align-center mb-8">
       <div>
-        <h1 class="page-title mb-1">Live Sessions</h1>
-        <p class="text-subtitle-1 text-secondary">Join ongoing classes or view upcoming schedule.</p>
+        <h1 class="text-h4 font-weight-bold mb-1 text-primary">Live Sessions</h1>
+        <p class="text-subtitle-1 text-medium-emphasis mb-6">Join ongoing classes or view upcoming schedule.</p>
       </div>
       <AppButton icon="mdi-video-plus" @click="showAddModal = true">
         Schedule Session
@@ -54,7 +54,7 @@
         </div>
       </v-col>
     </v-row>
-  </div>
+  </v-container>
 </template>
 
 <script setup lang="ts">
@@ -77,12 +77,7 @@ const formatDate = (date: string) => dayjs(date).format('MMM D, h:mm A');
 </script>
 
 <style scoped>
-.page-title {
-  font-size: 28px;
-  font-weight: 800;
-  letter-spacing: -0.6px;
-  color: var(--g7);
-}
+
 
 .session-card {
   background: white;
@@ -104,14 +99,5 @@ const formatDate = (date: string) => dayjs(date).format('MMM D, h:mm A');
   font-weight: 700;
   color: var(--g7);
   letter-spacing: -0.3px;
-}
-
-.fade-in {
-  animation: fadeIn 0.3s ease-out;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
 }
 </style>

@@ -1,10 +1,10 @@
 <template>
-  <div class="pa-6">
+  <v-container fluid class="pa-6">
     <!-- Course List View -->
     <template v-if="!viewingCourse">
       <div class="d-flex align-center justify-space-between mb-8">
         <div>
-          <h1 class="text-h4 font-weight-bold text-grey-darken-4 mb-2">Course Approvals</h1>
+          <h1 class="text-h4 font-weight-bold mb-1 text-primary">Course Approvals</h1>
           <p class="text-blue-grey-300">Review and approve courses submitted by tutors.</p>
         </div>
         <v-btn icon="mdi-refresh" variant="tonal" color="primary" @click="loadPendingCourses" :loading="loading"></v-btn>
@@ -28,7 +28,7 @@
                 <div class="text-caption text-grey">{{ item.tutor_email }}</div>
               </div>
             </div>
-          </template>
+</template>
 
           <!-- Course Details Column -->
           <template v-slot:item.title="{ item }">
@@ -75,7 +75,7 @@
         <div class="d-flex align-center gap-4">
           <v-btn icon="mdi-arrow-left" variant="tonal" size="small" @click="viewingCourse = null"></v-btn>
           <div>
-            <h1 class="text-h4 font-weight-bold text-grey-darken-4 mb-1">Course Review</h1>
+            <h1 class="text-h4 font-weight-bold mb-1 text-primary">Course Review</h1>
             <p class="text-blue-grey-300">Review all details before approving or rejecting this course.</p>
           </div>
         </div>
@@ -312,7 +312,7 @@
         </div>
       </v-card>
     </v-dialog>
-  </div>
+  </v-container>
 </template>
 
 <script setup lang="ts">

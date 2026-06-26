@@ -145,7 +145,7 @@
 
       <v-divider></v-divider>
       <v-card-actions class="pa-6">
-        <v-btn variant="text" @click="close">Cancel</v-btn>
+        <v-btn  @click="close" variant="text">Cancel</v-btn>
         <v-spacer></v-spacer>
         <v-btn
           color="primary"

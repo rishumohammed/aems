@@ -3,7 +3,7 @@
     <div class="d-flex align-center gap-3 mb-8">
       <v-btn icon="mdi-arrow-left" variant="text" to="/dashboard/exams"></v-btn>
       <div>
-        <h1 class="text-h4 font-weight-bold">{{ isEdit ? 'Edit Exam' : 'Create Exam' }}</h1>
+        <h1 class="text-h4 font-weight-bold mb-1 text-primary">{{ isEdit ? 'Edit Exam' : 'Create Exam' }}</h1>
         <p class="text-grey">{{ isEdit ? `Editing: ${form.title}` : 'Set up a new exam linked to a course' }}</p>
       </div>
     </div>

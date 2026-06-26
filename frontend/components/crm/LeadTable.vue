@@ -48,6 +48,40 @@
         <span v-else class="text-caption text-grey">Unassigned</span>
       </template>
 
+      <!-- Course Column -->
+      <template v-slot:item.course_interest_name="{ item }">
+        <div v-if="item.course_names && item.course_names.length > 0" class="d-flex align-center">
+          <span class="text-truncate d-inline-block" style="max-width: 150px;">
+            {{ item.course_names[0] }}
+          </span>
+          
+          <v-menu v-if="item.course_names.length > 1" open-on-hover location="top">
+            <template v-slot:activator="{ props }">
+              <v-chip
+                v-bind="props"
+                size="x-small"
+                color="primary"
+                variant="tonal"
+                class="ml-2 px-2 font-weight-bold"
+                style="cursor: pointer"
+              >
+                +{{ item.course_names.length - 1 }}
+              </v-chip>
+            </template>
+            <v-card class="pa-3" elevation="3" min-width="200">
+              <div class="text-caption font-weight-bold mb-2 text-primary">Selected Courses</div>
+              <div v-for="(course, idx) in item.course_names" :key="idx" class="text-caption text-grey-darken-3 mb-1">
+                • {{ course }}
+              </div>
+            </v-card>
+          </v-menu>
+        </div>
+        <span v-else-if="item.course_interest_name" class="text-truncate d-inline-block" style="max-width: 150px;">
+          {{ item.course_interest_name }}
+        </span>
+        <span v-else class="text-caption text-grey">None</span>
+      </template>
+
       <!-- Date Column -->
       <template v-slot:item.created_at="{ item }">
         <div class="font-weight-medium">{{ formatDate(item.created_at) }}</div>

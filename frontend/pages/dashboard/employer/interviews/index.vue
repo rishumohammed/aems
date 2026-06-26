@@ -1,8 +1,8 @@
 <template>
-  <div class="pa-6">
+  <v-container fluid class="pa-6">
     <div class="d-flex align-center justify-space-between mb-8">
       <div>
-        <h1 class="text-h4 font-weight-black text-grey-darken-4 mb-2">Interviews</h1>
+        <h1 class="text-h4 font-weight-bold mb-1 text-primary">Interviews</h1>
         <p class="text-blue-grey-300">Manage your scheduled interviews with candidates.</p>
       </div>
     </div>
@@ -17,7 +17,7 @@
         <template v-slot:item.candidate="{ item }">
           <div class="font-weight-bold text-h6">{{ item.applicant_name || 'Anonymous' }}</div>
           <div class="text-caption text-blue-grey-300">{{ item.applicant_email }}</div>
-        </template>
+</template>
 
         <template v-slot:item.job="{ item }">
           <div class="font-weight-bold">{{ item.job_title }}</div>
@@ -142,12 +142,12 @@
         </v-card-text>
         <v-card-actions class="px-4 pb-4">
           <v-spacer></v-spacer>
-          <v-btn variant="text" @click="editDialog = false">Cancel</v-btn>
-          <v-btn color="primary" variant="flat" :loading="editLoading" @click="submitEdit">Save Changes</v-btn>
+          <v-btn  @click="editDialog = false" variant="text">Cancel</v-btn>
+          <v-btn color="primary"  :loading="editLoading" @click="submitEdit" class="px-6" variant="flat" rounded="lg">Save Changes</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
-  </div>
+  </v-container>
 </template>
 
 <script setup lang="ts">

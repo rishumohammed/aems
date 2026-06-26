@@ -1,11 +1,11 @@
 <template>
-  <v-container fluid class="pa-0">
+  <v-container fluid class="pa-6">
     <!-- Header -->
     <v-card class="pa-8 pb-15 mb-n10 border-b rounded-0" elevation="0" color="white">
       <div class="d-flex align-center justify-space-between mb-2">
         <div>
-          <h1 class="text-h4 font-weight-black text-primary-dark mb-1">My Courses</h1>
-          <p class="text-subtitle-1 text-secondary font-weight-medium">Manage and organize your learning curriculum.</p>
+          <h1 class="text-h4 font-weight-bold mb-1 text-primary">My Courses</h1>
+          <p class="text-subtitle-1 text-medium-emphasis mb-6">Manage and organize your learning curriculum.</p>
         </div>
         <v-btn color="primary" variant="flat" rounded="lg" class="font-weight-bold px-6" size="large" to="/dashboard/courses/create" prepend-icon="mdi-plus">
           Create New Course
@@ -48,7 +48,7 @@
           <template v-slot:item.title="{ item }">
             <div class="d-flex align-center py-4">
               <v-img
-                :src="item.thumbnail_url ? ($config.public.apiBase.replace('/api', '') + item.thumbnail_url) : 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=200'"
+                :src="item.thumbnail_url ? ($config.public.apiBase.replace('/api', '') + item.thumbnail_url) : ''"
                 width="100"
                 max-width="100"
                 aspect-ratio="16/9"

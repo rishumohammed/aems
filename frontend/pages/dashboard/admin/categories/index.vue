@@ -1,9 +1,9 @@
 <template>
-  <div class="pa-6 fade-in">
+  <v-container fluid class="pa-6">
     <div class="d-flex justify-space-between align-center mb-8">
       <div>
-        <h1 class="page-title mb-1">Course Categories</h1>
-        <p class="text-subtitle-1 text-secondary">Manage categories for your course catalog.</p>
+        <h1 class="text-h4 font-weight-bold mb-1 text-primary">Course Categories</h1>
+        <p class="text-subtitle-1 text-medium-emphasis mb-6">Manage categories for your course catalog.</p>
       </div>
       <AppButton icon="mdi-plus" @click="openAddModal">
         Add Category
@@ -29,7 +29,7 @@
             <v-btn icon="mdi-pencil" variant="text" size="small" color="primary" @click="editCategory(item)"></v-btn>
             <v-btn icon="mdi-trash-can-outline" variant="text" size="small" color="red" @click="confirmDelete(item)"></v-btn>
           </div>
-        </template>
+</template>
       </v-data-table>
     </div>
 
@@ -46,7 +46,7 @@
       <AppInput v-model="form.icon" label="Icon (MDI)" placeholder="mdi-code-tags" large class="mb-4" />
       <AppInput v-model="form.description" label="Description" type="textarea" placeholder="Describe this category..." large />
     </AppModal>
-  </div>
+  </v-container>
 </template>
 
 <script setup lang="ts">
@@ -137,12 +137,7 @@ onMounted(fetchData);
 </script>
 
 <style scoped>
-.page-title {
-  font-size: 28px;
-  font-weight: 800;
-  letter-spacing: -0.6px;
-  color: var(--g7);
-}
+
 
 .apple-table-card {
   background: white;
@@ -162,14 +157,5 @@ onMounted(fetchData);
   text-transform: uppercase !important;
   letter-spacing: 0.4px !important;
   color: var(--g4) !important;
-}
-
-.fade-in {
-  animation: fadeIn 0.3s ease-out;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
 }
 </style>

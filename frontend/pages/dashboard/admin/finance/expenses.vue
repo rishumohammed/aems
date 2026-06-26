@@ -1,10 +1,10 @@
 <template>
-  <div class="pa-6 fade-in">
+  <v-container fluid class="pa-6">
     <!-- Header -->
     <div class="d-flex align-center justify-space-between mb-8">
       <div>
-        <h1 class="page-title mb-1">Manage Expenses</h1>
-        <p class="text-subtitle-1 text-secondary">Record, categorize, and track organizational expenditures.</p>
+        <h1 class="text-h4 font-weight-bold mb-1 text-primary">Manage Expenses</h1>
+        <p class="text-subtitle-1 text-medium-emphasis mb-6">Record, categorize, and track organizational expenditures.</p>
       </div>
       <div class="d-flex gap-2">
         <v-btn color="secondary" variant="tonal" rounded="lg" prepend-icon="mdi-format-list-bulleted" @click="openManageCategories">
@@ -82,7 +82,7 @@
       >
         <template v-slot:item.date="{ item }">
           <div class="font-weight-medium">{{ formatDate(item.date) }}</div>
-        </template>
+</template>
 
         <template v-slot:item.category="{ item }">
           <v-chip size="small" variant="tonal" :color="categoryColor(item.category)">
@@ -236,7 +236,7 @@
         
         <v-card-actions class="pa-6 pt-0">
           <v-spacer></v-spacer>
-          <v-btn variant="text" @click="closeForm">Cancel</v-btn>
+          <v-btn  @click="closeForm" variant="text">Cancel</v-btn>
           <v-btn color="primary" variant="flat" rounded="lg" :loading="actionLoading" :disabled="!formValid" @click="saveExpense">
             Save Expense
           </v-btn>
@@ -262,7 +262,7 @@
         </v-card-text>
         <v-card-actions class="px-4 pb-4">
           <v-spacer></v-spacer>
-          <v-btn variant="text" @click="deleteDialog = false">Cancel</v-btn>
+          <v-btn  @click="deleteDialog = false" variant="text">Cancel</v-btn>
           <v-btn color="error" variant="flat" rounded="lg" :loading="actionLoading" @click="doDelete">
             Delete
           </v-btn>
@@ -316,7 +316,7 @@
     <v-snackbar v-model="snackbar" :color="snackbarColor" rounded="lg" timeout="3000">
       {{ snackbarMsg }}
     </v-snackbar>
-  </div>
+  </v-container>
 </template>
 
 <script setup lang="ts">
@@ -591,17 +591,4 @@ const categoryColor = (cat: string) => {
 </script>
 
 <style scoped>
-.page-title {
-  font-size: 28px;
-  font-weight: 800;
-  letter-spacing: -0.6px;
-  color: var(--g7);
-}
-.fade-in {
-  animation: fadeIn 0.4s ease-out;
-}
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
 </style>

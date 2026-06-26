@@ -1,11 +1,11 @@
 <template>
-  <div class="pa-6 fade-in">
+  <v-container fluid class="pa-6">
     <div class="d-flex align-center justify-space-between mb-8">
       <div class="d-flex align-center gap-4">
         <v-btn icon="mdi-arrow-left" variant="text" @click="$router.back()"></v-btn>
         <div>
-          <h1 class="page-title mb-1">Proctoring Review</h1>
-          <p class="text-subtitle-1 text-secondary">Attempt ID: {{ attemptId }}</p>
+          <h1 class="text-h4 font-weight-bold mb-1 text-primary">Proctoring Review</h1>
+          <p class="text-subtitle-1 text-medium-emphasis mb-6">Attempt ID: {{ attemptId }}</p>
         </div>
       </div>
       <div class="d-flex gap-2">
@@ -93,7 +93,7 @@
     <div v-else class="d-flex justify-center align-center py-16">
       <v-progress-circular indeterminate color="primary" size="48"></v-progress-circular>
     </div>
-  </div>
+  </v-container>
 </template>
 
 <script setup lang="ts">
@@ -188,12 +188,7 @@ const flagAttempt = () => {
 </script>
 
 <style scoped>
-.page-title {
-  font-size: 28px;
-  font-weight: 800;
-  letter-spacing: -0.6px;
-  color: var(--g7);
-}
+
 
 .apple-card {
   background: white;
@@ -223,15 +218,6 @@ const flagAttempt = () => {
 .scrollbar-hide {
   -ms-overflow-style: none;
   scrollbar-width: none;
-}
-
-.fade-in {
-  animation: fadeIn 0.3s ease-out;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
 }
 
 .gap-2 { gap: 8px; }

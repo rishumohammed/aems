@@ -1,8 +1,8 @@
 <template>
-  <div class="pa-6 fade-in">
+  <v-container fluid class="pa-6">
     <div class="mb-8">
-      <h1 class="page-title mb-1">System Settings</h1>
-      <p class="text-subtitle-1 text-secondary">Configure branding, integrations, and global parameters.</p>
+      <h1 class="text-h4 font-weight-bold mb-1 text-primary">System Settings</h1>
+      <p class="text-subtitle-1 text-medium-emphasis mb-6">Configure branding, integrations, and global parameters.</p>
     </div>
 
     <div class="settings-layout">
@@ -87,6 +87,53 @@
               <AppInput v-model="form.brand_primary_color" label="Primary Color" type="color" large />
               <AppInput v-model="form.brand_secondary_color" label="Secondary Color" type="color" large />
             </div>
+            <div class="fr2 mt-4">
+              <div>
+                <AppInput v-model="form.invoice_header_color" label="Invoice Header Color" type="color" large />
+                <div class="text-caption text-secondary mt-1">Choose a header background color for your PDF invoices that complements your logo.</div>
+              </div>
+              <div class="d-flex align-center justify-center">
+                <v-card :style="{ background: form.invoice_header_color || '#1a237e', minHeight: '64px', width: '100%', borderRadius: '12px' }" class="d-flex align-center justify-center pa-4">
+                  <span class="text-white font-weight-bold" style="opacity:0.85; font-size:13px;">INVOICE</span>
+                </v-card>
+              </div>
+            </div>
+
+            <v-divider class="my-6" />
+
+            <div class="d-flex align-center justify-space-between">
+              <div>
+                <div class="text-subtitle-2 font-weight-bold">Regenerate Invoice PDFs</div>
+                <div class="text-caption text-secondary">After saving, click this to apply branding changes to all existing invoice PDFs immediately.</div>
+              </div>
+              <v-btn
+                color="primary"
+                variant="tonal"
+                rounded="lg"
+                :loading="regenerating"
+                prepend-icon="mdi-file-refresh-outline"
+                @click="regenerateInvoicePDFs"
+              >Regenerate Now</v-btn>
+            </div>
+
+          </div>
+
+          <!-- LMS Tab -->
+          <div v-if="activeTab[0] === 'lms'" class="fade-in">
+            <h2 class="text-h6 font-weight-bold mb-6">LMS Configuration</h2>
+            <div class="mb-2">
+              <v-combobox
+                v-model="form.course_languages"
+                label="Course Languages"
+                chips
+                multiple
+                clearable
+                variant="outlined"
+                hint="Type a language and press Enter to add it."
+                persistent-hint
+              ></v-combobox>
+            </div>
+            <div class="text-caption text-secondary mb-6">These languages will appear in the language dropdown when creating or editing a course.</div>
           </div>
 
           <!-- Email Tab -->
@@ -417,7 +464,7 @@
     <v-snackbar v-model="snackbar" :color="snackbarColor" rounded="lg" timeout="3000">
       {{ snackbarMessage }}
     </v-snackbar>
-  </div>
+  </v-container>
 </template>
 
 <script setup lang="ts">
@@ -439,6 +486,7 @@ const baseUrl = computed(() => config.public.apiBase.replace('/api', ''));
 
 const activeTab = ref(['branding']);
 const saving = ref(false);
+const regenerating = ref(false);
 const form = ref<any>({});
 const acceptanceHistory = ref<any[]>([]);
 const logoFile = ref(null);
@@ -453,6 +501,7 @@ const snackbarColor = ref('success');
 
 const tabs = [
   { label: 'Branding', value: 'branding', icon: 'mdi-palette-outline' },
+  { label: 'LMS Settings', value: 'lms', icon: 'mdi-school-outline' },
   { label: 'Homepage', value: 'homepage', icon: 'mdi-home-outline' },
   { label: 'Contact Info', value: 'contact', icon: 'mdi-map-marker-outline' },
   { label: 'Email (SMTP)', value: 'email', icon: 'mdi-email-outline' },
@@ -496,6 +545,11 @@ const fetchData = async () => {
     data.forEach((item: any) => {
       configMap[item.key] = item.value;
     });
+    if (configMap.course_languages && typeof configMap.course_languages === 'string') {
+      configMap.course_languages = configMap.course_languages.split(',').map((s: string) => s.trim()).filter(Boolean);
+    } else {
+      configMap.course_languages = [];
+    }
     form.value = configMap;
   } catch (err) {
     console.error('Failed to fetch config');
@@ -573,7 +627,11 @@ const uploadHomepageImages = async () => {
 const save = async () => {
   saving.value = true;
   try {
-    await api.put('/admin/config', form.value);
+    const payload = { ...form.value };
+    if (Array.isArray(payload.course_languages)) {
+      payload.course_languages = payload.course_languages.join(',');
+    }
+    await api.put('/admin/config', payload);
     snackbarMessage.value = 'Settings saved successfully. Reloading to apply changes...';
     snackbarColor.value = 'success';
     snackbar.value = true;
@@ -603,18 +661,29 @@ const testEmail = async () => {
   }
 };
 
+const regenerateInvoicePDFs = async () => {
+  regenerating.value = true;
+  try {
+    await api.post('/admin/config/invoices/regenerate-pdfs');
+    snackbarMessage.value = 'Invoice PDFs are being regenerated in the background.';
+    snackbarColor.value = 'success';
+    snackbar.value = true;
+  } catch (err) {
+    snackbarMessage.value = 'Failed to trigger PDF regeneration';
+    snackbarColor.value = 'error';
+    snackbar.value = true;
+  } finally {
+    regenerating.value = false;
+  }
+};
+
 onMounted(() => {
   fetchData();
 });
 </script>
 
 <style scoped>
-.page-title {
-  font-size: 28px;
-  font-weight: 800;
-  letter-spacing: -0.6px;
-  color: var(--g7);
-}
+
 
 .settings-layout {
   display: flex;
@@ -647,11 +716,9 @@ onMounted(() => {
 }
 
 .fr2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-
 .fade-in {
-  animation: fadeIn 0.3s ease-out;
+  animation: fadeIn 0.3s ease-in-out;
 }
-
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }

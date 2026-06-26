@@ -3,7 +3,7 @@
     <!-- Header -->
     <div class="d-flex justify-space-between align-center mb-6">
       <div>
-        <h1 class="text-h4 font-weight-black text-grey-darken-4 mb-1">System Users</h1>
+        <h1 class="text-h4 font-weight-bold mb-1 text-primary">System Users</h1>
         <p class="text-body-1 text-grey-darken-1">Manage internal staff accounts and permissions</p>
       </div>
       <v-btn color="primary" rounded="pill" elevation="0" size="large" class="px-6 font-weight-bold text-none" prepend-icon="mdi-account-plus" @click="openAddModal">
@@ -200,7 +200,7 @@
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="primary" variant="flat" @click="showPasswordDialog = false" class="px-6 rounded-pill">Close</v-btn>
+          <v-btn   @click="showPasswordDialog = false" class=" rounded-pill" variant="text">Close</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>

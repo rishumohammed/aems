@@ -2,7 +2,7 @@
   <v-card class="course-grid-card h-100 d-flex flex-column" rounded="xl" flat border :class="{ 'featured-ring': course.is_featured }">
     <div class="position-relative">
       <v-img
-        :src="course.thumbnail_url ? ($config.public.apiBase.replace('/api', '') + course.thumbnail_url) : 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=800'"
+        :src="course.thumbnail_url ? ($config.public.apiBase.replace('/api', '') + course.thumbnail_url) : ''"
         aspect-ratio="16/9"
         cover
         class="bg-grey-lighten-3"

@@ -1,9 +1,9 @@
 <template>
-  <v-container class="py-8 px-6" fluid style="max-width: 1600px;">
+  <v-container fluid class="pa-6">
     <!-- Header -->
     <div class="d-flex align-center justify-space-between mb-8 flex-wrap gap-4">
       <div>
-        <h1 class="text-h4 font-weight-black text-dark mb-1">All Public Exams</h1>
+        <h1 class="text-h4 font-weight-bold mb-1 text-primary">All Public Exams</h1>
         <p class="text-subtitle-2 text-secondary">Manage visitor entrance exams, change publish workflows, and duplicate exam sessions.</p>
       </div>
       <div class="d-flex gap-2">

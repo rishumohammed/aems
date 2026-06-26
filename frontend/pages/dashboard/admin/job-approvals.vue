@@ -1,8 +1,8 @@
 <template>
-  <div class="pa-6">
+  <v-container fluid class="pa-6">
     <div class="d-flex align-center justify-space-between mb-8">
       <div>
-        <h1 class="text-h4 font-weight-bold text-grey-darken-4 mb-2">Job Approvals</h1>
+        <h1 class="text-h4 font-weight-bold mb-1 text-primary">Job Approvals</h1>
         <p class="text-blue-grey-300">Review and approve employer job postings.</p>
       </div>
       <v-btn icon="mdi-refresh" variant="tonal" color="primary" @click="loadPendingJobs" :loading="loading"></v-btn>
@@ -26,7 +26,7 @@
               <div class="text-caption text-grey">{{ item.employer_email }}</div>
             </div>
           </div>
-        </template>
+</template>
 
         <!-- Job Details Column -->
         <template v-slot:item.title="{ item }">
@@ -161,7 +161,7 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
-  </div>
+  </v-container>
 </template>
 
 <script setup lang="ts">

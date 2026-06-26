@@ -1,5 +1,5 @@
 <template>
-  <div class="builder-container">
+  <v-container fluid class="pa-6">
     <!-- Header -->
     <v-app-bar flat border class="px-4">
       <v-btn icon="mdi-arrow-left" variant="text" to="/dashboard/admin/forms"></v-btn>
@@ -155,7 +155,7 @@
         </v-form>
       </v-card>
     </v-dialog>
-  </div>
+  </v-container>
 </template>
 
 <script setup lang="ts">

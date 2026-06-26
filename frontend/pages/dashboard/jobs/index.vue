@@ -1,9 +1,9 @@
 <template>
-  <div class="pa-6 fade-in">
+  <v-container fluid class="pa-6">
     <div class="mb-8 d-flex align-center justify-space-between">
       <div>
-        <h1 class="page-title mb-1">Job Board</h1>
-        <p class="text-subtitle-1 text-secondary">Discover your next career move with our top hiring partners.</p>
+        <h1 class="text-h4 font-weight-bold mb-1 text-primary">Job Board</h1>
+        <p class="text-subtitle-1 text-medium-emphasis mb-6">Discover your next career move with our top hiring partners.</p>
       </div>
       <div v-if="authStore.isAdmin || authStore.userRole === 'tutor'">
         <v-btn color="primary" rounded="lg" prepend-icon="mdi-plus" to="/dashboard/employer/jobs/create">Post Job</v-btn>
@@ -139,7 +139,7 @@
         </div>
       </v-col>
     </v-row>
-  </div>
+  </v-container>
 </template>
 
 <script setup lang="ts">
@@ -218,12 +218,7 @@ const formatDate = (date: string) => dayjs(date).fromNow();
 </script>
 
 <style scoped>
-.page-title {
-  font-size: 28px;
-  font-weight: 800;
-  letter-spacing: -0.6px;
-  color: var(--g7);
-}
+
 .uppercase { text-transform: uppercase; letter-spacing: 1px; }
 .sticky-top {
   position: sticky;
@@ -240,6 +235,4 @@ const formatDate = (date: string) => dayjs(date).fromNow();
 .gap-4 { gap: 16px; }
 .gap-x-4 { column-gap: 16px; }
 .gap-y-1 { row-gap: 4px; }
-.fade-in { animation: fadeIn 0.4s ease-out; }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 </style>

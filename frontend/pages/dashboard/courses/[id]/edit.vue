@@ -4,7 +4,7 @@
       <div class="d-flex align-center">
         <v-btn icon="mdi-arrow-left" variant="text" class="mr-4" to="/dashboard/courses"></v-btn>
         <div>
-          <h1 class="text-h4 font-weight-bold mb-1">Edit Course</h1>
+          <h1 class="text-h4 font-weight-bold mb-1 text-primary">Edit Course</h1>
           <div class="d-flex align-center gap-2">
             <span class="text-subtitle-1 text-grey">{{ course.title || 'Loading...' }}</span>
             <v-chip :color="getStatusColor(course.status)" size="x-small" class="text-uppercase font-weight-bold" variant="tonal">
@@ -47,7 +47,6 @@
             <v-col cols="12" md="8">
               <v-text-field v-model="course.title" label="Course Title" variant="outlined" rounded="lg" class="mb-4"></v-text-field>
               <v-text-field v-model="course.slug" label="Slug" variant="outlined" rounded="lg" class="mb-4"></v-text-field>
-              <v-textarea v-model="course.short_description" label="Short Description" variant="outlined" rounded="lg" class="mb-4" rows="2"></v-textarea>
               
               <div class="mb-2 font-weight-bold">Full Description (Rich Text)</div>
               <!-- Tiptap Implementation -->
@@ -63,10 +62,12 @@
             </v-col>
             <v-col cols="12" md="4">
               <v-select v-model="course.category_id" :items="categories" item-title="name" item-value="id" label="Category *" variant="outlined" rounded="lg" class="mb-4" :rules="[v => !!v || 'Please select a course category.']"></v-select>
-              <v-select v-model="course.course_type" :items="[{title: 'Recorded Course', value: 'recorded'}, {title: 'Live Course', value: 'live'}]" label="Course Type *" variant="outlined" rounded="lg" class="mb-4"></v-select>
-              <v-text-field v-if="course.course_type === 'live'" v-model="course.start_date" label="Course Start Date & Time *" type="datetime-local" variant="outlined" rounded="lg" class="mb-4" :rules="[v => !!v || 'Start date is required for live courses']"></v-text-field>
-              <v-select v-model="course.level" :items="['beginner', 'intermediate', 'advanced']" label="Level" variant="outlined" rounded="lg" class="mb-4 text-capitalize"></v-select>
-              <v-select v-model="course.language" :items="['English', 'Hindi', 'Spanish']" label="Language" variant="outlined" rounded="lg" class="mb-4"></v-select>
+              <v-card flat rounded="xl" color="primary" class="pa-4 text-white" v-if="course.title">
+                <div class="text-caption opacity-70 mb-1">Preview</div>
+                <div class="font-weight-black text-subtitle-1 mb-1">{{ course.title }}</div>
+                <v-chip size="x-small" color="white" class="text-primary font-weight-bold mr-1">{{ course.level || 'Beginner' }}</v-chip>
+                <v-chip size="x-small" color="white" class="text-primary font-weight-bold">{{ course.language || 'English' }}</v-chip>
+              </v-card>
             </v-col>
           </v-row>
         </v-window-item>
@@ -81,7 +82,7 @@
           <v-row>
             <v-col cols="12" md="6">
               <div class="text-subtitle-1 font-weight-bold mb-4">Thumbnail</div>
-              <v-img :src="thumbnailPreview || ($config.public.apiBase + course.thumbnail_url)" height="250" cover class="rounded-lg border bg-grey-lighten-4 mb-4"></v-img>
+              <v-img :src="thumbnailPreview || ($config.public.apiBase.replace('/api', '') + course.thumbnail_url)" height="250" cover class="rounded-lg border bg-grey-lighten-4 mb-4"></v-img>
               <v-file-input label="Change Thumbnail" variant="outlined" rounded="lg" @change="onThumbnailChange"></v-file-input>
             </v-col>
             <v-col cols="12" md="6">
@@ -109,20 +110,77 @@
 
         <!-- Tab: Settings -->
         <v-window-item value="settings">
-          <div class="text-h6 font-weight-bold mb-4">Course Settings</div>
-          <v-select
-            v-model="course.prerequisites"
-            :items="allCourses"
-            item-title="title"
-            item-value="id"
-            label="Prerequisites"
-            multiple
-            chips
-            variant="outlined"
-            rounded="lg"
-            hint="Select courses students should complete before this one"
-            persistent-hint
-          ></v-select>
+          <div class="text-h6 font-weight-bold mb-6">Course Settings</div>
+          
+          <v-row>
+            <v-col cols="12" md="6">
+              <v-select
+                v-model="course.course_type"
+                :items="[{title: 'Recorded Course', value: 'recorded'}, {title: 'Live Course', value: 'live'}]"
+                label="Course Type"
+                variant="outlined"
+                rounded="lg"
+                class="mb-4"
+              ></v-select>
+
+              <v-text-field
+                v-if="course.course_type === 'live'"
+                v-model="course.start_date"
+                label="Course Start Date & Time"
+                type="datetime-local"
+                variant="outlined"
+                rounded="lg"
+                class="mb-4"
+              ></v-text-field>
+
+              <v-select
+                v-model="course.prerequisites"
+                :items="allCourses"
+                item-title="title"
+                item-value="id"
+                label="Prerequisites"
+                multiple
+                chips
+                variant="outlined"
+                rounded="lg"
+                hint="Select courses students should complete before this one"
+                persistent-hint
+                class="mb-4"
+              ></v-select>
+            </v-col>
+
+            <v-col cols="12" md="6">
+              <v-select
+                v-model="course.level"
+                :items="['beginner', 'intermediate', 'advanced']"
+                label="Difficulty Level"
+                variant="outlined"
+                rounded="lg"
+                class="mb-4 text-capitalize"
+              ></v-select>
+
+              <v-select
+                v-model="course.language"
+                :items="availableLanguages"
+                label="Primary Language"
+                variant="outlined"
+                rounded="lg"
+                class="mb-4"
+              ></v-select>
+
+              <v-card flat border rounded="lg" class="pa-4">
+                <v-switch
+                  v-model="course.is_featured"
+                  label="Featured Course"
+                  color="primary"
+                  hide-details
+                ></v-switch>
+                <div class="text-caption text-grey mt-1 ml-2">
+                  Display this course prominently on the homepage and in catalog recommendations.
+                </div>
+              </v-card>
+            </v-col>
+          </v-row>
         </v-window-item>
       </v-window>
     </v-card>
@@ -134,7 +192,7 @@
         <v-textarea v-model="rejectModal.reason" label="Reason for Rejection" variant="outlined" rounded="lg" placeholder="Please provide feedback for the tutor..."></v-textarea>
         <v-card-actions class="pa-0 mt-4">
           <v-spacer></v-spacer>
-          <v-btn variant="text" @click="rejectModal.show = false">Cancel</v-btn>
+          <v-btn  @click="rejectModal.show = false" variant="text">Cancel</v-btn>
           <v-btn color="error" class="px-6 rounded-lg" @click="updateStatus('rejected')">Reject Course</v-btn>
         </v-card-actions>
       </v-card>
@@ -160,6 +218,14 @@
         </div>
       </v-card>
     </v-dialog>
+    <!-- Snackbar for Notifications -->
+    <v-snackbar v-model="snackbar.show" :color="snackbar.color" :timeout="3000" location="top right" rounded="pill">
+      <v-icon start :icon="snackbar.color === 'error' ? 'mdi-alert-circle' : 'mdi-check-circle'"></v-icon>
+      {{ snackbar.text }}
+      <template v-slot:actions>
+        <v-btn variant="text" icon="mdi-close" @click="snackbar.show = false"></v-btn>
+      </template>
+    </v-snackbar>
   </v-container>
 </template>
 
@@ -177,6 +243,7 @@ const tab = ref('basic')
 const loading = ref(true)
 const saving = ref(false)
 const categories = ref([])
+const availableLanguages = ref(['English', 'Hindi', 'Spanish', 'French', 'German'])
 const allCourses = ref([])
 const course = ref({ sections: [] })
 const thumbnailFile = ref(null)
@@ -184,6 +251,18 @@ const thumbnailPreview = ref(null)
 
 const rejectModal = reactive({ show: false, reason: '' })
 const publishSuccessModal = reactive({ show: false })
+
+const snackbar = reactive({
+  show: false,
+  text: '',
+  color: 'success'
+})
+
+const showMessage = (text, color = 'success') => {
+  snackbar.text = text
+  snackbar.color = color
+  snackbar.show = true
+}
 
 const editor = useEditor({
   content: '',
@@ -214,12 +293,18 @@ const fetchCourse = async () => {
 }
 
 const fetchMetadata = async () => {
-  const [catsResponse, coursesResponse] = await Promise.all([
+  const [catsResponse, coursesResponse, configResponse] = await Promise.all([
     api.get('/lms/categories'),
-    api.get('/lms/courses')
+    api.get('/lms/courses'),
+    api.get('/public/config').catch(() => ({ data: {} }))
   ])
   categories.value = catsResponse.data
   allCourses.value = coursesResponse.data.filter(c => c.id !== route.params.id)
+  
+  const configData = configResponse.data || configResponse
+  if (configData.course_languages) {
+    availableLanguages.value = configData.course_languages.split(',').map(s => s.trim()).filter(Boolean)
+  }
 }
 
 const onThumbnailChange = (e) => {
@@ -243,18 +328,25 @@ const saveAll = async () => {
   saving.value = true
   const formData = new FormData()
   Object.keys(course.value).forEach(key => {
-    if (key === 'sections' || key === 'tutor_name' || key === 'category_name') return
+    if (['sections', 'tutor_name', 'category_name', 'level', 'language', 'course_type', 'is_featured', 'start_date'].includes(key)) return
     if (key === 'prerequisites') {
       formData.append(key, JSON.stringify(course.value[key]))
     } else {
       formData.append(key, course.value[key])
     }
   })
+  formData.append('level', course.value.level || 'beginner')
+  formData.append('language', course.value.language || 'English')
+  formData.append('course_type', course.value.course_type || 'recorded')
+  formData.append('is_featured', course.value.is_featured ? 'true' : 'false')
+  if (course.value.course_type === 'live' && course.value.start_date) {
+    formData.append('start_date', course.value.start_date)
+  }
   if (thumbnailFile.value) formData.append('thumbnail', thumbnailFile.value)
 
   try {
     await api.put(`/lms/courses/${route.params.id}`, formData)
-    alert('Course saved successfully')
+    showMessage('Course saved successfully')
     
     // Redirect after saving
     if (user.value.role === 'super_admin') {
@@ -263,7 +355,7 @@ const saveAll = async () => {
       navigateTo('/dashboard/tutor/courses')
     }
   } catch (error) {
-    alert('Error saving course')
+    showMessage('Error saving course', 'error')
   } finally {
     saving.value = false
   }
@@ -281,10 +373,10 @@ const updateStatus = async (status) => {
     if (status === 'published') {
       publishSuccessModal.show = true
     } else {
-      alert(`Course ${status.replace('_', ' ')}`)
+      showMessage(`Course ${status.replace('_', ' ')}`)
     }
   } catch (error) {
-    alert(error.response?.data?.message || 'Failed to update status')
+    showMessage(error.response?.data?.message || 'Failed to update status', 'error')
   }
 }
 

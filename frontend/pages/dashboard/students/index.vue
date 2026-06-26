@@ -1,8 +1,8 @@
 <template>
-  <v-container class="py-8">
+  <v-container fluid class="pa-6">
     <div class="d-flex align-center justify-space-between mb-8">
       <div>
-        <h1 class="text-h4 font-weight-black mb-1">Students</h1>
+        <h1 class="text-h4 font-weight-bold mb-1 text-primary">Students</h1>
         <p class="text-grey-darken-1">Manage student lifecycles, progress, and billing.</p>
       </div>
       <div class="d-flex gap-3" v-if="authStore.userRole !== 'finance_staff'">
@@ -204,7 +204,7 @@
 
         <v-divider></v-divider>
         <v-card-actions class="pa-6">
-          <v-btn variant="text" @click="showAddModal = false">Cancel</v-btn>
+          <v-btn  @click="showAddModal = false" variant="text">Cancel</v-btn>
           <v-spacer></v-spacer>
           <v-btn
             color="primary"
@@ -212,9 +212,9 @@
             :loading="saving"
             :disabled="!newStudent.name || !newStudent.email"
             elevation="0"
-            rounded="lg"
+            
             size="large"
-          >Create Student</v-btn>
+           class="px-6" variant="flat" rounded="lg">Create Student</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>

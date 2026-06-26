@@ -2,8 +2,8 @@
   <v-container fluid class="pa-6">
     <div class="d-flex align-center justify-space-between mb-6">
       <div>
-        <h1 class="text-h4 font-weight-bold mb-1">Course Categories</h1>
-        <p class="text-subtitle-1 text-grey">Manage categories and their display order for the public website.</p>
+        <h1 class="text-h4 font-weight-bold mb-1 text-primary">Course Categories</h1>
+        <p class="text-subtitle-1 text-medium-emphasis mb-6">Manage categories and their display order for the public website.</p>
       </div>
       <v-btn color="primary" prepend-icon="mdi-plus" class="text-capitalize font-weight-bold" rounded="lg" @click="openModal()">
         Add Category
@@ -115,7 +115,7 @@
         </v-card-text>
         <v-card-actions class="pa-6 pt-0">
           <v-spacer></v-spacer>
-          <v-btn variant="text" color="grey" class="text-capitalize font-weight-bold" @click="modal.show = false">Cancel</v-btn>
+          <v-btn   class="text-capitalize font-weight-bold" @click="modal.show = false" variant="text">Cancel</v-btn>
           <v-btn color="primary" class="text-capitalize font-weight-bold px-6" rounded="lg" :loading="modal.loading" @click="saveCategory">
             {{ modal.isEdit ? 'Update' : 'Create' }}
           </v-btn>

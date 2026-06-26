@@ -1,8 +1,8 @@
 <template>
-  <div class="pa-6">
+  <v-container fluid class="pa-6">
     <div class="d-flex align-center justify-space-between mb-8">
       <div>
-        <h1 class="text-h4 font-weight-black text-grey-darken-4 mb-2">Job Management</h1>
+        <h1 class="text-h4 font-weight-bold mb-1 text-primary">Job Management</h1>
         <p class="text-blue-grey-300">Manage all your job postings across the platform.</p>
       </div>
       <v-btn
@@ -45,7 +45,7 @@
             <v-icon size="small">mdi-map-marker-outline</v-icon> {{ item.is_remote ? 'Remote' : item.location }}
             <v-icon size="small" class="ml-2">mdi-clock-outline</v-icon> {{ item.type.replace('_', ' ') }}
           </div>
-        </template>
+</template>
 
         <template v-slot:item.status="{ item }">
           <v-chip 
@@ -94,7 +94,7 @@
         </template>
       </v-data-table>
     </v-card>
-  </div>
+  </v-container>
 </template>
 
 <script setup lang="ts">

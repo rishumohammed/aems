@@ -1,7 +1,7 @@
 <template>
   <v-container fluid class="pa-6">
     <div class="mb-8">
-      <h1 class="text-h4 font-weight-bold mb-2">Content Management</h1>
+      <h1 class="text-h4 font-weight-bold mb-1 text-primary">Content Management</h1>
       <p class="text-secondary">Update your institute's story, team, and testimonials.</p>
     </div>
 

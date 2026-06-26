@@ -1,5 +1,5 @@
 <template>
-  <v-container fluid class="pa-0 h-screen overflow-hidden d-flex">
+  <v-container fluid class="pa-6">
     <!-- Conversations Sidebar -->
     <v-card width="350" class="h-100 border-e rounded-0 d-flex flex-column" flat>
       <v-toolbar color="white" flat class="px-4 border-b">

@@ -1,5 +1,5 @@
 <template>
-  <div class="pa-6 dashboard-page-content">
+  <v-container fluid class="pa-6">
     <div v-if="loading">
       <v-skeleton-loader type="heading" class="mb-8" width="300"></v-skeleton-loader>
       <v-row class="mb-4">
@@ -12,7 +12,7 @@
     <div v-else>
       <div class="d-flex align-center mb-8">
         <div>
-          <h1 class="text-h4 font-weight-bold">CRM Dashboard</h1>
+          <h1 class="text-h4 font-weight-bold mb-1 text-primary">CRM Dashboard</h1>
           <p class="text-secondary">Overview of leads, conversions, and upcoming tasks.</p>
         </div>
         <v-spacer></v-spacer>
@@ -76,7 +76,7 @@
         </v-col>
       </v-row>
     </div>
-  </div>
+  </v-container>
 </template>
 
 <script setup lang="ts">

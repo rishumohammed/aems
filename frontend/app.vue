@@ -13,6 +13,11 @@ const theme = useTheme();
 const config = useRuntimeConfig();
 const instituteName = useState('instituteName', () => '');
 const instituteTagline = useState('instituteTagline', () => '');
+const contactAddress = useState('contactAddress', () => '');
+const contactPhone = useState('contactPhone', () => '');
+const contactEmail = useState('contactEmail', () => '');
+const contactWhatsapp = useState('contactWhatsapp', () => '');
+
 
 useHead({
   script: [
@@ -86,6 +91,11 @@ onMounted(async () => {
       if (data.aboutpage_who_image_url) {
         useState('aboutpage_who_image_url').value = data.aboutpage_who_image_url;
       }
+      // Contact details
+      if (data.contact_address) contactAddress.value = data.contact_address;
+      if (data.contact_phone)   contactPhone.value   = data.contact_phone;
+      if (data.contact_email)   contactEmail.value   = data.contact_email;
+      if (data.contact_whatsapp) contactWhatsapp.value = data.contact_whatsapp;
     }
   } catch (err) {
     console.error('Failed to fetch public config', err);

@@ -1,10 +1,10 @@
 <template>
-  <div class="pa-6 fade-in">
+  <v-container fluid class="pa-6">
     <!-- Header -->
     <div class="d-flex justify-space-between align-center mb-8">
       <div>
-        <h1 class="page-title mb-1">My Payments</h1>
-        <p class="text-subtitle-1 text-secondary">Track your course enrollments, invoices, and payment history.</p>
+        <h1 class="text-h4 font-weight-bold mb-1 text-primary">My Payments</h1>
+        <p class="text-subtitle-1 text-medium-emphasis mb-6">Track your course enrollments, invoices, and payment history.</p>
       </div>
       <v-btn 
         color="primary" 
@@ -83,7 +83,7 @@
             <div class="font-weight-bold text-primary">{{ item.invoice_number || ('INV-' + item.id.split('-')[0].toUpperCase()) }}</div>
             <div class="text-caption text-grey">{{ formatDate(item.created_at) }}</div>
           </div>
-        </template>
+</template>
 
         <template v-slot:item.course_title="{ item }">
           <div class="font-weight-bold text-truncate" style="max-width: 250px;">{{ item.course_title }}</div>
@@ -268,11 +268,11 @@
         </v-card-text>
         <v-card-actions class="pa-4">
           <v-spacer></v-spacer>
-          <v-btn variant="text" class="px-6" @click="historyDialog = false">Close</v-btn>
+          <v-btn  class="" @click="historyDialog = false" variant="text">Close</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
-  </div>
+  </v-container>
 </template>
 
 <script setup lang="ts">
@@ -449,12 +449,7 @@ const contactEmail = () => {
 </script>
 
 <style scoped>
-.page-title {
-  font-size: 28px;
-  font-weight: 800;
-  letter-spacing: -0.6px;
-  color: var(--g7);
-}
+
 
 .uppercase { text-transform: uppercase; letter-spacing: 1px; }
 
@@ -468,15 +463,6 @@ const contactEmail = () => {
 }
 
 .text-white-50 { color: rgba(255, 255, 255, 0.7) !important; }
-
-.fade-in {
-  animation: fadeIn 0.4s ease-out;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
 
 .custom-table :deep(th) {
   text-transform: uppercase;

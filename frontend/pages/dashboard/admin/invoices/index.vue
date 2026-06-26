@@ -1,9 +1,9 @@
 <template>
-  <div class="pa-6 fade-in">
+  <v-container fluid class="pa-6">
     <div class="d-flex align-center justify-space-between mb-8">
       <div>
-        <h1 class="page-title mb-1">Invoice Management</h1>
-        <p class="text-subtitle-1 text-secondary">Manage billing, track payments, and record manual collections.</p>
+        <h1 class="text-h4 font-weight-bold mb-1 text-primary">Invoice Management</h1>
+        <p class="text-subtitle-1 text-medium-emphasis mb-6">Manage billing, track payments, and record manual collections.</p>
       </div>
     </div>
 
@@ -38,7 +38,7 @@
         <template #item.invoice_number="{ item }">
           <div class="font-weight-bold">{{ item.invoice_number }}</div>
           <div class="text-caption text-secondary">{{ formatDate(item.created_at) }}</div>
-        </template>
+</template>
 
         <template #item.student_name="{ item }">
           <div class="font-weight-bold">{{ item.student_name }}</div>
@@ -286,7 +286,7 @@
         <AppButton variant="g" @click="historyDialog = false">Close</AppButton>
       </template>
     </AppModal>
-  </div>
+  </v-container>
 </template>
 
 <script setup lang="ts">
@@ -541,12 +541,7 @@ const formatDate = (dateStr: string) => {
 </script>
 
 <style scoped>
-.page-title {
-  font-size: 28px;
-  font-weight: 800;
-  letter-spacing: -0.6px;
-  color: var(--g7);
-}
+
 
 .apple-table-card {
   background: white;
@@ -566,14 +561,5 @@ const formatDate = (dateStr: string) => {
 
 .border-t {
   border-top: 1px solid rgba(0, 0, 0, 0.05);
-}
-
-.fade-in {
-  animation: fadeIn 0.3s ease-out;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
 }
 </style>

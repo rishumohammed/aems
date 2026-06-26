@@ -125,7 +125,7 @@
         </v-card-text>
         
         <v-card-actions class="pa-6 pt-0 d-flex justify-end gap-3">
-          <v-btn variant="text" class="text-none font-weight-bold" @click="closeDialog" :disabled="saving">Cancel</v-btn>
+          <v-btn  class="text-none font-weight-bold" @click="closeDialog" :disabled="saving" variant="text">Cancel</v-btn>
           <AppButton @click="save" :loading="saving" :disabled="!isValid" icon="mdi-check">Save</AppButton>
         </v-card-actions>
       </v-card>

@@ -3,10 +3,10 @@
     <div class="d-flex align-center justify-space-between mb-6">
       <div>
         <h3 class="text-h6 font-weight-bold">Course Builder</h3>
-        <p class="text-caption text-grey">Organize your course into Chapters → Modules → Lessons</p>
+        <p class="text-caption text-grey">Organize your course into Modules → Lessons</p>
       </div>
       <v-btn color="primary" variant="flat" prepend-icon="mdi-plus" rounded="lg" class="text-capitalize font-weight-bold px-4" @click="addSection">
-        Add Chapter
+        Add Module
       </v-btn>
     </div>
 
@@ -21,7 +21,7 @@
       <div v-for="(section, sIndex) in sections" :key="section.id" class="section-wrapper mb-6">
         <v-card flat border rounded="xl" class="bg-grey-lighten-5 overflow-hidden">
           
-          <!-- Chapter Header -->
+          <!-- Module Header -->
           <div class="d-flex align-center pa-4 bg-white border-b">
             <v-icon class="section-drag-handle cursor-move mr-2" color="grey">mdi-drag-vertical</v-icon>
             
@@ -33,7 +33,7 @@
                 rounded="lg"
                 hide-details
                 autofocus
-                placeholder="Chapter Title"
+                placeholder="Module Title"
                 class="max-width-400"
                 @keyup.enter="editingSectionId = null"
               ></v-text-field>
@@ -43,7 +43,7 @@
                 variant="outlined"
                 rounded="lg"
                 hide-details
-                placeholder="Chapter Description (Optional)"
+                placeholder="Module Description (Optional)"
                 class="flex-grow-1"
                 @keyup.enter="editingSectionId = null"
               ></v-text-field>
@@ -52,15 +52,15 @@
             
             <div v-else class="flex-grow-1 cursor-pointer" @click="editingSectionId = section.id">
               <h4 class="text-subtitle-1 font-weight-bold d-flex align-center">
-                Chapter {{ sIndex + 1 }}: {{ section.title }}
+                Module {{ sIndex + 1 }}: {{ section.title }}
                 <v-icon size="16" class="ml-2 opacity-50">mdi-pencil</v-icon>
               </h4>
               <p v-if="section.description" class="text-caption text-grey mt-1 mb-0">{{ section.description }}</p>
             </div>
 
             <div class="d-flex gap-1 align-center">
-              <v-btn color="primary" variant="text" size="small" rounded="lg" prepend-icon="mdi-plus" class="text-capitalize font-weight-bold" @click="addModule(section)">
-                Add Module
+              <v-btn color="primary" variant="text" size="small" rounded="lg" prepend-icon="mdi-plus" class="text-capitalize font-weight-bold" @click="openLessonModal(section)">
+                Add Lesson
               </v-btn>
               <v-btn icon="mdi-delete-outline" variant="text" size="small" color="error" @click="deleteSection(section)"></v-btn>
               <v-btn
@@ -73,96 +73,26 @@
             </div>
           </div>
 
-          <!-- Modules List Inside Chapter -->
+          <!-- Lessons List Inside Module -->
           <v-card-text v-if="!collapsedSections.has(section.id)" class="pa-4">
             <VueDraggable
-              v-model="section.modules"
-              handle=".module-drag-handle"
+              v-model="section.lessons"
+              handle=".lesson-drag-handle"
               :animation="200"
-              :group="{ name: `modules-${section.id}` }"
-              class="modules-container"
-              @end="onReorder('modules', section)"
+              group="lessons"
+              class="lessons-list min-height-20"
+              @end="onReorder('lessons', section)"
             >
-              <div v-for="(module, mIndex) in section.modules" :key="module.id" class="module-wrapper mb-4">
-                <v-card flat border rounded="lg" class="bg-white">
-                  
-                  <!-- Module Header -->
-                  <div class="d-flex align-center pa-3 bg-grey-lighten-4 border-b">
-                    <v-icon class="module-drag-handle cursor-move mr-2" color="grey">mdi-drag-vertical</v-icon>
-                    
-                    <div v-if="editingModuleId === module.id" class="flex-grow-1 d-flex align-center gap-2">
-                      <v-text-field
-                        v-model="module.title"
-                        density="compact"
-                        variant="outlined"
-                        rounded="lg"
-                        hide-details
-                        autofocus
-                        placeholder="Module Title"
-                        class="max-width-300"
-                        @keyup.enter="editingModuleId = null"
-                      ></v-text-field>
-                      <v-text-field
-                        v-model="module.description"
-                        density="compact"
-                        variant="outlined"
-                        rounded="lg"
-                        hide-details
-                        placeholder="Module Description"
-                        class="flex-grow-1"
-                        @keyup.enter="editingModuleId = null"
-                      ></v-text-field>
-                      <v-btn icon="mdi-check" color="success" variant="flat" size="small" @click="saveModuleMeta(section, module)"></v-btn>
-                    </div>
-
-                    <div v-else class="flex-grow-1 cursor-pointer" @click="editingModuleId = module.id">
-                      <div class="text-subtitle-2 font-weight-bold d-flex align-center">
-                        Module {{ sIndex + 1 }}.{{ mIndex + 1 }}: {{ module.title }}
-                        <v-icon size="14" class="ml-2 opacity-50">mdi-pencil</v-icon>
-                      </div>
-                      <p v-if="module.description" class="text-caption text-grey mt-0.5 mb-0">{{ module.description }}</p>
-                    </div>
-
-                    <div class="d-flex gap-1 align-center">
-                      <v-btn icon="mdi-plus" variant="text" size="small" color="primary" title="Add Lesson" @click="openLessonModal(section, module)"></v-btn>
-                      <v-btn icon="mdi-delete-outline" variant="text" size="small" color="error" @click="deleteModule(section, module)"></v-btn>
-                      <v-btn
-                        :icon="collapsedModules.has(module.id) ? 'mdi-chevron-down' : 'mdi-chevron-up'"
-                        variant="text"
-                        size="small"
-                        color="grey"
-                        @click="toggleModuleCollapse(module.id)"
-                      ></v-btn>
-                    </div>
-                  </div>
-
-                  <!-- Lessons List Inside Module -->
-                  <v-card-text v-if="!collapsedModules.has(module.id)" class="pa-3">
-                    <VueDraggable
-                      v-model="module.lessons"
-                      handle=".lesson-drag-handle"
-                      :animation="200"
-                      group="lessons"
-                      class="lessons-list min-height-20"
-                      @end="onReorder('lessons', module)"
-                    >
-                      <LessonCard
-                        v-for="lesson in module.lessons"
-                        :key="lesson.id"
-                        :lesson="lesson"
-                        @edit="openLessonModal(section, module, lesson)"
-                        @delete="deleteLesson(section, module, lesson)"
-                      />
-                    </VueDraggable>
-                    <div v-if="!module.lessons?.length" class="text-center py-4 border-dashed rounded-lg text-grey text-caption">
-                      No lessons in this module. Click + to add one.
-                    </div>
-                  </v-card-text>
-                </v-card>
-              </div>
+              <LessonCard
+                v-for="lesson in section.lessons"
+                :key="lesson.id"
+                :lesson="lesson"
+                @edit="openLessonModal(section, lesson)"
+                @delete="deleteLesson(section, lesson)"
+              />
             </VueDraggable>
-            <div v-if="!section.modules?.length" class="text-center py-6 border-dashed rounded-lg text-grey text-caption">
-              No modules in this chapter. Click "Add Module" to start structuring.
+            <div v-if="!section.lessons?.length" class="text-center py-6 border-dashed rounded-lg text-grey text-caption">
+              No lessons in this module. Click "Add Lesson" to start adding content.
             </div>
           </v-card-text>
         </v-card>
@@ -171,9 +101,9 @@
     <div v-if="!sections.length" class="text-center py-12 border-dashed rounded-xl bg-grey-lighten-5">
       <v-icon size="48" color="grey-lighten-1" class="mb-4">mdi-book-open-outline</v-icon>
       <h3 class="text-subtitle-1 font-weight-bold text-grey-darken-1 mb-1">Create Your Curriculum</h3>
-      <p class="text-caption text-grey mb-6">Start by adding your first chapter.</p>
+      <p class="text-caption text-grey mb-6">Start by adding your first module.</p>
       <v-btn color="primary" rounded="lg" prepend-icon="mdi-plus" class="text-capitalize font-weight-bold" @click="addSection">
-        Add Chapter
+        Add Module
       </v-btn>
     </div>
 
@@ -382,9 +312,9 @@
         </v-card-text>
         <v-card-actions class="pa-6 pt-0">
           <v-spacer></v-spacer>
-          <v-btn variant="text" color="grey" @click="lessonModal.show = false">Cancel</v-btn>
-          <v-btn color="primary" class="px-6 rounded-lg" :loading="lessonModal.loading" @click="saveLesson">
-            {{ lessonModal.isEdit ? 'Update' : 'Add' }}
+          <v-btn   class="text-capitalize font-weight-bold" @click="lessonModal.show = false" variant="text">Cancel</v-btn>
+          <v-btn color="primary" variant="flat" class="px-6 rounded-lg text-capitalize font-weight-bold" :loading="lessonModal.loading" @click="saveLesson">
+            {{ lessonModal.isEdit ? 'Update Lesson' : 'Add Lesson' }}
           </v-btn>
         </v-card-actions>
       </v-card>
@@ -410,19 +340,14 @@ const api = useApi()
 
 // Compute and emit live stats
 const emitStats = () => {
-  const chapters = sections.value.length
-  const modules = sections.value.reduce((acc, s) => acc + (s.modules?.length || 0), 0)
-  const lessons = sections.value.reduce((acc, s) =>
-    acc + (s.modules || []).reduce((mAcc, m) => mAcc + (m.lessons?.length || 0), 0), 0
-  )
-  emit('updated', { chapters, modules, lessons })
+  const modules = sections.value.length
+  const lessons = sections.value.reduce((acc, s) => acc + (s.lessons?.length || 0), 0)
+  emit('updated', { modules, lessons })
 }
 
 const sections = ref([])
 const collapsedSections = ref(new Set())
-const collapsedModules = ref(new Set())
 const editingSectionId = ref(null)
-const editingModuleId = ref(null)
 
 const quizzes = ref([])
 const assignments = ref([])
@@ -445,7 +370,6 @@ const lessonModal = reactive({
   isEdit: false,
   loading: false,
   section: null,
-  module: null,
   data: {
     id: null,
     type: 'video',
@@ -505,22 +429,14 @@ const toggleSectionCollapse = (id) => {
   }
 }
 
-const toggleModuleCollapse = (id) => {
-  if (collapsedModules.value.has(id)) {
-    collapsedModules.value.delete(id)
-  } else {
-    collapsedModules.value.add(id)
-  }
-}
-
-// Chapter (Section) CRUD
+// Module (Section) CRUD
 const addSection = async () => {
   try {
-    const { data: res } = await api.post(`/lms/courses/${props.courseId}/sections`, { title: 'New Chapter' })
-    sections.value.push({ id: res.id, title: 'New Chapter', description: '', modules: [] })
+    const { data: res } = await api.post(`/lms/courses/${props.courseId}/sections`, { title: 'New Module' })
+    sections.value.push({ id: res.id, title: 'New Module', description: '', lessons: [] })
     editingSectionId.value = res.id
   } catch (error) {
-    alert('Failed to add chapter')
+    alert('Failed to add module')
   }
 }
 
@@ -532,49 +448,15 @@ const saveSectionMeta = async (section) => {
     })
     editingSectionId.value = null
   } catch (error) {
-    alert('Failed to update chapter details')
-  }
-}
-
-const deleteSection = async (section) => {
-  if (!confirm(`Are you sure you want to delete chapter "${section.title}" and all its modules and lessons?`)) return
-  try {
-    await api.delete(`/lms/courses/${props.courseId}/sections/${section.id}`)
-    sections.value = sections.value.filter(s => s.id !== section.id)
-  } catch (error) {
-    alert('Failed to delete chapter')
-  }
-}
-
-// Module CRUD
-const addModule = async (section) => {
-  try {
-    const { data: res } = await api.post(`/lms/courses/${props.courseId}/sections/${section.id}/modules`, { title: 'New Module' })
-    if (!section.modules) section.modules = []
-    section.modules.push({ id: res.id, section_id: section.id, title: 'New Module', description: '', lessons: [] })
-    editingModuleId.value = res.id
-  } catch (error) {
-    alert('Failed to add module')
-  }
-}
-
-const saveModuleMeta = async (section, module) => {
-  try {
-    await api.put(`/lms/courses/${props.courseId}/sections/${section.id}/modules/${module.id}`, {
-      title: module.title,
-      description: module.description
-    })
-    editingModuleId.value = null
-  } catch (error) {
     alert('Failed to update module details')
   }
 }
 
-const deleteModule = async (section, module) => {
-  if (!confirm(`Are you sure you want to delete module "${module.title}"?`)) return
+const deleteSection = async (section) => {
+  if (!confirm(`Are you sure you want to delete module "${section.title}" and all its lessons?`)) return
   try {
-    await api.delete(`/lms/courses/${props.courseId}/sections/${section.id}/modules/${module.id}`)
-    section.modules = section.modules.filter(m => m.id !== module.id)
+    await api.delete(`/lms/courses/${props.courseId}/sections/${section.id}`)
+    sections.value = sections.value.filter(s => s.id !== section.id)
   } catch (error) {
     alert('Failed to delete module')
   }
@@ -606,9 +488,8 @@ const onFileChange = (e) => {
   lessonModal.file = e.target.files[0]
 }
 
-const openLessonModal = (section, module, lesson = null) => {
+const openLessonModal = (section, lesson = null) => {
   lessonModal.section = section
-  lessonModal.module = module
   lessonModal.file = null
 
   if (lesson) {
@@ -740,7 +621,7 @@ const saveLesson = async () => {
   }
 
   try {
-    const baseUrl = `/lms/courses/${props.courseId}/sections/${lessonModal.section.id}/modules/${lessonModal.module.id}/lessons`
+    const baseUrl = `/lms/courses/${props.courseId}/sections/${lessonModal.section.id}/lessons`
     let responseData
 
     if (lessonModal.isEdit) {
@@ -752,7 +633,7 @@ const saveLesson = async () => {
     }
 
     // Refresh state locally
-    if (!lessonModal.module.lessons) lessonModal.module.lessons = []
+    if (!lessonModal.section.lessons) lessonModal.section.lessons = []
     
     // For MP4 uploaded files, map the path returned from backend to video_id
     let resolvedVideoId = lessonModal.data.video_id
@@ -773,12 +654,12 @@ const saveLesson = async () => {
     savedLesson.is_mandatory = lessonModal.data.is_mandatory;
 
     if (lessonModal.isEdit) {
-      const index = lessonModal.module.lessons.findIndex(l => l.id === savedLesson.id)
+      const index = lessonModal.section.lessons.findIndex(l => l.id === savedLesson.id)
       if (index !== -1) {
-        lessonModal.module.lessons[index] = savedLesson
+        lessonModal.section.lessons[index] = savedLesson
       }
     } else {
-      lessonModal.module.lessons.push(savedLesson)
+      lessonModal.section.lessons.push(savedLesson)
     }
 
     lessonModal.show = false
@@ -790,38 +671,31 @@ const saveLesson = async () => {
   }
 }
 
-const deleteLesson = async (section, module, lesson) => {
+const deleteLesson = async (section, lesson) => {
   if (!confirm(`Are you sure you want to delete lesson "${lesson.title}"?`)) return
   try {
-    await api.delete(`/lms/courses/${props.courseId}/sections/${section.id}/modules/${module.id}/lessons/${lesson.id}`)
-    module.lessons = module.lessons.filter(l => l.id !== lesson.id)
+    await api.delete(`/lms/courses/${props.courseId}/sections/${section.id}/lessons/${lesson.id}`)
+    section.lessons = section.lessons.filter(l => l.id !== lesson.id)
   } catch (error) {
     alert('Failed to delete lesson')
   }
 }
 
 // Batch reordering
-const onReorder = async (type, parent = null) => {
+const onReorder = async (type) => {
   let items = []
   if (type === 'sections') {
     items = sections.value.map((s, index) => ({ id: s.id, order_index: index + 1 }))
-  } else if (type === 'modules') {
-    items = parent.modules.map((m, index) => ({ id: m.id, order_index: index + 1, section_id: parent.id }))
   } else if (type === 'lessons') {
     // Collect lessons from all modules to properly handle moving lessons between modules
-    sections.value.forEach(chapter => {
-      if (chapter.modules) {
-        chapter.modules.forEach(mod => {
-          if (mod.lessons) {
-            mod.lessons.forEach((l, index) => {
-              items.push({
-                id: l.id,
-                order_index: index + 1,
-                module_id: mod.id,
-                section_id: chapter.id
-              })
-            })
-          }
+    sections.value.forEach(mod => {
+      if (mod.lessons) {
+        mod.lessons.forEach((l, index) => {
+          items.push({
+            id: l.id,
+            order_index: index + 1,
+            section_id: mod.id
+          })
         })
       }
     })

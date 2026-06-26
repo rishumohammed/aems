@@ -1,8 +1,8 @@
 <template>
-  <div class="page-container">
+  <v-container fluid class="pa-6">
     <div class="page-header d-flex align-center justify-space-between mb-6">
       <div>
-        <h1 class="text-h4 font-weight-bold text-ink">Notice Board</h1>
+        <h1 class="text-h4 font-weight-bold mb-1 text-primary">Notice Board</h1>
         <p class="text-body-1 text-secondary mt-1">Manage announcements, webinars, and talent exams for the homepage.</p>
       </div>
       <v-btn color="primary" class="text-none font-weight-bold rounded-lg" prepend-icon="mdi-plus" @click="openDialog()">
@@ -38,7 +38,7 @@
             <v-btn icon="mdi-pencil" variant="text" size="small" color="primary" @click="openDialog(item)"></v-btn>
             <v-btn icon="mdi-delete" variant="text" size="small" color="error" @click="confirmDelete(item)"></v-btn>
           </div>
-        </template>
+</template>
       </v-data-table>
     </v-card>
 
@@ -117,7 +117,7 @@
           </v-form>
         </v-card-text>
         <v-card-actions class="pa-6 pt-0 d-flex justify-end border-t bg-grey-lighten-5">
-          <v-btn variant="text" class="text-none" @click="dialog = false">Cancel</v-btn>
+          <v-btn  class="text-none" @click="dialog = false" variant="text">Cancel</v-btn>
           <v-btn color="primary" variant="flat" class="text-none px-6 rounded-lg" @click="saveNotice" :loading="saving">
             Save Notice
           </v-btn>
@@ -143,7 +143,7 @@
     <v-snackbar v-model="snackbar" :color="snackbarColor" rounded="lg" timeout="3000">
       {{ snackbarText }}
     </v-snackbar>
-  </div>
+  </v-container>
 </template>
 
 <script setup lang="ts">

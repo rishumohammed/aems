@@ -38,8 +38,8 @@
         </v-card-text>
         <v-card-actions class="pa-0 mt-6">
           <v-spacer></v-spacer>
-          <v-btn variant="text" @click="recordingDialog.show = false">Cancel</v-btn>
-          <v-btn color="primary" class="px-6 rounded-lg" :loading="recordingDialog.loading" @click="saveRecording" :disabled="!recordingDialog.url">Save Recording</v-btn>
+          <v-btn  @click="recordingDialog.show = false" variant="text">Cancel</v-btn>
+          <v-btn color="primary" class="rounded-lg px-6" :loading="recordingDialog.loading" @click="saveRecording" :disabled="!recordingDialog.url" variant="flat" rounded="lg">Save Recording</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>

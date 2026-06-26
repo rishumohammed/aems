@@ -70,8 +70,8 @@
         </v-card-text>
         <v-card-actions class="pa-6">
           <v-spacer></v-spacer>
-          <v-btn variant="text" @click="paymentModal = false">Cancel</v-btn>
-          <v-btn color="success" @click="submitPayment" :loading="submitting" elevation="0" rounded="lg" class="px-8">Confirm Payment</v-btn>
+          <v-btn  @click="paymentModal = false" variant="text">Cancel</v-btn>
+          <v-btn color="success" @click="submitPayment" :loading="submitting" elevation="0"  class="px-8 px-6" variant="flat" rounded="lg">Confirm Payment</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>

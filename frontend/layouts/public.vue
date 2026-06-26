@@ -122,19 +122,21 @@
           
           <v-col cols="12" md="4">
             <h4 class="text-subtitle-1 font-weight-bold mb-4 tracking-tight">Contact</h4>
-            <div class="d-flex align-start mb-4">
+            <div v-if="contactAddress" class="d-flex align-start mb-4">
               <v-icon color="primary" size="20" class="mr-3 mt-1">mdi-map-marker</v-icon>
-              <div class="text-body-2 text-secondary">
-                Moozhikkal,<br/>Kozhikode
-              </div>
+              <div class="text-body-2 text-secondary" style="white-space: pre-line;">{{ contactAddress }}</div>
             </div>
-            <div class="d-flex align-center mb-4">
+            <div v-if="contactPhone" class="d-flex align-center mb-4">
               <v-icon color="primary" size="20" class="mr-3">mdi-phone</v-icon>
-              <div class="text-body-2 text-secondary">+91 97460 87916<br/>+91 9746 118916</div>
+              <div class="text-body-2 text-secondary">{{ contactPhone }}</div>
             </div>
-            <div class="d-flex align-center mb-4">
+            <div v-if="contactWhatsapp && contactWhatsapp !== contactPhone" class="d-flex align-center mb-4">
+              <v-icon color="success" size="20" class="mr-3">mdi-whatsapp</v-icon>
+              <a :href="'https://wa.me/' + contactWhatsapp.replace(/\D/g, '')" target="_blank" class="text-body-2 text-secondary text-decoration-none">{{ contactWhatsapp }}</a>
+            </div>
+            <div v-if="contactEmail" class="d-flex align-center mb-4">
               <v-icon color="primary" size="20" class="mr-3">mdi-email</v-icon>
-              <div class="text-body-2 text-secondary">brixcouncil@gmail.com</div>
+              <a :href="'mailto:' + contactEmail" class="text-body-2 text-secondary text-decoration-none">{{ contactEmail }}</a>
             </div>
           </v-col>
         </v-row>
@@ -163,6 +165,10 @@ const drawer = ref(false);
 const authStore = useAuthStore();
 const instituteName = useState('instituteName', () => '');
 const appLogo = useState('appLogo', () => '');
+const contactAddress  = useState('contactAddress', () => '');
+const contactPhone    = useState('contactPhone', () => '');
+const contactEmail    = useState('contactEmail', () => '');
+const contactWhatsapp = useState('contactWhatsapp', () => '');
 const config = useRuntimeConfig();
 const theme = useTheme();
 

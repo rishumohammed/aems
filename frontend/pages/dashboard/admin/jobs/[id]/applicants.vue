@@ -1,9 +1,9 @@
 <template>
-  <div class="pa-6">
+  <v-container fluid class="pa-6">
     <div class="d-flex align-center gap-4 mb-6">
       <v-btn icon="mdi-arrow-left" variant="text" to="/dashboard/admin/jobs"></v-btn>
       <div>
-        <h1 class="text-h4 font-weight-bold text-white mb-1">Applicants: {{ job?.title }}</h1>
+        <h1 class="text-h4 font-weight-bold mb-1 text-primary">Applicants: {{ job?.title }}</h1>
         <p class="text-blue-grey-300">
           <v-icon size="small" class="mr-1">mdi-domain</v-icon> {{ job?.company }} | 
           <v-icon size="small" class="ml-2 mr-1">mdi-map-marker</v-icon> {{ job?.location }}
@@ -23,15 +23,24 @@
         class="bg-transparent text-white custom-table"
       >
         <!-- Applicant Name & Avatar -->
-        <template v-slot:item.applicant_name="{ item }">
-          <div class="d-flex align-center gap-3">
-            <v-avatar size="40" :image="item.avatar_url || '/placeholder-avatar.png'" color="grey-darken-3"></v-avatar>
-            <div>
-              <div class="font-weight-bold">{{ item.applicant_name }}</div>
-              <div class="text-caption text-blue-grey-300">{{ item.applicant_email }}</div>
-            </div>
-          </div>
-        </template>
+      <template v-slot:item.applicant_name="{ item }">
+  <div class="d-flex align-center gap-3">
+    <v-avatar
+      size="40"
+      :image="item.avatar_url || '/placeholder-avatar.png'"
+      color="grey-darken-3"
+    ></v-avatar>
+
+    <div>
+      <div class="font-weight-bold">
+        {{ item.applicant_name }}
+      </div>
+      <div class="text-caption text-blue-grey-300">
+        {{ item.applicant_email }}
+      </div>
+    </div>
+  </div>
+</template>
 
         <!-- AEMS Progress (Courses & Certs) -->
         <template v-slot:item.aems_progress="{ item }">
@@ -111,7 +120,7 @@
         </v-btn>
       </v-card>
     </v-dialog>
-  </div>
+  </v-container>
 </template>
 
 <script setup lang="ts">

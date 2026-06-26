@@ -1,5 +1,5 @@
 <template>
-  <div class="pa-6 dashboard-page-content">
+  <v-container fluid class="pa-6">
     <div v-if="loading">
       <v-skeleton-loader type="heading" class="mb-8" width="300"></v-skeleton-loader>
       <v-row class="mb-4">
@@ -28,7 +28,7 @@
     <div v-else>
     <div class="d-flex align-center mb-8">
       <div>
-        <h1 class="text-h4 font-weight-bold">Platform Overview</h1>
+        <h1 class="text-h4 font-weight-bold mb-1 text-primary">Platform Overview</h1>
         <p class="text-secondary">Comprehensive analytics and system health for your platform.</p>
       </div>
       <v-spacer></v-spacer>
@@ -110,9 +110,10 @@
         </v-card>
       </v-col>
 
-      <!-- System Health -->
-      <v-col cols="12" md="5">
-        <v-card class="pa-6 rounded-lg shadow-sm fill-height">
+      <!-- Right Column -->
+      <v-col cols="12" md="5" class="d-flex flex-column" style="gap: 16px;">
+        <!-- System Health -->
+        <v-card class="pa-6 rounded-lg shadow-sm">
           <div class="text-h6 font-weight-bold mb-6">System Health</div>
           <div class="mb-6">
             <div class="d-flex justify-space-between mb-2">
@@ -143,6 +144,24 @@
               <v-list-item-subtitle class="text-caption">{{ f.time }} - {{ f.notes }}</v-list-item-subtitle>
             </v-list-item>
             <div v-if="data.todayFollowups.length === 0" class="text-caption text-grey text-center py-4">No follow-ups today</div>
+          </v-list>
+        </v-card>
+
+        <!-- Upcoming Live Classes -->
+        <v-card class="pa-6 rounded-lg shadow-sm flex-grow-1">
+          <div class="d-flex align-center justify-space-between mb-4">
+            <div class="text-h6 font-weight-bold">Upcoming Live Classes</div>
+            <v-chip size="small" color="primary" variant="tonal">Next 10 Days</v-chip>
+          </div>
+          <v-list density="compact" class="bg-transparent pa-0">
+            <v-list-item v-for="cls in data.upcomingLiveClasses" :key="cls.id" class="px-0 mb-3">
+              <template #prepend><v-icon icon="mdi-video-outline" size="20" class="mr-3 text-primary"></v-icon></template>
+              <v-list-item-title class="text-body-2 font-weight-bold">{{ cls.title }}</v-list-item-title>
+              <v-list-item-subtitle class="text-caption mt-1">
+                {{ formatDate(cls.start_date) }} &bull; By {{ cls.tutor_name || 'TBA' }}
+              </v-list-item-subtitle>
+            </v-list-item>
+            <div v-if="!data.upcomingLiveClasses || data.upcomingLiveClasses.length === 0" class="text-caption text-grey text-center py-4">No live classes scheduled for the next 10 days</div>
           </v-list>
         </v-card>
       </v-col>
@@ -185,7 +204,7 @@
       </v-col>
     </v-row>
     </div>
-  </div>
+  </v-container>
 </template>
 
 <script setup lang="ts">
@@ -237,6 +256,13 @@ interface SystemHealth {
   redisStatus: string;
 }
 
+interface LiveClass {
+  id: string;
+  title: string;
+  start_date: string;
+  tutor_name: string;
+}
+
 interface AdminDashboardData {
   kpis: {
     row1: KPI[];
@@ -245,6 +271,7 @@ interface AdminDashboardData {
   funnel: FunnelStage[];
   recentEnrollments: Enrollment[];
   todayFollowups: Followup[];
+  upcomingLiveClasses: LiveClass[];
   systemHealth: SystemHealth;
 }
 
@@ -253,6 +280,7 @@ const data = ref<AdminDashboardData>({
   funnel: [],
   recentEnrollments: [],
   todayFollowups: [],
+  upcomingLiveClasses: [],
   systemHealth: { diskUsage: 0, dbStatus: 'Offline', redisStatus: 'Offline' }
 });
 
@@ -368,13 +396,4 @@ onMounted(fetchData);
 <style scoped>
 
 .shadow-sm { border: 1px solid var(--border); }
-
-.fade-in {
-  animation: fadeIn 0.6s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(15px); }
-  to { opacity: 1; transform: translateY(0); }
-}
 </style>

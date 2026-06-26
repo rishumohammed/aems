@@ -1,9 +1,9 @@
 <template>
-  <div class="pa-6 fade-in">
+  <v-container fluid class="pa-6">
     <div class="d-flex align-center justify-space-between mb-8">
       <div>
-        <h1 class="page-title mb-1">Results & Grading</h1>
-        <p class="text-subtitle-1 text-secondary">Review and manually grade exam submissions</p>
+        <h1 class="text-h4 font-weight-bold mb-1 text-primary">Results & Grading</h1>
+        <p class="text-subtitle-1 text-medium-emphasis mb-6">Review and manually grade exam submissions</p>
       </div>
       <div class="filter-pill">
         <AppInput
@@ -97,7 +97,7 @@
             </v-avatar>
             <div class="font-weight-bold">{{ item.student_name }}</div>
           </div>
-        </template>
+</template>
 
         <template #item.status="{ item }">
           <Badge :color="statusColor(item.status)">
@@ -135,7 +135,7 @@
         </template>
       </v-data-table>
     </div>
-  </div>
+  </v-container>
 </template>
 
 <script setup lang="ts">
@@ -207,12 +207,7 @@ onMounted(fetchAttempts);
 </script>
 
 <style scoped>
-.page-title {
-  font-size: 28px;
-  font-weight: 800;
-  letter-spacing: -0.6px;
-  color: var(--g7);
-}
+
 
 .apple-table-card {
   background: white;
@@ -243,15 +238,6 @@ onMounted(fetchAttempts);
 
 .av-sq {
   border-radius: 10px !important;
-}
-
-.fade-in {
-  animation: fadeIn 0.3s ease-out;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
 }
 
 .apple-stat-card {

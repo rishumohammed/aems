@@ -1,9 +1,9 @@
 <template>
-  <div class="pa-6 fade-in">
+  <v-container fluid class="pa-6">
     <div class="d-flex justify-space-between align-center mb-8">
       <div>
-        <h1 class="page-title mb-1">User Management</h1>
-        <p class="text-subtitle-1 text-secondary">Control access and roles for all platform users.</p>
+        <h1 class="text-h4 font-weight-bold mb-1 text-primary">User Management</h1>
+        <p class="text-subtitle-1 text-medium-emphasis mb-6">Control access and roles for all platform users.</p>
       </div>
       <AppButton icon="mdi-account-plus" @click="openAddModal">
         Add User
@@ -61,7 +61,7 @@
               <div class="user-email">{{ item.email }}</div>
             </div>
           </div>
-        </template>
+</template>
         <template #[`item.role`]="{ item }">
           <Badge :color="roleColor(item.role)">
             {{ item.role.replace('_', ' ') }}
@@ -133,7 +133,7 @@
         </div>
       </div>
     </AppModal>
-  </div>
+  </v-container>
 </template>
 
 <script setup lang="ts">
@@ -261,12 +261,7 @@ definePageMeta({
 </script>
 
 <style scoped>
-.page-title {
-  font-size: 28px;
-  font-weight: 800;
-  letter-spacing: -0.6px;
-  color: var(--g7);
-}
+
 
 .filters-card {
   background: white;
@@ -317,15 +312,6 @@ definePageMeta({
 
 .av-sq {
   border-radius: 10px !important;
-}
-
-.fade-in {
-  animation: fadeIn 0.3s ease-out;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
 }
 
 .fr2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }

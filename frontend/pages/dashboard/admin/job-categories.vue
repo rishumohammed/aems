@@ -2,8 +2,8 @@
   <v-container fluid class="pa-6">
     <div class="d-flex align-center justify-space-between mb-6">
       <div>
-        <h1 class="text-h4 font-weight-bold mb-1">Job Categories</h1>
-        <p class="text-subtitle-1 text-grey">Manage categories used to classify job postings.</p>
+        <h1 class="text-h4 font-weight-bold mb-1 text-primary">Job Categories</h1>
+        <p class="text-subtitle-1 text-medium-emphasis mb-6">Manage categories used to classify job postings.</p>
       </div>
       <v-btn color="primary" prepend-icon="mdi-plus" class="text-capitalize font-weight-bold" rounded="lg" @click="openModal()">
         Add Category
@@ -97,7 +97,7 @@
         </v-card-text>
         <v-card-actions class="pa-6 pt-0">
           <v-spacer></v-spacer>
-          <v-btn variant="text" color="grey" class="text-capitalize font-weight-bold" @click="dialog = false">Cancel</v-btn>
+          <v-btn   class="text-capitalize font-weight-bold" @click="dialog = false" variant="text">Cancel</v-btn>
           <v-btn color="primary" class="text-capitalize font-weight-bold px-6" rounded="lg" :loading="saving" @click="saveCategory">
             {{ editingId ? 'Update' : 'Create' }}
           </v-btn>

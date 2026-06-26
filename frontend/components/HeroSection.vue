@@ -69,6 +69,7 @@
         <!-- Main image -->
         <div class="image-frame">
           <img
+            v-if="heroImgSrc"
             :src="heroImgSrc"
             alt="Food technology quality control"
             class="hero-img"
@@ -124,7 +125,7 @@ const heroImageUrlConfig = useState('homepage_hero_image_url', () => '');
 const heroImgSrc = computed(() => {
   if (heroImageUrlConfig.value) return heroImageUrlConfig.value;
   if (heroImageConfig.value) return baseUrl.value + heroImageConfig.value;
-  return 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?q=80&w=1200';
+  return '';
 });
 </script>
 

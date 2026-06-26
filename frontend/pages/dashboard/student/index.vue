@@ -1,5 +1,5 @@
 <template>
-  <div class="dashboard-page bg-grey-lighten-4 min-vh-100">
+  <v-container fluid class="pa-6">
     <v-container class="pt-4 pb-8">
       
       <div v-if="loading" class="pa-6">
@@ -144,7 +144,7 @@
                     :elevation="isHovering ? 10 : 2"
                     class="course-card rounded-xl border-0 h-100 transition-swing"
                   >
-                    <v-img :src="course.thumbnail_url || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800'" height="160" cover class="align-end">
+                    <v-img :src="course.thumbnail_url" height="160" cover class="align-end">
                       <div class="pa-4 bg-gradient-overlay">
                         <v-chip size="x-small" :color="course.status === 'completed' ? 'success' : 'primary'" variant="flat" class="font-weight-black">
                           {{ course.status.toUpperCase() }}
@@ -218,7 +218,7 @@
             <v-row>
               <v-col v-for="course in recommendedCourses" :key="course.id" cols="12" sm="6" md="3">
                 <v-card class="recommended-card rounded-xl border-0 overflow-hidden" elevation="1">
-                  <v-img :src="course.thumbnail_url || 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=400'" height="120" cover></v-img>
+                  <v-img :src="course.thumbnail_url" height="120" cover></v-img>
                   <v-card-text class="pa-3">
                     <div class="text-caption text-primary font-weight-bold mb-1">{{ course.category_name }}</div>
                     <div class="text-body-2 font-weight-bold text-truncate mb-2">{{ course.title }}</div>
@@ -388,7 +388,7 @@
       </v-row>
       </template>
     </v-container>
-  </div>
+  </v-container>
 </template>
 
 <script setup>

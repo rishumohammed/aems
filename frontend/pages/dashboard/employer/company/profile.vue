@@ -1,8 +1,8 @@
 <template>
-  <div class="pa-6 max-w-1000 mx-auto">
+  <v-container fluid class="pa-6">
     <div class="d-flex align-center justify-space-between mb-8">
       <div>
-        <h1 class="text-h4 font-weight-black text-grey-darken-4 mb-2">Company Profile</h1>
+        <h1 class="text-h4 font-weight-bold mb-1 text-primary">Company Profile</h1>
         <p class="text-blue-grey-300">Manage your company's public branding and details.</p>
       </div>
       <v-btn
@@ -151,7 +151,7 @@
     <v-snackbar v-model="snackbar" :color="snackbarColor" timeout="3000">
       {{ snackbarText }}
     </v-snackbar>
-  </div>
+  </v-container>
 </template>
 
 <script setup lang="ts">
