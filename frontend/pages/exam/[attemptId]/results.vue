@@ -37,7 +37,65 @@
               <p class="text-grey-darken-1 text-center max-w-400 mb-4">Your answers have been recorded.</p>
             </template>
             
-            <v-btn variant="tonal" color="blue-grey" @click="router.push('/dashboard/exams')" size="large" rounded="xl">Back to Exams</v-btn>
+          </div>
+        </div>
+
+        <!-- Review Section -->
+        <div v-if="(canGrade || result.show_result_detail) && result.question_breakdown?.length" class="review-section mt-12 text-left">
+          <h2 class="text-h5 font-weight-bold mb-6 text-dark">Review & Grading</h2>
+          
+          <div v-for="(q, index) in result.question_breakdown" :key="q.id" class="review-card" :class="{
+            'correct': q.is_correct === true,
+            'wrong': q.is_correct === false,
+            'pending': q.is_correct === null
+          }">
+            <div class="review-header">
+              <span class="q-num">Q{{ index + 1 }}</span>
+              <span class="q-type">{{ q.type }}</span>
+              <span class="q-score-badge" :class="{
+                'badge-pass': q.is_correct === true,
+                'badge-fail': q.is_correct === false,
+                'badge-pending': q.is_correct === null
+              }">
+                {{ q.marks_awarded || 0 }} / {{ q.marks }} Marks
+              </span>
+            </div>
+            
+            <p class="q-text">{{ q.question_text }}</p>
+            
+            <div class="answer-row">
+              <div class="answer-block">
+                <span class="answer-label">Student's Answer</span>
+                <span class="answer-text">{{ q.answer_text || 'No answer provided' }}</span>
+              </div>
+              <div v-if="q.correct_answer && result.show_result_detail" class="answer-block correct-answer">
+                <span class="answer-label text-success">Correct Answer</span>
+                <span class="answer-text">{{ q.correct_answer }}</span>
+              </div>
+            </div>
+            
+            <div v-if="q.explanation && result.show_result_detail" class="explanation">
+              <v-icon size="16" color="warning" class="mt-1">mdi-lightbulb-on-outline</v-icon>
+              <span>{{ q.explanation }}</span>
+            </div>
+            
+            <!-- Grading UI for Admin/Tutor -->
+            <div v-if="canGrade" class="grade-row">
+              <v-text-field
+                v-model.number="gradeInputs[q.id]"
+                type="number"
+                label="Marks Awarded"
+                density="compact"
+                variant="outlined"
+                hide-details
+                style="max-width: 150px;"
+                :max="q.marks"
+                min="0"
+              ></v-text-field>
+              <v-btn color="primary" class="text-none font-weight-bold" @click="gradeAnswer(q.id, q.marks)">
+                Save Grade
+              </v-btn>
+            </div>
           </div>
         </div>
       </v-card>
@@ -287,4 +345,37 @@ const downloadCertificate = async () => {
 
 .text-ink { color: var(--ink) !important; }
 .text-muted { color: var(--muted) !important; }
+
+/* Review section */
+.review-section { margin-top: 40px; }
+.review-card {
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  margin-bottom: 16px;
+  border: 1px solid var(--border);
+  background: var(--white);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+}
+.review-card.correct { border-left: 4px solid #10b981; }
+.review-card.wrong   { border-left: 4px solid var(--accent); }
+.review-card.pending { border-left: 4px solid #f59e0b; }
+
+.review-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.q-num { font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
+.q-type { font-size: 11px; background: var(--panel); border-radius: 10px; padding: 2px 8px; color: var(--muted); text-transform: uppercase; font-weight: 600; }
+.q-score-badge { margin-left: auto; font-size: 12px; font-weight: 700; border-radius: 20px; padding: 3px 12px; }
+.badge-pass { background: rgba(16,185,129,0.1); color: #10b981; }
+.badge-fail { background: rgba(239,68,68,0.1); color: #ef4444; }
+.badge-pending { background: rgba(245,158,11,0.1); color: #f59e0b; }
+
+.q-text { font-size: 15px; color: var(--ink); line-height: 1.6; margin-bottom: 16px; font-weight: 600; }
+
+.answer-row { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 12px; }
+.answer-block { flex: 1; min-width: 200px; background: var(--panel); border-radius: var(--radius-md); padding: 12px; border: 1px solid var(--border); }
+.answer-label { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin-bottom: 6px; font-weight: 600; }
+.answer-text { font-size: 14px; color: var(--ink); font-weight: 500; }
+.correct-answer { border-color: #10b981; background: rgba(16,185,129,0.05); }
+
+.explanation { font-size: 13px; color: var(--muted); display: flex; align-items: flex-start; gap: 6px; margin-top: 12px; padding: 12px; background: rgba(245,158,11,0.05); border-radius: var(--radius-md); }
+.grade-row { display: flex; align-items: center; gap: 12px; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); }
 </style>
