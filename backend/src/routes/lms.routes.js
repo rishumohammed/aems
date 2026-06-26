@@ -66,7 +66,6 @@ router.get('/courses', authenticateJWT, async (req, res) => {
       SELECT c.*, u.name as tutor_name, u.role as tutor_role, cat.name as category_name,
       (SELECT COUNT(*) FROM enrollments WHERE course_id = c.id) as enrolled_count,
       (SELECT COUNT(*) FROM course_sections WHERE course_id = c.id) as chapter_count,
-      (SELECT COUNT(*) FROM course_modules m JOIN course_sections s ON m.section_id = s.id WHERE s.course_id = c.id) as module_count,
       (SELECT COUNT(*) FROM course_lessons l JOIN course_sections s ON l.section_id = s.id WHERE s.course_id = c.id AND l.type = 'video') as video_count,
       (SELECT COUNT(*) FROM course_lessons l JOIN course_sections s ON l.section_id = s.id WHERE s.course_id = c.id AND l.type = 'resource') as document_count
       FROM courses c
