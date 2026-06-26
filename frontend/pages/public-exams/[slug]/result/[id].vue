@@ -7,25 +7,15 @@
     </div>
 
     <div v-else-if="result">
-      <!-- Result Banner Header -->
-      <v-card :class="['result-banner text-white pa-8 rounded-xl text-center mb-8', result.passed ? 'passed-bg' : 'failed-bg']" flat>
-        <v-avatar size="80" color="rgba(255,255,255,0.2)" class="mb-4">
-          <v-icon size="40" color="white">{{ result.passed ? 'mdi-trophy' : 'mdi-alert-circle' }}</v-icon>
-        </v-avatar>
-
-        <h1 class="text-h3 font-weight-black mb-2">
-          {{ result.passed ? 'Exam Passed!' : 'Exam Failed' }}
+      <!-- Result Stats Header -->
+      <div class="mb-6">
+        <h1 class="text-h4 font-weight-black text-dark mb-2">
+          {{ result.guest_name ? result.guest_name + "'s Scorecard" : 'Candidate Exam Scorecard' }}
         </h1>
-        <p class="text-subtitle-1 opacity-90">
-          {{ result.passed ? 'Excellent work! You have successfully cleared the entrance test.' : 'Do not worry, practice makes perfect. Try retaking the mock exam.' }}
+        <p class="text-subtitle-1 text-secondary">
+          Detailed breakdown of the candidate's performance.
         </p>
-
-        <!-- Dynamic warning for Practice Certificates -->
-        <div v-if="result.passed" class="mt-4 d-inline-flex align-center border border-white pa-2 px-4 rounded-lg bg-white bg-opacity-10 text-caption font-weight-bold">
-          <v-icon start size="16">mdi-shield-alert-outline</v-icon>
-          Practice Certificate available for download below. Not an official qualification.
-        </div>
-      </v-card>
+      </div>
 
       <!-- Stats Grid -->
       <v-row class="mb-8">
@@ -52,39 +42,14 @@
           {{ showAnswers ? 'Hide Answer Review' : 'Review Answers' }}
         </v-btn>
 
-        <!-- Download Certificate (Passed only) -->
-        <v-btn
-          color="success"
-          rounded="lg"
-          height="48"
-          class="text-capitalize font-weight-bold text-white px-6"
-          elevation="0"
-          v-if="result.passed"
-          @click="handleDownloadCertificateClick"
-          :loading="downloading"
-        >
-          <v-icon start>mdi-download</v-icon> Download Certificate
-        </v-btn>
-
-        <v-btn
-          color="primary"
-          rounded="lg"
-          height="48"
-          class="text-capitalize font-weight-bold px-6"
-          elevation="0"
-          :to="`/public-exams/${route.params.slug}`"
-        >
-          <v-icon start>mdi-refresh</v-icon> Retake Exam
-        </v-btn>
-
         <v-btn
           variant="text"
           color="grey-darken-2"
           height="48"
           class="text-capitalize font-weight-bold"
-          to="/public-exams"
+          @click="$router.back()"
         >
-          Back to Portal
+          Go Back
         </v-btn>
       </div>
 

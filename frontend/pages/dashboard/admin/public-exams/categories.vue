@@ -3,7 +3,7 @@
     <!-- Header -->
     <div class="d-flex align-center justify-space-between mb-8 flex-wrap gap-4">
       <div>
-        <h1 class="text-h4 font-weight-bold mb-1 text-primary">Public Exam Categories</h1>
+        <h1 class="text-h4 font-weight-bold mb-1">Public Exam Categories</h1>
         <p class="text-subtitle-2 text-secondary">Create and manage categories to classify entrance tests and visitor mock exams.</p>
       </div>
       <div>

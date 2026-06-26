@@ -1,5 +1,19 @@
 <template>
   <v-app class="take-exam-app bg-background">
+    <!-- OVERLAYS -->
+    <ProctoringOverlay 
+      v-if="examConfig?.enable_proctoring && proctoring.violationWarning.value.show"
+      :show="proctoring.violationWarning.value.show" 
+      :message="proctoring.violationWarning.value.message" 
+      :is-auto-submitting="submittingExam"
+      @dismiss="proctoring.dismissWarning()" 
+    />
+    <WebcamThumbnail 
+      v-if="examConfig?.enable_proctoring && !requiresCamera" 
+      :stream="recorder.stream.value" 
+      @video-ready="onVideoReady"
+    />
+
     <!-- Header Bar -->
     <v-app-bar flat color="#1A1A2E" class="text-white border-b px-4" height="64">
       <div class="d-flex align-center cursor-pointer" @click="confirmExit">
@@ -353,6 +367,17 @@
         <v-btn color="primary" rounded="lg" size="large" @click="toggleFullScreen">Enter Full Screen</v-btn>
       </v-card>
     </v-overlay>
+
+    <!-- Camera Enforcement Overlay -->
+    <v-overlay v-model="requiresCamera" class="align-center justify-center" persistent>
+      <v-card class="pa-8 text-center rounded-xl border" max-width="400" flat>
+        <v-icon size="64" color="primary" class="mb-4">mdi-camera</v-icon>
+        <h3 class="text-h5 font-weight-bold mb-2">Camera Required</h3>
+        <p class="text-body-2 text-secondary mb-6">This exam is proctored. Please enable your camera to continue.</p>
+        <v-btn color="primary" rounded="lg" size="large" :loading="faceDetection.isModelLoading.value" @click="setupCamera">Enable Camera</v-btn>
+        <p v-if="recorder.cameraError.value" class="text-error text-caption mt-2">{{ recorder.cameraError.value }}</p>
+      </v-card>
+    </v-overlay>
   </v-app>
 </template>
 
@@ -360,6 +385,11 @@
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useApi } from '@/composables/useApi';
+import { useProctoring } from '@/composables/useProctoring';
+import { useFaceDetection } from '@/composables/useFaceDetection';
+import { useWebcamRecorder } from '@/composables/useWebcamRecorder';
+import ProctoringOverlay from '@/components/exam/ProctoringOverlay.vue';
+import WebcamThumbnail from '@/components/exam/WebcamThumbnail.vue';
 
 definePageMeta({
   layout: 'empty'
@@ -368,6 +398,9 @@ definePageMeta({
 const route = useRoute();
 const router = useRouter();
 const api = useApi();
+const proctoring = useProctoring();
+const faceDetection = useFaceDetection();
+const recorder = useWebcamRecorder();
 
 const examSlug = computed(() => route.params.slug as string);
 const examName = computed(() => {
@@ -417,6 +450,11 @@ const submittingExam = ref(false);
 
 const requiresFullscreen = computed(() => {
   return examConfig.value?.enforce_fullscreen && !isFullScreen.value && attemptId.value !== '';
+});
+
+const cameraReady = ref(false);
+const requiresCamera = computed(() => {
+  return examConfig.value?.enable_proctoring && !cameraReady.value && attemptId.value !== '';
 });
 
 const currentQuestion = computed(() => {
@@ -520,36 +558,60 @@ function toggleFullScreen() {
 }
 
 // Proctoring Logic
+const proctoringConfig = computed(() => {
+  return {
+    face_detection: true,
+    capture_on_violation: true,
+    face_missing_alert: true,
+    multiple_faces_alert: true,
+    record_full_video: true,
+    face_missing_threshold: 5
+  };
+});
+
+async function setupCamera() {
+  const granted = await recorder.requestCamera();
+  if (granted) {
+    await faceDetection.loadModel();
+    if (!faceDetection.faceDetectionError.value) {
+      cameraReady.value = true;
+      initAdvancedProctoring();
+    }
+  }
+}
+
+function onVideoReady(videoEl: HTMLVideoElement) {
+  faceDetection.startDetection(
+    videoEl, 
+    proctoring.logEvent, 
+    (msg) => {
+      proctoring.violationWarning.value = { show: true, message: msg };
+      proctoring.speakWarning(msg);
+    },
+    proctoringConfig.value
+  );
+}
+
+function initAdvancedProctoring() {
+  proctoring.initProctoring(attemptId.value, submitOnTimeout, proctoringConfig.value, () => recorder.captureScreenshot(attemptId.value));
+  if (!recorder.isRecording.value) {
+    recorder.startRecording(attemptId.value, proctoringConfig.value.record_full_video);
+  }
+}
+
 function setupProctoring() {
   if (!examConfig.value?.enable_proctoring && !examConfig.value?.enforce_fullscreen) return;
-  
-  if (examConfig.value?.enable_proctoring) {
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    window.addEventListener('blur', handleWindowBlur);
-  }
-  
-  if (examConfig.value?.enforce_fullscreen) {
+  // useProctoring composable now handles fullscreen change and visibility change internally!
+  // It is initialized after camera is ready.
+  // We only manually handle fullscreen exit enforcement here if proctoring composable is not used for it.
+  // Wait, if enable_proctoring is false, but enforce_fullscreen is true:
+  if (!examConfig.value?.enable_proctoring && examConfig.value?.enforce_fullscreen) {
     document.addEventListener('fullscreenchange', handleFullscreenChange);
-  }
-}
-
-function handleVisibilityChange() {
-  if (document.hidden && examConfig.value?.enable_proctoring && !showProctorWarningDialog.value) {
-    triggerProctorViolation('Tab switching or minimizing the browser is strictly prohibited.');
-  }
-}
-
-function handleWindowBlur() {
-  if (examConfig.value?.enable_proctoring && !showProctorWarningDialog.value) {
-    triggerProctorViolation('Leaving the browser window is strictly prohibited.');
   }
 }
 
 function handleFullscreenChange() {
   isFullScreen.value = !!document.fullscreenElement;
-  if (!document.fullscreenElement && examConfig.value?.enforce_fullscreen && !showProctorWarningDialog.value) {
-    triggerProctorViolation('Exiting full screen mode is not allowed.');
-  }
 }
 
 function triggerProctorViolation(customMsg: string) {
@@ -692,8 +754,9 @@ async function submitFinalAnswers() {
     localStorage.removeItem(`public_exam_token_${examSlug.value}`);
     localStorage.removeItem(`public_exam_candidate_${examSlug.value}`);
 
+    cleanupProctoring();
     confirmSubmitDialog.value = false;
-    router.push(`/public-exams/${examSlug.value}/result/${attemptId.value}`);
+    router.push(`/public-exams/${examSlug.value}/thank-you/${attemptId.value}`);
   } catch (err) {
     console.error('Failed to submit exam:', err);
   } finally {
@@ -710,9 +773,10 @@ async function submitOnTimeout() {
     }));
     const { data } = await api.post(`/public/exams/attempts/${attemptId.value}/submit`, {
       answers: formattedAnswers
-    });
+    }, { headers: authHeaders() });
     localStorage.removeItem(`exam_attempt_${examSlug.value}`);
-    router.push(`/public-exams/${examSlug.value}/result/${attemptId.value}`);
+    cleanupProctoring();
+    router.push(`/public-exams/${examSlug.value}/thank-you/${attemptId.value}`);
   } catch (err) {
     console.error('Timeout submit failed:', err);
     router.push('/public-exams');
@@ -754,15 +818,23 @@ onMounted(async () => {
 onBeforeUnmount(() => {
   clearInterval(timerInterval.value);
   window.removeEventListener('beforeunload', handleBeforeUnload);
-  
-  document.removeEventListener('visibilitychange', handleVisibilityChange);
-  window.removeEventListener('blur', handleWindowBlur);
   document.removeEventListener('fullscreenchange', handleFullscreenChange);
+
+  cleanupProctoring();
 
   if (document.fullscreenElement) {
     document.exitFullscreen().catch(() => {});
   }
 });
+
+function cleanupProctoring() {
+  if (examConfig.value?.enable_proctoring) {
+    proctoring.cleanupProctoring();
+    faceDetection.stopDetection();
+    recorder.stopRecording();
+    recorder.releaseCamera();
+  }
+}
 
 function handleBeforeUnload(e: BeforeUnloadEvent) {
   e.preventDefault();

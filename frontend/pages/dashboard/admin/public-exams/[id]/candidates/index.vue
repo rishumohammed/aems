@@ -7,7 +7,7 @@
       </v-btn>
       <div class="d-flex align-center justify-space-between flex-wrap gap-4">
         <div>
-          <h1 class="text-h4 font-weight-bold mb-1 text-primary">Candidates - {{ exam?.name || 'Loading...' }}</h1>
+          <h1 class="text-h4 font-weight-bold mb-1">Candidates - {{ exam?.name || 'Loading...' }}</h1>
           <p class="text-subtitle-2 text-secondary">Manage registrations and results for the "{{ exam?.name || '...' }}" entrance exam.</p>
         </div>
         <div class="d-flex gap-2 align-center">

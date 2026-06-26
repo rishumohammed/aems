@@ -170,7 +170,7 @@ router.post('/candidates/login', async (req, res) => {
 
     // Find candidate for this exam
     const [candidates] = await pool.query(
-      'SELECT id, name, email, password_hash, registration_status FROM public_exam_candidates WHERE email = ? AND exam_id = ?',
+      'SELECT id, name, email, phone, password_hash, registration_status FROM public_exam_candidates WHERE email = ? AND exam_id = ?',
       [email.trim().toLowerCase(), exam.id]
     );
 
@@ -205,7 +205,7 @@ router.post('/candidates/login', async (req, res) => {
     res.json({
       message: 'Login successful',
       token,
-      candidate: { id: candidate.id, name: candidate.name, email: candidate.email },
+      candidate: { id: candidate.id, name: candidate.name, email: candidate.email, phone: candidate.phone },
       exam: { id: exam.id, name: exam.name, slug: exam.slug }
     });
   } catch (error) {

@@ -190,6 +190,7 @@ async function handleLogin() {
       {
         guest_name: data.candidate.name,
         guest_email: data.candidate.email,
+        guest_phone: data.candidate.phone,
         is_anonymous: false,
         candidate_id: data.candidate.id
       },

@@ -4,7 +4,7 @@
     <div class="d-flex align-center mb-8 gap-4">
       <v-btn icon="mdi-arrow-left" variant="tonal" class="mr-2" to="/dashboard/admin/public-exams"></v-btn>
       <div>
-        <h1 class="text-h4 font-weight-bold mb-1 text-primary">Results &amp; Analytics</h1>
+        <h1 class="text-h4 font-weight-bold mb-1">Results &amp; Analytics</h1>
         <p class="text-subtitle-2 text-secondary">Monitor guest entrance test scores and view analytics dashboards for this exam.</p>
       </div>
       <v-spacer></v-spacer>
@@ -55,33 +55,6 @@
         </v-col>
       </v-row>
 
-      <!-- Advanced stats row -->
-      <v-row>
-        <v-col cols="12">
-          <v-card class="pa-6 border rounded-xl h-100" flat>
-            <h3 class="text-subtitle-1 font-weight-bold mb-4 text-dark">
-              <v-icon start color="primary" size="20">mdi-brain</v-icon> Question Success Rate
-            </h3>
-            <div v-if="analytics.questionDifficulty && analytics.questionDifficulty.length > 0">
-              <v-row>
-                <v-col cols="12" md="6" v-for="q in analytics.questionDifficulty.slice(0, 6)" :key="q.id" class="mb-3">
-                  <div class="d-flex justify-space-between align-center mb-1">
-                    <span class="text-body-2 text-truncate font-weight-bold text-dark" style="max-width: 75%">{{ q.question_text }}</span>
-                    <v-chip size="x-small" :color="getDifficultyColorBadge(q.perceived_difficulty)" variant="flat" class="text-white font-weight-bold text-uppercase">
-                      {{ q.perceived_difficulty }}
-                    </v-chip>
-                  </div>
-                  <v-progress-linear :model-value="q.success_rate" color="success" height="6" rounded></v-progress-linear>
-                  <div class="d-flex justify-space-between text-xsmall text-secondary mt-1">
-                    <span>{{ q.success_rate }}% Correct ({{ q.correct_count }}/{{ q.total_answers }})</span>
-                  </div>
-                </v-col>
-              </v-row>
-            </div>
-            <div v-else class="text-center py-8 text-secondary">No question analytics recorded.</div>
-          </v-card>
-        </v-col>
-      </v-row>
     </div>
 
     <!-- Search & Filter Controls -->
@@ -109,13 +82,7 @@
 
     <!-- Table -->
     <v-card variant="outlined" class="rounded-xl bg-white border-0 shadow-sm overflow-hidden">
-      <div v-if="loadingAttempts" class="pa-12 text-center">
-        <v-progress-circular indeterminate color="primary" size="48"></v-progress-circular>
-        <div class="mt-4 text-grey font-weight-bold">Loading guest attempts...</div>
-      </div>
-
       <v-data-table-server
-        v-else
         v-model:items-per-page="itemsPerPage"
         :headers="headers"
         :items="attempts"

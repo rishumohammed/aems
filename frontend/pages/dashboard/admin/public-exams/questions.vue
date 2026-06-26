@@ -3,7 +3,7 @@
     <!-- Header -->
     <div class="d-flex align-center justify-space-between mb-8 flex-wrap gap-4">
       <div>
-        <h1 class="text-h4 font-weight-bold mb-1 text-primary">Question Bank</h1>
+        <h1 class="text-h4 font-weight-bold mb-1">Question Bank</h1>
         <p class="text-subtitle-2 text-secondary">Manage exam questions, set marking schemes, and bulk import questions using CSV or JSON.</p>
       </div>
     </div>

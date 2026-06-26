@@ -9,7 +9,7 @@
 
     <!-- Header -->
     <div class="mb-8">
-      <h1 class="text-h4 font-weight-bold mb-1 text-primary">
+      <h1 class="text-h4 font-weight-bold mb-1">
         {{ isEditMode ? 'Edit Public Exam Settings' : 'Create Public Exam' }}
       </h1>
       <p class="text-subtitle-2 text-secondary">
