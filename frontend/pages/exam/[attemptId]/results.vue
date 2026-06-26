@@ -18,8 +18,8 @@
           </v-icon>
 
           <div class="text-center mt-2 mb-6">
-            <h1 class="text-h4 font-weight-black mb-2">Thank you, {{ authStore.user?.name }}!</h1>
-            <p class="text-body-1 text-grey-darken-1">You have successfully completed the <strong>{{ result.exam_title }}</strong>.</p>
+            <h1 class="text-h4 font-weight-black mb-2 text-dark">Exam Results</h1>
+            <p class="text-body-1 text-grey-darken-1"><strong>{{ result.exam_title }}</strong></p>
             <p class="text-caption text-grey mt-1">{{ result.course_title }}</p>
           </div>
 
