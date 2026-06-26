@@ -441,10 +441,13 @@ router.get('/:id', authenticateJWT, async (req, res) => {
       'SELECT * FROM exam_questions WHERE exam_id = ? ORDER BY order_index ASC',
       [req.params.id]
     );
-    exam.questions = questions.map(q => ({
-      ...q,
-      options: q.options_json ? JSON.parse(q.options_json) : []
-    }));
+    exam.questions = questions.map(q => {
+      let parsedOptions = [];
+      if (q.options_json) {
+        try { parsedOptions = JSON.parse(q.options_json); } catch(e) { console.error('Invalid JSON for question', q.id); }
+      }
+      return { ...q, options: parsedOptions };
+    });
     res.json(exam);
   } catch (err) {
     res.status(500).json({ message: err.message });
