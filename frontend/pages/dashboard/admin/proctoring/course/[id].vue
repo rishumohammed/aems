@@ -4,7 +4,7 @@
     <div class="d-flex align-center mb-6">
       <v-btn icon="mdi-arrow-left" variant="text" class="mr-4" to="/dashboard/admin/proctoring"></v-btn>
       <div>
-        <h1 class="text-h4 font-weight-bold mb-1 text-primary">{{ course?.title || 'Loading...' }}</h1>
+        <h1 class="text-h4 font-weight-bold mb-1 text-dark">{{ course?.title || 'Loading...' }}</h1>
         <p class="text-subtitle-1 text-medium-emphasis mb-0">Select a student to view their proctoring records for this course.</p>
       </div>
     </div>
@@ -185,6 +185,8 @@ const initials = (name: string) => {
 </script>
 
 <style scoped>
+.text-dark { color: #1e293b; }
+
 .filter-card {
   border: 1px solid rgba(0, 0, 0, 0.06);
   background: white;

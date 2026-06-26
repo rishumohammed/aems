@@ -9,7 +9,7 @@
 
     <div class="d-flex justify-space-between align-center mb-6">
       <div>
-        <h1 class="text-h4 font-weight-bold mb-1 text-primary">{{ examTitle }}</h1>
+        <h1 class="text-h4 font-weight-bold mb-1 text-dark">{{ examTitle }}</h1>
         <p class="text-subtitle-1 text-medium-emphasis mb-0">Review candidates and their proctoring flags for this exam.</p>
       </div>
     </div>
@@ -202,6 +202,8 @@ const filteredCandidates = computed<any[]>(() => {
 </script>
 
 <style scoped>
+.text-dark { color: #1e293b; }
+
 .filter-card {
   border: 1px solid rgba(0, 0, 0, 0.06);
   background: white;

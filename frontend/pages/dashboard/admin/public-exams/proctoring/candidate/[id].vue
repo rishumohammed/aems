@@ -7,7 +7,7 @@
         <span class="text-h6 font-weight-bold text-white">{{ initials(candidate?.name || '') }}</span>
       </v-avatar>
       <div>
-        <h1 class="text-h4 font-weight-bold mb-1 text-primary">{{ candidate?.name || 'Loading...' }}</h1>
+        <h1 class="text-h4 font-weight-bold mb-1 text-dark">{{ candidate?.name || 'Loading...' }}</h1>
         <p class="text-subtitle-1 text-medium-emphasis mb-0">Select an exam attempt to view detailed proctoring logs.</p>
       </div>
       <v-spacer></v-spacer>
@@ -200,6 +200,8 @@ const getStatusColor = (status: string) => {
 </script>
 
 <style scoped>
+.text-dark { color: #1e293b; }
+
 .font-mono {
   font-family: 'Fira Code', 'Courier New', monospace;
   font-size: 11px;
