@@ -593,10 +593,10 @@ router.post('/courses/:id/sections/:sid/lessons', authenticateJWT, isTutorOrAdmi
     const nextOrder = (maxOrder[0].max_order || 0) + 1;
 
     await pool.query(
-      `INSERT INTO course_lessons (id, section_id, module_id, title, type, video_source, video_id, notes, is_free_preview, order_index, resource_url, live_date, live_time, zoom_link, thumbnail_url, duration_seconds, quiz_id, assignment_id, content_html, is_mandatory, scheduled_at, duration_minutes, live_link) 
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO course_lessons (id, section_id, title, type, video_source, video_id, notes, is_free_preview, order_index, resource_url, live_date, live_time, zoom_link, thumbnail_url, duration_seconds, quiz_id, assignment_id, content_html, is_mandatory, scheduled_at, duration_minutes, live_link) 
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
-        id, section_id, null, title, type,
+        id, section_id, title, type,
         video_source || null, video_id || null, notes || null,
         is_free_preview === 'true' || is_free_preview === true, nextOrder, resource_url,
         live_date || null, live_time || null, zoom_link || null,
