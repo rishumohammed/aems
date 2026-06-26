@@ -8,7 +8,7 @@
     @dismiss="proctoring.dismissWarning()" 
   />
   <WebcamThumbnail 
-    v-if="attempt?.proctoring_enabled && stage === 'exam'" 
+    v-if="isProctoringEnabled && stage === 'exam'" 
     :stream="recorder.stream.value" 
     @video-ready="onVideoReady"
   />
@@ -28,7 +28,7 @@
         <div class="info-pill"><v-icon size="16">mdi-clock-outline</v-icon> {{ attempt.duration_minutes }} minutes</div>
         <div class="info-pill"><v-icon size="16">mdi-target</v-icon> Pass: {{ attempt.pass_percentage }}%</div>
         <div class="info-pill"><v-icon size="16">mdi-fullscreen</v-icon> Full-screen required</div>
-        <div class="info-pill" v-if="attempt.proctoring_enabled"><v-icon size="16" color="#f59e0b">mdi-cctv</v-icon> Proctored</div>
+        <div class="info-pill" v-if="isProctoringEnabled"><v-icon size="16" color="#f59e0b">mdi-cctv</v-icon> Proctored</div>
       </div>
 
       <div v-if="attempt.instructions" class="instructions-box mb-8">
@@ -44,13 +44,13 @@
           <li>Ensure a stable internet connection throughout the exam.</li>
           <li>Do not refresh the page — your progress auto-saves every 60 seconds.</li>
           <li>The exam will auto-submit when time runs out.</li>
-          <li v-if="attempt.proctoring_enabled">Your webcam activity will be monitored. Ensure you are clearly visible.</li>
+          <li v-if="isProctoringEnabled">Your webcam activity will be monitored. Ensure you are clearly visible.</li>
           <li>Exiting full-screen will trigger a warning.</li>
         </ul>
       </div>
 
       <!-- Proctoring Setup -->
-      <div v-if="attempt.proctoring_enabled" class="mb-6 pa-4 rounded-lg bg-indigo-darken-4">
+      <div v-if="isProctoringEnabled" class="mb-6 pa-4 rounded-lg bg-indigo-darken-4">
         <h4 class="text-white mb-2"><v-icon left>mdi-shield-check</v-icon> Proctoring Setup</h4>
         <div class="d-flex align-center gap-4">
           <v-btn 
@@ -81,7 +81,7 @@
         color="primary"
         size="large"
         rounded="xl"
-        :disabled="!agreedToTC || (attempt.proctoring_enabled && !cameraReady)"
+        :disabled="!agreedToTC || (isProctoringEnabled && !cameraReady)"
         :loading="starting"
         @click="startExam"
         class="start-btn"
@@ -264,6 +264,12 @@ const examScreenEl = ref<HTMLElement | null>(null);
 
 const cameraReady = ref(false);
 
+const isProctoringEnabled = computed(() => {
+  return attempt.value?.proctoring_enabled === 1 || 
+         attempt.value?.proctoring_enabled === true || 
+         attempt.value?.proctoring_enabled === '1';
+});
+
 // ── Load attempt details ──────────────────────────────────────────────────────
 onMounted(async () => {
   examStore.reset();
@@ -273,7 +279,7 @@ onMounted(async () => {
   // If attempt is already in_progress (e.g. after refresh), skip checklist
   if (attempt.value?.status === 'in_progress') {
     await resumeExam();
-  } else if (attempt.value?.proctoring_enabled && stage.value === 'checklist') {
+  } else if (isProctoringEnabled.value && stage.value === 'checklist') {
     // Automatically trigger the camera permission prompt
     setupCamera();
   }
@@ -342,7 +348,7 @@ const startExam = async () => {
     stage.value = 'exam';
     watchTimer();
     
-    if (attempt.value.proctoring_enabled) {
+    if (isProctoringEnabled.value) {
       proctoring.initProctoring(attemptId.value, triggerAutoSubmitLimit, proctoringConfig.value, () => recorder.captureScreenshot(attemptId.value));
       if (!recorder.isRecording.value) {
         recorder.startRecording(attemptId.value, proctoringConfig.value.record_full_video);
@@ -360,7 +366,7 @@ const resumeExam = async () => {
   stage.value = 'exam';
   watchTimer();
 
-  if (attempt.value?.proctoring_enabled) {
+  if (isProctoringEnabled.value) {
     // Attempt to silently restart camera if we lost it (refresh)
     if (!recorder.stream.value) {
       await recorder.requestCamera();
@@ -436,7 +442,7 @@ const doSubmit = async () => {
 };
 
 const cleanupProctoring = () => {
-  if (attempt.value?.proctoring_enabled) {
+  if (isProctoringEnabled.value) {
     proctoring.cleanupProctoring();
     faceDetection.stopDetection();
     recorder.stopRecording();
