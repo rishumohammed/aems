@@ -43,14 +43,18 @@ class ExamService {
     // If it's a course exam, verify enrollment AND completion
     if (exam.course_id) {
       const [enrollment] = await pool.query(
-        "SELECT id, status FROM enrollments WHERE student_id = ? AND course_id = ?",
+        "SELECT id, status, completion_percentage FROM enrollments WHERE student_id = ? AND course_id = ?",
         [studentId, exam.course_id]
       );
       if (enrollment.length === 0) {
         throw new Error('You must be enrolled in the course to take the exam');
       }
-      if (enrollment[0].status !== 'completed') {
-        throw new Error('You must complete the course before taking the exam.');
+      
+      const currentStatus = enrollment[0].status;
+      const progress = enrollment[0].completion_percentage || 0;
+
+      if (currentStatus !== 'completed' && progress < 100) {
+        throw new Error('You must complete all course lessons (100% progress) before taking the final exam.');
       }
 
       // Check Option C (Restrict final exam until fully paid)
