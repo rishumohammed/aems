@@ -529,7 +529,7 @@ router.put('/:id', authenticateJWT, isTutorOrAdmin, async (req, res) => {
 // DELETE /api/exams/:id
 router.delete('/:id', authenticateJWT, isAdmin, async (req, res) => {
   try {
-    await pool.query('UPDATE exams SET deleted_at = NOW(), status = "closed" WHERE id = ?', [req.params.id]);
+    await pool.query("UPDATE exams SET deleted_at = NOW(), status = 'archived' WHERE id = ?", [req.params.id]);
     res.json({ message: 'Exam deleted' });
   } catch (err) {
     res.status(500).json({ message: err.message });
