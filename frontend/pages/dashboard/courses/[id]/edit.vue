@@ -200,8 +200,9 @@
 
     <!-- Publish Success Modal -->
     <v-dialog v-model="publishSuccessModal.show" max-width="450px" persistent>
-      <v-card rounded="lg" class="pa-6 text-center">
-        <v-icon color="success" size="64" class="mx-auto mb-4">mdi-check-circle</v-icon>
+      <v-card rounded="lg" class="pa-6 text-center position-relative">
+        <v-btn icon="mdi-close" variant="text" size="small" class="position-absolute" style="top: 8px; right: 8px" @click="publishSuccessModal.show = false"></v-btn>
+        <v-icon color="success" size="64" class="mx-auto mb-4 mt-2">mdi-check-circle</v-icon>
         <h3 class="text-h5 font-weight-bold mb-2">Course Published Successfully</h3>
         <p class="text-grey-darken-1 mb-6">Your course is now live and available to students.</p>
         
