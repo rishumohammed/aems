@@ -57,7 +57,7 @@ router.get('/', authenticateJWT, isTutorOrAdmin, async (req, res) => {
         (SELECT COUNT(*) FROM exam_questions WHERE exam_id = e.id) as question_count,
         (SELECT COUNT(*) FROM exam_attempts WHERE exam_id = e.id AND exam_attempts.status IN ('submitted','graded','pending_manual_review')) as attempt_count
       FROM exams e
-      JOIN courses c ON e.course_id = c.id
+      LEFT JOIN courses c ON e.course_id = c.id
       LEFT JOIN users u ON e.created_by = u.id
     `;
     const conditions = ['e.deleted_at IS NULL'];
@@ -120,7 +120,7 @@ router.get('/attempts', authenticateJWT, isTutorOrAdmin, async (req, res) => {
       FROM exam_attempts ea
       JOIN exams e ON ea.exam_id = e.id
       JOIN users u ON ea.student_id = u.id
-      JOIN courses c ON e.course_id = c.id
+      LEFT JOIN courses c ON e.course_id = c.id
       WHERE 1=1
     `;
     const params = [];
@@ -146,7 +146,7 @@ router.get('/attempts/:id', authenticateJWT, async (req, res) => {
              c.title as course_title
       FROM exam_attempts ea
       JOIN exams e ON ea.exam_id = e.id
-      JOIN courses c ON e.course_id = c.id
+      LEFT JOIN courses c ON e.course_id = c.id
       WHERE ea.id = ?
     `, [req.params.id]);
 
@@ -324,7 +324,7 @@ router.get('/attempts/:id/results', authenticateJWT, async (req, res) => {
              (SELECT COUNT(*) FROM exam_attempts WHERE student_id = ea.student_id AND exam_id = ea.exam_id AND status IN ('submitted','graded','pending_manual_review')) as attempts_used
       FROM exam_attempts ea
       JOIN exams e ON ea.exam_id = e.id
-      JOIN courses c ON e.course_id = c.id
+      LEFT JOIN courses c ON e.course_id = c.id
       JOIN users u ON ea.student_id = u.id
       LEFT JOIN certificates cert ON cert.exam_attempt_id = ea.id
       WHERE ea.id = ?
@@ -427,7 +427,7 @@ router.get('/:id', authenticateJWT, async (req, res) => {
   try {
     const [exams] = await pool.query(`
       SELECT e.*, c.title as course_title, c.tutor_id
-      FROM exams e JOIN courses c ON e.course_id = c.id
+      FROM exams e LEFT JOIN courses c ON e.course_id = c.id
       WHERE e.id = ?
     `, [req.params.id]);
     if (exams.length === 0) return res.status(404).json({ message: 'Exam not found' });
@@ -500,7 +500,7 @@ router.put('/:id', authenticateJWT, isTutorOrAdmin, async (req, res) => {
     // Ownership check for tutors
     if (req.user.role === 'tutor') {
       const [exam] = await pool.query(
-         'SELECT c.tutor_id FROM exams e JOIN courses c ON e.course_id = c.id WHERE e.id = ?',
+         'SELECT c.tutor_id FROM exams e LEFT JOIN courses c ON e.course_id = c.id WHERE e.id = ?',
         [req.params.id]
       );
       if (exam.length === 0 || exam[0].tutor_id !== req.user.id) {
