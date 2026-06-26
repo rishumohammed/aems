@@ -18,10 +18,10 @@
         </v-avatar>
         <h2 class="text-h4 font-weight-black mb-4">This lesson is locked</h2>
         <p class="text-body-1 text-grey-darken-1 mb-8 max-width-500 mx-auto">
-          Enroll in <span class="font-weight-bold text-grey-darken-4">{{ enrollment?.title || 'this course' }}</span> to unlock this lesson and all other curriculum materials.
+          Your payment for <span class="font-weight-bold text-grey-darken-4">{{ enrollment?.title || 'this course' }}</span> is incomplete. Please settle your pending invoice to unlock this lesson.
         </p>
-        <v-btn color="primary" size="large" rounded="pill" class="px-10 font-weight-black" :to="`/courses/${courseSlug}`">
-          Enroll Now
+        <v-btn color="primary" size="large" rounded="pill" class="px-10 font-weight-black" to="/dashboard/finance">
+          Complete Payment
         </v-btn>
         <v-btn variant="text" color="primary" class="mt-4 text-none font-weight-bold" @click="navigateToFirstPreview">
           Watch Free Preview
@@ -190,6 +190,9 @@
             <p class="text-caption mt-4 text-success font-weight-bold animate-pulse">Session is currently live!</p>
           </div>
           <div v-else-if="isSessionUpcoming">
+            <div v-if="liveCountdown" class="text-h3 font-weight-black text-primary mb-6" style="font-variant-numeric: tabular-nums;">
+              {{ liveCountdown }}
+            </div>
             <v-btn color="grey" size="large" rounded="xl" prepend-icon="mdi-clock-outline" disabled class="px-8">
               Waiting for Session...
             </v-btn>
@@ -454,6 +457,9 @@ const markComplete = async () => {
     if (res.data?.course_completed) {
       showCompletionModal.value = true;
     }
+  } catch (error) {
+    console.error('Failed to mark lesson as complete:', error);
+    alert(error.response?.data?.message || 'Failed to update progress. Please try again.');
   } finally {
     markingComplete.value = false;
   }
@@ -508,6 +514,37 @@ const isSessionUpcoming = computed(() => {
   return dayjs().isBefore(start.subtract(10, 'minute'));
 });
 
+const liveCountdown = ref('');
+let countdownInterval = null;
+
+const updateCountdown = () => {
+  if (!currentLesson.value?.scheduled_at) return;
+  const start = dayjs(currentLesson.value.scheduled_at).subtract(10, 'minute');
+  const now = dayjs();
+  
+  if (now.isBefore(start)) {
+    const diff = start.diff(now, 'second');
+    const d = Math.floor(diff / (3600 * 24));
+    const h = Math.floor((diff % (3600 * 24)) / 3600);
+    const m = Math.floor((diff % 3600) / 60);
+    const s = diff % 60;
+    
+    if (d > 0) {
+      liveCountdown.value = `${d}d ${h}h ${m}m`;
+    } else {
+      liveCountdown.value = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+    }
+  } else {
+    liveCountdown.value = '';
+    // Force reactivity update to show join button
+    if (currentLesson.value) {
+      currentLesson.value = { ...currentLesson.value };
+    }
+  }
+};
+
+watch(() => currentLesson.value, updateCountdown);
+
 const formatDateTime = (date) => dayjs(date).format('MMM D, YYYY • h:mm A');
 
 const navigateToFirstPreview = () => {
@@ -546,14 +583,11 @@ const getFileName = (url) => {
 
 onMounted(async () => {
   await fetchData();
-  
-  // Load YouTube API if not present
-  if (!window.YT) {
-    const tag = document.createElement('script');
-    tag.src = "https://www.youtube.com/iframe_api";
-    const firstScriptTag = document.getElementsByTagName('script')[0];
-    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-  }
+  countdownInterval = setInterval(updateCountdown, 1000);
+});
+
+onUnmounted(() => {
+  if (countdownInterval) clearInterval(countdownInterval);
 });
 
 // Watch for lessonId changes (re-fetch when navigating between lessons)

@@ -2,7 +2,7 @@
   <v-container fluid class="pa-6">
     <div class="d-flex align-center justify-space-between mb-8">
       <div>
-        <h1 class="text-h4 font-weight-bold mb-1 text-primary">Job Approvals</h1>
+        <h1 class="text-h4 font-weight-bold mb-1">Job Approvals</h1>
         <p class="text-blue-grey-300">Review and approve employer job postings.</p>
       </div>
       <v-btn icon="mdi-refresh" variant="tonal" color="primary" @click="loadPendingJobs" :loading="loading"></v-btn>

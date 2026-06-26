@@ -5,125 +5,42 @@
       <p class="text-muted mt-4">Loading your results...</p>
     </div>
 
-    <div v-else-if="result" class="results-content">
-      <!-- Score Hero Section -->
-      <div class="score-hero">
-        <div class="confetti-wrap" v-if="result.passed">
-          <div v-for="i in 30" :key="i" class="confetti-piece" :style="confettiStyle(i)"></div>
-        </div>
+    <div v-else-if="result" class="results-content d-flex justify-center mt-12">
+      <v-card class="pa-10 rounded-xl elevation-2 text-center w-100" max-width="600">
+        <!-- Score Hero Section -->
+        <div class="score-hero">
+          <div class="confetti-wrap" v-if="result.passed">
+            <div v-for="i in 30" :key="i" class="confetti-piece" :style="confettiStyle(i)"></div>
+          </div>
 
-        <div class="score-ring-wrap">
-          <svg class="score-ring" viewBox="0 0 120 120">
-            <circle cx="60" cy="60" r="52" class="ring-bg" />
-            <circle
-              cx="60" cy="60" r="52"
-              :class="result.passed ? 'ring-pass' : 'ring-fail'"
-              :style="{ strokeDashoffset: ringOffset }"
-              class="ring-progress"
-            />
-          </svg>
-          <div class="score-inner">
-            <div class="score-pct">{{ result.score }}%</div>
-            <div class="score-label">{{ result.passed ? '🎉 Passed' : '😔 Failed' }}</div>
+          <v-icon size="80" :color="result.passed ? 'success' : 'warning'" class="mb-4">
+            {{ result.passed ? 'mdi-check-circle-outline' : 'mdi-alert-circle-outline' }}
+          </v-icon>
+
+          <div class="text-center mt-2 mb-6">
+            <h1 class="text-h4 font-weight-black mb-2">Thank you, {{ authStore.user?.name }}!</h1>
+            <p class="text-body-1 text-grey-darken-1">You have successfully completed the <strong>{{ result.exam_title }}</strong>.</p>
+            <p class="text-caption text-grey mt-1">{{ result.course_title }}</p>
+          </div>
+
+          <!-- CTA Buttons -->
+          <div class="cta-row d-flex flex-column align-center">
+            <template v-if="result.passed">
+              <v-chip color="success" size="large" prepend-icon="mdi-check-decagram" class="font-weight-bold px-6 py-4 text-body-1 mb-4">
+                Certificate Earned!
+              </v-chip>
+              <v-btn v-if="result.cert_id" color="success" size="large" prepend-icon="mdi-download" rounded="xl" @click="downloadCertificate" :loading="downloading" class="mb-4">
+                Download Certificate
+              </v-btn>
+            </template>
+            <template v-else>
+              <p class="text-grey-darken-1 text-center max-w-400 mb-4">Your answers have been recorded.</p>
+            </template>
+            
+            <v-btn variant="tonal" color="blue-grey" @click="router.push('/dashboard/exams')" size="large" rounded="xl">Back to Exams</v-btn>
           </div>
         </div>
-
-        <div class="text-center mt-6">
-          <h1 class="text-h4 font-weight-black text-ink mb-2">{{ result.exam_title }}</h1>
-          <p class="text-muted">{{ result.course_title }}</p>
-        </div>
-
-        <!-- Stats row -->
-        <div class="stats-row">
-          <div class="stat-box">
-            <div class="stat-val">{{ result.auto_score }}</div>
-            <div class="stat-key">Marks Earned</div>
-          </div>
-          <div class="stat-box">
-            <div class="stat-val">{{ result.total_marks }}</div>
-            <div class="stat-key">Total Marks</div>
-          </div>
-          <div class="stat-box">
-            <div class="stat-val">{{ result.pass_percentage }}%</div>
-            <div class="stat-key">Pass Threshold</div>
-          </div>
-          <div class="stat-box" v-if="result.pending_manual_review">
-            <div class="stat-val" style="color:#f59e0b">Pending</div>
-            <div class="stat-key">Manual Review</div>
-          </div>
-        </div>
-
-        <!-- CTA Buttons -->
-        <div class="cta-row">
-          <template v-if="result.passed">
-            <v-chip color="success" size="large" prepend-icon="mdi-check-decagram" class="font-weight-bold px-6 py-4 text-body-1">
-              Certificate Earned!
-            </v-chip>
-            <v-btn v-if="result.cert_id" color="success" size="large" prepend-icon="mdi-download" rounded="xl" @click="downloadCertificate" :loading="downloading">
-              Download Certificate
-            </v-btn>
-          </template>
-          <template v-else>
-            <p class="text-muted text-center max-w-400 mb-4">Don't give up! Review the questions below, strengthen your knowledge, and come back stronger.</p>
-          </template>
-          <v-btn variant="tonal" color="blue-grey" @click="router.push('/dashboard/exams')" size="large" rounded="xl">Back to Exams</v-btn>
-        </div>
-      </div>
-
-      <!-- Question Review -->
-      <div v-if="result.show_result_detail && result.question_breakdown && result.question_breakdown.length > 0" class="review-section">
-        <h2 class="text-h5 font-weight-bold text-ink mb-6">Question Review</h2>
-        <div v-for="(q, i) in result.question_breakdown" :key="q.question_id" class="review-card" :class="q.is_correct === false ? 'wrong' : q.is_correct === true ? 'correct' : 'pending'">
-          <div class="review-header">
-            <span class="q-num">Q{{ i + 1 }}</span>
-            <span class="q-type">{{ q.type }}</span>
-            <div class="q-score-badge" :class="q.is_correct === true ? 'badge-pass' : q.is_correct === false ? 'badge-fail' : 'badge-pending'">
-              <template v-if="q.is_correct === null">Pending Review</template>
-              <template v-else>{{ q.marks_awarded }} / {{ q.marks }} marks</template>
-            </div>
-          </div>
-          <div class="q-text">{{ q.question_text }}</div>
-
-          <div class="answer-row">
-            <div class="answer-block your-answer">
-              <span class="answer-label">Your Answer</span>
-              <span class="answer-text">{{ q.answer_text || '(No answer)' }}</span>
-            </div>
-            <div v-if="q.correct_answer" class="answer-block correct-answer">
-              <span class="answer-label">Correct Answer</span>
-              <span class="answer-text">{{ q.correct_answer }}</span>
-            </div>
-          </div>
-
-          <div v-if="q.explanation" class="explanation">
-            <v-icon size="15" class="mr-1">mdi-lightbulb-outline</v-icon>
-            {{ q.explanation }}
-          </div>
-
-          <!-- Manual grading input (for admin/tutor) -->
-          <div v-if="canGrade && q.is_correct === null" class="grade-row">
-            <v-text-field
-              v-model.number="gradeInputs[q.id]"
-              :label="`Marks (max ${q.marks})`"
-              type="number"
-              :min="0"
-              :max="q.marks"
-              density="compact"
-              hide-details
-              style="max-width: 160px"
-            />
-            <v-btn size="small" color="primary" variant="tonal" @click="gradeAnswer(q.id, q.marks)">
-              Save Grade
-            </v-btn>
-          </div>
-        </div>
-      </div>
-
-      <div v-else-if="result.pending_manual_review" class="pending-banner">
-        <v-icon size="40" color="warning">mdi-clock-outline</v-icon>
-        <h3 class="text-h6 text-ink font-weight-bold mt-3 mb-2">Awaiting Manual Review</h3>
-        <p class="text-muted">Some of your answers require manual grading by your tutor. Your final result will be available shortly.</p>
-      </div>
+      </v-card>
     </div>
     
     <div v-else class="text-center pt-16">

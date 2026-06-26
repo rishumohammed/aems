@@ -322,6 +322,7 @@ const onVideoReady = (videoEl: HTMLVideoElement) => {
     proctoring.logEvent, 
     (msg) => {
       proctoring.violationWarning.value = { show: true, message: msg };
+      proctoring.speakWarning(msg);
     },
     proctoringConfig.value
   );

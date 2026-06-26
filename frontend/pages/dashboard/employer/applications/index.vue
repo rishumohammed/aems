@@ -2,7 +2,7 @@
   <v-container fluid class="pa-6">
     <div class="d-flex align-center justify-space-between mb-8">
       <div>
-        <h1 class="text-h4 font-weight-bold mb-1 text-primary">Candidate Applications</h1>
+        <h1 class="text-h4 font-weight-bold mb-1">Candidate Applications</h1>
         <p class="text-blue-grey-300">Review, shortlist, and manage job applicants.</p>
       </div>
     </div>
@@ -135,14 +135,14 @@
 
           <v-row>
             <v-col cols="12" md="6">
-              <h4 class="text-subtitle-1 font-weight-bold text-primary mb-2">Education & Experience</h4>
+              <h4 class="text-subtitle-1 font-weight-bold mb-2">Education & Experience</h4>
               <p><strong>Qualification:</strong> {{ selectedApplicant.qualification || 'N/A' }}</p>
               <p><strong>Institution:</strong> {{ selectedApplicant.institution || 'N/A' }} ({{ selectedApplicant.year_of_passing || 'N/A' }})</p>
               <p><strong>Experience:</strong> {{ selectedApplicant.experience_years || 0 }} years</p>
               <p><strong>Last Role:</strong> {{ selectedApplicant.last_role || 'N/A' }} at {{ selectedApplicant.last_company || 'N/A' }}</p>
             </v-col>
             <v-col cols="12" md="6">
-              <h4 class="text-subtitle-1 font-weight-bold text-primary mb-2">Skills & Links</h4>
+              <h4 class="text-subtitle-1 font-weight-bold mb-2">Skills & Links</h4>
               <div class="mb-2">
                 <v-chip v-for="(skill, i) in parseSkills(selectedApplicant.skills_json)" :key="i" size="small" class="mr-1 mb-1" color="indigo" variant="tonal">
                   {{ skill }}
@@ -155,7 +155,7 @@
 
           <v-divider class="my-4 border-opacity-10"></v-divider>
 
-          <h4 class="text-subtitle-1 font-weight-bold text-primary mb-2">Cover Note</h4>
+          <h4 class="text-subtitle-1 font-weight-bold mb-2">Cover Note</h4>
           <v-card color="rgba(255,255,255,0.05)" rounded="lg" class="pa-4 text-body-2" elevation="0">
             {{ selectedApplicant.cover_note || 'No cover note provided.' }}
           </v-card>

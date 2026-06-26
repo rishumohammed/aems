@@ -2,7 +2,7 @@
   <v-container fluid class="pa-6">
     <div class="page-header d-flex flex-column flex-sm-row justify-space-between align-sm-center mb-8 gap-4">
       <div>
-        <h1 class="text-h4 font-weight-bold mb-1 text-primary">Standalone Live Events</h1>
+        <h1 class="text-h4 font-weight-bold mb-1">Standalone Live Events</h1>
         <p class="text-body-1 text-secondary">Manage webinars and masterclasses not tied to courses.</p>
       </div>
       <AppButton variant="blue" icon="mdi-plus" size="lg" @click="openDialog()">

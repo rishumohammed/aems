@@ -3,7 +3,7 @@
     <!-- Header -->
     <div class="d-flex justify-space-between align-center mb-8">
       <div>
-        <h1 class="text-h4 font-weight-bold mb-1 text-primary">My Payments</h1>
+        <h1 class="text-h4 font-weight-bold mb-1">My Payments</h1>
         <p class="text-subtitle-1 text-medium-emphasis mb-6">Track your course enrollments, invoices, and payment history.</p>
       </div>
       <v-btn 

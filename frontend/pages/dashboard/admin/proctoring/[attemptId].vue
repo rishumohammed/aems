@@ -4,7 +4,7 @@
       <div class="d-flex align-center gap-4">
         <v-btn icon="mdi-arrow-left" variant="text" @click="$router.back()"></v-btn>
         <div>
-          <h1 class="text-h4 font-weight-bold mb-1 text-primary">Proctoring Review</h1>
+          <h1 class="text-h4 font-weight-bold mb-1">Proctoring Review</h1>
           <p class="text-subtitle-1 text-medium-emphasis mb-6">Attempt ID: {{ attemptId }}</p>
         </div>
       </div>

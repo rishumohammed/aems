@@ -3,7 +3,7 @@
     <!-- Header Section -->
     <div class="d-flex justify-space-between align-center mb-10">
       <div>
-        <h1 class="text-h4 font-weight-bold mb-1 text-primary">Lead Ecosystem</h1>
+        <h1 class="text-h4 font-weight-bold mb-1">Lead Ecosystem</h1>
         <p class="text-subtitle-1 text-medium-emphasis mb-6">Advanced tracking and conversion pipeline for AEMS Academy.</p>
       </div>
       <div class="d-flex align-center gap-4">

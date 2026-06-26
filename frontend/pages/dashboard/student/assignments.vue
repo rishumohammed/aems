@@ -1,7 +1,7 @@
 <template>
   <v-container fluid class="pa-6">
     <div class="mb-8">
-      <h1 class="text-h4 font-weight-bold mb-1 text-primary">My Assignments</h1>
+      <h1 class="text-h4 font-weight-bold mb-1">My Assignments</h1>
       <p class="text-subtitle-1 text-medium-emphasis mb-6">Track your coursework and submit your practical tasks for review.</p>
     </div>
 

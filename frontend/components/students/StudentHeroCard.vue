@@ -1,5 +1,5 @@
 <template>
-  <v-card class="rounded-xl overflow-hidden border" elevation="0">
+  <v-card class="rounded-xl overflow-hidden" elevation="2">
     <v-card-text class="pa-6 pa-md-8">
       <v-row align="center">
         <v-col cols="12" md="auto" class="text-center">
@@ -10,8 +10,8 @@
         
         <v-col class="text-center text-md-left mt-4 mt-md-0">
           <div class="d-flex align-center justify-center justify-md-start flex-wrap gap-2 mb-2">
-            <h1 class="text-h4 font-weight-black text-primary-dark">{{ student.name }}</h1>
-            <v-chip size="small" :color="statusColor" variant="flat" class="text-uppercase font-weight-bold ml-2">
+            <h1 class="text-h4 font-weight-bold">{{ student.name }}</h1>
+            <v-chip size="small" :color="statusColor" variant="flat" class="text-uppercase font-weight-medium ml-2">
               {{ student.status }}
             </v-chip>
           </div>
@@ -49,14 +49,14 @@
 
         <v-col cols="12" md="3">
           <v-card color="grey-lighten-4" flat class="rounded-xl pa-4 border">
-            <div class="text-caption font-weight-bold text-secondary text-uppercase tracking-wider">Payment Status</div>
+            <div class="text-caption font-weight-medium text-grey-darken-1 text-uppercase">Payment Status</div>
             <div class="d-flex align-center justify-space-between mt-1">
-              <span class="text-h6 font-weight-black text-primary-dark">{{ paymentStatusLabel }}</span>
+              <span class="text-h6 font-weight-bold">{{ paymentStatusLabel }}</span>
               <v-icon :color="paymentStatusColor">{{ paymentStatusIcon }}</v-icon>
             </div>
             <v-divider class="my-3"></v-divider>
-            <div class="text-caption font-weight-bold text-secondary text-uppercase tracking-wider">Enrolled Courses</div>
-            <div class="text-h4 font-weight-black text-primary-dark mt-1">{{ enrollmentCount }}</div>
+            <div class="text-caption font-weight-medium text-grey-darken-1 text-uppercase">Enrolled Courses</div>
+            <div class="text-h4 font-weight-bold mt-1">{{ enrollmentCount }}</div>
           </v-card>
         </v-col>
       </v-row>

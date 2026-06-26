@@ -81,6 +81,23 @@ export const useProctoring = () => {
     }
   };
 
+  const speakWarning = (text: string) => {
+    if (proctoringConfig.value?.enable_voice_alert !== false && 'speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      
+      const voices = window.speechSynthesis.getVoices();
+      if (voices.length > 0) {
+        const enVoice = voices.find(v => v.lang.startsWith('en'));
+        if (enVoice) utterance.voice = enVoice;
+      }
+      
+      utterance.volume = 1;
+      utterance.rate = 1;
+      window.speechSynthesis.speak(utterance);
+    }
+  };
+
   const handleVisibilityChange = () => {
     if (document.visibilityState === 'hidden') {
       handleViolation('tab_switch');
@@ -99,13 +116,14 @@ export const useProctoring = () => {
     logEvent(type, { count: tabSwitchCount.value });
 
     if (tabSwitchCount.value >= maxTabSwitches) {
-      violationWarning.value = { show: true, message: 'You have exceeded the maximum allowed tab switches. Your exam is being automatically submitted.' };
+      const msg = 'You have exceeded the maximum allowed tab switches. Your exam is being automatically submitted.';
+      violationWarning.value = { show: true, message: msg };
+      speakWarning(msg);
       if (submitCallback) submitCallback('tab_switch_limit_exceeded');
     } else {
-      violationWarning.value = {
-        show: true,
-        message: `Warning ${tabSwitchCount.value}/${maxTabSwitches}: Please do not leave the exam window. Doing so again may result in auto-submission.`
-      };
+      const msg = `Warning ${tabSwitchCount.value} out of ${maxTabSwitches}: Please do not leave the exam window. Doing so again may result in auto-submission.`;
+      violationWarning.value = { show: true, message: msg };
+      speakWarning(msg);
     }
   };
 
@@ -113,10 +131,9 @@ export const useProctoring = () => {
     checkFullscreen();
     if (!isFullscreen.value) {
       logEvent('fullscreen_exit');
-      violationWarning.value = {
-        show: true,
-        message: 'You have exited fullscreen mode. You must return to fullscreen to continue the exam.'
-      };
+      const msg = 'You have exited fullscreen mode. You must return to fullscreen to continue the exam.';
+      violationWarning.value = { show: true, message: msg };
+      speakWarning(msg);
     }
   };
 
@@ -175,6 +192,7 @@ export const useProctoring = () => {
     requestFullscreen,
     logEvent,
     dismissWarning,
+    speakWarning,
     isFullscreen,
     violationWarning,
     tabSwitchCount

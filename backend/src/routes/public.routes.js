@@ -13,7 +13,7 @@ const router = express.Router();
 router.get('/config', async (req, res) => {
   try {
     const [configs] = await pool.query(
-      'SELECT `key`, `value` FROM system_config WHERE (`group` IN ("branding", "contact") AND `is_sensitive` = 0) OR `key` IN ("homepage_hero_image", "homepage_hero_image_url", "homepage_about_image", "homepage_about_image_url", "aboutpage_who_image", "aboutpage_who_image_url")'
+      'SELECT `key`, `value` FROM system_config WHERE (`group` IN ("branding", "contact", "lms") AND `is_sensitive` = 0) OR `key` IN ("homepage_hero_image", "homepage_hero_image_url", "homepage_about_image", "homepage_about_image_url", "aboutpage_who_image", "aboutpage_who_image_url")'
     );
     const configMap = {};
     configs.forEach(c => configMap[c.key] = c.value);
@@ -195,21 +195,17 @@ router.get('/courses/:slug', async (req, res) => {
 
     const course = courses[0];
 
-    // Get sections (Chapters) & Modules & Lessons
+    // Get sections (Modules) & Lessons
     const [sections] = await pool.query('SELECT * FROM course_sections WHERE course_id = ? ORDER BY order_index', [course.id]);
     
     for (let section of sections) {
-      const [modules] = await pool.query('SELECT * FROM course_modules WHERE section_id = ? ORDER BY order_index', [section.id]);
-      section.modules = modules;
-      for (let module of modules) {
-        const [lessons] = await pool.query('SELECT * FROM course_lessons WHERE module_id = ? ORDER BY order_index', [module.id]);
-        
-        // Strip sensitive info from public API
-        module.lessons = lessons.map(lesson => {
-          const { zoom_link, live_link, ...safeLesson } = lesson;
-          return safeLesson;
-        });
-      }
+      const [lessons] = await pool.query('SELECT * FROM course_lessons WHERE section_id = ? ORDER BY order_index', [section.id]);
+      
+      // Strip sensitive info from public API
+      section.lessons = lessons.map(lesson => {
+        const { zoom_link, live_link, ...safeLesson } = lesson;
+        return safeLesson;
+      });
     }
 
     course.sections = sections;

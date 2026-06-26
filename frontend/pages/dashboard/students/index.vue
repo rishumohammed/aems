@@ -2,7 +2,7 @@
   <v-container fluid class="pa-6">
     <div class="d-flex align-center justify-space-between mb-8">
       <div>
-        <h1 class="text-h4 font-weight-bold mb-1 text-primary">Students</h1>
+        <h1 class="text-h4 font-weight-bold mb-1">Students</h1>
         <p class="text-grey-darken-1">Manage student lifecycles, progress, and billing.</p>
       </div>
       <div class="d-flex gap-3" v-if="authStore.userRole !== 'finance_staff'">

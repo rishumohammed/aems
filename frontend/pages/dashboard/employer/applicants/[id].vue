@@ -4,7 +4,7 @@
       <div class="d-flex align-center">
         <v-btn icon="mdi-arrow-left" variant="text" class="mr-4" @click="goBack"></v-btn>
         <div>
-          <h1 class="text-h4 font-weight-bold mb-1 text-primary">Applicant Profile</h1>
+          <h1 class="text-h4 font-weight-bold mb-1">Applicant Profile</h1>
           <p class="text-blue-grey-300">Detailed ATS view for candidate assessment</p>
         </div>
       </div>
@@ -96,12 +96,12 @@
               <v-window v-model="tab">
                 <!-- Profile Tab -->
                 <v-window-item value="profile">
-                  <h3 class="text-subtitle-1 font-weight-bold text-primary mb-3">Cover Letter</h3>
+                  <h3 class="text-subtitle-1 font-weight-bold mb-3">Cover Letter</h3>
                   <v-card color="grey-lighten-4" variant="flat" class="pa-4 mb-6 text-body-2">
                     {{ applicant.cover_note || 'No cover letter provided.' }}
                   </v-card>
 
-                  <h3 class="text-subtitle-1 font-weight-bold text-primary mb-3">Experience</h3>
+                  <h3 class="text-subtitle-1 font-weight-bold mb-3">Experience</h3>
                   <v-row class="mb-6">
                     <v-col cols="6"><div class="text-caption text-grey">Total Experience</div><div class="font-weight-medium">{{ applicant.experience_years || 0 }} years</div></v-col>
                     <v-col cols="6"><div class="text-caption text-grey">Last Role</div><div class="font-weight-medium">{{ applicant.last_role || 'N/A' }}</div></v-col>
@@ -109,7 +109,7 @@
                     <v-col cols="6"><div class="text-caption text-grey">Employment Status</div><div class="font-weight-medium text-capitalize">{{ applicant.employment_status || 'Unknown' }}</div></v-col>
                   </v-row>
 
-                  <h3 class="text-subtitle-1 font-weight-bold text-primary mb-3">Education</h3>
+                  <h3 class="text-subtitle-1 font-weight-bold mb-3">Education</h3>
                   <v-row class="mb-6">
                     <v-col cols="6"><div class="text-caption text-grey">Qualification</div><div class="font-weight-medium">{{ applicant.qualification || 'N/A' }}</div></v-col>
                     <v-col cols="6"><div class="text-caption text-grey">Institution</div><div class="font-weight-medium">{{ applicant.institution || 'N/A' }}</div></v-col>
@@ -117,7 +117,7 @@
                     <v-col cols="6"><div class="text-caption text-grey">Year of Passing</div><div class="font-weight-medium">{{ applicant.year_of_passing || 'N/A' }}</div></v-col>
                   </v-row>
 
-                  <h3 class="text-subtitle-1 font-weight-bold text-primary mb-3">Skills</h3>
+                  <h3 class="text-subtitle-1 font-weight-bold mb-3">Skills</h3>
                   <div>
                     <v-chip v-for="skill in parsedSkills" :key="skill" color="indigo" variant="tonal" size="small" class="mr-2 mb-2">{{ skill }}</v-chip>
                     <span v-if="!parsedSkills.length" class="text-grey text-body-2">No skills listed</span>
@@ -126,7 +126,7 @@
 
                 <!-- LMS Tab -->
                 <v-window-item value="lms">
-                  <h3 class="text-subtitle-1 font-weight-bold text-primary mb-3">Enrolled Courses</h3>
+                  <h3 class="text-subtitle-1 font-weight-bold mb-3">Enrolled Courses</h3>
                   <v-list v-if="applicant.enrollments?.length" lines="two" class="bg-transparent border rounded-lg mb-6">
                     <v-list-item v-for="en in applicant.enrollments" :key="en.id" :title="en.course_title">
                       <template v-slot:subtitle>
@@ -144,7 +144,7 @@
                   </v-list>
                   <p v-else class="text-grey mb-6">No courses enrolled.</p>
 
-                  <h3 class="text-subtitle-1 font-weight-bold text-primary mb-3">Certificates Earned</h3>
+                  <h3 class="text-subtitle-1 font-weight-bold mb-3">Certificates Earned</h3>
                   <div v-if="applicant.certificates?.length" class="d-flex flex-wrap gap-2 mb-6">
                     <v-chip v-for="c in applicant.certificates" :key="c.cert_number" color="amber-darken-3" variant="flat" prepend-icon="mdi-certificate">
                       {{ c.course_title }}
@@ -152,7 +152,7 @@
                   </div>
                   <p v-else class="text-grey mb-6">No certificates earned.</p>
 
-                  <h3 class="text-subtitle-1 font-weight-bold text-primary mb-3">Exam Results</h3>
+                  <h3 class="text-subtitle-1 font-weight-bold mb-3">Exam Results</h3>
                   <v-table v-if="applicant.exams?.length" class="border rounded-lg" density="compact">
                     <thead>
                       <tr>

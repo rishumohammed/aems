@@ -3,7 +3,7 @@
     <div class="d-flex align-center gap-4 mb-6">
       <v-btn icon="mdi-arrow-left" variant="text" to="/dashboard/admin/jobs"></v-btn>
       <div>
-        <h1 class="text-h4 font-weight-bold mb-1 text-primary">Applicants: {{ job?.title }}</h1>
+        <h1 class="text-h4 font-weight-bold mb-1">Applicants: {{ job?.title }}</h1>
         <p class="text-blue-grey-300">
           <v-icon size="small" class="mr-1">mdi-domain</v-icon> {{ job?.company }} | 
           <v-icon size="small" class="ml-2 mr-1">mdi-map-marker</v-icon> {{ job?.location }}

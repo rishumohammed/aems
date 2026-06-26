@@ -4,7 +4,7 @@
     <div class="header-section pa-8 pb-15 mb-n10">
       <div class="d-flex align-center justify-space-between mb-2">
         <div>
-          <h1 class="text-h4 font-weight-bold mb-1 text-primary">Student Reviews</h1>
+          <h1 class="text-h4 font-weight-bold mb-1">Student Reviews</h1>
           <p class="text-subtitle-1 text-medium-emphasis mb-6">Monitor feedback and engage with your community.</p>
         </div>
       </div>

@@ -4,7 +4,7 @@
     <v-card class="rounded-xl border shadow-sm mb-6 overflow-hidden">
       <div class="pa-6 border-b bg-primary-lighten-5 d-flex align-center justify-space-between flex-wrap gap-4">
         <div>
-          <h3 class="text-h5 font-weight-bold text-primary">Community Engagement</h3>
+          <h3 class="text-h5 font-weight-bold">Community Engagement</h3>
           <p class="text-secondary text-body-2 mb-0">Overview of the student's participation in official social channels.</p>
         </div>
         <div class="text-right">

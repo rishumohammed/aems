@@ -15,7 +15,7 @@
             </v-avatar>
             <div class="flex-grow-1">
               <div class="d-flex align-center gap-2 mb-1">
-                <h1 class="text-h4 font-weight-bold mb-1 text-primary">{{ lead.name }}</h1>
+                <h1 class="text-h4 font-weight-bold mb-1">{{ lead.name }}</h1>
                 <v-chip :color="getStatusColor(lead.status)" size="small" class="text-uppercase font-weight-bold">
                   {{ lead.status }}
                 </v-chip>

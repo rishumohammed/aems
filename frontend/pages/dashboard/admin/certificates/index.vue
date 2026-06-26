@@ -2,7 +2,7 @@
   <v-container fluid class="pa-6">
     <div class="d-flex align-center justify-space-between mb-6">
       <div>
-        <h1 class="text-h4 font-weight-bold mb-1 text-primary">Certificate Management</h1>
+        <h1 class="text-h4 font-weight-bold mb-1">Certificate Management</h1>
         <p class="text-blue-grey-300">View, revoke, and re-issue student certificates</p>
       </div>
       <div class="d-flex gap-2">

@@ -6,6 +6,7 @@
 
 <script setup>
 const route = useRoute();
+const router = useRouter();
 const api = useApi();
 const { courseSlug } = route.params;
 
@@ -16,7 +17,7 @@ onMounted(async () => {
     const enrollments = dashboardData.enrollments || [];
     const enrollment = enrollments.find(e => e.slug === courseSlug);
     
-    if (!enrollment) return navigateTo('/dashboard/student');
+    if (!enrollment) return router.push('/dashboard/student');
 
     const resCurr = await api.get(`/lms/student/courses/${enrollment.course_id}/curriculum`);
     const curriculum = resCurr.data || resCurr || [];
@@ -26,13 +27,13 @@ onMounted(async () => {
     const nextLesson = allLessons.find(l => !l.completed) || allLessons[0];
     
     if (nextLesson) {
-      navigateTo(`/learn/${courseSlug}/${nextLesson.id}`);
+      router.push(`/learn/${courseSlug}/${nextLesson.id}`);
     } else {
-      navigateTo('/dashboard/student');
+      router.push('/dashboard/student');
     }
   } catch (error) {
     console.error('Redirect failed:', error);
-    navigateTo('/dashboard/student');
+    router.push('/dashboard/student');
   }
 });
 

@@ -4,7 +4,7 @@
     <v-card class="pa-10 pb-16 mb-n12 rounded-b-xl border-b" elevation="0" color="white">
       <div class="d-flex align-center justify-space-between mb-2 position-relative">
         <div>
-          <h1 class="text-h3 font-weight-black text-primary-dark mb-2">Instructor Studio</h1>
+          <h1 class="text-h3 font-weight-black mb-2">Instructor Studio</h1>
           <p class="text-h6 text-secondary font-weight-medium">Manage your academy, interact with students, and track your growth.</p>
         </div>
         <v-btn color="primary" rounded="lg" variant="flat" class="font-weight-bold px-8" size="large" to="/dashboard/courses/create" prepend-icon="mdi-plus">

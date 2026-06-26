@@ -2,7 +2,7 @@
   <v-container fluid class="pa-6">
     <div class="mb-8 d-flex align-center justify-space-between">
       <div>
-        <h1 class="text-h4 font-weight-bold mb-1 text-primary">Job Board</h1>
+        <h1 class="text-h4 font-weight-bold mb-1">Job Board</h1>
         <p class="text-subtitle-1 text-medium-emphasis mb-6">Discover your next career move with our top hiring partners.</p>
       </div>
       <div v-if="authStore.isAdmin || authStore.userRole === 'tutor'">

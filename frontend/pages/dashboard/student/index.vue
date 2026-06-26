@@ -144,7 +144,7 @@
                     :elevation="isHovering ? 10 : 2"
                     class="course-card rounded-xl border-0 h-100 transition-swing"
                   >
-                    <v-img :src="course.thumbnail_url" height="160" cover class="align-end">
+                    <v-img :src="course.thumbnail_url ? ($config.public.apiBase.replace('/api', '') + course.thumbnail_url) : ''" height="160" cover class="align-end">
                       <div class="pa-4 bg-gradient-overlay">
                         <v-chip size="x-small" :color="course.status === 'completed' ? 'success' : 'primary'" variant="flat" class="font-weight-black">
                           {{ course.status.toUpperCase() }}
@@ -218,7 +218,7 @@
             <v-row>
               <v-col v-for="course in recommendedCourses" :key="course.id" cols="12" sm="6" md="3">
                 <v-card class="recommended-card rounded-xl border-0 overflow-hidden" elevation="1">
-                  <v-img :src="course.thumbnail_url" height="120" cover></v-img>
+                  <v-img :src="course.thumbnail_url ? ($config.public.apiBase.replace('/api', '') + course.thumbnail_url) : ''" height="120" cover></v-img>
                   <v-card-text class="pa-3">
                     <div class="text-caption text-primary font-weight-bold mb-1">{{ course.category_name }}</div>
                     <div class="text-body-2 font-weight-bold text-truncate mb-2">{{ course.title }}</div>
@@ -235,34 +235,37 @@
         <v-col cols="12" lg="4">
           
           <!-- Job Portal Widget -->
-          <v-card class="rounded-xl border-0 mb-6 bg-indigo-darken-4 text-white job-widget" elevation="4">
-            <v-card-text class="pa-6">
-              <div class="d-flex align-center justify-space-between mb-4">
-                <h3 class="text-h6 font-weight-bold">Career Center</h3>
-                <v-icon size="24">mdi-briefcase-variant</v-icon>
+          <v-card class="rounded-xl border-0 mb-6 text-white overflow-hidden position-relative" style="background-color: #1e1e2c !important;" elevation="4">
+            <!-- Decorative circle -->
+            <div class="position-absolute rounded-circle" style="background-color: rgba(255,255,255,0.05); width: 250px; height: 250px; top: -100px; right: -50px; pointer-events: none;"></div>
+            
+            <v-card-text class="pa-6 position-relative z-index-1">
+              <div class="d-flex align-center justify-space-between mb-8">
+                <h3 class="text-h5 font-weight-black">Career Center</h3>
+                <v-icon size="28">mdi-briefcase</v-icon>
               </div>
-              <div class="mb-6">
-                <div class="d-flex justify-space-between text-caption mb-1">
+              <div class="mb-8">
+                <div class="d-flex justify-space-between text-caption font-weight-bold mb-2">
                   <span>Profile Completion</span>
-                  <span>{{ jobStats.resumeCompletion }}%</span>
+                  <span>{{ jobStats.resumeCompletion || 0 }}%</span>
                 </div>
-                <v-progress-linear :model-value="jobStats.resumeCompletion" color="amber" height="6" rounded></v-progress-linear>
+                <v-progress-linear :model-value="jobStats.resumeCompletion || 0" color="#ffc107" height="8" rounded></v-progress-linear>
               </div>
-              <v-row class="mb-6 text-center">
+              <v-row class="mb-8 text-center">
                 <v-col cols="6">
-                  <div class="text-h5 font-weight-black">{{ jobStats.applicationsSubmitted }}</div>
-                  <div class="text-caption opacity-70">Applied</div>
+                  <div class="text-h3 font-weight-black mb-1">{{ jobStats.applicationsSubmitted || 0 }}</div>
+                  <div class="text-subtitle-2 text-grey-lighten-1 font-weight-medium">Applied</div>
                 </v-col>
                 <v-col cols="6">
-                  <div class="text-h5 font-weight-black">{{ jobStats.recommendedJobsCount }}</div>
-                  <div class="text-caption opacity-70">Matches</div>
+                  <div class="text-h3 font-weight-black mb-1">{{ jobStats.recommendedJobsCount || 0 }}</div>
+                  <div class="text-subtitle-2 text-grey-lighten-1 font-weight-medium">Matches</div>
                 </v-col>
               </v-row>
-              <div class="d-flex gap-2">
-                <v-btn flex-grow-1 color="amber" variant="flat" rounded="lg" class="font-weight-black text-grey-darken-4" to="/dashboard/student/applications">
+              <div class="d-flex gap-3">
+                <v-btn flex-grow-1 color="#ffc107" variant="flat" rounded="lg" class="font-weight-bold text-black" size="large" to="/dashboard/student/applications">
                   Applications
                 </v-btn>
-                <v-btn flex-grow-1 color="white" variant="tonal" rounded="lg" class="font-weight-bold" to="/dashboard/jobs">
+                <v-btn flex-grow-1 style="background-color: rgba(255,255,255,0.15) !important;" variant="flat" rounded="lg" class="font-weight-bold text-white" size="large" elevation="0" to="/dashboard/jobs">
                   Browse Jobs
                 </v-btn>
               </div>
@@ -423,7 +426,7 @@ const statCards = computed(() => [
   { label: 'Completed', value: stats.value.completed_courses || 0, icon: 'mdi-check-circle', color: 'success' },
   { label: 'Enrolled', value: stats.value.active_enrollments || 0, icon: 'mdi-play-circle', color: 'primary' },
   { label: 'Certificates', value: stats.value.certificates_earned || 0, icon: 'mdi-certificate', color: 'success' },
-  { label: 'Assignments', value: stats.value.pending_assignments || 0, icon: 'mdi-clipboard-text-clock', color: 'error' },
+  { label: 'Assignments', value: stats.value.pending_assignments || 0, icon: 'mdi-clipboard-text', color: 'error' },
   { label: 'Exams', value: stats.value.upcoming_exams || 0, icon: 'mdi-file-document-edit', color: 'warning' },
   { label: 'Applied', value: stats.value.job_applications || 0, icon: 'mdi-briefcase-check', color: 'indigo' },
 ]);

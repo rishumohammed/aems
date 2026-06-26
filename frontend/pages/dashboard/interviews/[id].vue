@@ -23,7 +23,7 @@
                   <v-icon color="indigo" size="32">mdi-account-tie-voice</v-icon>
                 </v-avatar>
                 <div>
-                  <h1 class="text-h4 font-weight-bold mb-1 text-primary">{{ interview.job_title }}</h1>
+                  <h1 class="text-h4 font-weight-bold mb-1">{{ interview.job_title }}</h1>
                   <div class="text-subtitle-1 text-primary font-weight-bold">{{ interview.company_name }}</div>
                 </div>
               </div>

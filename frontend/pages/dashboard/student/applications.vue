@@ -3,7 +3,7 @@
     <v-container class="py-8">
       <!-- Header -->
       <header class="mb-10">
-        <h1 class="text-h4 font-weight-bold mb-1 text-primary">My Job Applications</h1>
+        <h1 class="text-h4 font-weight-bold mb-1">My Job Applications</h1>
         <p class="text-subtitle-1 text-medium-emphasis mb-6">Track the status of your career opportunities.</p>
       </header>
 

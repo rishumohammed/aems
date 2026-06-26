@@ -83,7 +83,9 @@ const bookExam = async () => {
     emit('booked', data.attempt_id);
     router.push(`/exam/${data.attempt_id}`);
   } catch (err: any) {
-    console.error(err?.response?.data?.message || 'Failed to book exam');
+    const errorMessage = err?.response?.data?.message || 'Failed to book exam';
+    console.error(errorMessage);
+    alert(errorMessage);
   } finally {
     booking.value = false;
   }

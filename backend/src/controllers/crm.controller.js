@@ -68,7 +68,7 @@ export const CRMController = {
         const courseNames = parsedIds.map(id => courseMap[id]).filter(Boolean);
         const course_interest_name = courseNames.join(', ');
 
-        return { ...l, course_interest_ids: parsedIds, course_interest_name };
+        return { ...l, course_interest_ids: parsedIds, course_interest_name, course_names: courseNames };
       });
 
       res.json({
@@ -116,6 +116,7 @@ export const CRMController = {
       
       const courseNames = lead.course_interest_ids.map(id => courseMap[id]).filter(Boolean);
       lead.course_interest_name = courseNames.join(', ');
+      lead.course_names = courseNames;
 
       // Get Custom Fields
       const [customFields] = await pool.query('SELECT * FROM lead_custom_fields WHERE lead_id = ?', [id]);

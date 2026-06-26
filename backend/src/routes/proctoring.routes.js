@@ -103,6 +103,16 @@ router.get('/admin/violations', authenticateJWT, isAdminOrTutor, async (req, res
   }
 });
 
+// GET /api/proctoring/admin/public-violations
+router.get('/admin/public-violations', authenticateJWT, isAdminOrTutor, async (req, res) => {
+  try {
+    const data = await proctoringService.getPublicViolationsGroupedByExam(req.user.id, req.user.role);
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 // GET /api/proctoring/admin/:attemptId (Note: mount point in app.js may vary, but let's keep it clean here)
 router.get('/admin/:attemptId', authenticateJWT, isAdminOrTutor, async (req, res) => {
   try {

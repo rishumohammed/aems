@@ -4,7 +4,7 @@
     <v-card class="pa-8 pb-15 mb-n10 border-b rounded-0" elevation="0" color="white">
       <div class="d-flex align-center justify-space-between mb-2">
         <div>
-          <h1 class="text-h4 font-weight-bold mb-1 text-primary">Earnings Report</h1>
+          <h1 class="text-h4 font-weight-bold mb-1">Earnings Report</h1>
           <p class="text-subtitle-1 text-medium-emphasis mb-6">Track your revenue and financial performance.</p>
         </div>
         <v-btn 

@@ -3,7 +3,7 @@
     <!-- Header -->
     <div class="d-flex align-center justify-space-between mb-8">
       <div>
-        <h1 class="text-h4 font-weight-bold mb-1 text-primary">Tutor Approvals</h1>
+        <h1 class="text-h4 font-weight-bold mb-1">Tutor Approvals</h1>
         <p class="text-subtitle-1 text-medium-emphasis mb-6">Review and process tutor applications</p>
       </div>
       <v-btn icon="mdi-refresh" variant="tonal" color="primary" @click="loadTutors" :loading="loading || loadingApproved || loadingRejected" />
@@ -271,7 +271,7 @@
             <span class="text-h4 font-weight-black text-white">{{ selectedTutor.name?.charAt(0)?.toUpperCase() }}</span>
           </v-avatar>
           <div class="flex-grow-1">
-            <h2 class="text-h5 font-weight-black text-primary-dark mb-1">{{ selectedTutor.name }}</h2>
+            <h2 class="text-h5 font-weight-black mb-1">{{ selectedTutor.name }}</h2>
             <div class="text-secondary text-body-2 font-weight-medium">{{ selectedTutor.email }}</div>
             <v-chip size="small" color="warning" class="mt-2 font-weight-black" variant="tonal">
               <v-icon start size="14">mdi-clock-outline</v-icon> Pending Approval

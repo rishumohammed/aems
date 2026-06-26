@@ -2,7 +2,7 @@
   <v-container fluid class="pa-6">
     <div class="d-flex align-center justify-space-between mb-8">
       <div>
-        <h1 class="text-h4 font-weight-bold mb-1 text-primary">Job Management</h1>
+        <h1 class="text-h4 font-weight-bold mb-1">Job Management</h1>
         <p class="text-blue-grey-300">Manage all your job postings across the platform.</p>
       </div>
       <v-btn

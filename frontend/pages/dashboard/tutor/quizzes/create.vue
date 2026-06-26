@@ -8,7 +8,7 @@
             <v-icon size="14" class="mr-1">mdi-home</v-icon>
             Dashboard / Quizzes / <span class="font-weight-black ml-1">New Quiz</span>
           </div>
-          <h1 class="text-h4 font-weight-bold mb-1 text-primary">Create Assessment</h1>
+          <h1 class="text-h4 font-weight-bold mb-1">Create Assessment</h1>
           <p class="text-subtitle-1 text-medium-emphasis mb-6">Design your quiz and add interactive questions.</p>
         </div>
         <div class="d-flex gap-3">

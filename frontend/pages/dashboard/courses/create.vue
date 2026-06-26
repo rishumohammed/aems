@@ -73,7 +73,7 @@
     <!-- Header -->
     <div class="d-flex align-center justify-space-between mb-8 px-8 pt-8">
       <div>
-        <h1 class="text-h4 font-weight-bold mb-1 text-primary">Create New Course</h1>
+        <h1 class="text-h4 font-weight-bold mb-1">Create New Course</h1>
         <p class="text-subtitle-1 text-medium-emphasis mb-6">Build your complete course with chapters, modules, and lessons.</p>
       </div>
       <v-btn variant="tonal" color="primary" prepend-icon="mdi-arrow-left" class="text-capitalize font-weight-bold" to="/dashboard/courses">

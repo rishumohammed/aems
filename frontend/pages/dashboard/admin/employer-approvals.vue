@@ -2,7 +2,7 @@
   <v-container fluid class="pa-6">
     <div class="d-flex align-center justify-space-between mb-8">
       <div>
-        <h1 class="text-h4 font-weight-bold mb-1 text-primary">Employer Approvals</h1>
+        <h1 class="text-h4 font-weight-bold mb-1">Employer Approvals</h1>
         <p class="text-subtitle-1 text-medium-emphasis mb-6">Review and approve new employer accounts</p>
       </div>
       <v-chip color="warning" variant="flat" size="large" class="font-weight-black">

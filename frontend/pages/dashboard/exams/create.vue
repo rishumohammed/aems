@@ -3,7 +3,7 @@
     <div class="d-flex align-center gap-3 mb-8">
       <v-btn icon="mdi-arrow-left" variant="text" to="/dashboard/exams"></v-btn>
       <div>
-        <h1 class="text-h4 font-weight-bold mb-1 text-primary">{{ isEdit ? 'Edit Exam' : 'Create Exam' }}</h1>
+        <h1 class="text-h4 font-weight-bold mb-1">{{ isEdit ? 'Edit Exam' : 'Create Exam' }}</h1>
         <p class="text-grey">{{ isEdit ? `Editing: ${form.title}` : 'Set up a new exam linked to a course' }}</p>
       </div>
     </div>
@@ -55,6 +55,10 @@
                 <v-checkbox v-model="form.proctoring_config.face_missing_alert" label="Face Missing Alert" color="warning" density="compact" hide-details />
                 <v-checkbox v-model="form.proctoring_config.multiple_faces_alert" label="Multiple Faces Alert" color="warning" density="compact" hide-details />
                 <v-checkbox v-model="form.proctoring_config.record_full_video" label="Record Full Webcam Video" color="warning" density="compact" hide-details />
+                <v-checkbox v-model="form.proctoring_config.block_tab_switching" label="Block Tab Switching" color="warning" density="compact" hide-details />
+                <v-checkbox v-model="form.proctoring_config.block_browser_switching" label="Block Browser Switching" color="warning" density="compact" hide-details />
+                <v-checkbox v-model="form.proctoring_config.block_right_click" label="Block Right Click" color="warning" density="compact" hide-details />
+                <v-checkbox v-model="form.proctoring_config.enable_voice_alert" label="Enable Voice Alert (Text-to-Speech)" color="warning" density="compact" hide-details />
                 
                 <v-select
                   v-model="form.proctoring_config.face_missing_threshold"
@@ -130,7 +134,11 @@ const form = ref({
     face_missing_alert: true,
     multiple_faces_alert: true,
     record_full_video: false,
-    face_missing_threshold: 5
+    face_missing_threshold: 5,
+    block_tab_switching: true,
+    block_browser_switching: true,
+    block_right_click: true,
+    enable_voice_alert: true
   },
   requires_scheduling: false,
   show_results: true,
@@ -195,7 +203,11 @@ onMounted(async () => {
       face_missing_alert: true,
       multiple_faces_alert: true,
       record_full_video: false,
-      face_missing_threshold: 5
+      face_missing_threshold: 5,
+      block_tab_switching: true,
+      block_browser_switching: true,
+      block_right_click: true,
+      enable_voice_alert: true
     };
     if (data.proctoring_config) {
       try {

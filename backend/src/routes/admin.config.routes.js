@@ -7,6 +7,16 @@ import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
 
+// Lazy import to avoid circular deps
+const regenerateAllInvoicePDFs = async () => {
+  const invoiceService = (await import('../services/invoice.service.js')).default;
+  const [invoices] = await pool.query('SELECT id FROM invoices');
+  for (const inv of invoices) {
+    try { await invoiceService.generatePDF(inv.id); } catch (e) { console.error('PDF regen failed for', inv.id, e.message); }
+  }
+  console.log(`[Config] Regenerated ${invoices.length} invoice PDFs after settings change.`);
+};
+
 const router = express.Router();
 
 const storage = multer.diskStorage({
@@ -35,11 +45,28 @@ router.get('/', authenticateJWT, authorizeRoles('super_admin'), async (req, res)
 // Update multiple config keys
 router.put('/', authenticateJWT, authorizeRoles('super_admin'), async (req, res) => {
   try {
-    const configMap = req.body; // { key1: value1, key2: value2 }
+    const configMap = req.body;
     await ConfigService.updateMultiple(configMap);
     res.json({ message: 'Configuration updated successfully' });
+
+    // Trigger async PDF regeneration if branding/contact changed
+    const invoiceKeys = ['invoice_header_color', 'app_logo', 'institute_name', 'contact_address', 'contact_email', 'contact_phone'];
+    const hasInvoiceChange = invoiceKeys.some(k => configMap[k] !== undefined);
+    if (hasInvoiceChange) {
+      regenerateAllInvoicePDFs().catch(e => console.error('[Config] PDF regen error:', e));
+    }
   } catch (error) {
     res.status(500).json({ message: 'Failed to update configuration' });
+  }
+});
+
+// Manually regenerate all invoice PDFs
+router.post('/invoices/regenerate-pdfs', authenticateJWT, authorizeRoles('super_admin'), async (req, res) => {
+  try {
+    res.json({ message: 'PDF regeneration started in background.' });
+    regenerateAllInvoicePDFs().catch(e => console.error('[Config] PDF regen error:', e));
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to trigger PDF regeneration' });
   }
 });
 

@@ -12,7 +12,7 @@
           </v-avatar>
         </div>
         
-        <h3 class="text-h5 font-weight-black text-primary-dark mb-1">{{ authStore.user?.name || 'Student Name' }}</h3>
+        <h3 class="text-h5 font-weight-black mb-1">{{ authStore.user?.name || 'Student Name' }}</h3>
         <div class="text-caption text-secondary d-flex align-center justify-center gap-2 mb-2 font-weight-medium">
           <span>Student ID: {{ studentId }}</span>
           <span class="opacity-50 px-1">•</span>

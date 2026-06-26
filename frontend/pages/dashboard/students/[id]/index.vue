@@ -284,6 +284,7 @@ watch(tab, (newTab) => {
 onMounted(() => {
   fetchStudent();
   fetchInvoices(); // Fetch initial billing for hero card
+  fetchEnrollments(); // Fetch initial enrollments for hero card count
 });
 
 definePageMeta({

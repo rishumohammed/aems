@@ -1,10 +1,13 @@
 <template>
   <div class="change-password-page">
     <div class="card-wrap">
-      <div class="brand">
-        <span class="brand-icon">◈</span>
-        <span class="brand-name">AEMS Academy</span>
-      </div>
+      <NuxtLink to="/" class="brand" style="text-decoration:none;">
+        <img v-if="appLogo" :src="baseUrl + appLogo" :alt="instituteName" style="max-height: 40px; max-width: 160px; object-fit: contain;" />
+        <template v-else>
+          <span class="brand-icon">◈</span>
+          <span class="brand-name">{{ instituteName || 'AEMS Academy' }}</span>
+        </template>
+      </NuxtLink>
 
       <div class="card">
         <div class="card-header">
@@ -94,6 +97,11 @@ definePageMeta({
 const authStore = useAuthStore();
 const api = useApi();
 const router = useRouter();
+const config = useRuntimeConfig();
+const baseUrl = computed(() => config.public.apiBase.replace('/api', ''));
+
+const instituteName = useState('instituteName');
+const appLogo = useState('appLogo');
 
 const password = ref('');
 const confirmPassword = ref('');

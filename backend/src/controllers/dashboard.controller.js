@@ -40,6 +40,11 @@ export const DashboardController = {
       const [totalEmployers] = await pool.query('SELECT COUNT(*) as count FROM users WHERE role = "employer" AND status = "active"');
       const [pendingEmployers] = await pool.query('SELECT COUNT(*) as count FROM users WHERE role = "employer" AND status = "pending_review"');
       
+      const [pendingCourses] = await pool.query('SELECT COUNT(*) as count FROM courses WHERE status = "pending_review"');
+      
+      const [outstandingRes] = await pool.query('SELECT SUM(balance_due) as total FROM invoices WHERE payment_status IN ("pending", "partial")');
+      const outstandingAmount = outstandingRes[0].total || 0;
+      
       const [pendingJobs] = await pool.query('SELECT COUNT(*) as count FROM jobs WHERE status = "pending_approval"');
       const [activeJobs] = await pool.query('SELECT COUNT(*) as count FROM jobs WHERE status = "approved"');
       const [pendingExams] = await pool.query('SELECT COUNT(*) as count FROM exam_attempts WHERE status = "pending_manual_review"');
@@ -65,6 +70,17 @@ export const DashboardController = {
         ORDER BY lf.scheduled_at ASC
       `);
 
+      // Upcoming Live Classes (Next 10 days)
+      const [upcomingLiveClasses] = await pool.query(`
+        SELECT c.id, c.title, c.start_date, u.name as tutor_name
+        FROM courses c
+        LEFT JOIN users u ON c.tutor_id = u.id
+        WHERE c.course_type = 'live' 
+        AND c.status = 'published'
+        AND c.start_date BETWEEN NOW() AND DATE_ADD(NOW(), INTERVAL 10 DAY)
+        ORDER BY c.start_date ASC
+      `);
+
       // Fetch Base Currency
       const [baseCurrencies] = await pool.query('SELECT symbol, code FROM currencies WHERE is_base = TRUE LIMIT 1');
       const currencySymbol = baseCurrencies.length > 0 ? baseCurrencies[0].symbol : '₹';
@@ -75,8 +91,9 @@ export const DashboardController = {
       // Month-over-month trends for row1 KPIs
       const [pendingTutorsLastMonth] = await pool.query("SELECT COUNT(*) as count FROM users WHERE role = 'tutor' AND status = 'pending_review' AND MONTH(created_at) = MONTH(CURRENT_DATE() - INTERVAL 1 MONTH) AND YEAR(created_at) = YEAR(CURRENT_DATE() - INTERVAL 1 MONTH)");
       const [pendingEmployersLastMonth] = await pool.query("SELECT COUNT(*) as count FROM users WHERE role = 'employer' AND status = 'pending_review' AND MONTH(created_at) = MONTH(CURRENT_DATE() - INTERVAL 1 MONTH) AND YEAR(created_at) = YEAR(CURRENT_DATE() - INTERVAL 1 MONTH)");
-      const [totalTutorsLastMonth] = await pool.query("SELECT COUNT(*) as count FROM users WHERE role = 'tutor' AND status = 'active' AND MONTH(created_at) <= MONTH(CURRENT_DATE() - INTERVAL 1 MONTH)");
-      const [totalEmployersLastMonth] = await pool.query("SELECT COUNT(*) as count FROM users WHERE role = 'employer' AND status = 'active' AND MONTH(created_at) <= MONTH(CURRENT_DATE() - INTERVAL 1 MONTH)");
+      const [pendingCoursesLastMonth] = await pool.query("SELECT COUNT(*) as count FROM courses WHERE status = 'pending_review' AND MONTH(created_at) = MONTH(CURRENT_DATE() - INTERVAL 1 MONTH) AND YEAR(created_at) = YEAR(CURRENT_DATE() - INTERVAL 1 MONTH)");
+      const [outstandingLastMonthRes] = await pool.query("SELECT SUM(balance_due) as total FROM invoices WHERE payment_status IN ('pending', 'partial') AND created_at <= (CURRENT_DATE() - INTERVAL 1 MONTH)");
+      const outstandingAmountLastMonth = outstandingLastMonthRes[0].total || 0;
 
       const calcTrend = (current, previous) => {
         if (previous === 0 && current === 0) return { change: 0, direction: 'neutral' };
@@ -90,8 +107,8 @@ export const DashboardController = {
           row1: [
             { title: 'Pending Tutors', value: pendingTutors[0].count, icon: 'mdi-account-clock', color: 'error', trend: calcTrend(pendingTutors[0].count, pendingTutorsLastMonth[0].count) },
             { title: 'Pending Employers', value: pendingEmployers[0].count, icon: 'mdi-domain-plus', color: 'warning', trend: calcTrend(pendingEmployers[0].count, pendingEmployersLastMonth[0].count) },
-            { title: 'Approved Tutors', value: totalTutors[0].count, icon: 'mdi-account-tie', color: 'primary', trend: calcTrend(totalTutors[0].count, totalTutorsLastMonth[0].count) },
-            { title: 'Approved Employers', value: totalEmployers[0].count, icon: 'mdi-domain', color: 'info', trend: calcTrend(totalEmployers[0].count, totalEmployersLastMonth[0].count) },
+            { title: 'Course Approvals', value: pendingCourses[0].count, icon: 'mdi-book-clock-outline', color: 'primary', trend: calcTrend(pendingCourses[0].count, pendingCoursesLastMonth[0].count) },
+            { title: 'Outstanding Amount', value: currencySymbol + outstandingAmount.toLocaleString(), icon: 'mdi-cash-remove', color: 'info', trend: calcTrend(outstandingAmount, outstandingAmountLastMonth) },
           ],
           row2: [
             { title: 'Monthly Revenue', value: currencySymbol + (revenueMonth[0].total || 0).toLocaleString(), icon: safeIcon, color: 'success' },
@@ -104,6 +121,7 @@ export const DashboardController = {
         funnel: funnelData,
         recentEnrollments,
         todayFollowups,
+        upcomingLiveClasses,
         systemHealth: {
           diskUsage: 45, // Static for now
           dbStatus: 'Connected',

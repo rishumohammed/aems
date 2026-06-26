@@ -11,7 +11,7 @@
                 <v-icon size="40">mdi-office-building</v-icon>
               </v-avatar>
               <div>
-                <h1 class="text-h4 font-weight-bold mb-1 text-primary">{{ job.title }}</h1>
+                <h1 class="text-h4 font-weight-bold mb-1">{{ job.title }}</h1>
                 <div class="d-flex align-center gap-4 text-subtitle-1 text-secondary">
                   <span class="font-weight-bold text-primary">{{ job.company }}</span>
                   <v-divider vertical inset class="mx-1"></v-divider>

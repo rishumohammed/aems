@@ -103,9 +103,9 @@
             <v-list density="compact" class="bg-transparent pa-0 footer-list">
               <v-list-item to="/courses" class="footer-link">Browse Courses</v-list-item>
               <v-list-item to="/live-courses" class="footer-link">Live Courses</v-list-item>
-              <v-list-item to="/courses?category=web" class="footer-link">Web Development</v-list-item>
-              <v-list-item to="/courses?category=data" class="footer-link">Data Science</v-list-item>
-              <v-list-item to="/courses?category=finance" class="footer-link">Finance</v-list-item>
+              <v-list-item v-for="cat in footerCategories" :key="cat.id" :to="`/courses?category=${cat.slug}`" class="footer-link">
+                {{ cat.name }}
+              </v-list-item>
               <v-list-item to="/resources" class="footer-link">Tutor Resources</v-list-item>
             </v-list>
           </v-col>
@@ -176,6 +176,13 @@ const fullLogoUrl = computed(() => {
   if (!appLogo.value) return '';
   const baseUrl = config.public.apiBase.replace('/api', '');
   return `${baseUrl}${appLogo.value}`;
+});
+
+// Fetch categories for footer
+const { data: footerCategoriesData } = await useFetch(`${config.public.apiBase}/public/categories`);
+const footerCategories = computed(() => {
+  const cats = footerCategoriesData.value || [];
+  return cats.slice(0, 4); // Display up to 4 categories in the footer to maintain layout balance
 });
 
 onMounted(async () => {

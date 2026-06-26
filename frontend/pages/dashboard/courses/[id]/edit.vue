@@ -4,7 +4,7 @@
       <div class="d-flex align-center">
         <v-btn icon="mdi-arrow-left" variant="text" class="mr-4" to="/dashboard/courses"></v-btn>
         <div>
-          <h1 class="text-h4 font-weight-bold mb-1 text-primary">Edit Course</h1>
+          <h1 class="text-h4 font-weight-bold mb-1">Edit Course</h1>
           <div class="d-flex align-center gap-2">
             <span class="text-subtitle-1 text-grey">{{ course.title || 'Loading...' }}</span>
             <v-chip :color="getStatusColor(course.status)" size="x-small" class="text-uppercase font-weight-bold" variant="tonal">

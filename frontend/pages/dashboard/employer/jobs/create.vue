@@ -3,7 +3,7 @@
     <div class="d-flex align-center gap-4 mb-6">
       <v-btn icon="mdi-arrow-left" variant="text" @click="$router.back()"></v-btn>
       <div>
-        <h1 class="text-h4 font-weight-bold mb-1 text-primary">Post a New Job</h1>
+        <h1 class="text-h4 font-weight-bold mb-1">Post a New Job</h1>
         <p class="text-grey-darken-1">Fill out the details below to submit your job for review.</p>
       </div>
     </div>

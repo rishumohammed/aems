@@ -4,7 +4,7 @@
     <v-card class="pa-8 pb-15 mb-n10 border-b rounded-0" elevation="0" color="white">
       <div class="d-flex align-center justify-space-between mb-2">
         <div>
-          <h1 class="text-h4 font-weight-bold mb-1 text-primary">Instructor Settings</h1>
+          <h1 class="text-h4 font-weight-bold mb-1">Instructor Settings</h1>
           <p class="text-subtitle-1 text-medium-emphasis mb-6">Manage your profile, expertise, and teaching preferences.</p>
         </div>
         <v-btn color="primary" variant="flat" rounded="lg" class="font-weight-bold px-6" size="large" :loading="loading" @click="saveSettings">

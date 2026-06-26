@@ -332,16 +332,12 @@ router.get('/courses/:id', authenticateJWT, async (req, res) => {
     const [course] = await pool.query('SELECT * FROM courses WHERE id = ?', [req.params.id]);
     if (course.length === 0) return res.status(404).json({ message: 'Course not found' });
 
-    // Fetch Sections (Chapters) & Modules & Lessons
+    // Fetch Sections (Modules in UI) & Lessons
     const [sections] = await pool.query('SELECT * FROM course_sections WHERE course_id = ? ORDER BY order_index', [req.params.id]);
     
     for (let section of sections) {
-      const [modules] = await pool.query('SELECT * FROM course_modules WHERE section_id = ? ORDER BY order_index', [section.id]);
-      section.modules = modules;
-      for (let module of modules) {
-        const [lessons] = await pool.query('SELECT * FROM course_lessons WHERE module_id = ? ORDER BY order_index', [module.id]);
-        module.lessons = lessons;
-      }
+      const [lessons] = await pool.query('SELECT * FROM course_lessons WHERE section_id = ? ORDER BY order_index', [section.id]);
+      section.lessons = lessons;
     }
 
     // Fetch Prerequisites
@@ -427,15 +423,7 @@ router.put('/courses/:id/status', authenticateJWT, isTutorOrAdmin, async (req, r
 
   if (['published', 'pending_review'].includes(status)) {
     try {
-      const [chapters] = await pool.query('SELECT COUNT(*) as count FROM course_sections WHERE course_id = ?', [req.params.id]);
-      if (chapters[0].count === 0) {
-        return res.status(400).json({ message: 'Validation failed: A course must have at least one chapter before it can be published or submitted for review.' });
-      }
-
-      const [modules] = await pool.query(
-        'SELECT COUNT(*) as count FROM course_modules WHERE section_id IN (SELECT id FROM course_sections WHERE course_id = ?)',
-        [req.params.id]
-      );
+      const [modules] = await pool.query('SELECT COUNT(*) as count FROM course_sections WHERE course_id = ?', [req.params.id]);
       if (modules[0].count === 0) {
         return res.status(400).json({ message: 'Validation failed: A course must have at least one module before it can be published or submitted for review.' });
       }
@@ -592,25 +580,24 @@ router.delete('/courses/:id/sections/:sid/modules/:mid', authenticateJWT, isTuto
   }
 });
 
-// --- Lessons under Modules ---
+// --- Lessons under Sections (Directly) ---
 
-// Add Lesson
-router.post('/courses/:id/sections/:sid/modules/:mid/lessons', authenticateJWT, isTutorOrAdmin, upload.single('resource'), sanitizeBody, async (req, res) => {
+// Add Lesson Directly under Section
+router.post('/courses/:id/sections/:sid/lessons', authenticateJWT, isTutorOrAdmin, upload.single('resource'), sanitizeBody, async (req, res) => {
   const { title, type, video_source, video_id, notes, is_free_preview, live_date, live_time, zoom_link, thumbnail_url, duration_seconds, quiz_id, assignment_id, content_html, is_mandatory, scheduled_at, duration_minutes, live_link } = req.body;
   const section_id = req.params.sid;
-  const module_id = req.params.mid;
   const id = uuidv4();
   const resource_url = req.file ? `/uploads/resources/${req.file.filename}` : null;
 
   try {
-    const [maxOrder] = await pool.query('SELECT MAX(order_index) as max_order FROM course_lessons WHERE module_id = ?', [module_id]);
+    const [maxOrder] = await pool.query('SELECT MAX(order_index) as max_order FROM course_lessons WHERE section_id = ?', [section_id]);
     const nextOrder = (maxOrder[0].max_order || 0) + 1;
 
     await pool.query(
       `INSERT INTO course_lessons (id, section_id, module_id, title, type, video_source, video_id, notes, is_free_preview, order_index, resource_url, live_date, live_time, zoom_link, thumbnail_url, duration_seconds, quiz_id, assignment_id, content_html, is_mandatory, scheduled_at, duration_minutes, live_link) 
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
-        id, section_id, module_id, title, type,
+        id, section_id, null, title, type,
         video_source || null, video_id || null, notes || null,
         is_free_preview === 'true' || is_free_preview === true, nextOrder, resource_url,
         live_date || null, live_time || null, zoom_link || null,
@@ -626,8 +613,8 @@ router.post('/courses/:id/sections/:sid/modules/:mid/lessons', authenticateJWT, 
   }
 });
 
-// Update Lesson
-router.put('/courses/:id/sections/:sid/modules/:mid/lessons/:lid', authenticateJWT, isTutorOrAdmin, upload.single('resource'), sanitizeBody, async (req, res) => {
+// Update Lesson Directly under Section
+router.put('/courses/:id/sections/:sid/lessons/:lid', authenticateJWT, isTutorOrAdmin, upload.single('resource'), sanitizeBody, async (req, res) => {
   const { title, type, video_source, video_id, notes, is_free_preview, live_date, live_time, zoom_link, thumbnail_url, duration_seconds, quiz_id, assignment_id, content_html, is_mandatory, scheduled_at, duration_minutes, live_link } = req.body;
   const lesson_id = req.params.lid;
   const resource_url = req.file ? `/uploads/resources/${req.file.filename}` : undefined;
@@ -657,8 +644,8 @@ router.put('/courses/:id/sections/:sid/modules/:mid/lessons/:lid', authenticateJ
   }
 });
 
-// Delete Lesson
-router.delete('/courses/:id/sections/:sid/modules/:mid/lessons/:lid', authenticateJWT, isTutorOrAdmin, async (req, res) => {
+// Delete Lesson Directly under Section
+router.delete('/courses/:id/sections/:sid/lessons/:lid', authenticateJWT, isTutorOrAdmin, async (req, res) => {
   try {
     await pool.query('DELETE FROM course_lessons WHERE id = ?', [req.params.lid]);
     res.json({ message: 'Lesson deleted' });
@@ -677,12 +664,7 @@ router.put('/curriculum/reorder', authenticateJWT, isTutorOrAdmin, async (req, r
     for (const item of items) {
       if (type === 'lessons') {
         await connection.query(
-          `UPDATE course_lessons SET order_index = ?, module_id = ?, section_id = ? WHERE id = ?`,
-          [item.order_index, item.module_id, item.section_id, item.id]
-        );
-      } else if (type === 'modules') {
-        await connection.query(
-          `UPDATE course_modules SET order_index = ?, section_id = ? WHERE id = ?`,
+          `UPDATE course_lessons SET order_index = ?, section_id = ? WHERE id = ?`,
           [item.order_index, item.section_id, item.id]
         );
       } else {

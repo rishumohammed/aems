@@ -17,7 +17,7 @@
     <div v-else>
       <div class="d-flex align-center mb-8">
         <div>
-          <h1 class="text-h4 font-weight-bold mb-1 text-primary">Placement Dashboard</h1>
+          <h1 class="text-h4 font-weight-bold mb-1">Placement Dashboard</h1>
           <p class="text-secondary">Overview of jobs, applications, and interviews.</p>
         </div>
         <v-spacer></v-spacer>

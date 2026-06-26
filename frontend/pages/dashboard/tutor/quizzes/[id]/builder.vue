@@ -5,7 +5,7 @@
         <div class="d-flex align-center">
           <v-btn icon="mdi-arrow-left" variant="tonal" color="white" class="mr-4" to="/dashboard/tutor/quizzes"></v-btn>
           <div>
-            <h1 class="text-h4 font-weight-bold mb-1 text-primary">Question Builder</h1>
+            <h1 class="text-h4 font-weight-bold mb-1">Question Builder</h1>
             <p class="text-subtitle-1 text-medium-emphasis mb-6" v-if="quiz">{{ quiz.title }} • {{ quiz.course_title }}</p>
           </div>
         </div>

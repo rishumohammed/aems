@@ -150,8 +150,10 @@ router.post('/manual', authenticateJWT, authorizeRoles('super_admin', 'crm_agent
     const idsToEnroll = course_ids || (course_id ? [course_id] : []);
     if (idsToEnroll.length === 0) return res.status(400).json({ message: 'No courses selected' });
 
-    let remainingPayment = parseFloat(amount_paid) || 0;
+    const totalAmountPaid = parseFloat(amount_paid) || 0;
     const bundlePrice = parseFloat(price) || 0;
+    const paymentPercentage = bundlePrice > 0 ? (totalAmountPaid / bundlePrice) : 1;
+    let remainingPayment = totalAmountPaid;
     const results = [];
 
     // Fetch original prices for all courses to calculate proportional discount
@@ -165,16 +167,16 @@ router.post('/manual', authenticateJWT, authorizeRoles('super_admin', 'crm_agent
 
     const discountFactor = originalTotal > 0 ? bundlePrice / originalTotal : 1;
 
-    for (const cid of idsToEnroll) {
+    for (let i = 0; i < idsToEnroll.length; i++) {
+      const cid = idsToEnroll[i];
       const originalCoursePrice = courseMap[cid] || 0;
       const finalCoursePrice = originalTotal > 0 ? originalCoursePrice * discountFactor : bundlePrice / idsToEnroll.length;
       
-      let allocatedAmount = Math.min(finalCoursePrice, remainingPayment);
-      if (allocatedAmount < 0) allocatedAmount = 0;
+      let allocatedAmount = finalCoursePrice * paymentPercentage;
       
-      // If this is the last course and there's remaining payment, just put it all here to avoid penny rounding issues
-      if (cid === idsToEnroll[idsToEnroll.length - 1] && remainingPayment > allocatedAmount) {
-        allocatedAmount = remainingPayment;
+      // If this is the last course, assign the remaining payment to avoid penny rounding issues
+      if (i === idsToEnroll.length - 1) {
+        allocatedAmount = Math.max(0, remainingPayment);
       }
 
       remainingPayment -= allocatedAmount;

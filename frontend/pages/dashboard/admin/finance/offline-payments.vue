@@ -3,7 +3,7 @@
     <!-- Header -->
     <div class="d-flex align-center justify-space-between mb-8">
       <div>
-        <h1 class="text-h4 font-weight-bold mb-1 text-primary">Offline Payments</h1>
+        <h1 class="text-h4 font-weight-bold mb-1">Offline Payments</h1>
         <p class="text-subtitle-1 text-medium-emphasis mb-6">Review, approve, or reject student offline payment submissions.</p>
       </div>
     </div>

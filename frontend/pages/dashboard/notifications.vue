@@ -2,7 +2,7 @@
   <v-container fluid class="pa-6">
     <div class="d-flex align-center justify-space-between mb-8">
       <div>
-        <h1 class="text-h4 font-weight-bold mb-1 text-primary">Notifications</h1>
+        <h1 class="text-h4 font-weight-bold mb-1">Notifications</h1>
         <p class="text-subtitle-1 text-medium-emphasis mb-6">Stay updated with your learning and career progress.</p>
       </div>
       <AppButton variant="g" icon="mdi-check-all" @click="markAllAsRead" v-if="notifications.length > 0">

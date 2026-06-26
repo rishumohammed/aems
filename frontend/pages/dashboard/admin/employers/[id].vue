@@ -5,7 +5,7 @@
       <div class="d-flex align-center gap-4">
         <v-btn icon="mdi-arrow-left" variant="tonal" to="/dashboard/admin/employers" size="small"></v-btn>
         <div>
-          <h1 class="text-h4 font-weight-bold mb-1 text-primary">Company Profile</h1>
+          <h1 class="text-h4 font-weight-bold mb-1">Company Profile</h1>
           <p class="text-blue-grey-300">Detailed job posting and application statistics</p>
         </div>
       </div>

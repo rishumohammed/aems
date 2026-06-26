@@ -7,7 +7,7 @@
         frameborder="0"
         allowfullscreen
         sandbox="allow-scripts allow-same-origin allow-presentation"
-        :src="`https://www.youtube-nocookie.com/embed/${videoId}?enablejsapi=1&autoplay=0&controls=1&modestbranding=1&rel=0&showinfo=0&fs=1&iv_load_policy=3&start=${Math.floor(lastWatchedSeconds)}`"
+        :src="`https://www.youtube.com/embed/${videoId}?enablejsapi=1&autoplay=0&controls=1&modestbranding=1&rel=0&showinfo=0&fs=1&iv_load_policy=3&start=${Math.floor(lastWatchedSeconds)}`"
       ></iframe>
       <!-- Invisible overlay to block title details & sharing button clicks at the top -->
       <div class="absolute" style="top: 0; left: 0; width: 100%; height: 50px; z-index: 1; cursor: default;" @click.stop.prevent></div>
@@ -65,6 +65,12 @@
 <script setup>
 import VimeoPlayer from '@vimeo/player';
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
+
+useHead({
+  script: [
+    { src: 'https://www.youtube.com/iframe_api', async: true, defer: true }
+  ]
+});
 
 const props = defineProps({
   source: { type: String, required: true }, // 'youtube' | 'vimeo' | 'mp4' | 'external'

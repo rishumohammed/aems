@@ -43,6 +43,7 @@ export const useNavStore = defineStore('nav', {
       { label: 'Results', icon: 'mdi-trophy-outline', route: '/dashboard/exams/grading', roles: ['super_admin', 'lms_user', 'tutor'], section: 'EXAMS' },
       { label: 'Certificates', icon: 'mdi-certificate-outline', route: '/dashboard/certificates', roles: ['super_admin', 'lms_user', 'tutor', 'student'], section: 'EXAMS' },
       { label: 'Proctoring Logs', icon: 'mdi-cctv', route: '/dashboard/admin/proctoring', roles: ['super_admin', 'lms_user', 'tutor'], section: 'EXAMS' },
+      { label: 'Talent Proctoring', icon: 'mdi-webcam', route: '/dashboard/admin/public-exams/proctoring', roles: ['super_admin', 'lms_user'], section: 'EXAMS' },
       { label: 'Results', icon: 'mdi-trophy-outline', route: '/dashboard/student/results', roles: ['student'], section: 'EXAMS' },
       
       // JOBS

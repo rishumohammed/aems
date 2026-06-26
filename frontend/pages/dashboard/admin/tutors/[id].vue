@@ -5,7 +5,7 @@
       <div class="d-flex align-center gap-4">
         <v-btn icon="mdi-arrow-left" variant="tonal" to="/dashboard/admin/tutors" size="small"></v-btn>
         <div>
-          <h1 class="text-h4 font-weight-bold mb-1 text-primary">Tutor Profile</h1>
+          <h1 class="text-h4 font-weight-bold mb-1">Tutor Profile</h1>
           <p class="text-blue-grey-300">Detailed performance and course statistics</p>
         </div>
       </div>

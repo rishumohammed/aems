@@ -2,7 +2,7 @@
   <v-container fluid class="pa-6">
     <div class="d-flex align-center justify-space-between mb-8">
       <div>
-        <h1 class="text-h4 font-weight-bold mb-1 text-primary">Company Profile</h1>
+        <h1 class="text-h4 font-weight-bold mb-1">Company Profile</h1>
         <p class="text-blue-grey-300">Manage your company's public branding and details.</p>
       </div>
       <v-btn

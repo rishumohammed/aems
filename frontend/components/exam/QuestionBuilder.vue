@@ -97,6 +97,14 @@
             placeholder="Optional explanation shown after exam results"
           />
         </div>
+
+        <v-divider class="my-4"></v-divider>
+        
+        <div class="d-flex justify-center mb-1">
+          <v-btn size="small" variant="tonal" color="primary" prepend-icon="mdi-plus-circle" @click="insertQuestion(i)">
+            Add Next Question
+          </v-btn>
+        </div>
       </v-card>
     </div>
   </div>
@@ -127,6 +135,19 @@ const addQuestion = () => {
     marks: 1,
     explanation: '',
   }];
+};
+
+const insertQuestion = (i: number) => {
+  const arr = [...questions.value];
+  arr.splice(i + 1, 0, {
+    question_text: '',
+    type: 'mcq',
+    options: ['', '', '', ''],
+    correct_answer: '',
+    marks: 1,
+    explanation: '',
+  });
+  questions.value = arr;
 };
 
 const removeQuestion = (i: number) => {

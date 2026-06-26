@@ -3,22 +3,25 @@
     <v-row>
       <!-- Contact Details -->
       <v-col cols="12" md="4">
-        <v-card variant="outlined" class="rounded-xl h-100">
-          <v-card-item title="Contact Details">
+        <v-card elevation="2" class="rounded-xl h-100 bg-surface">
+          <v-card-item class="pb-2">
             <template v-slot:prepend>
-              <v-icon color="primary">mdi-account-details-outline</v-icon>
+              <v-avatar color="primary-lighten-5" size="40" class="mr-3">
+                <v-icon color="primary">mdi-account-details-outline</v-icon>
+              </v-avatar>
             </template>
+            <v-card-title class="text-h6 font-weight-bold">Contact Details</v-card-title>
           </v-card-item>
-          <v-divider></v-divider>
-          <v-card-text>
-            <v-list density="compact">
-              <v-list-item v-for="(item, i) in contactItems" :key="i" class="px-0">
+          <v-divider class="mx-4 my-2"></v-divider>
+          <v-card-text class="pt-0">
+            <v-list density="comfortable" bg-color="transparent" class="px-0">
+              <v-list-item v-for="(item, i) in contactItems" :key="i" class="px-0 mb-2">
                 <template v-slot:prepend>
-                  <v-icon size="small" class="mr-3 opacity-60">{{ item.icon }}</v-icon>
+                  <v-icon size="small" class="mr-4 text-grey-darken-1">{{ item.icon }}</v-icon>
                 </template>
-                <div class="d-flex justify-space-between align-center flex-grow-1">
-                  <span class="text-caption text-grey">{{ item.label }}</span>
-                  <span class="text-body-2 font-weight-bold">{{ item.value }}</span>
+                <div class="d-flex flex-column align-start">
+                  <span class="text-caption text-grey-darken-1 font-weight-medium text-uppercase mb-1">{{ item.label }}</span>
+                  <span class="text-body-2 font-weight-medium text-high-emphasis" style="line-height: 1.4; word-break: break-word;">{{ item.value }}</span>
                 </div>
               </v-list-item>
             </v-list>
@@ -28,31 +31,34 @@
 
       <!-- Work Experience Summary -->
       <v-col cols="12" md="4">
-        <v-card variant="outlined" class="rounded-xl h-100">
-          <v-card-item title="Professional Summary">
+        <v-card elevation="2" class="rounded-xl h-100 bg-surface">
+          <v-card-item class="pb-2">
             <template v-slot:prepend>
-              <v-icon color="primary">mdi-briefcase-outline</v-icon>
+              <v-avatar color="primary-lighten-5" size="40" class="mr-3">
+                <v-icon color="primary">mdi-briefcase-outline</v-icon>
+              </v-avatar>
             </template>
+            <v-card-title class="text-h6 font-weight-bold">Professional Summary</v-card-title>
           </v-card-item>
-          <v-divider></v-divider>
-          <v-card-text>
-            <div class="mb-4">
-              <div class="text-caption text-grey mb-1">Current Status</div>
-              <v-chip :color="statusColor" size="small" class="text-uppercase font-weight-bold">
+          <v-divider class="mx-4 my-2"></v-divider>
+          <v-card-text class="pt-2">
+            <div class="mb-5">
+              <div class="text-caption text-grey-darken-1 font-weight-medium text-uppercase mb-1">Current Status</div>
+              <v-chip :color="statusColor" size="small" variant="flat" class="text-uppercase font-weight-bold elevation-1">
                 {{ student.current_status || 'Fresher' }}
               </v-chip>
             </div>
-            <div class="mb-4">
-              <div class="text-caption text-grey mb-1">Total Experience</div>
-              <div class="text-h6 font-weight-bold">{{ student.experience_years || 0 }} Years</div>
+            <div class="mb-5">
+              <div class="text-caption text-grey-darken-1 font-weight-medium text-uppercase mb-1">Total Experience</div>
+              <div class="text-h6 font-weight-bold text-high-emphasis">{{ student.experience_years || 0 }} Years</div>
             </div>
             <div>
-              <div class="text-caption text-grey mb-2">Key Skills</div>
+              <div class="text-caption text-grey-darken-1 font-weight-medium text-uppercase mb-2">Key Skills</div>
               <div class="d-flex flex-wrap gap-2">
-                <v-chip v-for="skill in parsedSkills" :key="skill" size="small" variant="tonal" color="primary">
+                <v-chip v-for="skill in parsedSkills" :key="skill" size="small" variant="tonal" color="primary" class="font-weight-medium">
                   {{ skill }}
                 </v-chip>
-                <span v-if="parsedSkills.length === 0" class="text-caption text-grey italic">No skills listed</span>
+                <span v-if="parsedSkills.length === 0" class="text-caption text-grey font-italic">No skills listed</span>
               </div>
             </div>
           </v-card-text>
@@ -61,61 +67,58 @@
 
       <!-- Lead Conversion & System Details -->
       <v-col cols="12" md="4">
-        <v-card variant="outlined" class="rounded-xl h-100">
-          <v-card-item title="System & Conversion Info">
+        <v-card elevation="2" class="rounded-xl h-100 bg-surface">
+          <v-card-item class="pb-2">
             <template v-slot:prepend>
-              <v-icon color="primary">mdi-cog-outline</v-icon>
+              <v-avatar color="primary-lighten-5" size="40" class="mr-3">
+                <v-icon color="primary">mdi-cog-outline</v-icon>
+              </v-avatar>
             </template>
+            <v-card-title class="text-h6 font-weight-bold">System & Info</v-card-title>
           </v-card-item>
-          <v-divider></v-divider>
-          <v-card-text>
-            <v-list density="compact">
-              <v-list-item class="px-0">
-                <div class="d-flex justify-space-between align-center flex-grow-1">
-                  <span class="text-caption text-grey">Student ID</span>
+          <v-divider class="mx-4 my-2"></v-divider>
+          <v-card-text class="pt-0">
+            <v-list density="comfortable" bg-color="transparent" class="px-0">
+              
+              <v-list-item class="px-0 mb-1">
+                <div class="d-flex flex-column align-start">
+                  <span class="text-caption text-grey-darken-1 font-weight-medium text-uppercase mb-1">Student ID</span>
                   <span class="text-body-2 font-weight-bold text-primary">{{ student.student_id || 'N/A' }}</span>
                 </div>
               </v-list-item>
               
-              <v-list-item class="px-0">
-                <div class="d-flex justify-space-between align-center flex-grow-1">
-                  <span class="text-caption text-grey">Username</span>
-                  <span class="text-body-2 font-weight-bold">{{ student.email }}</span>
+              <v-list-item class="px-0 mb-1">
+                <div class="d-flex flex-column align-start">
+                  <span class="text-caption text-grey-darken-1 font-weight-medium text-uppercase mb-1">Username</span>
+                  <span class="text-body-2 font-weight-medium text-high-emphasis">{{ student.email }}</span>
+                </div>
+              </v-list-item>
+
+              <v-list-item class="px-0 mb-1">
+                <div class="d-flex flex-column align-start">
+                  <span class="text-caption text-grey-darken-1 font-weight-medium text-uppercase mb-1">Enrollment Date</span>
+                  <span class="text-body-2 font-weight-medium text-high-emphasis">{{ formatDate(student.created_at) }}</span>
+                </div>
+              </v-list-item>
+
+              <v-list-item class="px-0 mb-1">
+                <div class="d-flex flex-column align-start">
+                  <span class="text-caption text-grey-darken-1 font-weight-medium text-uppercase mb-1">Lead Source</span>
+                  <span class="text-body-2 font-weight-medium text-capitalize text-high-emphasis">{{ student.lead_source || 'Direct' }}</span>
+                </div>
+              </v-list-item>
+
+              <v-list-item class="px-0 mb-1">
+                <div class="d-flex flex-column align-start">
+                  <span class="text-caption text-grey-darken-1 font-weight-medium text-uppercase mb-1">Converted By</span>
+                  <span class="text-body-2 font-weight-medium text-high-emphasis">{{ student.converted_by_name || 'N/A' }}</span>
                 </div>
               </v-list-item>
 
               <v-list-item class="px-0">
-                <div class="d-flex justify-space-between align-center flex-grow-1">
-                  <span class="text-caption text-grey">Email</span>
-                  <span class="text-body-2 font-weight-bold">{{ student.email }}</span>
-                </div>
-              </v-list-item>
-
-              <v-list-item class="px-0">
-                <div class="d-flex justify-space-between align-center flex-grow-1">
-                  <span class="text-caption text-grey">Enrollment Date</span>
-                  <span class="text-body-2 font-weight-bold">{{ formatDate(student.created_at) }}</span>
-                </div>
-              </v-list-item>
-
-              <v-list-item class="px-0">
-                <div class="d-flex justify-space-between align-center flex-grow-1">
-                  <span class="text-caption text-grey">Lead Source</span>
-                  <span class="text-body-2 font-weight-bold text-capitalize">{{ student.lead_source || 'Direct' }}</span>
-                </div>
-              </v-list-item>
-
-              <v-list-item class="px-0">
-                <div class="d-flex justify-space-between align-center flex-grow-1">
-                  <span class="text-caption text-grey">Converted By</span>
-                  <span class="text-body-2 font-weight-bold">{{ student.converted_by_name || 'N/A' }}</span>
-                </div>
-              </v-list-item>
-
-              <v-list-item class="px-0">
-                <div class="d-flex justify-space-between align-center flex-grow-1">
-                  <span class="text-caption text-grey">Credentials Status</span>
-                  <v-chip :color="student.force_password_change ? 'warning' : 'success'" size="x-small" class="text-uppercase font-weight-bold">
+                <div class="d-flex flex-column align-start">
+                  <span class="text-caption text-grey-darken-1 font-weight-medium text-uppercase mb-2">Credentials Status</span>
+                  <v-chip :color="student.force_password_change ? 'warning' : 'success'" size="small" variant="flat" class="text-uppercase font-weight-bold elevation-1">
                     {{ student.force_password_change ? 'Temp (Force Reset)' : 'Active' }}
                   </v-chip>
                 </div>
@@ -127,25 +130,28 @@
 
       <!-- Login Credentials -->
       <v-col cols="12" md="4">
-        <v-card variant="outlined" class="rounded-xl h-100">
-          <v-card-item title="Login Credentials">
+        <v-card elevation="2" class="rounded-xl h-100 bg-surface">
+          <v-card-item class="pb-2">
             <template v-slot:prepend>
-              <v-icon color="primary">mdi-key-outline</v-icon>
+              <v-avatar color="primary-lighten-5" size="40" class="mr-3">
+                <v-icon color="primary">mdi-key-outline</v-icon>
+              </v-avatar>
             </template>
+            <v-card-title class="text-h6 font-weight-bold">Login Credentials</v-card-title>
           </v-card-item>
-          <v-divider></v-divider>
-          <v-card-text>
-            <div class="mb-4">
-              <div class="text-caption text-grey mb-1">Username / Email</div>
-              <div class="text-body-1 font-weight-bold">{{ student.email }}</div>
+          <v-divider class="mx-4 my-2"></v-divider>
+          <v-card-text class="pt-2">
+            <div class="mb-5">
+              <div class="text-caption text-grey text-uppercase font-weight-bold tracking-wider mb-1">Username / Email</div>
+              <div class="text-body-1 font-weight-medium text-high-emphasis">{{ student.email }}</div>
             </div>
             
-            <div class="mb-4">
-              <div class="text-caption text-grey mb-1">Temporary Password</div>
-              <div class="d-flex align-center gap-2">
-                <div class="text-h6 tracking-widest font-family-monospace" v-if="student.force_password_change">********</div>
-                <div class="text-body-2 text-grey-darken-1 italic" v-else>Password changed by user</div>
-                <v-chip :color="student.force_password_change ? 'warning' : 'success'" size="x-small" class="text-uppercase font-weight-bold ml-auto">
+            <div class="mb-5">
+              <div class="text-caption text-grey text-uppercase font-weight-bold tracking-wider mb-1">Temporary Password</div>
+              <div class="d-flex align-center gap-2 mt-1">
+                <div class="text-h6 tracking-widest font-family-monospace text-high-emphasis" v-if="student.force_password_change">********</div>
+                <div class="text-body-2 text-grey-darken-1 font-italic" v-else>Password changed by user</div>
+                <v-chip :color="student.force_password_change ? 'warning' : 'success'" size="small" variant="flat" class="text-uppercase font-weight-bold ml-auto elevation-1">
                   {{ student.force_password_change ? 'Temporary' : 'Active' }}
                 </v-chip>
               </div>
@@ -153,9 +159,9 @@
             
             <v-btn 
               color="primary" 
-              variant="tonal" 
+              variant="flat" 
               block 
-              class="text-none mt-2" 
+              class="text-none mt-4 font-weight-bold elevation-1" 
               prepend-icon="mdi-lock-reset"
               @click="resetPassword"
               :loading="resettingPassword"
@@ -174,7 +180,7 @@
         </h3>
         <v-row v-if="parsedEducation.length > 0">
           <v-col v-for="(edu, i) in parsedEducation" :key="i" cols="12" md="6">
-            <v-card variant="outlined" class="rounded-xl pa-4 bg-grey-lighten-5">
+            <v-card elevation="1" class="rounded-xl pa-4 bg-surface">
               <div class="d-flex justify-space-between align-start mb-2">
                 <div>
                   <div class="text-subtitle-1 font-weight-bold">{{ edu.degree }}</div>
@@ -212,7 +218,7 @@
         </h3>
         <v-row v-if="parsedExperience.length > 0">
           <v-col v-for="(exp, i) in parsedExperience" :key="i" cols="12" md="6">
-            <v-card variant="outlined" class="rounded-xl pa-4 bg-grey-lighten-5">
+            <v-card elevation="1" class="rounded-xl pa-4 bg-surface">
               <div class="d-flex justify-space-between align-start mb-2">
                 <div>
                   <div class="text-subtitle-1 font-weight-bold">{{ exp.role }}</div>

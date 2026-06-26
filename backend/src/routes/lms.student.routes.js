@@ -16,6 +16,7 @@ router.get('/dashboard', async (req, res) => {
     const [enrollments] = await pool.query(`
       SELECT e.*, c.title, c.thumbnail_url, c.slug,
              u.name as instructor_name,
+             (SELECT payment_status FROM invoices i WHERE i.student_id = e.student_id AND i.course_id = e.course_id ORDER BY created_at DESC LIMIT 1) as payment_status,
              (SELECT COUNT(*) FROM course_lessons cl 
               JOIN course_sections cs ON cl.section_id = cs.id 
               WHERE cs.course_id = c.id) as total_lessons,
@@ -120,14 +121,9 @@ router.get('/courses/:courseId/curriculum', async (req, res) => {
       if (invoices.length > 0) {
         const paymentStatus = invoices[0].payment_status;
         if (paymentStatus !== 'paid') {
-          // Check config
-          const [configs] = await pool.query('SELECT value FROM system_config WHERE `key` = "payment_allow_partial_access"');
-          const allowPartial = configs[0]?.value === 'true';
-          
           if (paymentStatus === 'partial') {
-            if (!allowPartial) {
-              hasPaymentAccess = false;
-            }
+            // Unconditionally allow access for partial payments
+            hasPaymentAccess = true;
           } else {
             // pending or voided
             hasPaymentAccess = false;
@@ -145,25 +141,16 @@ router.get('/courses/:courseId/curriculum', async (req, res) => {
     const sectionIds = sections.map(s => s.id);
     if (sectionIds.length === 0) return res.json([]);
 
-    // Fetch Modules
-    const [modules] = await pool.query(`
-      SELECT * FROM course_modules
-      WHERE section_id IN (?)
-      ORDER BY order_index ASC
-    `, [sectionIds]);
-
-    const moduleIds = modules.map(m => m.id);
-
     // Fetch Lessons (with progress)
     let lessons = [];
-    if (moduleIds.length > 0) {
+    if (sectionIds.length > 0) {
       const [lessonsData] = await pool.query(`
         SELECT l.*, p.watched_seconds, p.completed
         FROM course_lessons l
         LEFT JOIN lesson_progress p ON l.id = p.lesson_id AND p.enrollment_id = ?
-        WHERE l.module_id IN (?)
+        WHERE l.section_id IN (?)
         ORDER BY l.order_index ASC
-      `, [enrollmentId, moduleIds]);
+      `, [enrollmentId, sectionIds]);
       lessons = lessonsData;
     }
 
@@ -184,35 +171,29 @@ router.get('/courses/:courseId/curriculum', async (req, res) => {
         };
       }
       return { ...l, is_locked: false };
-    });    // Group lessons into modules and compute module stats
-    const modulesWithLessons = modules.map(mod => {
-      const modLessons = sanitizedLessons.filter(l => l.module_id === mod.id);
-      const totalLessons = modLessons.length;
-      const completedLessons = modLessons.filter(l => l.completed).length;
+    });
+
+    // Group lessons into sections and wrap them in a dummy module for frontend compatibility
+    const curriculum = sections.map(section => {
+      const sectLessons = sanitizedLessons.filter(l => l.section_id === section.id);
+      const totalLessons = sectLessons.length;
+      const completedLessons = sectLessons.filter(l => l.completed).length;
       const progressPercentage = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
       const completed = totalLessons > 0 && completedLessons === totalLessons;
 
-      return {
-        ...mod,
-        lessons: modLessons,
+      const dummyModule = {
+        id: section.id,
+        title: section.title,
+        lessons: sectLessons,
         total_lessons: totalLessons,
         completed_lessons: completedLessons,
         progress_percentage: progressPercentage,
         completed
       };
-    });
-
-    // Group modules into chapters (sections) and compute chapter stats
-    const curriculum = sections.map(section => {
-      const sectModules = modulesWithLessons.filter(m => m.section_id === section.id);
-      const totalLessons = sectModules.reduce((sum, m) => sum + m.total_lessons, 0);
-      const completedLessons = sectModules.reduce((sum, m) => sum + m.completed_lessons, 0);
-      const progressPercentage = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
-      const completed = sectModules.length > 0 && sectModules.every(m => m.completed);
 
       return {
         ...section,
-        modules: sectModules,
+        modules: [dummyModule],
         total_lessons: totalLessons,
         completed_lessons: completedLessons,
         progress_percentage: progressPercentage,
@@ -252,13 +233,11 @@ router.post('/progress', async (req, res) => {
     if (invoices.length > 0) {
       const paymentStatus = invoices[0].payment_status;
       if (paymentStatus !== 'paid') {
-        const [configs] = await pool.query('SELECT value FROM system_config WHERE `key` = "payment_allow_partial_access"');
-        const allowPartial = configs[0]?.value === 'true';
         let hasPaymentAccess = true;
         if (paymentStatus === 'partial') {
-          if (!allowPartial) hasPaymentAccess = false;
+          hasPaymentAccess = true; // Unconditionally allow progress tracking for partial payments
         } else {
-          hasPaymentAccess = false;
+          hasPaymentAccess = false; // pending or voided
         }
         if (!hasPaymentAccess) {
           // Check if lesson is free preview
@@ -427,6 +406,7 @@ router.get('/my-courses', async (req, res) => {
     const [enrollments] = await pool.query(`
       SELECT e.*, c.title, c.thumbnail_url, c.slug, c.description,
              u.name as instructor_name,
+             (SELECT payment_status FROM invoices i WHERE i.student_id = e.student_id AND i.course_id = e.course_id ORDER BY created_at DESC LIMIT 1) as payment_status,
              (SELECT COUNT(*) FROM course_lessons cl 
               JOIN course_sections cs ON cl.section_id = cs.id 
               WHERE cs.course_id = c.id) as total_lessons,

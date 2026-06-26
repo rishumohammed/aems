@@ -61,11 +61,22 @@ class InvoiceService {
     const pdfFilename = `${invoice.invoice_number || invoice.id}.pdf`;
     const pdfPath = path.join(pdfDir, pdfFilename);
     const pdfUrl = `/uploads/invoices/${pdfFilename}`;
+    const [configRows] = await pool.query('SELECT `key`, `value` FROM system_config WHERE `key` IN ("institute_name", "contact_address", "contact_phone", "contact_email", "app_logo", "invoice_header_color")');
+    const instituteInfo = {};
+    configRows.forEach(r => {
+      if (r.key === 'institute_name')       instituteInfo.name              = r.value;
+      if (r.key === 'contact_address')      instituteInfo.address           = r.value;
+      if (r.key === 'contact_phone')        instituteInfo.phone             = r.value;
+      if (r.key === 'contact_email')        instituteInfo.email             = r.value;
+      if (r.key === 'app_logo')             instituteInfo.logo_url          = r.value;
+      if (r.key === 'invoice_header_color') instituteInfo.header_color      = r.value;
+    });
 
     await generateInvoicePDF(
       invoice,
       { name: invoice.student_name, email: invoice.student_email, phone: invoice.student_phone },
       { title: invoice.course_title || 'General Enrollment' },
+      instituteInfo,
       pdfPath
     );
 

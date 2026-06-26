@@ -3,7 +3,7 @@
     <!-- Header -->
     <div class="d-flex align-center justify-space-between mb-8">
       <div>
-        <h1 class="text-h4 font-weight-bold mb-1 text-primary">Transactions Ledger</h1>
+        <h1 class="text-h4 font-weight-bold mb-1">Transactions Ledger</h1>
         <p class="text-subtitle-1 text-medium-emphasis mb-6">A consolidated view of all cash inflows and outflows.</p>
       </div>
     </div>

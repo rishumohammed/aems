@@ -2,7 +2,7 @@
   <v-container fluid class="pa-6">
     <div class="page-header d-flex align-center justify-space-between mb-6">
       <div>
-        <h1 class="text-h4 font-weight-bold mb-1 text-primary">Notice Board</h1>
+        <h1 class="text-h4 font-weight-bold mb-1">Notice Board</h1>
         <p class="text-body-1 text-secondary mt-1">Manage announcements, webinars, and talent exams for the homepage.</p>
       </div>
       <v-btn color="primary" class="text-none font-weight-bold rounded-lg" prepend-icon="mdi-plus" @click="openDialog()">

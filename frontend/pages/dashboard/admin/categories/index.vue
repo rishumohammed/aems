@@ -2,7 +2,7 @@
   <v-container fluid class="pa-6">
     <div class="d-flex justify-space-between align-center mb-8">
       <div>
-        <h1 class="text-h4 font-weight-bold mb-1 text-primary">Course Categories</h1>
+        <h1 class="text-h4 font-weight-bold mb-1">Course Categories</h1>
         <p class="text-subtitle-1 text-medium-emphasis mb-6">Manage categories for your course catalog.</p>
       </div>
       <AppButton icon="mdi-plus" @click="openAddModal">
