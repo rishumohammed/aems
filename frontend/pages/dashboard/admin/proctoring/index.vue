@@ -3,7 +3,7 @@
     <!-- Header -->
     <div class="d-flex justify-space-between align-center mb-6">
       <div>
-        <h1 class="text-h4 font-weight-bold mb-1 text-primary">Proctoring Logs</h1>
+        <h1 class="text-h4 font-weight-bold mb-1 text-dark">Proctoring Logs</h1>
         <p class="text-subtitle-1 text-medium-emphasis mb-0">Select a course to review proctoring violations and integrity checks.</p>
       </div>
     </div>
@@ -202,6 +202,8 @@ const getCourseViolationsCount = (course: any) => {
 </script>
 
 <style scoped>
+.text-dark { color: #1e293b; }
+
 .stat-card {
   border: 1px solid rgba(0, 0, 0, 0.07);
   background: white;
