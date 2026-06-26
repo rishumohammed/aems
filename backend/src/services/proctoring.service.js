@@ -77,11 +77,12 @@ class ProctoringService {
   async getViolationsGroupedByExam(userId, role) {
     let query = `
       SELECT 
-        pe.id, pe.type as violation_type, pe.metadata_json, pe.created_at as timestamp,
-        ea.id as attempt_id, ea.student_id, ea.exam_id, ea.status, ea.submitted_at, ea.started_at as attempt_started_at,
-        u.name as student_name,
-        e.title as exam_title, e.created_at as exam_created_at,
-        c.title as course_title
+        pe.id as event_id, pe.type as violation_type, pe.metadata_json, pe.created_at as timestamp,
+        ea.id as attempt_id, ea.student_id, ea.exam_id, ea.status as attempt_status,
+        ea.submitted_at, ea.started_at as attempt_started_at,
+        u.name as student_name, u.id as uid,
+        e.title as exam_title, e.id as eid,
+        c.title as course_title, c.id as cid
       FROM exam_attempts ea
       LEFT JOIN proctoring_events pe ON pe.attempt_id = ea.id
       JOIN users u ON ea.student_id = u.id
@@ -94,13 +95,15 @@ class ProctoringService {
       query += ` AND c.tutor_id = ?`;
       params.push(userId);
     }
-    query += ` ORDER BY ea.started_at DESC, pe.created_at DESC`;
-    const [events] = await pool.query(query, params);
+    query += ` ORDER BY c.title ASC, u.name ASC, ea.started_at DESC, pe.created_at DESC`;
+    const [rows] = await pool.query(query, params);
 
-    const examsMap = new Map();
+    // Course -> Student -> Attempt -> violations
+    const coursesMap = new Map();
     let totalViolations = 0;
     let highSeverityViolations = 0;
     const studentsFlaggedSet = new Set();
+    const attemptsSet = new Set(); // for counting unique exams monitored
 
     const getSeverity = (type) => {
       const high = ['multiple_faces', 'face_absent', 'devtools_open', 'phone_detected', 'suspicious_object', 'camera_disabled', 'microphone_disabled'];
@@ -110,97 +113,251 @@ class ProctoringService {
       return 'Low';
     };
 
-    events.forEach(ev => {
-      if (!examsMap.has(ev.exam_id)) {
-        examsMap.set(ev.exam_id, {
-          id: ev.exam_id,
-          title: ev.exam_title,
-          course_title: ev.course_title,
-          date: ev.exam_created_at,
-          attempts: 0,
-          totalViolations: 0,
-          highSeverity: 0,
-          violations: []
+    rows.forEach(row => {
+      const courseKey = row.cid;
+      const studentKey = `${row.cid}_${row.uid}`;
+      const attemptKey = row.attempt_id;
+
+      // --- Course level ---
+      if (!coursesMap.has(courseKey)) {
+        coursesMap.set(courseKey, {
+          id: courseKey,
+          title: row.course_title,
+          students: new Map()
         });
       }
-      
-      const examGroup = examsMap.get(ev.exam_id);
-      
-      if (ev.id) {
-        const severity = getSeverity(ev.violation_type);
-        
-        totalViolations++;
-        examGroup.totalViolations++;
-        studentsFlaggedSet.add(ev.student_id);
+      const courseGroup = coursesMap.get(courseKey);
 
+      // --- Student level ---
+      if (!courseGroup.students.has(studentKey)) {
+        courseGroup.students.set(studentKey, {
+          id: row.uid,
+          name: row.student_name,
+          attempts: new Map()
+        });
+      }
+      const studentGroup = courseGroup.students.get(studentKey);
+
+      // --- Attempt level ---
+      if (!studentGroup.attempts.has(attemptKey)) {
+        attemptsSet.add(row.exam_id);
+        studentGroup.attempts.set(attemptKey, {
+          attempt_id: row.attempt_id,
+          exam_id: row.exam_id,
+          exam_title: row.exam_title,
+          started_at: row.attempt_started_at,
+          submitted_at: row.submitted_at,
+          status: row.attempt_status,
+          violations: [],
+          violationCount: 0,
+          highSeverityCount: 0
+        });
+      }
+      const attemptGroup = studentGroup.attempts.get(attemptKey);
+
+      // --- Violation / event level ---
+      if (row.event_id) {
+        const severity = getSeverity(row.violation_type);
+        totalViolations++;
+        attemptGroup.violationCount++;
+        studentsFlaggedSet.add(row.uid);
         if (severity === 'High') {
           highSeverityViolations++;
-          examGroup.highSeverity++;
+          attemptGroup.highSeverityCount++;
         }
 
         let has_screenshot = false;
         let screenshot_url = null;
         try {
-          if (ev.metadata_json) {
-            const meta = typeof ev.metadata_json === 'string' ? JSON.parse(ev.metadata_json) : ev.metadata_json;
+          if (row.metadata_json) {
+            const meta = typeof row.metadata_json === 'string' ? JSON.parse(row.metadata_json) : row.metadata_json;
             has_screenshot = !!meta.screenshot;
             screenshot_url = meta.screenshot || null;
           }
         } catch (e) {}
 
-        examGroup.violations.push({
-          id: ev.id,
-          attempt_id: ev.attempt_id,
-          student_id: ev.student_id,
-          student_name: ev.student_name,
-          violation_type: ev.violation_type,
+        attemptGroup.violations.push({
+          id: row.event_id,
+          attempt_id: row.attempt_id,
+          violation_type: row.violation_type,
           severity,
-          timestamp: ev.timestamp,
+          timestamp: row.timestamp,
           has_screenshot,
-          screenshot_url,
-          status: ev.status
+          screenshot_url
         });
       } else {
-        // Attempt with no violations
-        examGroup.violations.push({
-          id: ev.attempt_id,
-          attempt_id: ev.attempt_id,
-          student_id: ev.student_id,
-          student_name: ev.student_name,
-          violation_type: 'No Violations',
-          severity: 'None',
-          timestamp: ev.attempt_started_at,
-          has_screenshot: false,
-          screenshot_url: null,
-          status: ev.status
-        });
+        // Attempt with no violations at all
+        if (attemptGroup.violations.length === 0) {
+          attemptGroup.violations.push({
+            id: row.attempt_id + '_clean',
+            attempt_id: row.attempt_id,
+            violation_type: 'No Violations',
+            severity: 'None',
+            timestamp: row.attempt_started_at,
+            has_screenshot: false,
+            screenshot_url: null
+          });
+        }
       }
     });
 
-    const examIds = Array.from(examsMap.keys());
-    if (examIds.length > 0) {
-      const [attemptsCounts] = await pool.query(
-        'SELECT exam_id, COUNT(id) as count FROM exam_attempts WHERE exam_id IN (?) GROUP BY exam_id',
-        [examIds]
-      );
-      attemptsCounts.forEach(row => {
-        if (examsMap.has(row.exam_id)) {
-          examsMap.get(row.exam_id).attempts = row.count;
-        }
-      });
-    }
-
-    // Sort exams by title alphabetically
-    const sortedExams = Array.from(examsMap.values()).sort((a, b) => a.title.localeCompare(b.title));
+    // Serialize Maps to arrays
+    const courses = Array.from(coursesMap.values()).map(course => ({
+      ...course,
+      students: Array.from(course.students.values()).map(student => ({
+        ...student,
+        attempts: Array.from(student.attempts.values())
+      }))
+    }));
 
     return {
       stats: {
-        totalExamsMonitored: examsMap.size,
+        totalExamsMonitored: attemptsSet.size,
         totalViolations,
         highSeverityViolations,
         studentsFlagged: studentsFlaggedSet.size
       },
-      exams: sortedExams
+      courses
+    };
+  }
+
+  async getPublicViolationsGroupedByExam(userId, role) {
+    let query = `
+      SELECT 
+        pe.id as event_id, pe.type as violation_type, pe.metadata_json, pe.created_at as timestamp,
+        ea.id as attempt_id, ea.exam_id, ea.status as attempt_status,
+        ea.submitted_at, ea.started_at as attempt_started_at,
+        COALESCE(c.name, ea.guest_name) as candidate_name, 
+        COALESCE(ea.candidate_id, ea.id) as cid,
+        e.name as exam_title, e.id as eid
+      FROM public_exam_attempts ea
+      LEFT JOIN proctoring_events pe ON pe.attempt_id = ea.id
+      LEFT JOIN public_exam_candidates c ON ea.candidate_id = c.id
+      JOIN public_exams e ON ea.exam_id = e.id
+      WHERE e.enable_proctoring = 1
+    `;
+    const params = [];
+    query += ` ORDER BY e.name ASC, c.name ASC, ea.started_at DESC, pe.created_at DESC`;
+    const [rows] = await pool.query(query, params);
+
+    // Exam -> Candidate -> Attempt -> violations
+    const examsMap = new Map();
+    let totalViolations = 0;
+    let highSeverityViolations = 0;
+    const candidatesFlaggedSet = new Set();
+    const attemptsSet = new Set();
+
+    const getSeverity = (type) => {
+      const high = ['multiple_faces', 'face_absent', 'devtools_open', 'phone_detected', 'suspicious_object', 'camera_disabled', 'microphone_disabled'];
+      const medium = ['tab_switch', 'window_blur', 'fullscreen_exit', 'looking_away'];
+      if (high.includes(type)) return 'High';
+      if (medium.includes(type)) return 'Medium';
+      return 'Low';
+    };
+
+    rows.forEach(row => {
+      const examKey = row.eid;
+      const candidateKey = `${row.eid}_${row.cid}`;
+      const attemptKey = row.attempt_id;
+
+      // --- Exam level ---
+      if (!examsMap.has(examKey)) {
+        examsMap.set(examKey, {
+          id: examKey,
+          title: row.exam_title,
+          candidates: new Map()
+        });
+      }
+      const examGroup = examsMap.get(examKey);
+
+      // --- Candidate level ---
+      if (!examGroup.candidates.has(candidateKey)) {
+        examGroup.candidates.set(candidateKey, {
+          id: row.cid,
+          name: row.candidate_name,
+          attempts: new Map()
+        });
+      }
+      const candidateGroup = examGroup.candidates.get(candidateKey);
+
+      // --- Attempt level ---
+      if (!candidateGroup.attempts.has(attemptKey)) {
+        attemptsSet.add(row.attempt_id);
+        candidateGroup.attempts.set(attemptKey, {
+          attempt_id: row.attempt_id,
+          exam_id: row.exam_id,
+          exam_title: row.exam_title,
+          started_at: row.attempt_started_at,
+          submitted_at: row.submitted_at,
+          status: row.attempt_status,
+          violations: [],
+          violationCount: 0,
+          highSeverityCount: 0
+        });
+      }
+      const attemptGroup = candidateGroup.attempts.get(attemptKey);
+
+      // --- Violation / event level ---
+      if (row.event_id) {
+        const severity = getSeverity(row.violation_type);
+        totalViolations++;
+        attemptGroup.violationCount++;
+        candidatesFlaggedSet.add(row.cid);
+        if (severity === 'High') {
+          highSeverityViolations++;
+          attemptGroup.highSeverityCount++;
+        }
+
+        let has_screenshot = false;
+        let screenshot_url = null;
+        try {
+          if (row.metadata_json) {
+            const meta = typeof row.metadata_json === 'string' ? JSON.parse(row.metadata_json) : row.metadata_json;
+            has_screenshot = !!meta.screenshot;
+            screenshot_url = meta.screenshot || null;
+          }
+        } catch (e) {}
+
+        attemptGroup.violations.push({
+          id: row.event_id,
+          attempt_id: row.attempt_id,
+          violation_type: row.violation_type,
+          severity,
+          timestamp: row.timestamp,
+          has_screenshot,
+          screenshot_url
+        });
+      } else {
+        if (attemptGroup.violations.length === 0) {
+          attemptGroup.violations.push({
+            id: row.attempt_id + '_clean',
+            attempt_id: row.attempt_id,
+            violation_type: 'No Violations',
+            severity: 'None',
+            timestamp: row.attempt_started_at,
+            has_screenshot: false,
+            screenshot_url: null
+          });
+        }
+      }
+    });
+
+    const exams = Array.from(examsMap.values()).map(exam => ({
+      ...exam,
+      candidates: Array.from(exam.candidates.values()).map(candidate => ({
+        ...candidate,
+        attempts: Array.from(candidate.attempts.values())
+      }))
+    }));
+
+    return {
+      stats: {
+        totalExamsMonitored: attemptsSet.size,
+        totalViolations,
+        highSeverityViolations,
+        candidatesFlagged: candidatesFlaggedSet.size
+      },
+      exams
     };
   }
 
