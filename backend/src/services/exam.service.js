@@ -32,7 +32,7 @@ class ExamService {
    */
   async checkEligibility(studentId, examId) {
     const [exams] = await pool.query(
-      'SELECT e.*, c.id as course_id FROM exams e JOIN courses c ON e.course_id = c.id WHERE e.id = ?',
+      'SELECT e.*, c.id as course_id FROM exams e LEFT JOIN courses c ON e.course_id = c.id WHERE e.id = ?',
       [examId]
     );
     if (exams.length === 0) throw new Error('Exam not found');
@@ -40,25 +40,30 @@ class ExamService {
 
     if (exam.status !== 'published') throw new Error('Exam is not active');
 
-    // Check enrollment exists and is active
-    const [enrollment] = await pool.query(
-      "SELECT id, status FROM enrollments WHERE student_id = ? AND course_id = ? AND status IN ('active', 'completed')",
-      [studentId, exam.course_id]
-    );
-    if (enrollment.length === 0) {
-      throw new Error('You must be enrolled in the course to take the exam');
-    }
-
-    // Check Option C (Restrict final exam until fully paid)
-    const [configs] = await pool.query('SELECT value FROM system_config WHERE `key` = "payment_restrict_exam"');
-    const restrictExam = configs[0]?.value === 'true';
-    if (restrictExam) {
-      const [invoices] = await pool.query(
-        'SELECT payment_status FROM invoices WHERE student_id = ? AND course_id = ?',
+    // If it's a course exam, verify enrollment AND completion
+    if (exam.course_id) {
+      const [enrollment] = await pool.query(
+        "SELECT id, status FROM enrollments WHERE student_id = ? AND course_id = ?",
         [studentId, exam.course_id]
       );
-      if (invoices.length > 0 && invoices[0].payment_status !== 'paid') {
-        throw new Error('You must pay the full course fee before taking the final exam.');
+      if (enrollment.length === 0) {
+        throw new Error('You must be enrolled in the course to take the exam');
+      }
+      if (enrollment[0].status !== 'completed') {
+        throw new Error('You must complete the course before taking the exam.');
+      }
+
+      // Check Option C (Restrict final exam until fully paid)
+      const [configs] = await pool.query('SELECT value FROM system_config WHERE `key` = "payment_restrict_exam"');
+      const restrictExam = configs[0]?.value === 'true';
+      if (restrictExam) {
+        const [invoices] = await pool.query(
+          'SELECT payment_status FROM invoices WHERE student_id = ? AND course_id = ?',
+          [studentId, exam.course_id]
+        );
+        if (invoices.length > 0 && invoices[0].payment_status !== 'paid') {
+          throw new Error('You must pay the full course fee before taking the final exam.');
+        }
       }
     }
 

@@ -273,6 +273,9 @@ onMounted(async () => {
   // If attempt is already in_progress (e.g. after refresh), skip checklist
   if (attempt.value?.status === 'in_progress') {
     await resumeExam();
+  } else if (attempt.value?.proctoring_enabled && stage.value === 'checklist') {
+    // Automatically trigger the camera permission prompt
+    setupCamera();
   }
 });
 
