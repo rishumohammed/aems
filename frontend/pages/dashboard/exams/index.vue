@@ -89,6 +89,13 @@
                 title="View Exam"
               ></AppButton>
               <AppButton
+                size="xs"
+                variant="g"
+                icon="mdi-format-list-checks"
+                :to="`/dashboard/exams/grading?exam_id=${item.id}`"
+                title="View Exam Results"
+              ></AppButton>
+              <AppButton
                 v-if="isAdmin"
                 size="xs"
                 variant="danger"
@@ -97,7 +104,7 @@
                 title="Delete Exam"
               ></AppButton>
             </div>
-</template>
+          </template>
         </v-data-table>
       </div>
     </div>

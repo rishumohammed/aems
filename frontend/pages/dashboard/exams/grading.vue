@@ -141,6 +141,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import { useApi } from '@/composables/useApi';
+import { useRoute } from 'vue-router';
 
 definePageMeta({ 
   layout: 'dashboard', 
@@ -193,10 +194,14 @@ const statusColor = (s: string) => ({
   submitted: 'blue', in_progress: 'gray', scheduled: 'gray'
 }[s] || 'gray');
 
+const route = useRoute();
+
 const fetchAttempts = async () => {
   loading.value = true;
   try {
-    const { data } = await api.get(`/exams/attempts`);
+    const examId = route.query.exam_id;
+    const url = examId ? `/exams/attempts?exam_id=${examId}` : `/exams/attempts`;
+    const { data } = await api.get(url);
     allAttempts.value = data;
   } finally {
     loading.value = false;
