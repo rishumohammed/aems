@@ -7,50 +7,44 @@
 
     <div v-else-if="result" class="results-content d-flex justify-center mt-12">
       <v-card class="pa-10 rounded-xl elevation-2 text-center w-100" max-width="600">
-        <!-- Score Hero Section -->
-        <div v-if="result.show_results !== false && result.show_results !== 0" class="score-hero">
-          <div class="confetti-wrap" v-if="result.passed">
-            <div v-for="i in 30" :key="i" class="confetti-piece" :style="confettiStyle(i)"></div>
+        <!-- Universal Hero Section -->
+        <div class="score-hero py-6">
+          <div class="text-center mb-6">
+            <v-icon size="64" color="success" class="mb-4">mdi-check-decagram-outline</v-icon>
+            <h1 class="text-h4 font-weight-black mb-2 text-dark">Thank You, {{ result.student_name || authStore.user?.name }}!</h1>
+            <p class="text-body-1 text-grey-darken-1">Your exam <strong>{{ result.exam_title }}</strong> has been submitted successfully.</p>
+            <p v-if="result.course_title" class="text-caption text-grey mt-1 mb-2">{{ result.course_title }}</p>
           </div>
 
-          <v-icon size="80" :color="result.passed ? 'success' : 'warning'" class="mb-4">
-            {{ result.passed ? 'mdi-check-circle-outline' : 'mdi-alert-circle-outline' }}
-          </v-icon>
+          <!-- Conditional Score/Results UI -->
+          <div v-if="result.show_results != false && result.show_results != 0 && result.show_results !== '0'" class="results-details-box bg-grey-lighten-4 rounded-xl pa-6 mb-6">
+            <div class="confetti-wrap" v-if="result.passed">
+              <div v-for="i in 30" :key="i" class="confetti-piece" :style="confettiStyle(i)"></div>
+            </div>
 
-          <div class="text-center mt-2 mb-6">
-            <h1 class="text-h4 font-weight-black mb-2 text-dark">Exam Results</h1>
-            <p class="text-body-1 text-grey-darken-1"><strong>{{ result.exam_title }}</strong></p>
-            <p class="text-caption text-grey mt-1 mb-2">{{ result.course_title }}</p>
-            <v-chip size="small" variant="tonal" color="primary" class="font-weight-bold">
-              Student: {{ result.student_name || authStore.user?.name }}
-            </v-chip>
+            <v-icon size="64" :color="result.passed ? 'success' : 'warning'" class="mb-2">
+              {{ result.passed ? 'mdi-check-circle' : 'mdi-alert-circle' }}
+            </v-icon>
+            <h3 class="text-h6 font-weight-bold mb-4" :class="result.passed ? 'text-success' : 'text-warning'">
+              {{ result.passed ? 'You Passed!' : 'Exam Recorded' }}
+            </h3>
+
+            <div class="cta-row d-flex flex-column align-center">
+              <template v-if="result.passed">
+                <v-chip color="success" size="large" prepend-icon="mdi-certificate" class="font-weight-bold px-6 py-4 text-body-1 mb-4">
+                  Certificate Earned!
+                </v-chip>
+                <v-btn v-if="result.cert_id" color="success" size="large" prepend-icon="mdi-download" rounded="xl" @click="downloadCertificate" :loading="downloading" class="mb-4">
+                  Download Certificate
+                </v-btn>
+              </template>
+              <template v-else>
+                <p class="text-grey-darken-1 text-center max-w-400 mb-2">Your score has been recorded for review.</p>
+              </template>
+            </div>
           </div>
 
-          <!-- CTA Buttons -->
-          <div class="cta-row d-flex flex-column align-center">
-            <template v-if="result.passed">
-              <v-chip color="success" size="large" prepend-icon="mdi-check-decagram" class="font-weight-bold px-6 py-4 text-body-1 mb-4">
-                Certificate Earned!
-              </v-chip>
-              <v-btn v-if="result.cert_id" color="success" size="large" prepend-icon="mdi-download" rounded="xl" @click="downloadCertificate" :loading="downloading" class="mb-4">
-                Download Certificate
-              </v-btn>
-            </template>
-            <template v-else>
-              <p class="text-grey-darken-1 text-center max-w-400 mb-4">Your answers have been recorded.</p>
-            </template>
-            
-          </div>
-        </div>
-
-        <!-- Hidden Results / Thank You Hero Section -->
-        <div v-else class="thank-you-hero py-10">
-          <v-icon size="80" color="success" class="mb-4">mdi-check-decagram-outline</v-icon>
-          <h1 class="text-h4 font-weight-black mb-4 text-dark">Thank You, {{ result.student_name || authStore.user?.name }}!</h1>
-          <p class="text-body-1 text-grey-darken-1 mb-2">Your exam <strong>{{ result.exam_title }}</strong> has been submitted successfully.</p>
-          <p v-if="result.course_title" class="text-caption text-grey mb-8">{{ result.course_title }}</p>
-          
-          <v-btn color="primary" rounded="xl" size="large" @click="router.push('/dashboard/exams')">
+          <v-btn color="primary" rounded="xl" size="large" @click="router.push('/dashboard/exams')" class="mt-2 px-8">
             Return to Dashboard
           </v-btn>
         </div>
