@@ -8,7 +8,7 @@
 
     <div v-else-if="result">
       <!-- Thank You Banner -->
-      <v-card class="result-banner text-white pa-8 rounded-xl text-center mb-8" style="background: linear-gradient(135deg, #1ca15b 0%, #178b4d 100%);" flat>
+      <v-card color="success" class="result-banner pa-8 rounded-xl text-center mb-8" flat>
         <v-avatar size="80" color="rgba(255,255,255,0.2)" class="mb-4">
           <v-icon size="40" color="white">mdi-check-circle-outline</v-icon>
         </v-avatar>
