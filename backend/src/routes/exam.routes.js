@@ -367,8 +367,8 @@ router.post('/attempts/:id/grade', authenticateJWT, isTutorOrAdmin, async (req, 
 
     await connection.beginTransaction();
     await connection.query(
-      'UPDATE exam_answers SET marks_awarded = ?, graded_by = ?, graded_at = NOW() WHERE id = ? AND attempt_id = ?',
-      [marks_awarded, req.user.id, answer_id, req.params.id]
+      'UPDATE exam_answers SET marks_awarded = ?, is_correct = ?, graded_by = ?, graded_at = NOW() WHERE id = ? AND attempt_id = ?',
+      [marks_awarded, marks_awarded > 0, req.user.id, answer_id, req.params.id]
     );
 
     const [scoreResult] = await connection.query(

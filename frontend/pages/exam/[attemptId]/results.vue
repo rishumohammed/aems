@@ -186,7 +186,7 @@ onMounted(async () => {
     // init grade inputs
     if (data.question_breakdown) {
       data.question_breakdown.forEach((q: any) => {
-        gradeInputs.value[q.id] = 0;
+        gradeInputs.value[q.id] = q.marks_awarded || 0;
       });
     }
   } finally {
