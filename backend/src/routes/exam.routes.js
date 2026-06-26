@@ -377,7 +377,7 @@ router.post('/attempts/:id/grade', authenticateJWT, isTutorOrAdmin, async (req, 
     );
     const { total_scored, ungraded } = scoreResult[0];
 
-    if (ungraded === 0) {
+    if (Number(ungraded) === 0) {
       const [attemptData] = await connection.query(
         'SELECT ea.total_marks, e.pass_percentage FROM exam_attempts ea JOIN exams e ON ea.exam_id = e.id WHERE ea.id = ?',
         [req.params.id]
