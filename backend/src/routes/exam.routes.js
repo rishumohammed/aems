@@ -317,7 +317,7 @@ router.get('/attempts/:id/results', authenticateJWT, async (req, res) => {
   try {
     const [attempts] = await pool.query(`
       SELECT ea.*, 
-             e.title as exam_title, e.pass_percentage, e.duration_minutes, e.show_result_detail, e.max_attempts,
+             e.title as exam_title, e.pass_percentage, e.duration_minutes, e.show_result_detail, e.max_attempts, e.show_results,
              c.title as course_title, c.slug as course_slug,
              u.name as student_name,
              cert.cert_number, cert.id as cert_id,

@@ -8,7 +8,7 @@
     <div v-else-if="result" class="results-content d-flex justify-center mt-12">
       <v-card class="pa-10 rounded-xl elevation-2 text-center w-100" max-width="600">
         <!-- Score Hero Section -->
-        <div class="score-hero">
+        <div v-if="result.show_results !== false && result.show_results !== 0" class="score-hero">
           <div class="confetti-wrap" v-if="result.passed">
             <div v-for="i in 30" :key="i" class="confetti-piece" :style="confettiStyle(i)"></div>
           </div>
@@ -41,6 +41,18 @@
             </template>
             
           </div>
+        </div>
+
+        <!-- Hidden Results / Thank You Hero Section -->
+        <div v-else class="thank-you-hero py-10">
+          <v-icon size="80" color="success" class="mb-4">mdi-check-decagram-outline</v-icon>
+          <h1 class="text-h4 font-weight-black mb-4 text-dark">Thank You, {{ result.student_name || authStore.user?.name }}!</h1>
+          <p class="text-body-1 text-grey-darken-1 mb-2">Your exam <strong>{{ result.exam_title }}</strong> has been submitted successfully.</p>
+          <p v-if="result.course_title" class="text-caption text-grey mb-8">{{ result.course_title }}</p>
+          
+          <v-btn color="primary" rounded="xl" size="large" @click="router.push('/dashboard/exams')">
+            Return to Dashboard
+          </v-btn>
         </div>
 
         <!-- Review Section -->
@@ -150,6 +162,7 @@ interface AttemptResult {
   pass_percentage: number;
   pending_manual_review: boolean;
   cert_id?: string | number;
+  show_results?: boolean | number;
   show_result_detail: boolean;
   question_breakdown?: QuestionBreakdown[];
   attempts_used?: number;
