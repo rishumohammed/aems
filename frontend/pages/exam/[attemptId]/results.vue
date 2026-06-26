@@ -20,7 +20,10 @@
           <div class="text-center mt-2 mb-6">
             <h1 class="text-h4 font-weight-black mb-2 text-dark">Exam Results</h1>
             <p class="text-body-1 text-grey-darken-1"><strong>{{ result.exam_title }}</strong></p>
-            <p class="text-caption text-grey mt-1">{{ result.course_title }}</p>
+            <p class="text-caption text-grey mt-1 mb-2">{{ result.course_title }}</p>
+            <v-chip size="small" variant="tonal" color="primary" class="font-weight-bold">
+              Student: {{ result.student_name || authStore.user?.name }}
+            </v-chip>
           </div>
 
           <!-- CTA Buttons -->
@@ -153,6 +156,7 @@ interface AttemptResult {
   max_attempts?: number;
   exam_id: string | number;
   cert_number?: string;
+  student_name?: string;
 }
 
 const result = ref<AttemptResult | null>(null);

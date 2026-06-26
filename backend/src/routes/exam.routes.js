@@ -319,11 +319,13 @@ router.get('/attempts/:id/results', authenticateJWT, async (req, res) => {
       SELECT ea.*, 
              e.title as exam_title, e.pass_percentage, e.duration_minutes, e.show_result_detail, e.max_attempts,
              c.title as course_title, c.slug as course_slug,
+             u.name as student_name,
              cert.cert_number, cert.id as cert_id,
              (SELECT COUNT(*) FROM exam_attempts WHERE student_id = ea.student_id AND exam_id = ea.exam_id AND status IN ('submitted','graded','pending_manual_review')) as attempts_used
       FROM exam_attempts ea
       JOIN exams e ON ea.exam_id = e.id
       JOIN courses c ON e.course_id = c.id
+      JOIN users u ON ea.student_id = u.id
       LEFT JOIN certificates cert ON cert.exam_attempt_id = ea.id
       WHERE ea.id = ?
     `, [req.params.id]);
