@@ -22,7 +22,7 @@
           </div>
 
           <v-row>
-            <v-col v-for="course in featuredCourses" :key="course.id" cols="12" sm="6" md="4">
+            <v-col v-for="course in featuredCourses" :key="course.id" cols="12" sm="6" md="3">
               <CourseCard :course="course" />
             </v-col>
           </v-row>
@@ -43,7 +43,7 @@
           </div>
 
           <v-row>
-            <v-col v-for="course in latestCourses" :key="course.id" cols="12" sm="6" md="4">
+            <v-col v-for="course in latestCourses" :key="course.id" cols="12" sm="6" md="3">
               <CourseCard :course="course" />
             </v-col>
           </v-row>
@@ -72,7 +72,7 @@
           </div>
 
           <v-row>
-            <v-col v-for="course in liveCourses" :key="course.id" cols="12" sm="6" md="4">
+            <v-col v-for="course in liveCourses" :key="course.id" cols="12" sm="6" md="3">
               <CourseCard :course="course" />
             </v-col>
           </v-row>
@@ -323,15 +323,15 @@ const liveCourses = ref<any[]>([]);
 const informationItems = ref<any[]>([]);
 
 const fetchHomepageData = async () => {
-  api.get('/public/courses?course_type=recorded&sort=newest&limit=6')
+  api.get('/public/courses?course_type=recorded&sort=newest&limit=8')
     .then(res => { latestCourses.value = res.data?.courses || []; })
     .catch(err => console.error('Failed to load latest courses', err));
 
-  api.get('/public/courses?course_type=recorded&is_featured=true&limit=6')
+  api.get('/public/courses?course_type=recorded&is_featured=true&limit=8')
     .then(res => { featuredCourses.value = res.data?.courses || []; })
     .catch(err => console.error('Failed to load featured courses', err));
 
-  api.get('/public/courses?course_type=live&sort=newest&limit=3')
+  api.get('/public/courses?course_type=live&sort=newest&limit=4')
     .then(res => { liveCourses.value = res.data?.courses || []; })
     .catch(err => console.error('Failed to load live courses', err));
 
