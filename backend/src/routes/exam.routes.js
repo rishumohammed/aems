@@ -338,7 +338,8 @@ router.get('/attempts/:id/results', authenticateJWT, async (req, res) => {
     }
 
     let questionBreakdown = [];
-    if (attempt.show_result_detail && ['graded', 'pending_manual_review'].includes(attempt.status)) {
+    const isTeacher = req.user && ['super_admin', 'sub_admin', 'tutor'].includes(req.user.role);
+    if ((attempt.show_result_detail || isTeacher) && ['graded', 'pending_manual_review'].includes(attempt.status)) {
       const [answers] = await pool.query(`
         SELECT ea.*, eq.question_text, eq.type, eq.correct_answer, eq.marks, eq.explanation, eq.options_json
         FROM exam_answers ea

@@ -24,30 +24,40 @@
           </div>
 
           <!-- Conditional Score/Results UI -->
-          <div v-if="result.show_results != false && result.show_results != 0 && result.show_results !== '0'" class="results-details-box bg-grey-lighten-4 rounded-xl pa-6 mb-6">
-            <div class="confetti-wrap" v-if="result.passed">
+          <div v-if="(canGrade || (result.show_results != false && result.show_results != 0 && result.show_results !== '0'))" class="results-details-box bg-grey-lighten-4 rounded-xl pa-6 mb-6">
+            <div class="confetti-wrap" v-if="result.passed && !canGrade">
               <div v-for="i in 30" :key="i" class="confetti-piece" :style="confettiStyle(i)"></div>
             </div>
 
-            <v-icon size="64" :color="result.passed ? 'success' : 'warning'" class="mb-2">
-              {{ result.passed ? 'mdi-check-circle' : 'mdi-alert-circle' }}
-            </v-icon>
-            <h3 class="text-h6 font-weight-bold mb-4" :class="result.passed ? 'text-success' : 'text-warning'">
-              {{ result.passed ? 'You Passed!' : 'Exam Recorded' }}
-            </h3>
+            <!-- Score Ring for Admins or Graded Exams -->
+            <div v-if="canGrade || result.status === 'graded' || result.passed" class="d-flex flex-column align-center mb-4">
+               <div class="score-ring-wrap">
+                  <svg class="score-ring" viewBox="0 0 120 120">
+                     <circle cx="60" cy="60" r="52" fill="none" stroke="#e2e8f0" stroke-width="12" />
+                     <circle cx="60" cy="60" r="52" fill="none" :stroke="result.passed ? '#34d399' : '#f87171'" stroke-width="12" stroke-linecap="round"
+                             :stroke-dasharray="CIRCUMFERENCE" :stroke-dashoffset="ringOffset" />
+                  </svg>
+                  <div class="score-inner">
+                     <div class="score-pct">{{ result.score }}%</div>
+                     <div class="score-label" :class="result.passed ? 'text-success' : 'text-error'">{{ result.passed ? 'PASSED' : 'FAILED' }}</div>
+                  </div>
+               </div>
+            </div>
+            
+            <!-- Pending Review Message for Students -->
+            <div v-else class="text-center">
+              <v-icon size="64" color="warning" class="mb-2">mdi-alert-circle</v-icon>
+              <h3 class="text-h6 font-weight-bold mb-2 text-warning">Exam Recorded</h3>
+              <p class="text-grey-darken-1 max-w-400 mb-2 mx-auto">Your score has been recorded and is pending review.</p>
+            </div>
 
-            <div class="cta-row d-flex flex-column align-center">
-              <template v-if="result.passed">
-                <v-chip color="success" size="large" prepend-icon="mdi-certificate" class="font-weight-bold px-6 py-4 text-body-1 mb-4">
-                  Certificate Earned!
-                </v-chip>
-                <v-btn v-if="result.cert_id" color="success" size="large" prepend-icon="mdi-download" rounded="xl" @click="downloadCertificate" :loading="downloading" class="mb-4">
-                  Download Certificate
-                </v-btn>
-              </template>
-              <template v-else>
-                <p class="text-grey-darken-1 text-center max-w-400 mb-2">Your score has been recorded for review.</p>
-              </template>
+            <div class="cta-row d-flex flex-column align-center" v-if="result.passed && !canGrade">
+              <v-chip color="success" size="large" prepend-icon="mdi-certificate" class="font-weight-bold px-6 py-4 text-body-1 mb-4">
+                Certificate Earned!
+              </v-chip>
+              <v-btn v-if="result.cert_id" color="success" size="large" prepend-icon="mdi-download" rounded="xl" @click="downloadCertificate" :loading="downloading" class="mb-4">
+                Download Certificate
+              </v-btn>
             </div>
           </div>
 
