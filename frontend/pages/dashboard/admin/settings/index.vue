@@ -242,19 +242,6 @@
               </v-col>
             </v-row>
 
-            <v-divider class="my-8"></v-divider>
-
-            <h2 class="text-h6 font-weight-bold mb-4">Candidate Consent &amp; Acceptance History</h2>
-            <v-data-table
-              :headers="historyHeaders"
-              :items="acceptanceHistory"
-              hover
-              class="border rounded-xl"
-            >
-              <template v-slot:item.accepted_at="{ item }">
-                <span>{{ new Date(item.accepted_at).toLocaleString() }}</span>
-              </template>
-            </v-data-table>
           </div>
 
           <!-- Social Platforms Tab -->
@@ -488,7 +475,6 @@ const activeTab = ref(['branding']);
 const saving = ref(false);
 const regenerating = ref(false);
 const form = ref<any>({});
-const acceptanceHistory = ref<any[]>([]);
 const logoFile = ref(null);
 const faviconFile = ref(null);
 const heroImageFile = ref(null);
@@ -513,30 +499,6 @@ const tabs = [
   { label: 'Certifications', value: 'certifications', icon: 'mdi-certificate-outline' },
 ];
 
-const historyHeaders = [
-  { title: 'Candidate', key: 'candidate_name' },
-  { title: 'Email', key: 'candidate_email' },
-  { title: 'Exam', key: 'exam_name' },
-  { title: 'Terms Version', key: 'accepted_terms_version' },
-  { title: 'Privacy Version', key: 'accepted_privacy_version' },
-  { title: 'Accepted At', key: 'accepted_at' },
-  { title: 'IP Address', key: 'ip_address' }
-];
-
-const fetchAcceptanceHistory = async () => {
-  try {
-    const { data } = await api.get('/admin/config/terms-privacy-acceptances');
-    acceptanceHistory.value = data || [];
-  } catch (err) {
-    console.error('Failed to fetch acceptance history', err);
-  }
-};
-
-watch(activeTab, (newVal) => {
-  if (newVal[0] === 'terms_privacy') {
-    fetchAcceptanceHistory();
-  }
-});
 
 const fetchData = async () => {
   try {
