@@ -31,11 +31,7 @@
     <!-- Filters -->
     <v-card class="rounded-xl mb-6 pa-4" variant="outlined">
       <v-row dense align="center">
-        <v-col cols="12" md="2" class="text-center">
-          <div class="text-caption text-grey font-weight-bold">TOTAL STUDENTS</div>
-          <div class="text-h6 font-weight-black">{{ totalStudents }}</div>
-        </v-col>
-        <v-col cols="12" md="4">
+        <v-col cols="12" md="6">
           <v-text-field
             v-model="filters.search"
             prepend-inner-icon="mdi-magnify"
