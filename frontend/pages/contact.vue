@@ -199,9 +199,14 @@ const errorMsg = ref('');
 const coursesList = ref([]);
 
 // Fetch available courses for the dropdown
-useFetch(`${config.public.apiBase}/public/courses?limit=100`).then((res) => {
-  if (res.data.value && res.data.value.courses) {
-    coursesList.value = res.data.value.courses;
+onMounted(async () => {
+  try {
+    const res = await $fetch(`${config.public.apiBase}/public/courses?limit=100`);
+    if (res && res.courses) {
+      coursesList.value = res.courses;
+    }
+  } catch (err) {
+    console.error('Failed to fetch courses:', err);
   }
 });
 
