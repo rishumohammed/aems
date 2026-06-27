@@ -10,9 +10,16 @@
         <!-- Universal Hero Section -->
         <div class="score-hero py-6">
           <div class="text-center mb-6">
-            <v-icon size="64" color="success" class="mb-4">mdi-check-decagram-outline</v-icon>
-            <h1 class="text-h4 font-weight-black mb-2 text-dark">Thank You, {{ result.student_name || authStore.user?.name }}!</h1>
-            <p class="text-body-1 text-grey-darken-1">Your exam <strong>{{ result.exam_title }}</strong> has been submitted successfully.</p>
+            <template v-if="!canGrade">
+              <v-icon size="64" color="success" class="mb-4">mdi-check-decagram-outline</v-icon>
+              <h1 class="text-h4 font-weight-black mb-2 text-dark">Thank You, {{ result.student_name || authStore.user?.name }}!</h1>
+              <p class="text-body-1 text-grey-darken-1">Your exam <strong>{{ result.exam_title }}</strong> has been submitted successfully.</p>
+            </template>
+            <template v-else>
+              <v-icon size="64" color="primary" class="mb-4">mdi-text-box-search-outline</v-icon>
+              <h1 class="text-h4 font-weight-black mb-2 text-dark">Attempt Review: {{ result.student_name || 'Student' }}</h1>
+              <p class="text-body-1 text-grey-darken-1">Exam: <strong>{{ result.exam_title }}</strong></p>
+            </template>
             <p v-if="result.course_title" class="text-caption text-grey mt-1 mb-2">{{ result.course_title }}</p>
           </div>
 
@@ -44,8 +51,17 @@
             </div>
           </div>
 
-          <v-btn color="primary" rounded="xl" size="large" @click="router.push('/dashboard/exams')" class="mt-2 px-8">
+          <v-btn 
+            v-if="!canGrade"
+            color="primary" rounded="xl" size="large" @click="router.push('/dashboard/exams')" class="mt-2 px-8"
+          >
             Return to Dashboard
+          </v-btn>
+          <v-btn 
+            v-else
+            color="primary" rounded="xl" size="large" @click="router.push('/dashboard/exams/grading')" class="mt-2 px-8"
+          >
+            Return to Results Page
           </v-btn>
         </div>
 
