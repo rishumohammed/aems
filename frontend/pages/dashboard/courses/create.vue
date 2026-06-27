@@ -63,7 +63,7 @@
               class="font-weight-bold px-6"
               to="/dashboard/courses"
             >
-              Dashboard
+              <v-icon start>mdi-format-list-bulleted</v-icon> Go To Courses
             </v-btn>
           </div>
         </div>
