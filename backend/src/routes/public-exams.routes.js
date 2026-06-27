@@ -258,8 +258,8 @@ router.post('/:slug/register', async (req, res) => {
       await connection.beginTransaction();
       await connection.query(`
         INSERT INTO public_exam_candidates 
-        (id, exam_id, name, email, phone, password_hash, country, state, city, qualification, college, course_stream, year_of_study, agreed_to_terms)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        (id, exam_id, name, email, phone, password_hash, country, state, city, qualification, college, course_stream, year_of_study, agreed_to_terms, registration_status)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'approved')
       `, [candidateId, exam.id, name, email, phone, password_hash, country || null, state || null, city || null, qualification || null, college || null, course_stream || null, year_of_study || null, !!agreed_to_terms]);
 
       await connection.query(`
