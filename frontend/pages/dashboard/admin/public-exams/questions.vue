@@ -49,6 +49,15 @@
             Bulk CSV
           </v-btn>
           <v-btn
+            variant="outlined"
+            color="success"
+            rounded="lg"
+            prepend-icon="mdi-export"
+            @click="exportQuestions"
+          >
+            Export CSV
+          </v-btn>
+          <v-btn
             color="primary"
             rounded="lg"
             prepend-icon="mdi-plus"
@@ -504,6 +513,25 @@ async function fetchQuestions() {
 function onExamChange() {
   importOpen.value = false;
   fetchQuestions();
+}
+
+async function exportQuestions() {
+  if (!selectedExamId.value) return;
+  try {
+    const response = await api.get(`/admin/public-exams/${selectedExamId.value}/questions/export`, { responseType: 'blob' });
+    // Handle both cases where response might be the blob itself or wrapped in data
+    const blobData = response.data || response;
+    const url = window.URL.createObjectURL(new Blob([blobData as BlobPart]));
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `${selectedExam.value?.slug || 'exam'}-questions.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  } catch (error) {
+    console.error('Export questions error:', error);
+    alert('Failed to export questions.');
+  }
 }
 
 function openImportSection(mode: 'json' | 'csv') {

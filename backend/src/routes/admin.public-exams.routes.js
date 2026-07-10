@@ -544,6 +544,55 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
+// GET /api/admin/public-exams/:id/questions/export
+router.get('/:id/questions/export', async (req, res) => {
+  try {
+    const [questions] = await pool.query(
+      'SELECT * FROM public_exam_questions WHERE exam_id = ? ORDER BY order_index ASC',
+      [req.params.id]
+    );
+    
+    let csv = 'Type,Question,Options,Correct Answer,Explanation,Marks,Difficulty\n';
+    
+    questions.forEach(q => {
+      let optionsStr = '';
+      if (q.options_json) {
+        try {
+          const opts = typeof q.options_json === 'string' ? JSON.parse(q.options_json) : q.options_json;
+          if (Array.isArray(opts)) {
+            optionsStr = opts.join('|');
+          }
+        } catch (e) {}
+      }
+      
+      let correctStr = q.correct_answer || '';
+      if (q.type === 'msq') {
+        try {
+          const cOpts = typeof q.correct_answer === 'string' ? JSON.parse(q.correct_answer) : q.correct_answer;
+          if (Array.isArray(cOpts)) {
+            correctStr = cOpts.join('|');
+          }
+        } catch (e) {}
+      }
+      
+      const escape = (str) => {
+        if (str === null || str === undefined) return '';
+        const s = str.toString().replace(/"/g, '""');
+        return `"${s}"`;
+      };
+      
+      csv += `${escape(q.type)},${escape(q.question_text)},${escape(optionsStr)},${escape(correctStr)},${escape(q.explanation)},${q.marks},${escape(q.difficulty_level)}\n`;
+    });
+    
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', 'attachment; filename=question-bank.csv');
+    res.status(200).send(csv);
+  } catch (error) {
+    console.error('Export questions error:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
 // GET /api/admin/public-exams/:id/questions
 router.get('/:id/questions', async (req, res) => {
   try {
