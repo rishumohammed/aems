@@ -10,11 +10,11 @@
     <div class="kpi-content">
       <div class="d-flex align-center mb-4">
         <div class="icon-box" :style="{ backgroundColor: iconBg }">
-          <v-icon :icon="icon" :style="{ color: iconColor }" size="20"></v-icon>
+          <v-icon :style="{ color: iconColor }" size="20">{{ icon }}</v-icon>
         </div>
         <v-spacer></v-spacer>
         <div v-if="trendValue !== null" class="trend-badge" :class="trendPositive ? 'trend-up' : 'trend-down'">
-          <v-icon :icon="trendPositive ? 'mdi-trending-up' : 'mdi-trending-down'" size="12" class="mr-1"></v-icon>
+          <v-icon size="12" class="mr-1">{{ trendPositive ? 'mdi-trending-up' : 'mdi-trending-down' }}</v-icon>
           {{ trendValue }}%
         </div>
       </div>
