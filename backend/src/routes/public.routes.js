@@ -74,7 +74,7 @@ router.get('/stats', async (req, res) => {
 router.get('/categories', async (req, res) => {
   try {
     const [categories] = await pool.query(`
-      SELECT c.*, (SELECT COUNT(*) FROM courses WHERE category_id = c.id AND status = ?) as course_count
+      SELECT c.*, (SELECT COUNT(*) FROM courses WHERE category_id = c.id AND status = ? AND deleted_at IS NULL) as course_count
       FROM course_categories c
       WHERE c.is_active = true
     `, [COURSE_STATUS.PUBLISHED]);
@@ -95,7 +95,7 @@ router.get('/courses', async (req, res) => {
     FROM courses c
     LEFT JOIN users u ON c.tutor_id = u.id
     LEFT JOIN course_categories cat ON c.category_id = cat.id
-    WHERE c.status = ?
+    WHERE c.status = ? AND c.deleted_at IS NULL
   `;
   const params = [COURSE_STATUS.PUBLISHED];
 
@@ -130,7 +130,7 @@ router.get('/courses', async (req, res) => {
     const [courses] = await pool.query(query, params);
     
     // Total count logic needs to respect category and is_featured
-    let countQuery = 'SELECT COUNT(*) as count FROM courses c LEFT JOIN course_categories cat ON c.category_id = cat.id WHERE c.status = ?';
+    let countQuery = 'SELECT COUNT(*) as count FROM courses c LEFT JOIN course_categories cat ON c.category_id = cat.id WHERE c.status = ? AND c.deleted_at IS NULL';
     let countParams = [COURSE_STATUS.PUBLISHED];
     if (category && category !== 'All') {
       countQuery += ' AND cat.slug = ?';
@@ -178,7 +178,7 @@ router.get('/courses/:slug', async (req, res) => {
       FROM courses c
       LEFT JOIN users u ON c.tutor_id = u.id
       LEFT JOIN course_categories cat ON c.category_id = cat.id
-      WHERE c.slug = ?
+      WHERE c.slug = ? AND c.deleted_at IS NULL
     `;
     const params = [req.params.slug];
 
