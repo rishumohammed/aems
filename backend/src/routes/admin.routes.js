@@ -346,77 +346,80 @@ router.patch('/tutor-approve/:id', async (req, res) => {
 
     const isApproved = status === 'active';
 
-    // Send in-app notification to the tutor
-    try {
-      if (isApproved) {
-        await createNotification({
-          userId: req.params.id,
-          type: 'system',
-          title: '🎉 Tutor Application Approved!',
-          body: `Congratulations ${tutor.name}! Your tutor application has been approved. You now have full access to your Tutor Dashboard, course creation tools, and student management.`,
-          link: '/dashboard/tutor',
-          emailNotify: false
-        });
-        // Send approval email
-        await emailService.sendEmail({
-          to: tutor.email,
-          subject: '🎉 Your Tutor Application has been Approved — AEMS Academy',
-          html: `
-            <div style="font-family: sans-serif; padding: 32px; color: #1e293b; max-width: 600px; margin: auto; border: 1px solid #e2e8f0; border-radius: 16px;">
-              <div style="background: linear-gradient(135deg, #10b981, #059669); padding: 24px; border-radius: 12px; text-align: center; margin-bottom: 24px;">
-                <h1 style="color: white; margin: 0; font-size: 24px;">Application Approved! 🎉</h1>
-              </div>
-              <p style="font-size: 16px;">Dear <strong>${tutor.name}</strong>,</p>
-              <p>We are thrilled to inform you that your tutor application has been <strong style="color: #10b981;">approved</strong>!</p>
-              <p>You now have full access to:</p>
-              <ul style="line-height: 2;">
-                <li>📚 Course Creation &amp; Management</li>
-                <li>👥 Student Management Dashboard</li>
-                <li>📊 Earnings &amp; Analytics</li>
-                <li>🎯 Your Tutor Studio</li>
-              </ul>
-              ${notes ? `<p style="background:#f0fdf4; padding:12px; border-radius:8px; border-left:4px solid #10b981;"><strong>Admin Notes:</strong> ${notes}</p>` : ''}
-              <div style="text-align: center; margin: 32px 0;">
-                <a href="${process.env.FRONTEND_URL || 'http://localhost:3000'}/dashboard/tutor" style="display: inline-block; padding: 14px 32px; background: #4f46e5; color: #fff; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px;">Go to Tutor Dashboard</a>
-              </div>
-              <p style="font-size: 13px; color: #64748b;">Welcome aboard, and we look forward to your contributions to AEMS Academy!</p>
-            </div>
-          `
-        });
-      } else if (status === 'rejected') {
-        await createNotification({
-          userId: req.params.id,
-          type: 'system',
-          title: 'Tutor Application Update',
-          body: `Dear ${tutor.name}, we have reviewed your application and unfortunately we are unable to approve it at this time. ${notes ? 'Reason: ' + notes : ''} Please contact support for more information.`,
-          link: '/dashboard',
-          emailNotify: false
-        });
-        // Send rejection email
-        await emailService.sendEmail({
-          to: tutor.email,
-          subject: 'Update on Your Tutor Application — AEMS Academy',
-          html: `
-            <div style="font-family: sans-serif; padding: 32px; color: #1e293b; max-width: 600px; margin: auto; border: 1px solid #e2e8f0; border-radius: 16px;">
-              <div style="background: linear-gradient(135deg, #64748b, #475569); padding: 24px; border-radius: 12px; text-align: center; margin-bottom: 24px;">
-                <h1 style="color: white; margin: 0; font-size: 24px;">Application Update</h1>
-              </div>
-              <p style="font-size: 16px;">Dear <strong>${tutor.name}</strong>,</p>
-              <p>Thank you for your interest in joining AEMS Academy as a tutor. After careful review of your application, we regret to inform you that we are unable to approve your application at this time.</p>
-              ${notes ? `<div style="background:#fef2f2; padding:16px; border-radius:8px; border-left:4px solid #ef4444; margin: 16px 0;"><strong>Reason:</strong><br>${notes}</div>` : ''}
-              <p>If you have any questions or would like to appeal this decision, please contact us at <a href="mailto:support@aems.local">support@aems.local</a>.</p>
-              <p style="font-size: 13px; color: #64748b;">Thank you for your understanding.</p>
-            </div>
-          `
-        });
-      }
-    } catch (notifError) {
-      console.warn('Notification/email sending failed (non-critical):', notifError.message);
-    }
-
+    // Respond immediately to prevent frontend hanging
     res.json({ 
       message: `Tutor ${isApproved ? 'approved' : 'rejected'} successfully`,
       status 
+    });
+
+    // Send in-app notification and email in the background
+    Promise.resolve().then(async () => {
+      try {
+        if (isApproved) {
+          await createNotification({
+            userId: req.params.id,
+            type: 'system',
+            title: '🎉 Tutor Application Approved!',
+            body: `Congratulations ${tutor.name}! Your tutor application has been approved. You now have full access to your Tutor Dashboard, course creation tools, and student management.`,
+            link: '/dashboard/tutor',
+            emailNotify: false
+          });
+          // Send approval email
+          await emailService.sendEmail({
+            to: tutor.email,
+            subject: '🎉 Your Tutor Application has been Approved — AEMS Academy',
+            html: `
+              <div style="font-family: sans-serif; padding: 32px; color: #1e293b; max-width: 600px; margin: auto; border: 1px solid #e2e8f0; border-radius: 16px;">
+                <div style="background: linear-gradient(135deg, #10b981, #059669); padding: 24px; border-radius: 12px; text-align: center; margin-bottom: 24px;">
+                  <h1 style="color: white; margin: 0; font-size: 24px;">Application Approved! 🎉</h1>
+                </div>
+                <p style="font-size: 16px;">Dear <strong>${tutor.name}</strong>,</p>
+                <p>We are thrilled to inform you that your tutor application has been <strong style="color: #10b981;">approved</strong>!</p>
+                <p>You now have full access to:</p>
+                <ul style="line-height: 2;">
+                  <li>📚 Course Creation &amp; Management</li>
+                  <li>👥 Student Management Dashboard</li>
+                  <li>📊 Earnings &amp; Analytics</li>
+                  <li>🎯 Your Tutor Studio</li>
+                </ul>
+                ${notes ? `<p style="background:#f0fdf4; padding:12px; border-radius:8px; border-left:4px solid #10b981;"><strong>Admin Notes:</strong> ${notes}</p>` : ''}
+                <div style="text-align: center; margin: 32px 0;">
+                  <a href="${process.env.FRONTEND_URL || 'http://localhost:3000'}/dashboard/tutor" style="display: inline-block; padding: 14px 32px; background: #4f46e5; color: #fff; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px;">Go to Tutor Dashboard</a>
+                </div>
+                <p style="font-size: 13px; color: #64748b;">Welcome aboard, and we look forward to your contributions to AEMS Academy!</p>
+              </div>
+            `
+          });
+        } else if (status === 'rejected') {
+          await createNotification({
+            userId: req.params.id,
+            type: 'system',
+            title: 'Tutor Application Update',
+            body: `Dear ${tutor.name}, we have reviewed your application and unfortunately we are unable to approve it at this time. ${notes ? 'Reason: ' + notes : ''} Please contact support for more information.`,
+            link: '/dashboard',
+            emailNotify: false
+          });
+          // Send rejection email
+          await emailService.sendEmail({
+            to: tutor.email,
+            subject: 'Update on Your Tutor Application — AEMS Academy',
+            html: `
+              <div style="font-family: sans-serif; padding: 32px; color: #1e293b; max-width: 600px; margin: auto; border: 1px solid #e2e8f0; border-radius: 16px;">
+                <div style="background: linear-gradient(135deg, #64748b, #475569); padding: 24px; border-radius: 12px; text-align: center; margin-bottom: 24px;">
+                  <h1 style="color: white; margin: 0; font-size: 24px;">Application Update</h1>
+                </div>
+                <p style="font-size: 16px;">Dear <strong>${tutor.name}</strong>,</p>
+                <p>Thank you for your interest in joining AEMS Academy as a tutor. After careful review of your application, we regret to inform you that we are unable to approve your application at this time.</p>
+                ${notes ? `<div style="background:#fef2f2; padding:16px; border-radius:8px; border-left:4px solid #ef4444; margin: 16px 0;"><strong>Reason:</strong><br>${notes}</div>` : ''}
+                <p>If you have any questions or would like to appeal this decision, please contact us at <a href="mailto:support@aems.local">support@aems.local</a>.</p>
+                <p style="font-size: 13px; color: #64748b;">Thank you for your understanding.</p>
+              </div>
+            `
+          });
+        }
+      } catch (notifError) {
+        console.warn('Notification/email sending failed (non-critical):', notifError?.message || notifError);
+      }
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
