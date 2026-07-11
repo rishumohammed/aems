@@ -109,6 +109,44 @@
             </v-row>
           </v-card>
 
+          <!-- 1.5. Scheduling & Deadlines -->
+          <v-card class="pa-6 border rounded-xl mb-6" flat>
+            <h3 class="text-h6 font-weight-bold text-dark mb-4">Scheduling & Deadlines</h3>
+            <v-row>
+              <v-col cols="12" sm="4">
+                <v-text-field
+                  v-model="fields.registration_end_date"
+                  label="Registration Deadline"
+                  type="datetime-local"
+                  hint="Last date/time to register"
+                  persistent-hint
+                  :rules="[v => (!v || !fields.exam_start_date || new Date(v) <= new Date(fields.exam_start_date)) || 'Registration must end before exam starts']"
+                  class="mb-3"
+                ></v-text-field>
+              </v-col>
+              <v-col cols="12" sm="4">
+                <v-text-field
+                  v-model="fields.exam_start_date"
+                  label="Exam Start Time"
+                  type="datetime-local"
+                  hint="When candidates can start"
+                  persistent-hint
+                  class="mb-3"
+                ></v-text-field>
+              </v-col>
+              <v-col cols="12" sm="4">
+                <v-text-field
+                  v-model="fields.exam_end_date"
+                  label="Exam End Time"
+                  type="datetime-local"
+                  hint="Exam auto-closes after this time"
+                  persistent-hint
+                  class="mb-3"
+                ></v-text-field>
+              </v-col>
+            </v-row>
+          </v-card>
+
           <!-- 2. Exam Settings & Controls -->
           <v-card class="pa-6 border rounded-xl mb-6" flat>
             <h3 class="text-h6 font-weight-bold text-dark mb-4">Exam Simulator Settings</h3>
@@ -334,6 +372,9 @@ const fields = ref<any>({
   enable_proctoring: false,
   max_proctoring_warnings: 3,
   enforce_fullscreen: false,
+  registration_end_date: '',
+  exam_start_date: '',
+  exam_end_date: '',
   status: 'draft'
 });
 
@@ -391,6 +432,9 @@ async function fetchExamDetails() {
         enable_proctoring: !!examMatch.enable_proctoring,
         max_proctoring_warnings: examMatch.max_proctoring_warnings !== undefined ? examMatch.max_proctoring_warnings : 3,
         enforce_fullscreen: !!examMatch.enforce_fullscreen,
+        registration_end_date: examMatch.registration_end_date ? new Date(new Date(examMatch.registration_end_date).getTime() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16) : '',
+        exam_start_date: examMatch.exam_start_date ? new Date(new Date(examMatch.exam_start_date).getTime() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16) : '',
+        exam_end_date: examMatch.exam_end_date ? new Date(new Date(examMatch.exam_end_date).getTime() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16) : '',
         status: examMatch.status
       };
       

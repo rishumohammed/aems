@@ -472,17 +472,23 @@ router.get('/', async (req, res) => {
 // POST /api/admin/public-exams
 router.post('/', async (req, res) => {
   try {
-    const { name, category_id, description, syllabus, duration_minutes, total_questions, total_marks, passing_marks, difficulty_level, status, slug, instructions, pass_percentage, negative_marking, randomize_questions, randomize_options, show_correct_answers, show_explanations, allow_retake, enable_certificate, anonymous_access, require_name, require_email, require_mobile, enable_proctoring, max_proctoring_warnings, enforce_fullscreen } = req.body;
+    const { name, category_id, description, syllabus, duration_minutes, total_questions, total_marks, passing_marks, difficulty_level, status, slug, instructions, pass_percentage, negative_marking, randomize_questions, randomize_options, show_correct_answers, show_explanations, allow_retake, enable_certificate, anonymous_access, require_name, require_email, require_mobile, enable_proctoring, max_proctoring_warnings, enforce_fullscreen, registration_end_date, exam_start_date, exam_end_date } = req.body;
 
     if (!name || !category_id || !slug) {
       return res.status(400).json({ message: 'Name, Category, and SEO Slug are required' });
     }
 
+    if (registration_end_date && exam_start_date) {
+      if (new Date(registration_end_date) > new Date(exam_start_date)) {
+        return res.status(400).json({ message: 'Registration end date cannot overlap or be after exam start date.' });
+      }
+    }
+
     const id = uuidv4();
     await pool.query(`
       INSERT INTO public_exams (
-        id, name, category_id, description, syllabus, duration_minutes, total_questions, total_marks, passing_marks, difficulty_level, status, slug, instructions, pass_percentage, negative_marking, randomize_questions, randomize_options, show_correct_answers, show_explanations, allow_retake, enable_certificate, anonymous_access, require_name, require_email, require_mobile, enable_proctoring, max_proctoring_warnings, enforce_fullscreen
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        id, name, category_id, description, syllabus, duration_minutes, total_questions, total_marks, passing_marks, difficulty_level, status, slug, instructions, pass_percentage, negative_marking, randomize_questions, randomize_options, show_correct_answers, show_explanations, allow_retake, enable_certificate, anonymous_access, require_name, require_email, require_mobile, enable_proctoring, max_proctoring_warnings, enforce_fullscreen, registration_end_date, exam_start_date, exam_end_date
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `, [
       id, name, category_id, description || null, syllabus || null,
       duration_minutes || 60, total_questions || 0, total_marks || 0,
@@ -491,7 +497,8 @@ router.post('/', async (req, res) => {
       !!randomize_questions, !!randomize_options, show_correct_answers !== false, show_explanations !== false,
       allow_retake !== false, enable_certificate !== false, anonymous_access !== false,
       require_name !== false, !!require_name, !!require_email, !!require_mobile,
-      !!enable_proctoring, max_proctoring_warnings !== undefined ? max_proctoring_warnings : 3, !!enforce_fullscreen
+      !!enable_proctoring, max_proctoring_warnings !== undefined ? max_proctoring_warnings : 3, !!enforce_fullscreen,
+      registration_end_date || null, exam_start_date || null, exam_end_date || null
     ]);
 
     res.status(201).json({ id, message: 'Exam created successfully' });
@@ -504,12 +511,19 @@ router.post('/', async (req, res) => {
 // PUT /api/admin/public-exams/:id
 router.put('/:id', async (req, res) => {
   try {
+    const { registration_end_date, exam_start_date } = req.body;
+    if (registration_end_date && exam_start_date) {
+      if (new Date(registration_end_date) > new Date(exam_start_date)) {
+        return res.status(400).json({ message: 'Registration end date cannot overlap or be after exam start date.' });
+      }
+    }
+
     const fields = [
       'name', 'category_id', 'description', 'syllabus', 'duration_minutes',
       'total_questions', 'total_marks', 'passing_marks', 'difficulty_level', 'status', 'slug',
       'instructions', 'pass_percentage', 'negative_marking', 'randomize_questions', 'randomize_options',
       'show_correct_answers', 'show_explanations', 'allow_retake', 'enable_certificate', 'anonymous_access',
-      'require_name', 'require_email', 'require_mobile', 'enable_proctoring', 'max_proctoring_warnings', 'enforce_fullscreen'
+      'require_name', 'require_email', 'require_mobile', 'enable_proctoring', 'max_proctoring_warnings', 'enforce_fullscreen', 'registration_end_date', 'exam_start_date', 'exam_end_date'
     ];
     const updates = fields.filter(f => req.body[f] !== undefined);
     

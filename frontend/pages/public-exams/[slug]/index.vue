@@ -49,6 +49,18 @@
                 <div class="text-h6 font-weight-bold text-dark">{{ exam.duration_minutes }} Mins</div>
               </v-card>
             </v-col>
+            <v-col cols="6" sm="3" class="mb-4" v-if="exam.exam_start_date">
+              <v-card class="pa-4 bg-grey-lighten-4 rounded-lg text-center" flat>
+                <div class="text-caption text-secondary mb-1">Starts On</div>
+                <div class="text-body-2 font-weight-bold text-dark">{{ new Date(exam.exam_start_date).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) }}</div>
+              </v-card>
+            </v-col>
+            <v-col cols="6" sm="3" class="mb-4" v-if="exam.registration_end_date">
+              <v-card class="pa-4 bg-grey-lighten-4 rounded-lg text-center" flat>
+                <div class="text-caption text-secondary mb-1">Registration Closes</div>
+                <div class="text-body-2 font-weight-bold text-dark">{{ new Date(exam.registration_end_date).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) }}</div>
+              </v-card>
+            </v-col>
             <v-col cols="6" sm="3" class="mb-4">
               <v-card class="pa-4 bg-grey-lighten-4 rounded-lg text-center" flat>
                 <div class="text-caption text-secondary mb-1">Total Questions</div>
@@ -96,7 +108,7 @@
           <div class="mt-8">
             <!-- Registration Closed Banner -->
             <v-alert
-              v-if="exam.registration_status === 'closed'"
+              v-if="exam.registration_status === 'closed' || (exam.registration_end_date && new Date(exam.registration_end_date) < new Date())"
               color="warning"
               variant="tonal"
               rounded="lg"
@@ -125,7 +137,7 @@
 
               <!-- Register (only if open) -->
               <v-btn
-                v-if="exam.registration_status !== 'closed'"
+                v-if="exam.registration_status !== 'closed' && (!exam.registration_end_date || new Date(exam.registration_end_date) >= new Date())"
                 variant="outlined"
                 color="primary"
                 size="large"
