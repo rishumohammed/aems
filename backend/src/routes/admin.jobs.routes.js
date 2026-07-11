@@ -139,7 +139,7 @@ router.put('/jobs/:id/approve', authenticateJWT, hasAccess, async (req, res) => 
         to: jobs[0].email,
         subject: `✅ Your Job Listing is Live: ${jobs[0].title}`,
         html: `<p>Hello ${jobs[0].name},</p><p>Your job listing for <strong>${jobs[0].title}</strong> has been approved and is now live on our board.</p>`
-      }).catch(e => console.log('Email error:', e.message));
+      }).catch(e => console.log('Email error:', e?.message || e));
     }
 
     res.json({ message: 'Job approved' });
@@ -160,7 +160,7 @@ router.put('/jobs/:id/reject', authenticateJWT, hasAccess, async (req, res) => {
         to: jobs[0].email,
         subject: `❌ Your Job Listing requires revisions: ${jobs[0].title}`,
         html: `<p>Hello ${jobs[0].name},</p><p>Your job listing for <strong>${jobs[0].title}</strong> could not be approved.</p><p><strong>Reason:</strong> ${reason}</p><p>Please edit your draft and resubmit.</p>`
-      }).catch(e => console.log('Email error:', e.message));
+      }).catch(e => console.log('Email error:', e?.message || e));
     }
 
     res.json({ message: 'Job rejected' });

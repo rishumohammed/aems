@@ -463,7 +463,7 @@ router.patch('/employer-approve/:id', async (req, res) => {
           to: employer.email,
           subject: '✅ Your Employer Registration is Approved',
           html: `<p>Hello ${employer.name},</p><p>Your employer account has been approved. You can now post jobs and manage applicants.</p>`
-        }).catch(e => console.error('Email error:', e.message));
+        }).catch(e => console.error('Email error:', e?.message || e));
       }
     } else {
       await pool.query(
@@ -477,7 +477,7 @@ router.patch('/employer-approve/:id', async (req, res) => {
           to: employer.email,
           subject: '❌ Your Employer Registration was Rejected',
           html: `<p>Hello ${employer.name},</p><p>Unfortunately, your employer registration was rejected.</p><p><strong>Reason:</strong> ${notes || 'No reason provided'}</p>`
-        }).catch(e => console.error('Email error:', e.message));
+        }).catch(e => console.error('Email error:', e?.message || e));
       }
     }
     res.json({ message: `Employer ${status} successfully` });
