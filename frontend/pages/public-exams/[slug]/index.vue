@@ -36,13 +36,7 @@
 
           <v-divider class="mb-6 opacity-10" />
 
-          <!-- Syllabus Section -->
-          <h3 class="text-h6 font-weight-bold text-dark mb-3">
-            <v-icon start color="primary" class="mr-2">mdi-book-open-outline</v-icon> Exam Syllabus
-          </h3>
-          <p class="text-body-2 text-secondary mb-8 leading-relaxed white-space-pre">
-            {{ exam.syllabus || 'General topics testing speed, accuracy, and foundational knowledge of the subject.' }}
-          </p>
+
 
           <!-- Stats Grid -->
           <h3 class="text-h6 font-weight-bold text-dark mb-4">
