@@ -78,16 +78,26 @@
           <v-divider class="my-6 opacity-10" />
 
           <!-- Instructions -->
-          <h3 class="text-h6 font-weight-bold text-dark mb-3">
-            <v-icon start color="primary" class="mr-2">mdi-alert-circle-outline</v-icon> Instructions
-          </h3>
-          <ul class="text-body-2 text-secondary pl-5 leading-relaxed">
-            <li class="mb-2">This exam requires registration. Only registered candidates can access the exam.</li>
-            <li class="mb-2">Once launched, the timer cannot be paused. Closing the tab will automatically submit your answers when the timer ends.</li>
-            <li class="mb-2">We support MCQs, MSQs (Multiple Select), True/False, and Fill in the Blanks.</li>
-            <li class="mb-2">Answers are auto-saved in the background every few seconds.</li>
-            <li class="mb-2">A practice certificate is generated instantly if you score above or equal to the passing marks.</li>
-          </ul>
+          <div v-if="exam.instructions">
+            <h3 class="text-h6 font-weight-bold text-dark mb-3">
+              <v-icon start color="primary" class="mr-2">mdi-alert-circle-outline</v-icon> Instructions
+            </h3>
+            <p class="text-body-2 text-secondary mb-8 leading-relaxed white-space-pre">
+              {{ exam.instructions }}
+            </p>
+          </div>
+          <div v-else>
+            <h3 class="text-h6 font-weight-bold text-dark mb-3">
+              <v-icon start color="primary" class="mr-2">mdi-alert-circle-outline</v-icon> Instructions
+            </h3>
+            <ul class="text-body-2 text-secondary pl-5 leading-relaxed">
+              <li class="mb-2">This exam requires registration. Only registered candidates can access the exam.</li>
+              <li class="mb-2">Once launched, the timer cannot be paused. Closing the tab will automatically submit your answers when the timer ends.</li>
+              <li class="mb-2">We support MCQs, MSQs (Multiple Select), True/False, and Fill in the Blanks.</li>
+              <li class="mb-2">Answers are auto-saved in the background every few seconds.</li>
+              <li class="mb-2">A practice certificate is generated instantly if you score above or equal to the passing marks.</li>
+            </ul>
+          </div>
 
           <div class="mt-8">
             <!-- Registration Closed Banner -->
