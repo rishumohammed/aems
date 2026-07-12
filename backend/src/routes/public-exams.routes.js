@@ -393,7 +393,7 @@ router.post('/:id/attempt', verifyCandidateToken, async (req, res) => {
 });
 
 // 5. POST /api/public/exams/attempts/:id/save
-router.post('/attempts/:id/save', async (req, res) => {
+router.post('/attempts/:id/save', verifyCandidateToken, async (req, res) => {
   try {
     const { answers } = req.body;
     const attemptId = req.params.id;
@@ -426,7 +426,7 @@ router.post('/attempts/:id/save', async (req, res) => {
 });
 
 // 6. POST /api/public/exams/attempts/:id/submit
-router.post('/attempts/:id/submit', async (req, res) => {
+router.post('/attempts/:id/submit', verifyCandidateToken, async (req, res) => {
   const connection = await pool.getConnection();
   try {
     const attemptId = req.params.id;
@@ -442,14 +442,23 @@ router.post('/attempts/:id/submit', async (req, res) => {
     `, [attemptId]);
 
     if (attempts.length === 0) {
+      await connection.rollback();
       connection.release();
       return res.status(404).json({ message: 'Attempt not found' });
     }
 
     const attempt = attempts[0];
     if (attempt.status !== 'in_progress') {
+      await connection.rollback();
       connection.release();
       return res.status(400).json({ message: 'Attempt already submitted' });
+    }
+
+    // Check expiration
+    if (new Date() > new Date(attempt.session_expires_at)) {
+      await connection.rollback();
+      connection.release();
+      return res.status(400).json({ message: 'Exam session expired' });
     }
 
     // Fetch all questions with correct answers to grade
