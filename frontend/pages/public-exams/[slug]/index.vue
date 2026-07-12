@@ -73,12 +73,7 @@
                 <div class="text-h6 font-weight-bold text-dark">{{ exam.total_marks }} Marks</div>
               </v-card>
             </v-col>
-            <v-col cols="6" sm="3" class="mb-4">
-              <v-card class="pa-4 bg-grey-lighten-4 rounded-lg text-center" flat>
-                <div class="text-caption text-secondary mb-1">Passing Mark</div>
-                <div class="text-h6 font-weight-bold text-dark">{{ exam.passing_marks }} Marks</div>
-              </v-card>
-            </v-col>
+
           </v-row>
 
           <v-divider class="my-6 opacity-10" />
@@ -135,20 +130,7 @@
                 Login &amp; Access Exam
               </v-btn>
 
-              <!-- Register (only if open) -->
-              <v-btn
-                v-if="exam.registration_status !== 'closed' && (!exam.registration_end_date || new Date(exam.registration_end_date) >= new Date())"
-                variant="outlined"
-                color="primary"
-                size="large"
-                rounded="lg"
-                class="px-8 text-capitalize font-weight-bold"
-                height="52"
-                :to="`/public-exams/${exam.slug}/register`"
-              >
-                <v-icon start>mdi-account-plus-outline</v-icon>
-                Register for this Exam
-              </v-btn>
+
             </div>
           </div>
         </v-card>

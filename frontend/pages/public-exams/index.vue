@@ -39,13 +39,7 @@
 
             <v-divider class="mb-6 opacity-10"></v-divider>
 
-            <!-- Syllabus Section -->
-            <h3 class="text-h6 font-weight-bold text-dark mb-3">
-              <v-icon start color="primary" class="mr-2">mdi-book-open-outline</v-icon> Exam Syllabus
-            </h3>
-            <p class="text-body-2 text-secondary mb-8 leading-relaxed white-space-pre">
-              {{ exam.syllabus || 'General topics testing speed, accuracy, and foundational knowledge of the subject.' }}
-            </p>
+
 
             <!-- Stats Grid -->
             <h3 class="text-h6 font-weight-bold text-dark mb-4">
@@ -70,12 +64,7 @@
                   <div class="text-h6 font-weight-bold text-dark">{{ exam.total_marks }} Marks</div>
                 </v-card>
               </v-col>
-              <v-col cols="6" sm="3" class="mb-4">
-                <v-card class="pa-4 bg-grey-lighten-4 rounded-lg text-center" flat>
-                  <div class="text-caption text-secondary mb-1">Passing Mark</div>
-                  <div class="text-h6 font-weight-bold text-dark">{{ exam.passing_marks }} Marks</div>
-                </v-card>
-              </v-col>
+
             </v-row>
 
             <v-divider class="my-6 opacity-10"></v-divider>

@@ -751,8 +751,6 @@ async function submitFinalAnswers() {
 
     // Clean up local storage
     localStorage.removeItem(`exam_attempt_${examSlug.value}`);
-    localStorage.removeItem(`public_exam_token_${examSlug.value}`);
-    localStorage.removeItem(`public_exam_candidate_${examSlug.value}`);
 
     cleanupProctoring();
     confirmSubmitDialog.value = false;
