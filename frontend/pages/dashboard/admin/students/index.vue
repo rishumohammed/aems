@@ -218,8 +218,8 @@ const tempPasswordModal = ref({ show: false, password: '', name: '', email: '' }
 
 const copyPassword = async () => {
   try {
-    await navigator.clipboard.writeText(`Name: ${tempPasswordModal.value.name}\nEmail: ${tempPasswordModal.value.email}\nTemporary Password: ${tempPasswordModal.value.password}`);
-    alert('Credentials copied to clipboard!');
+    await navigator.clipboard.writeText(tempPasswordModal.value.password);
+    alert('Password copied to clipboard!');
   } catch (err) {
     console.error('Failed to copy text: ', err);
   }

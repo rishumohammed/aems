@@ -301,8 +301,8 @@ const resetPassword = async () => {
 
 const copyResetPassword = async () => {
   try {
-    await navigator.clipboard.writeText(`Name: ${props.student.name || props.student.email}\nEmail: ${props.student.email}\nTemporary Password: ${resetCredentials.value.password}`);
-    alert('Credentials copied to clipboard!');
+    await navigator.clipboard.writeText(resetCredentials.value.password);
+    alert('Password copied to clipboard!');
   } catch (err) {
     console.error('Failed to copy text: ', err);
   }
