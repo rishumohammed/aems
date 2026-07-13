@@ -717,6 +717,47 @@ router.delete('/:id/questions/:qid', async (req, res) => {
   }
 });
 
+// POST /api/admin/public-exams/:id/questions/:qid/duplicate
+router.post('/:id/questions/:qid/duplicate', async (req, res) => {
+  try {
+    const { id: examId, qid } = req.params;
+
+    const [questions] = await pool.query('SELECT * FROM public_exam_questions WHERE id = ? AND exam_id = ?', [qid, examId]);
+    if (questions.length === 0) {
+      return res.status(404).json({ message: 'Question not found' });
+    }
+
+    const q = questions[0];
+    const newId = uuidv4();
+    
+    const [maxOrder] = await pool.query('SELECT COALESCE(MAX(order_index), 0) as max_order FROM public_exam_questions WHERE exam_id = ?', [examId]);
+    const newOrderIndex = maxOrder[0].max_order + 1;
+
+    await pool.query(`
+      INSERT INTO public_exam_questions (id, exam_id, question_text, type, options_json, correct_answer, explanation, marks, order_index, difficulty_level)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `, [
+      newId,
+      examId,
+      q.question_text + ' (Copy)',
+      q.type,
+      q.options_json,
+      q.correct_answer,
+      q.explanation,
+      q.marks,
+      newOrderIndex,
+      q.difficulty_level
+    ]);
+
+    await recalculateExamTotals(examId);
+
+    res.status(201).json({ id: newId, message: 'Question duplicated successfully' });
+  } catch (error) {
+    console.error('Duplicate question error:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
 // POST /api/admin/public-exams/:id/questions/bulk (JSON Array)
 router.post('/:id/questions/bulk', async (req, res) => {
   const connection = await pool.getConnection();
