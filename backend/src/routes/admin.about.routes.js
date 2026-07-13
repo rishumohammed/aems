@@ -228,8 +228,12 @@ router.get('/contact-submissions', isSuperAdmin, async (req, res) => {
 });
 
 router.put('/contact-submissions/:id/status', isSuperAdmin, async (req, res) => {
-  await pool.query('UPDATE contact_submissions SET status = ? WHERE id = ?', [req.body.status, req.params.id]);
-  res.json({ message: 'Status updated' });
+  try {
+    await pool.query('UPDATE contact_submissions SET status = ? WHERE id = ?', [req.body.status || null, req.params.id]);
+    res.json({ message: 'Status updated' });
+  } catch (error) {
+    res.status(500).json({ message: 'Internal server error' });
+  }
 });
 
 export default router;

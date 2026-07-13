@@ -247,7 +247,7 @@ class EnrollmentService {
           { name: studentData.name, email: studentData.email },
           { password: tempPassword },
           courseName
-        );
+        ).catch(err => console.error('Failed to send welcome email:', err));
 
         // Also create an in-app system notification
         await createNotification({

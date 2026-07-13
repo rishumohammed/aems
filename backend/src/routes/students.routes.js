@@ -378,7 +378,7 @@ router.post('/:id/send-welcome', async (req, res) => {
     }
     const student = rows[0];
     
-    emailService.sendWelcomeEmail(
+    await emailService.sendWelcomeEmail(
       { name: student.name, email: student.email },
       { password: tempPassword || 'Abc@12345' },
       'Your LMS Course'

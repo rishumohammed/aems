@@ -126,7 +126,7 @@ router.post('/users', async (req, res) => {
 router.put('/users/:id/status', async (req, res) => {
   const { status } = req.body;
   try {
-    await pool.query('UPDATE users SET status = ? WHERE id = ?', [status, req.params.id]);
+    await pool.query('UPDATE users SET status = ? WHERE id = ?', [status || null, req.params.id]);
     res.json({ message: `User status updated to ${status}` });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -137,7 +137,7 @@ router.put('/users/:id/status', async (req, res) => {
 router.put('/users/:id', async (req, res) => {
   const { name, role } = req.body;
   try {
-    await pool.query('UPDATE users SET name = ?, role = ? WHERE id = ?', [name, role, req.params.id]);
+    await pool.query('UPDATE users SET name = ?, role = ? WHERE id = ?', [name || null, role || null, req.params.id]);
     res.json({ message: 'User updated' });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -189,7 +189,7 @@ router.post('/users/:id/reset-password', async (req, res) => {
     if (users.length > 0) {
       const user = users[0];
       try {
-        emailService.sendWelcomeEmail(
+        await emailService.sendWelcomeEmail(
           { name: user.name, email: user.email },
           { password: defaultPassword },
           'Password Reset'
