@@ -322,7 +322,10 @@ const fetchData = async () => {
     
     // Simple stats calculation for demo
     stats.value.active = students.value.filter(s => s.status === 'active').length;
-    const progressValues = students.value.map(s => s.avg_progress || 0).filter(v => v > 0);
+    
+    // Average progress should include students with 0% progress if they are enrolled in courses
+    const enrolledStudents = students.value.filter(s => s.enrolled_courses && s.enrolled_courses.length > 0);
+    const progressValues = enrolledStudents.map(s => s.avg_progress || 0);
     stats.value.avgProgress = progressValues.length ? Math.round(progressValues.reduce((a, b) => a + b, 0) / progressValues.length) : 0;
   } catch (err) {
     console.error('Failed to fetch students:', err);
