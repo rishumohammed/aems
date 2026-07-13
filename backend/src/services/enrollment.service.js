@@ -84,7 +84,7 @@ class EnrollmentService {
           
           await connection.query(
             'INSERT INTO users (id, role, name, email, password_hash, temp_password, phone, status, force_password_change) VALUES (?, "student", ?, ?, ?, ?, ?, "active", 1)',
-            [studentId, studentData.name, studentData.email, hashedPassword, tempPassword, studentData.phone]
+            [studentId, studentData.name || null, studentData.email || null, hashedPassword, tempPassword, studentData.phone || null]
           );
 
           // Generate sequential Student ID: STU-YYYY-NNN

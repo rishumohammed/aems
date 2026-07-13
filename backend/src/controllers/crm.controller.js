@@ -177,7 +177,7 @@ export const CRMController = {
       const activityId = uuidv4();
       await pool.query(
         'INSERT INTO lead_activities (id, lead_id, agent_id, type, content) VALUES (?, ?, ?, ?, ?)',
-        [activityId, id, req.user.id, type, content]
+        [activityId, id, req.user.id, type, content || null]
       );
 
       res.status(201).json({ message: 'Activity logged successfully' });
@@ -197,7 +197,7 @@ export const CRMController = {
 
       await pool.query(
         'INSERT INTO leads (id, name, email, phone, source, status, course_interest_ids, notes, assigned_to) VALUES (?, ?, ?, ?, "manual", "open", ?, ?, ?)',
-        [id, name, email, phone, JSON.stringify(course_interest_ids || []), notes, assigned_to]
+        [id, name, email || null, phone || null, JSON.stringify(course_interest_ids || []), notes || null, assigned_to]
       );
 
       // Log activity
@@ -267,7 +267,7 @@ export const CRMController = {
 
       await pool.query(
         'UPDATE leads SET name = ?, email = ?, phone = ?, status = ?, assigned_to = ?, course_interest_ids = ?, notes = ?, last_activity_at = CURRENT_TIMESTAMP WHERE id = ?',
-        [name, email, phone, status, assigned_to, JSON.stringify(course_interest_ids || []), notes, id]
+        [name, email || null, phone || null, status, assigned_to || null, JSON.stringify(course_interest_ids || []), notes || null, id]
       );
 
       res.json({ message: 'Lead updated successfully' });
@@ -285,7 +285,7 @@ export const CRMController = {
       const followupId = uuidv4();
       await pool.query(
         'INSERT INTO lead_followups (id, lead_id, agent_id, scheduled_at, note) VALUES (?, ?, ?, ?, ?)',
-        [followupId, id, req.user.id, scheduled_at, note]
+        [followupId, id, req.user.id, scheduled_at, note || null]
       );
 
       // Log activity

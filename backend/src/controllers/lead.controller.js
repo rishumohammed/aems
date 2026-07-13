@@ -15,10 +15,10 @@ export const LeadController = {
 
       await LeadService.createLead({
         name,
-        email,
+        email: email || null,
         phone,
         source: source || 'website',
-        form_id,
+        form_id: form_id || null,
         course_interest_ids,
         custom_fields
       });
