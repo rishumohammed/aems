@@ -192,7 +192,9 @@ const save = async () => {
 
 onMounted(async () => {
   const { data: courseList } = await api.get('/lms/courses');
-  courses.value = courseList;
+  const { data: examsList } = await api.get('/exams');
+  
+  let currentCourseId = null;
 
   if (isEdit.value) {
     const { data } = await api.get(`/exams/${(route.params as any).id}`);
@@ -224,6 +226,12 @@ onMounted(async () => {
       proctoring_config: parsedConfig,
       questions: data.questions || [],
     };
+    currentCourseId = data.course_id;
   }
+
+  courses.value = courseList.filter((course: any) => {
+    if (isEdit.value && currentCourseId === course.id) return true;
+    return !examsList.some((exam: any) => exam.course_id === course.id);
+  });
 });
 </script>

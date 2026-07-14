@@ -465,6 +465,16 @@ router.post('/', authenticateJWT, isTutorOrAdmin, async (req, res) => {
       proctoring_config
     } = req.body;
 
+    if (course_id) {
+      const [existingExams] = await pool.query(
+        'SELECT id FROM exams WHERE course_id = ? AND deleted_at IS NULL',
+        [course_id]
+      );
+      if (existingExams.length > 0) {
+        return res.status(400).json({ message: 'An exam already exists for this course. Only one exam is allowed per course.' });
+      }
+    }
+
     let configStr = null;
     if (proctoring_config) {
       configStr = typeof proctoring_config === 'object' ? JSON.stringify(proctoring_config) : proctoring_config;

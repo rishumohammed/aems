@@ -40,12 +40,11 @@ export const useNavStore = defineStore('nav', {
       // EXAMS
       { label: 'Exams', icon: 'mdi-file-document-edit-outline', route: '/dashboard/exams', roles: ['super_admin', 'lms_user', 'tutor', 'student'], section: 'EXAMS' },
       { label: 'Talent Hunt', icon: 'mdi-earth', route: '/dashboard/admin/public-exams', roles: ['super_admin', 'lms_user'], section: 'EXAMS' },
-      { label: 'Results', icon: 'mdi-trophy-outline', route: '/dashboard/exams/grading', roles: ['super_admin', 'lms_user', 'tutor'], section: 'EXAMS' },
       { label: 'Certificates', icon: 'mdi-certificate-outline', route: '/dashboard/certificates', roles: ['super_admin', 'lms_user', 'tutor', 'student'], section: 'EXAMS' },
       { label: 'Proctoring Logs', icon: 'mdi-cctv', route: '/dashboard/admin/proctoring', roles: ['super_admin', 'lms_user', 'tutor'], section: 'EXAMS' },
       { label: 'Talent Proctoring', icon: 'mdi-webcam', route: '/dashboard/admin/public-exams/proctoring', roles: ['super_admin', 'lms_user'], section: 'EXAMS' },
-      { label: 'Results', icon: 'mdi-trophy-outline', route: '/dashboard/student/results', roles: ['student'], section: 'EXAMS' },
       
+
       // JOBS
       { label: 'Job Board', icon: 'mdi-briefcase-outline', route: '/dashboard/jobs', roles: ['super_admin', 'placement_coordinator', 'student'], section: 'JOBS' },
       { label: 'Manage Jobs', icon: 'mdi-briefcase-edit-outline', route: '/dashboard/admin/jobs', roles: ['super_admin', 'placement_coordinator'], section: 'JOBS' },

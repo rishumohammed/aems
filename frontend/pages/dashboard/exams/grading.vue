@@ -5,12 +5,21 @@
         <h1 class="text-h4 font-weight-bold mb-1">Results & Grading</h1>
         <p class="text-subtitle-1 text-medium-emphasis mb-6">Review and manually grade exam submissions</p>
       </div>
-      <div class="filter-pill">
-        <AppInput
-          v-model="statusFilter"
-          type="select"
-          :options="statusOptions"
-        />
+      <div class="d-flex gap-4">
+        <div class="filter-pill" style="min-width: 250px;">
+          <AppInput
+            v-model="examFilter"
+            type="select"
+            :options="examOptions"
+          />
+        </div>
+        <div class="filter-pill" style="min-width: 200px;">
+          <AppInput
+            v-model="statusFilter"
+            type="select"
+            :options="statusOptions"
+          />
+        </div>
       </div>
     </div>
 
@@ -152,11 +161,25 @@ definePageMeta({
 const api = useApi();
 const loading = ref(true);
 const allAttempts = ref<any[]>([]);
+const exams = ref<any[]>([]);
 const statusFilter = ref('');
+const examFilter = ref('');
+
+const examOptions = computed(() => {
+  const opts = exams.value.map(e => ({ title: e.title, value: e.id }));
+  opts.unshift({ title: 'All Exams', value: '' });
+  return opts;
+});
 
 const filteredAttempts = computed(() => {
-  if (!statusFilter.value) return allAttempts.value;
-  return allAttempts.value.filter(a => a.status === statusFilter.value);
+  let result = allAttempts.value;
+  if (examFilter.value) {
+    result = result.filter(a => a.exam_id === examFilter.value);
+  }
+  if (statusFilter.value) {
+    result = result.filter(a => a.status === statusFilter.value);
+  }
+  return result;
 });
 
 const stats = computed(() => {
@@ -200,9 +223,16 @@ const fetchAttempts = async () => {
   loading.value = true;
   try {
     const examId = route.query.exam_id;
-    const url = examId ? `/exams/attempts?exam_id=${examId}` : `/exams/attempts`;
-    const { data } = await api.get(url);
-    allAttempts.value = data;
+    if (examId) {
+      examFilter.value = examId as string;
+    }
+    
+    const [attemptsRes, examsRes] = await Promise.all([
+      api.get('/exams/attempts'),
+      api.get('/exams')
+    ]);
+    allAttempts.value = attemptsRes.data;
+    exams.value = examsRes.data;
   } finally {
     loading.value = false;
   }
