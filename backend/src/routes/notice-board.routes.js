@@ -21,7 +21,10 @@ const storage = multer.diskStorage({
     cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
   }
 });
-const upload = multer({ storage });
+const upload = multer({ 
+  storage,
+  limits: { fileSize: 2 * 1024 * 1024 } // 2MB
+});
 
 // Role Gates
 const isAdmin = authorizeRoles(USER_ROLES.SUPER_ADMIN);
@@ -71,7 +74,7 @@ router.post('/manage', authenticateJWT, isAdmin, upload.single('image'), async (
 
 // ADMIN: Update notice
 router.put('/manage/:id', authenticateJWT, isAdmin, upload.single('image'), async (req, res) => {
-  const { title, event_date, event_type, link, is_active } = req.body;
+  const { title, event_date, event_type, link, is_active, remove_image } = req.body;
   const noticeId = req.params.id;
   const isActive = is_active === 'true' || is_active === true || is_active === 1 || is_active === '1';
   
@@ -89,6 +92,8 @@ router.put('/manage/:id', authenticateJWT, isAdmin, upload.single('image'), asyn
     if (req.file) {
       updateStr += (updateStr ? ', ' : '') + 'image_url = ?';
       values.push(`/uploads/notice_board/${req.file.filename}`);
+    } else if (remove_image === 'true' || remove_image === true) {
+      updateStr += (updateStr ? ', ' : '') + 'image_url = NULL';
     }
 
     if (updateStr) {

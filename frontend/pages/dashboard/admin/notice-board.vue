@@ -94,7 +94,20 @@
               class="mb-4"
             ></v-text-field>
 
+            <div v-if="isEditing && formData.current_image && !formData.remove_image" class="mb-4 d-flex align-center gap-4 bg-grey-lighten-4 pa-4 rounded-lg border">
+              <v-avatar rounded="lg" size="64" class="border bg-white">
+                <v-img :src="baseUrl + formData.current_image" cover></v-img>
+              </v-avatar>
+              <div>
+                <div class="text-subtitle-2 font-weight-bold mb-1">Current Image</div>
+                <v-btn color="error" variant="text" size="small" prepend-icon="mdi-delete" class="px-0" @click="formData.remove_image = true">
+                  Remove Image
+                </v-btn>
+              </div>
+            </div>
+
             <v-file-input
+              v-if="!isEditing || !formData.current_image || formData.remove_image"
               v-model="formData.image"
               label="Upload Thumbnail Image"
               variant="outlined"
@@ -103,8 +116,11 @@
               prepend-inner-icon="mdi-camera"
               accept="image/*"
               class="mb-4"
-              :hint="isEditing && formData.current_image ? 'Leave blank to keep existing image' : ''"
+              hint="Upload image with maximum size of 2 MB"
               persistent-hint
+              :rules="[
+                v => !v || !v.length || v[0].size <= 2 * 1024 * 1024 || 'Image size must be less than 2 MB'
+              ]"
             ></v-file-input>
 
             <v-switch
@@ -191,8 +207,9 @@ const formData = ref({
   event_date: '',
   link: '',
   is_active: true,
-  image: null as File | null,
-  current_image: ''
+  image: null as any,
+  current_image: '',
+  remove_image: false
 });
 
 const formatDate = (dateString: string) => {
@@ -224,7 +241,8 @@ const openDialog = (item?: any) => {
       link: item.link || '',
       is_active: item.is_active === 1 || item.is_active === true,
       image: null,
-      current_image: item.image_url
+      current_image: item.image_url,
+      remove_image: false
     };
   } else {
     formData.value = {
@@ -235,7 +253,8 @@ const openDialog = (item?: any) => {
       link: '',
       is_active: true,
       image: null,
-      current_image: ''
+      current_image: '',
+      remove_image: false
     };
   }
   dialog.value = true;
@@ -255,8 +274,16 @@ const saveNotice = async () => {
     payload.append('link', formData.value.link);
     payload.append('is_active', formData.value.is_active.toString());
     
+    if (formData.value.remove_image) {
+      payload.append('remove_image', 'true');
+    }
+    
     if (formData.value.image) {
-      payload.append('image', formData.value.image);
+      if (Array.isArray(formData.value.image) && formData.value.image.length > 0) {
+        payload.append('image', formData.value.image[0]);
+      } else if (!Array.isArray(formData.value.image)) {
+        payload.append('image', formData.value.image);
+      }
     }
 
     if (isEditing.value) {

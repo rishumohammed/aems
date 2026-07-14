@@ -239,7 +239,7 @@ const formatDate = (dateStr: string) => {
 };
 
 const exportFullReport = () => {
-  alert('Generating detailed PDF report...');
+  window.print();
 };
 </script>
 
