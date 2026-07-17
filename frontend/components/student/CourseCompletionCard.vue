@@ -127,6 +127,18 @@
         </v-btn>
 
         <v-btn 
+          color="grey-darken-2" 
+          variant="text" 
+          size="large"
+          block
+          rounded="lg"
+          class="font-weight-bold mt-2"
+          to="/dashboard/student"
+        >
+          Back to Dashboard
+        </v-btn>
+
+        <v-btn 
           variant="text" 
           color="secondary"
           block

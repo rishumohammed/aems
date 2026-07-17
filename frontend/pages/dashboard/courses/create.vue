@@ -65,6 +65,15 @@
             >
               <v-icon start>mdi-format-list-bulleted</v-icon> Go To Courses
             </v-btn>
+            <v-btn
+              variant="text"
+              color="grey-darken-2"
+              rounded="lg"
+              class="font-weight-bold px-6"
+              to="/dashboard"
+            >
+              <v-icon start>mdi-view-dashboard-outline</v-icon> Back to Dashboard
+            </v-btn>
           </div>
         </div>
       </v-card>

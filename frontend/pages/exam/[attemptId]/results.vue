@@ -61,18 +61,25 @@
             </div>
           </div>
 
-          <v-btn 
-            v-if="!canGrade"
-            color="primary" rounded="xl" size="large" @click="router.push('/dashboard/exams')" class="mt-2 px-8"
-          >
-            Return to Dashboard
-          </v-btn>
-          <v-btn 
-            v-else
-            color="primary" rounded="xl" size="large" @click="router.push('/dashboard/exams/grading')" class="mt-2 px-8"
-          >
-            Return to Results Page
-          </v-btn>
+          <div class="d-flex justify-center gap-3 flex-wrap">
+            <v-btn 
+              v-if="!canGrade"
+              color="primary" rounded="xl" size="large" @click="router.push('/dashboard/exams')" class="mt-2 px-8"
+            >
+              Return to Exams
+            </v-btn>
+            <v-btn 
+              v-else
+              color="primary" rounded="xl" size="large" @click="router.push('/dashboard/exams/grading')" class="mt-2 px-8"
+            >
+              Return to Results Page
+            </v-btn>
+            <v-btn 
+              variant="outlined" color="primary" rounded="xl" size="large" @click="router.push('/dashboard')" class="mt-2 px-8"
+            >
+              Back to Dashboard
+            </v-btn>
+          </div>
         </div>
 
         <!-- Review Section -->

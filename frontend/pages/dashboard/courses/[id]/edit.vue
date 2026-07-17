@@ -216,6 +216,9 @@
           <v-btn variant="text" color="grey-darken-1" size="large" rounded="lg" block @click="publishSuccessModal.show = false">
             Continue Editing
           </v-btn>
+          <v-btn variant="outlined" color="primary" size="large" rounded="lg" block to="/dashboard">
+            Back to Dashboard
+          </v-btn>
         </div>
       </v-card>
     </v-dialog>

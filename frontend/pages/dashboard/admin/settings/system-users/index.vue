@@ -333,8 +333,7 @@ const resetPassword = async (user) => {
 
 const copyPassword = () => {
   navigator.clipboard.writeText(tempPassword.value);
-  copied.value = true;
-  setTimeout(() => { copied.value = false; }, 3000);
+  alert('Password copied to clipboard!');
 };
 
 const confirmDelete = async (user) => {

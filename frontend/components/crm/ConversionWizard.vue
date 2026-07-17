@@ -314,7 +314,8 @@
       </v-card-actions>
       <v-card-actions class="pa-6" v-else>
         <v-spacer></v-spacer>
-        <v-btn color="grey-darken-1" variant="outlined" class="px-6 rounded-lg" @click="close">Done</v-btn>
+        <v-btn color="grey-darken-1" variant="text" class="px-6 rounded-lg" @click="close">Done</v-btn>
+        <v-btn color="primary" variant="outlined" class="px-6 rounded-lg" to="/dashboard">Back to Dashboard</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>

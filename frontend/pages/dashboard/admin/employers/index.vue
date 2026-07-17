@@ -185,8 +185,7 @@ const resetPassword = async (employer: any) => {
 
 const copyPassword = () => {
   navigator.clipboard.writeText(tempPassword.value);
-  copied.value = true;
-  setTimeout(() => { copied.value = false; }, 3000);
+  alert('Password copied to clipboard!');
 };
 </script>
 

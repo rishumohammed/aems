@@ -596,7 +596,7 @@ router.get('/courses/pending-approvals', async (req, res) => {
       (SELECT COUNT(*) FROM course_modules m JOIN course_sections s ON m.section_id = s.id WHERE s.course_id = c.id) as module_count,
       (SELECT COUNT(*) FROM course_lessons l JOIN course_sections s ON l.section_id = s.id WHERE s.course_id = c.id) as lesson_count
       FROM courses c
-      JOIN users u ON c.tutor_id = u.id
+      LEFT JOIN users u ON c.tutor_id = u.id
       LEFT JOIN course_categories cat ON c.category_id = cat.id
       WHERE c.status = 'pending_review'
       ORDER BY c.created_at ASC
@@ -615,7 +615,7 @@ router.get('/courses/:id/full-details', async (req, res) => {
       cat.name as category_name,
       (SELECT COUNT(*) FROM enrollments WHERE course_id = c.id) as enrolled_count
       FROM courses c
-      JOIN users u ON c.tutor_id = u.id
+      LEFT JOIN users u ON c.tutor_id = u.id
       LEFT JOIN course_categories cat ON c.category_id = cat.id
       WHERE c.id = ?
     `, [req.params.id]);

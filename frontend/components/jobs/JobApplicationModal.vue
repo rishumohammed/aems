@@ -10,7 +10,18 @@
       </v-card-title>
 
       <v-card-text class="pa-0">
-        <v-stepper v-model="step" :items="['Personal', 'Education', 'Experience', 'Application']" hide-actions flat class="rounded-0 bg-transparent custom-stepper">
+        <!-- Success State -->
+        <div v-if="isSubmitted" class="pa-10 text-center">
+          <v-icon size="80" color="success" class="mb-4">mdi-check-circle</v-icon>
+          <h2 class="text-h4 font-weight-black mb-2 text-grey-darken-4">Application Submitted!</h2>
+          <p class="text-body-1 text-grey-darken-1 mb-8">Your application has been successfully sent to the employer.</p>
+          <div class="d-flex justify-center gap-4">
+            <v-btn color="primary" size="x-large" rounded="lg" to="/dashboard/student/applications" @click="closeModal">View Applications</v-btn>
+            <v-btn variant="outlined" color="primary" size="x-large" rounded="lg" to="/dashboard" @click="closeModal">Back to Dashboard</v-btn>
+          </div>
+        </div>
+
+        <v-stepper v-else v-model="step" :items="['Personal', 'Education', 'Experience', 'Application']" hide-actions flat class="rounded-0 bg-transparent custom-stepper">
           
           <!-- Step 1: Personal Details -->
           <template v-slot:item.1>
@@ -154,6 +165,7 @@ const api = useApi();
 const isOpen = ref(props.modelValue);
 const step = ref(1);
 const loading = ref(false);
+const isSubmitted = ref(false);
 const resumeFile = ref<File | File[] | null>(null);
 
 interface JobApplicationForm {
@@ -287,6 +299,7 @@ async function loadProfileData() {
 function closeModal() {
   isOpen.value = false;
   step.value = 1;
+  isSubmitted.value = false;
 }
 
 async function submit() {
@@ -331,11 +344,10 @@ async function submit() {
     });
 
     if (response.data?.success) {
-      alert('Application submitted successfully!');
+      isSubmitted.value = true;
       emit('submitted');
       emit('success');
-      closeModal();
-      navigateTo('/dashboard/student/applications');
+      // No longer automatically closing or navigating, letting the user choose from the success screen.
     }
   } catch (error: any) {
     console.error('Submission error:', error);
