@@ -598,7 +598,7 @@ router.get('/courses/pending-approvals', async (req, res) => {
       FROM courses c
       LEFT JOIN users u ON c.tutor_id = u.id
       LEFT JOIN course_categories cat ON c.category_id = cat.id
-      WHERE c.status = 'pending_review'
+      WHERE LOWER(c.status) = 'pending_review'
       ORDER BY c.created_at ASC
     `);
     res.json(courses);
