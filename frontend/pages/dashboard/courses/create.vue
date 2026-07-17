@@ -725,6 +725,11 @@ const autoGenerateSlug = () => {
 const handleFileChange = (e) => {
   const file = e.target.files[0];
   if (file) {
+    if (file.size > 2 * 1024 * 1024) {
+      alert('File is too large. Maximum size allowed is 2MB.');
+      e.target.value = '';
+      return;
+    }
     thumbnailFile.value = file;
     thumbnailPreview.value = URL.createObjectURL(file);
   }
