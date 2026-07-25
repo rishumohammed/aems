@@ -9,6 +9,7 @@ commands:
   - pm2 start ecosystem.config.cjs
   - pm2 save
 nginx:
+  client_max_body_size: 500m
   locations:
     - match: /api/
       proxy: http://127.0.0.1:5001/api/
