@@ -29,6 +29,18 @@ const upload = multer({
   limits: { fileSize: 500 * 1024 * 1024 } // 500MB limit
 });
 
+const deleteFileSafe = (fileUrl) => {
+  if (!fileUrl) return;
+  try {
+    const filePath = path.join(process.cwd(), fileUrl.replace(/^\//, ''));
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
+    }
+  } catch (err) {
+    console.error('Failed to delete physical file:', err);
+  }
+};
+
 // Sanitizer for form data serialized "null" and "undefined" strings
 const sanitizeBody = (req, res, next) => {
   if (req.body) {
@@ -382,6 +394,10 @@ router.put('/courses/:id', authenticateJWT, isTutorOrAdmin, upload.single('thumb
   const courseId = req.params.id;
   
   try {
+    let oldThumbnailUrl = null;
+    const [oldCourse] = await pool.query('SELECT thumbnail_url FROM courses WHERE id = ?', [courseId]);
+    if (oldCourse.length > 0) oldThumbnailUrl = oldCourse[0].thumbnail_url;
+
     const fields = ['title', 'slug', 'description', 'short_description', 'category_id', 'level', 'language', 'price_type', 'price', 'intro_video_source', 'intro_video_id', 'is_featured', 'course_type', 'start_date'];
     let updateStr = fields.filter(f => data[f] !== undefined).map(f => `${f} = ?`).join(', ');
     let values = fields.filter(f => data[f] !== undefined).map(f => {
@@ -397,6 +413,10 @@ router.put('/courses/:id', authenticateJWT, isTutorOrAdmin, upload.single('thumb
 
     if (updateStr) {
       await pool.query(`UPDATE courses SET ${updateStr} WHERE id = ?`, [...values, courseId]);
+      
+      if (oldThumbnailUrl && (req.file || req.body.thumbnail_url === null)) {
+        deleteFileSafe(oldThumbnailUrl);
+      }
     }
 
     // Update Prerequisites if provided
@@ -530,7 +550,14 @@ router.put('/courses/:id/sections/:sid', authenticateJWT, isTutorOrAdmin, async 
 // Delete Section
 router.delete('/courses/:id/sections/:sid', authenticateJWT, isTutorOrAdmin, async (req, res) => {
   try {
+    const [lessons] = await pool.query('SELECT resource_url, thumbnail_url FROM course_lessons WHERE section_id = ?', [req.params.sid]);
     await pool.query('DELETE FROM course_sections WHERE id = ?', [req.params.sid]);
+    
+    lessons.forEach(l => {
+      if (l.resource_url) deleteFileSafe(l.resource_url);
+      if (l.thumbnail_url) deleteFileSafe(l.thumbnail_url);
+    });
+
     res.json({ message: 'Section and its modules/lessons deleted' });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -622,6 +649,10 @@ router.put('/courses/:id/sections/:sid/lessons/:lid', authenticateJWT, isTutorOr
   const resource_url = req.file ? `/uploads/resources/${req.file.filename}` : undefined;
 
   try {
+    let oldResourceUrl = null;
+    const [oldLesson] = await pool.query('SELECT resource_url FROM course_lessons WHERE id = ?', [lesson_id]);
+    if (oldLesson.length > 0) oldResourceUrl = oldLesson[0].resource_url;
+
     const fields = ['title', 'type', 'video_source', 'video_id', 'notes', 'is_free_preview', 'live_date', 'live_time', 'zoom_link', 'thumbnail_url', 'duration_seconds', 'quiz_id', 'assignment_id', 'content_html', 'is_mandatory', 'scheduled_at', 'duration_minutes', 'live_link'];
     let updateStr = fields.filter(f => req.body[f] !== undefined).map(f => `${f} = ?`).join(', ');
     let values = fields.filter(f => req.body[f] !== undefined).map(f => {
@@ -639,6 +670,10 @@ router.put('/courses/:id/sections/:sid/lessons/:lid', authenticateJWT, isTutorOr
 
     if (updateStr) {
       await pool.query(`UPDATE course_lessons SET ${updateStr} WHERE id = ?`, [...values, lesson_id]);
+      
+      if (oldResourceUrl && (resource_url !== undefined || req.body.resource_url === null)) {
+        deleteFileSafe(oldResourceUrl);
+      }
     }
     res.json({ message: 'Lesson updated' });
   } catch (error) {
@@ -649,7 +684,15 @@ router.put('/courses/:id/sections/:sid/lessons/:lid', authenticateJWT, isTutorOr
 // Delete Lesson Directly under Section
 router.delete('/courses/:id/sections/:sid/lessons/:lid', authenticateJWT, isTutorOrAdmin, async (req, res) => {
   try {
+    const [lesson] = await pool.query('SELECT resource_url, thumbnail_url FROM course_lessons WHERE id = ?', [req.params.lid]);
+    
     await pool.query('DELETE FROM course_lessons WHERE id = ?', [req.params.lid]);
+    
+    if (lesson.length > 0) {
+      if (lesson[0].resource_url) deleteFileSafe(lesson[0].resource_url);
+      if (lesson[0].thumbnail_url) deleteFileSafe(lesson[0].thumbnail_url);
+    }
+    
     res.json({ message: 'Lesson deleted' });
   } catch (error) {
     res.status(500).json({ message: error.message });
