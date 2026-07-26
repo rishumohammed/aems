@@ -216,13 +216,13 @@
               Recommended For You
             </h2>
             <v-row>
-              <v-col v-for="course in recommendedCourses" :key="course.id" cols="12" sm="6" md="3">
+              <v-col v-for="course in recommendedCourses" :key="course.id" cols="12" sm="6" md="6" lg="4">
                 <v-card class="recommended-card rounded-xl border-0 overflow-hidden" elevation="1">
                   <v-img :src="course.thumbnail_url ? ($config.public.apiBase.replace('/api', '') + course.thumbnail_url) : ''" height="120" cover></v-img>
-                  <v-card-text class="pa-3">
-                    <div class="text-caption text-primary font-weight-bold mb-1">{{ course.category_name }}</div>
-                    <div class="text-body-2 font-weight-bold text-truncate mb-2">{{ course.title }}</div>
-                    <v-btn block size="x-small" variant="outlined" color="primary" class="rounded-lg" :to="'/courses/' + course.slug">View Details</v-btn>
+                  <v-card-text class="pa-4">
+                    <div class="text-caption text-primary font-weight-bold mb-1 text-truncate">{{ course.category_name }}</div>
+                    <div class="text-body-2 font-weight-bold text-truncate mb-3">{{ course.title }}</div>
+                    <v-btn block size="small" variant="flat" color="primary" class="rounded-lg text-none" :to="'/courses/' + course.slug">View Details</v-btn>
                   </v-card-text>
                 </v-card>
               </v-col>

@@ -526,7 +526,7 @@ router.put('/profile', async (req, res) => {
     const { 
       name, phone, date_of_birth, gender, address, 
       linkedin_url, github_url, portfolio_url, instagram_url, twitter_url, youtube_url, other_urls,
-      skills, preferred_job_categories
+      skills, preferred_job_categories, current_status, experience_years, education_json, experience_json
     } = req.body;
     
     await connection.beginTransaction();
@@ -541,9 +541,10 @@ router.put('/profile', async (req, res) => {
     await connection.query(`
       INSERT INTO student_profiles (
         user_id, date_of_birth, gender, address, skills,
-        linkedin_url, github_url, portfolio_url, instagram_url, twitter_url, youtube_url, other_urls, preferred_job_categories
+        linkedin_url, github_url, portfolio_url, instagram_url, twitter_url, youtube_url, other_urls, preferred_job_categories,
+        current_status, experience_years, education_json, experience_json
       )
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       ON DUPLICATE KEY UPDATE
         date_of_birth = VALUES(date_of_birth),
         gender = VALUES(gender),
@@ -556,11 +557,16 @@ router.put('/profile', async (req, res) => {
         twitter_url = VALUES(twitter_url),
         youtube_url = VALUES(youtube_url),
         other_urls = VALUES(other_urls),
-        preferred_job_categories = VALUES(preferred_job_categories)
+        preferred_job_categories = VALUES(preferred_job_categories),
+        current_status = VALUES(current_status),
+        experience_years = VALUES(experience_years),
+        education_json = VALUES(education_json),
+        experience_json = VALUES(experience_json)
     `, [
       userId, date_of_birth, gender, address, JSON.stringify(skills || []),
       linkedin_url, github_url, portfolio_url, instagram_url, twitter_url, youtube_url, JSON.stringify(other_urls || []),
-      JSON.stringify(preferred_job_categories || [])
+      JSON.stringify(preferred_job_categories || []),
+      current_status || 'fresher', experience_years || 0, JSON.stringify(education_json || []), JSON.stringify(experience_json || [])
     ]);
     
     await connection.commit();

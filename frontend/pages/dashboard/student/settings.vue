@@ -27,6 +27,24 @@
               @click="activeTab = 'personal'"
             ></v-list-item>
             <v-list-item 
+              prepend-icon="mdi-school-outline" 
+              title="Education" 
+              value="education" 
+              :active="activeTab === 'education'" 
+              color="primary" 
+              rounded="lg"
+              @click="activeTab = 'education'"
+            ></v-list-item>
+            <v-list-item 
+              prepend-icon="mdi-briefcase-outline" 
+              title="Experience" 
+              value="experience" 
+              :active="activeTab === 'experience'" 
+              color="primary" 
+              rounded="lg"
+              @click="activeTab = 'experience'"
+            ></v-list-item>
+            <v-list-item 
               prepend-icon="mdi-shield-lock-outline" 
               title="Security" 
               value="security" 
@@ -237,8 +255,110 @@
           </v-form>
         </v-card>
 
+        <!-- Education Form -->
+        <v-card v-slot:default v-if="activeTab === 'education'" rounded="xl" class="pa-8 border shadow-sm">
+          <div class="text-h6 font-weight-bold mb-6">Education Details</div>
+          
+          <v-form @submit.prevent="saveProfile" :disabled="saving">
+            <div v-for="(edu, index) in form.education_json" :key="index" class="mb-6 pa-4 border rounded-xl bg-grey-lighten-5 position-relative">
+              <v-btn icon="mdi-delete" color="error" variant="text" size="small" class="position-absolute" style="top: 12px; right: 12px" @click="removeEducation(index)"></v-btn>
+              <v-row dense>
+                <v-col cols="12" md="6">
+                  <v-select v-model="edu.level" :items="['Post Graduate', 'Graduate', 'Diploma', '12th', '10th']" label="Qualification Level" variant="outlined" rounded="lg" density="comfortable"></v-select>
+                </v-col>
+                <v-col cols="12" md="6">
+                  <v-text-field v-model="edu.degree" label="Degree/Course Name" variant="outlined" rounded="lg" density="comfortable"></v-text-field>
+                </v-col>
+                <v-col cols="12" md="8">
+                  <v-text-field v-model="edu.institution" label="Institution" variant="outlined" rounded="lg" density="comfortable"></v-text-field>
+                </v-col>
+                <v-col cols="12" md="4">
+                  <v-text-field v-model="edu.year" label="Year of Passing" type="number" variant="outlined" rounded="lg" density="comfortable"></v-text-field>
+                </v-col>
+                <v-col cols="12" md="6">
+                  <v-text-field v-model="edu.specialisation" label="Specialisation" variant="outlined" rounded="lg" density="comfortable"></v-text-field>
+                </v-col>
+                <v-col cols="12" md="6">
+                  <v-text-field v-model="edu.grade" label="Grade/CGPA" variant="outlined" rounded="lg" density="comfortable"></v-text-field>
+                </v-col>
+              </v-row>
+            </div>
+            <v-btn variant="outlined" color="primary" class="rounded-lg mb-6" block @click="addEducation" prepend-icon="mdi-plus">Add Education Entry</v-btn>
+            
+            <v-divider class="my-6"></v-divider>
+
+            <div class="d-flex justify-end">
+              <v-btn
+                type="submit"
+                color="primary"
+                rounded="pill"
+                size="large"
+                class="px-8 font-weight-bold"
+                :loading="saving"
+              >
+                Save Changes
+              </v-btn>
+            </div>
+          </v-form>
+        </v-card>
+
+        <!-- Experience Form -->
+        <v-card v-if="activeTab === 'experience'" rounded="xl" class="pa-8 border shadow-sm">
+          <div class="text-h6 font-weight-bold mb-6">Work Experience & Skills</div>
+          
+          <v-form @submit.prevent="saveProfile" :disabled="saving">
+            <v-row>
+              <v-col cols="12" md="6">
+                <v-select v-model="form.current_status" :items="['employed', 'unemployed', 'freelancer', 'fresher']" label="Current Employment Status" variant="outlined" rounded="lg" density="comfortable"></v-select>
+              </v-col>
+              <v-col cols="12" md="6">
+                <v-text-field v-model="form.experience_years" label="Total Experience (Years)" type="number" variant="outlined" rounded="lg" density="comfortable"></v-text-field>
+              </v-col>
+              <v-col cols="12">
+                <v-combobox v-model="form.skills" label="Key Skills" multiple chips variant="outlined" rounded="lg" density="comfortable" hint="Press enter to add skill" persistent-hint></v-combobox>
+              </v-col>
+            </v-row>
+
+            <v-divider class="my-6"></v-divider>
+
+            <div v-for="(exp, index) in form.experience_json" :key="index" class="mb-6 pa-4 border rounded-xl bg-grey-lighten-5 position-relative">
+              <v-btn icon="mdi-delete" color="error" variant="text" size="small" class="position-absolute" style="top: 12px; right: 12px" @click="removeExperience(index)"></v-btn>
+              <v-row dense>
+                <v-col cols="12" md="6">
+                  <v-text-field v-model="exp.company" label="Company Name" variant="outlined" rounded="lg" density="comfortable"></v-text-field>
+                </v-col>
+                <v-col cols="12" md="6">
+                  <v-text-field v-model="exp.role" label="Role/Designation" variant="outlined" rounded="lg" density="comfortable"></v-text-field>
+                </v-col>
+                <v-col cols="12" md="6">
+                  <v-text-field v-model="exp.from" label="Duration From" variant="outlined" rounded="lg" density="comfortable" placeholder="e.g. Jan 2020"></v-text-field>
+                </v-col>
+                <v-col cols="12" md="6">
+                  <v-text-field v-model="exp.to" label="Duration To" variant="outlined" rounded="lg" density="comfortable" placeholder="e.g. Present"></v-text-field>
+                </v-col>
+              </v-row>
+            </div>
+            <v-btn variant="outlined" color="primary" class="rounded-lg mb-6" block @click="addExperience" prepend-icon="mdi-plus">Add Work Experience</v-btn>
+
+            <v-divider class="my-6"></v-divider>
+
+            <div class="d-flex justify-end">
+              <v-btn
+                type="submit"
+                color="primary"
+                rounded="pill"
+                size="large"
+                class="px-8 font-weight-bold"
+                :loading="saving"
+              >
+                Save Changes
+              </v-btn>
+            </div>
+          </v-form>
+        </v-card>
+
         <!-- Security Form -->
-        <v-card v-else-if="activeTab === 'security'" rounded="xl" class="pa-8 border shadow-sm">
+        <v-card v-slot:default v-if="activeTab === 'security'" rounded="xl" class="pa-8 border shadow-sm">
           <div class="text-h6 font-weight-bold mb-6">Security Settings</div>
           
           <v-form @submit.prevent="savePassword" :disabled="savingPassword">
@@ -433,11 +553,31 @@ const form = ref({
   twitter_url: '',
   youtube_url: '',
   other_urls: [] as string[],
-  skills: [],
-  preferred_job_categories: [] as string[]
+  skills: [] as string[],
+  preferred_job_categories: [] as string[],
+  current_status: 'fresher',
+  experience_years: 0,
+  education_json: [] as any[],
+  experience_json: [] as any[]
 });
 
 const jobCategories = ref<any[]>([]);
+
+const addEducation = () => {
+  form.value.education_json.push({ level: 'Graduate', degree: '', institution: '', year: '', specialisation: '', grade: '' });
+};
+
+const removeEducation = (index: number) => {
+  form.value.education_json.splice(index, 1);
+};
+
+const addExperience = () => {
+  form.value.experience_json.push({ company: '', role: '', from: '', to: '' });
+};
+
+const removeExperience = (index: number) => {
+  form.value.experience_json.splice(index, 1);
+};
 
 const passwordForm = ref({
   currentPassword: '',
@@ -483,8 +623,12 @@ const loadProfile = async () => {
       twitter_url: data.profile?.twitter_url || '',
       youtube_url: data.profile?.youtube_url || '',
       other_urls: data.profile?.other_urls ? (typeof data.profile.other_urls === 'string' ? JSON.parse(data.profile.other_urls) : data.profile.other_urls) : [],
-      skills: data.profile?.skills || [],
-      preferred_job_categories: data.profile?.preferred_job_categories ? (typeof data.profile.preferred_job_categories === 'string' ? JSON.parse(data.profile.preferred_job_categories) : data.profile.preferred_job_categories) : []
+      skills: data.profile?.skills ? (typeof data.profile.skills === 'string' ? JSON.parse(data.profile.skills) : data.profile.skills) : [],
+      preferred_job_categories: data.profile?.preferred_job_categories ? (typeof data.profile.preferred_job_categories === 'string' ? JSON.parse(data.profile.preferred_job_categories) : data.profile.preferred_job_categories) : [],
+      current_status: data.profile?.current_status || 'fresher',
+      experience_years: data.profile?.experience_years || 0,
+      education_json: data.profile?.education_json ? (typeof data.profile.education_json === 'string' ? JSON.parse(data.profile.education_json) : data.profile.education_json) : [],
+      experience_json: data.profile?.experience_json ? (typeof data.profile.experience_json === 'string' ? JSON.parse(data.profile.experience_json) : data.profile.experience_json) : []
     };
 
     // Load Notification Settings if they exist

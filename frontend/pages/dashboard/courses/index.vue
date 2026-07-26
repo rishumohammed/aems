@@ -26,14 +26,7 @@
 
     <!-- Filters Section -->
     <div class="filters-card mb-6 pa-4">
-      <div class="mb-4 overflow-x-auto no-scrollbar pb-1">
-        <SegmentControl
-          v-model="filters.category_id"
-          :options="[{ label: 'All Courses', value: 'all' }, ...categories.map(c => ({ label: c.name, value: c.id }))]"
-        />
-      </div>
-      
-      <div class="d-flex align-center gap-3">
+      <div class="d-flex flex-column flex-md-row gap-3">
         <div class="search-pill d-flex align-center px-3 flex-grow-1">
           <v-icon icon="mdi-magnify" size="18" color="grey-darken-1" class="mr-2"></v-icon>
           <input 
@@ -41,10 +34,17 @@
             type="text" 
             placeholder="Search courses by title or tutor..." 
             class="search-input"
+            style="width: 100%"
           />
         </div>
         
-        <div class="filter-selects d-flex gap-2">
+        <div class="filter-selects d-flex gap-2 flex-wrap">
+          <AppInput
+            v-model="filters.category_id"
+            type="select"
+            :options="[{ label: 'All Courses', value: 'all' }, ...categories.map(c => ({ label: c.name, value: c.id }))]"
+            style="min-width: 180px;"
+          />
           <AppInput
             v-model="filters.status"
             type="select"
