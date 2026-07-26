@@ -142,11 +142,12 @@ class EnrollmentService {
       const amountPaid = payment.amountPaid || 0;
       const balanceDue = amount - amountPaid;
       const paymentStatus = balanceDue <= 0 ? 'paid' : (amountPaid > 0 ? 'partial' : 'pending');
+      const invoicePaymentMode = (payment.mode === 'online' || payment.mode === 'offline') ? payment.mode : 'online';
 
       await connection.query(
         `INSERT INTO invoices (id, student_id, course_id, amount, total_fee, amount_paid, balance_due, balance_amount, payment_mode, payment_status, gateway_order_id) 
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        [invoiceId, studentId, courseId, amount, amount, amountPaid, balanceDue, balanceDue, payment.mode, paymentStatus, payment.gatewayOrderId]
+        [invoiceId, studentId, courseId, amount, amount, amountPaid, balanceDue, balanceDue, invoicePaymentMode, paymentStatus, payment.gatewayOrderId]
       );
 
       // 4. Record Payment Transaction
