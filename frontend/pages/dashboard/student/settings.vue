@@ -117,7 +117,10 @@
               <v-col cols="12" sm="6">
                 <v-select
                   v-model="form.gender"
-                  :items="['male', 'female', 'other', 'prefer_not_to_say']"
+                  :items="[
+                    { title: 'Male', value: 'male' },
+                    { title: 'Female', value: 'female' }
+                  ]"
                   label="Gender"
                   variant="outlined"
                   rounded="lg"

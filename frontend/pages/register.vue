@@ -54,9 +54,7 @@
                         v-model="student.gender"
                         :items="[
                           { title: 'Male', value: 'male' },
-                          { title: 'Female', value: 'female' },
-                          { title: 'Other', value: 'other' },
-                          { title: 'Prefer not to say', value: 'prefer_not_to_say' }
+                          { title: 'Female', value: 'female' }
                         ]"
                         label="Gender"
                         variant="outlined"

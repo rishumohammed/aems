@@ -42,7 +42,7 @@
                   <v-text-field v-model="form.dob" label="Date of Birth" type="date" variant="outlined" color="primary"></v-text-field>
                 </v-col>
                 <v-col cols="12" sm="6">
-                  <v-select v-model="form.gender" :items="['Male', 'Female', 'Other', 'Prefer not to say']" label="Gender" variant="outlined" color="primary"></v-select>
+                  <v-select v-model="form.gender" :items="['Male', 'Female']" label="Gender" variant="outlined" color="primary"></v-select>
                 </v-col>
                 <v-col cols="12" sm="6">
                   <v-text-field v-model="form.email" label="Email" type="email" variant="outlined" color="primary"></v-text-field>

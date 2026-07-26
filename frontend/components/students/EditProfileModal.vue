@@ -30,7 +30,10 @@
               <v-text-field v-model="form.date_of_birth" label="Date of Birth" type="date" variant="outlined" persistent-placeholder></v-text-field>
             </v-col>
             <v-col cols="12" md="6">
-              <v-select v-model="form.gender" :items="['male', 'female', 'other', 'prefer_not_to_say']" label="Gender" variant="outlined"></v-select>
+              <v-select v-model="form.gender" :items="[
+                { title: 'Male', value: 'male' },
+                { title: 'Female', value: 'female' }
+              ]" label="Gender" variant="outlined"></v-select>
             </v-col>
             <v-col cols="12" md="6">
               <v-text-field v-model="form.linkedin_url" label="LinkedIn Profile URL" variant="outlined"></v-text-field>
