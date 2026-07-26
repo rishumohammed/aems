@@ -47,10 +47,30 @@
                       <v-text-field v-model="student.confirmPassword" label="Confirm Password" :type="showConfirmPassword ? 'text' : 'password'" variant="outlined" rounded="lg" prepend-inner-icon="mdi-lock-check-outline" :append-inner-icon="showConfirmPassword ? 'mdi-eye-off' : 'mdi-eye'" @click:append-inner="showConfirmPassword = !showConfirmPassword" :rules="[v => v === student.password || 'Passwords do not match']" autocomplete="new-password"></v-text-field>
                     </v-col>
                     <v-col cols="12">
-                      <v-select v-model="student.education_level" :items="['High School', 'Bachelor\'s', 'Master\'s', 'PhD', 'Self-Taught']" label="Education Level" variant="outlined" rounded="lg"></v-select>
+                      <v-select v-model="student.education_level" :items="educationLevels" label="Education Level" variant="outlined" rounded="lg"></v-select>
                     </v-col>
-                    <v-col cols="12">
-                      <v-combobox v-model="student.skills" :items="predefinedSkills" label="Interests / Skills" multiple chips closable-chips variant="outlined" rounded="lg" hint="Select from list or type and press enter to add custom"></v-combobox>
+                    <v-col cols="12" md="6">
+                      <v-select
+                        v-model="student.gender"
+                        :items="[
+                          { title: 'Male', value: 'male' },
+                          { title: 'Female', value: 'female' },
+                          { title: 'Other', value: 'other' },
+                          { title: 'Prefer not to say', value: 'prefer_not_to_say' }
+                        ]"
+                        label="Gender"
+                        variant="outlined"
+                        rounded="lg"
+                      ></v-select>
+                    </v-col>
+                    <v-col cols="12" md="6">
+                      <v-text-field
+                        v-model="student.date_of_birth"
+                        label="Date of Birth"
+                        type="date"
+                        variant="outlined"
+                        rounded="lg"
+                      ></v-text-field>
                     </v-col>
                   </v-row>
 
@@ -212,9 +232,12 @@ const student = reactive({
   phone: '',
   password: '',
   confirmPassword: '',
-  education_level: 'Bachelor\'s',
-  skills: []
+  education_level: '',
+  gender: '',
+  date_of_birth: ''
 });
+
+const educationLevels = ref<string[]>([]);
 
 const tutor = reactive({
   name: '',
@@ -302,6 +325,26 @@ const handleEmployerRegister = async () => {
     loading.value = false;
   }
 };
+
+onMounted(async () => {
+  try {
+    const config = useRuntimeConfig();
+    const data: any = await $fetch(`${config.public.apiBase}/public/config`);
+    if (data && data.education_levels) {
+      educationLevels.value = data.education_levels.split(',').map((s: string) => s.trim()).filter(Boolean);
+      if (educationLevels.value.length > 0) {
+        student.education_level = educationLevels.value[0];
+      }
+    } else {
+      educationLevels.value = ['High School', 'Bachelor\'s', 'Master\'s', 'PhD', 'Self-Taught'];
+      student.education_level = 'Bachelor\'s';
+    }
+  } catch (err) {
+    console.error('Failed to load education levels:', err);
+    educationLevels.value = ['High School', 'Bachelor\'s', 'Master\'s', 'PhD', 'Self-Taught'];
+    student.education_level = 'Bachelor\'s';
+  }
+});
 </script>
 
 <style scoped>

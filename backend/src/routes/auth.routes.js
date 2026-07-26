@@ -38,7 +38,7 @@ const hashToken = (token) => crypto.createHash('sha256').update(token).digest('h
 // --- Registration ---
 
 router.post('/register/student', async (req, res) => {
-  const { name, email, password, phone, education_level, skills } = req.body;
+  const { name, email, password, phone, education_level, gender, date_of_birth } = req.body;
   const connection = await pool.getConnection();
 
   try {
@@ -56,8 +56,8 @@ router.post('/register/student', async (req, res) => {
     // 2. Create Profiles
     await connection.query('INSERT INTO user_profiles (user_id) VALUES (?)', [id]);
     await connection.query(
-      'INSERT INTO student_profiles (user_id, education_level, skills) VALUES (?, ?, ?)',
-      [id, education_level, JSON.stringify(skills || [])]
+      'INSERT INTO student_profiles (user_id, education_level, gender, date_of_birth) VALUES (?, ?, ?, ?)',
+      [id, education_level, gender || null, date_of_birth || null]
     );
 
     // 3. Log Action

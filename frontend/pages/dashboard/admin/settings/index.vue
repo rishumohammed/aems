@@ -119,11 +119,11 @@
           </div>
 
           <!-- LMS Tab -->
-          <div v-if="activeTab[0] === 'lms'" class="fade-in">
+          <div v-slot:default v-if="activeTab[0] === 'lms'" class="fade-in">
             <h2 class="text-h6 font-weight-bold mb-6">LMS Configuration</h2>
-            <div class="mb-2">
+            <div class="mb-4">
               <v-combobox
-                v-model="form.course_languages"
+                v-slot:default v-model="form.course_languages"
                 label="Course Languages"
                 chips
                 multiple
@@ -132,8 +132,25 @@
                 hint="Type a language and press Enter to add it."
                 persistent-hint
               ></v-combobox>
+              <div class="text-caption text-secondary mt-1">These languages will appear in the language dropdown when creating or editing a course.</div>
             </div>
-            <div class="text-caption text-secondary mb-6">These languages will appear in the language dropdown when creating or editing a course.</div>
+
+            <v-divider class="my-6"></v-divider>
+
+            <h3 class="text-subtitle-1 font-weight-bold mb-4">Student Profile Options</h3>
+            <div class="mb-2">
+              <v-combobox
+                v-model="form.education_levels"
+                label="Education Levels"
+                chips
+                multiple
+                clearable
+                variant="outlined"
+                hint="Type an education level and press Enter to add it."
+                persistent-hint
+              ></v-combobox>
+              <div class="text-caption text-secondary mt-1">These options will appear in the Education Level dropdown on the student registration and settings forms.</div>
+            </div>
           </div>
 
           <!-- Email Tab -->
@@ -512,6 +529,11 @@ const fetchData = async () => {
     } else {
       configMap.course_languages = [];
     }
+    if (configMap.education_levels && typeof configMap.education_levels === 'string') {
+      configMap.education_levels = configMap.education_levels.split(',').map((s: string) => s.trim()).filter(Boolean);
+    } else {
+      configMap.education_levels = [];
+    }
     form.value = configMap;
   } catch (err) {
     console.error('Failed to fetch config');
@@ -592,6 +614,9 @@ const save = async () => {
     const payload = { ...form.value };
     if (Array.isArray(payload.course_languages)) {
       payload.course_languages = payload.course_languages.join(',');
+    }
+    if (Array.isArray(payload.education_levels)) {
+      payload.education_levels = payload.education_levels.join(',');
     }
     await api.put('/admin/config', payload);
     snackbarMessage.value = 'Settings saved successfully. Reloading to apply changes...';
