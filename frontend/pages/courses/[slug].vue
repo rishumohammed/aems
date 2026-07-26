@@ -329,7 +329,22 @@
 
           <!-- Offline Payment Tab -->
           <v-window-item value="offline">
-            <v-card-text class="pa-6">
+            <v-card-text class="pa-6" v-if="offlineSubmitSuccess">
+              <div class="text-center py-8">
+                <v-icon color="success" size="64" class="mb-4">mdi-checkbox-marked-circle-outline</v-icon>
+                <h3 class="text-h5 font-weight-black mb-2">Thank You!</h3>
+                <p class="text-body-2 text-grey-darken-1 mb-6">
+                  Your payment details and proof have been successfully submitted. Our team will verify the payment and activate your course within 24 hours.
+                </p>
+                <v-btn
+                  color="success" size="large" rounded="lg" class="px-8 font-weight-bold text-none"
+                  @click="showPaymentOptions = false; offlineSubmitSuccess = false"
+                >
+                  Close
+                </v-btn>
+              </div>
+            </v-card-text>
+            <v-card-text class="pa-6" v-else>
               
               <div class="mb-4">
                 <div class="text-subtitle-1 font-weight-bold">{{ course.title }}</div>
@@ -407,14 +422,10 @@
                   </v-col>
                 </v-row>
               </v-form>
-
-              <v-alert v-if="offlineSubmitSuccess" type="success" variant="tonal" rounded="lg" class="mt-4">
-                <strong>Payment Submitted!</strong> Our team will verify and activate your enrollment within 24 hours.
-              </v-alert>
             </v-card-text>
-            <v-card-actions class="px-6 pb-6">
+            <v-card-actions class="px-6 pb-6" v-if="!offlineSubmitSuccess">
               <v-btn
-                block color="success" size="large" rounded="lg" class="font-weight-bold"
+                block color="success" size="large" rounded="lg" class="font-weight-bold text-none"
                 :loading="offlineSubmitting"
                 @click="submitOfflinePayment"
               >
@@ -521,6 +532,19 @@ const isAmountValid = computed(() => {
 });
 const api = useApi();
 const router = useRouter();
+
+// Reset offline payment state when dialog changes state
+watch(showPaymentOptions, (isOpen) => {
+  if (isOpen) {
+    offlineSubmitSuccess.value = false;
+    offlineForm.paymentMode = '';
+    offlineForm.amountPaid = null;
+    offlineForm.referenceNumber = '';
+    offlineForm.paymentDate = new Date().toISOString().split('T')[0];
+    offlineForm.proof = null;
+    offlineForm.remarks = '';
+  }
+});
 
 const layoutName = computed(() => authStore.isAuthenticated ? 'dashboard' : 'public');
 
