@@ -46,6 +46,7 @@ import expenseRoutes from './routes/expenses.routes.js';
 import { authenticateJWT, authorizeRoles } from './middleware/auth.js';
 import { initFollowupJob } from './jobs/followup-reminder.job.js';
 import { initLiveSessionJob } from './jobs/live-session-reminders.job.js';
+import { initDatabaseBackupJob } from './jobs/database-backup.job.js';
 import { initSocket } from './socket/index.js';
 import adminRoutes from './routes/admin.routes.js';
 import interviewsRoutes from './routes/interviews.routes.js';
@@ -59,6 +60,7 @@ const __dirname = path.dirname(__filename);
 
 initFollowupJob();
 initLiveSessionJob();
+initDatabaseBackupJob();
 
 const app = express();
 app.set('trust proxy', 1);
