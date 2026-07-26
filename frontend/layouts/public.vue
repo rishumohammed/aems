@@ -101,12 +101,10 @@
           <v-col cols="6" md="2">
             <h4 class="text-subtitle-1 font-weight-bold mb-4 tracking-tight">Learn</h4>
             <v-list density="compact" class="bg-transparent pa-0 footer-list">
-              <v-list-item to="/courses" class="footer-link">Browse Courses</v-list-item>
               <v-list-item to="/live-courses" class="footer-link">Live Courses</v-list-item>
               <v-list-item v-for="cat in footerCategories" :key="cat.id" :to="`/courses?category=${cat.slug}`" class="footer-link">
                 {{ cat.name }}
               </v-list-item>
-              <v-list-item to="/resources" class="footer-link">Tutor Resources</v-list-item>
             </v-list>
           </v-col>
           
