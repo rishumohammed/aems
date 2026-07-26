@@ -237,7 +237,7 @@ const student = reactive({
   date_of_birth: ''
 });
 
-const educationLevels = ref<string[]>([]);
+const educationLevels = ref([]);
 
 const tutor = reactive({
   name: '',
@@ -329,9 +329,9 @@ const handleEmployerRegister = async () => {
 onMounted(async () => {
   try {
     const config = useRuntimeConfig();
-    const data: any = await $fetch(`${config.public.apiBase}/public/config`);
+    const data = await $fetch(`${config.public.apiBase}/public/config`);
     if (data && data.education_levels) {
-      educationLevels.value = data.education_levels.split(',').map((s: string) => s.trim()).filter(Boolean);
+      educationLevels.value = data.education_levels.split(',').map((s) => s.trim()).filter(Boolean);
       if (educationLevels.value.length > 0) {
         student.education_level = educationLevels.value[0];
       }

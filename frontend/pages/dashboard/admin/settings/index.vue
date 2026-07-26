@@ -119,11 +119,11 @@
           </div>
 
           <!-- LMS Tab -->
-          <div v-slot:default v-if="activeTab[0] === 'lms'" class="fade-in">
+          <div v-if="activeTab[0] === 'lms'" class="fade-in">
             <h2 class="text-h6 font-weight-bold mb-6">LMS Configuration</h2>
             <div class="mb-4">
               <v-combobox
-                v-slot:default v-model="form.course_languages"
+                v-model="form.course_languages"
                 label="Course Languages"
                 chips
                 multiple
