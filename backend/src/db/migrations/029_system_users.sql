@@ -13,7 +13,8 @@ MODIFY COLUMN role ENUM(
     'placement_coordinator',
     'finance_staff',
     'exam_manager',
-    'support_staff'
+    'support_staff',
+    'lms_user'
 ) NOT NULL;
 
 -- Add permissions_json column to store fine-grained RBAC rules
