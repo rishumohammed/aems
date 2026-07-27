@@ -223,7 +223,7 @@ class EnrollmentService {
           }
 
           // Notify Tutor
-          const [tutorRows] = await pool.query('SELECT created_by as tutor_id FROM courses WHERE id = ?', [courseId]);
+          const [tutorRows] = await pool.query('SELECT tutor_id FROM courses WHERE id = ?', [courseId]);
           if (tutorRows.length > 0 && tutorRows[0].tutor_id) {
             await createNotification({
               userId: tutorRows[0].tutor_id,

@@ -1,20 +1,10 @@
 import { pool } from '../db/connection.js';
 import { v4 as uuidv4 } from 'uuid';
 import { getIO } from '../socket/index.js';
-import nodemailer from 'nodemailer';
+import emailService from './email.service.js';
 import dotenv from 'dotenv';
 
 dotenv.config({ path: '../../.env' });
-
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
-  port: process.env.SMTP_PORT,
-  secure: process.env.SMTP_PORT == 465,
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS
-  }
-});
 
 export const createNotification = async ({ userId, type, title, message, body, link, emailNotify = false }) => {
   const finalMessage = message || body;
@@ -41,15 +31,13 @@ export const createNotification = async ({ userId, type, title, message, body, l
     if (emailNotify) {
       const [[user]] = await pool.query('SELECT email FROM users WHERE id = ?', [userId]);
       if (user) {
-        await transporter.sendMail({
-          from: `"AEMS Academy" <${process.env.SMTP_USER}>`,
+        await emailService.sendEmail({
           to: user.email,
           subject: title,
-          text: finalMessage,
           html: `<div style="font-family: sans-serif;">
             <h2>${title}</h2>
             <p>${finalMessage}</p>
-            ${link ? `<a href="${process.env.FRONTEND_URL}${link}" style="display: inline-block; padding: 10px 20px; background: #007AFF; color: white; text-decoration: none; border-radius: 5px;">View Details</a>` : ''}
+            ${link ? `<a href="${process.env.FRONTEND_URL || 'http://localhost:3000'}${link}" style="display: inline-block; padding: 10px 20px; background: #007AFF; color: white; text-decoration: none; border-radius: 5px;">View Details</a>` : ''}
           </div>`
         });
       }
