@@ -171,9 +171,25 @@
                   {{ course.price_type === 'custom' ? 'Custom Quote' : '₹' + course.price }}
                 </div>
                 
-                <v-btn block color="primary" size="x-large" rounded="lg" class="text-capitalize font-weight-bold mb-4" elevation="0" @click="handleEnroll">
-                  <template v-if="isEnrolled">Go to Course</template>
-                  <template v-else>{{ course.price_type === 'custom' ? 'Get a Quote' : 'Enroll Now' }}</template>
+                <v-btn 
+                  block 
+                  color="primary" 
+                  size="x-large" 
+                  rounded="lg" 
+                  class="text-capitalize font-weight-bold mb-4" 
+                  elevation="0" 
+                  @click="handleEnroll"
+                  :disabled="['suspended_offline', 'suspended_gateway'].includes(enrollmentStatus)"
+                >
+                  <template v-if="['suspended_offline', 'suspended_gateway'].includes(enrollmentStatus)">
+                    Waiting for Approval
+                  </template>
+                  <template v-else-if="isEnrolled">
+                    Already Enrolled
+                  </template>
+                  <template v-else>
+                    {{ course.price_type === 'custom' ? 'Get a Quote' : 'Enroll Now' }}
+                  </template>
                 </v-btn>
                 
                 <p class="text-center text-caption text-grey mb-6">30-Day Money-Back Guarantee</p>
@@ -472,6 +488,7 @@ const showInquiry = ref(false);
 const paymentOrder = ref(null);
 const paymentModalRef = ref<any>(null);
 const isEnrolled = ref(false);
+const enrollmentStatus = ref<string | null>(null);
 
 const showPaymentOptions = ref(false);
 const selectedOption = ref('full');
@@ -600,6 +617,7 @@ onMounted(async () => {
     try {
       const { data } = await api.get(`/enrollments/check/${course.value.id}`);
       isEnrolled.value = data.isEnrolled;
+      enrollmentStatus.value = data.status;
     } catch (e) {
       console.error('Failed to check enrollment', e);
     }
@@ -679,6 +697,7 @@ const submitOfflinePayment = async () => {
     });
 
     offlineSubmitSuccess.value = true;
+    enrollmentStatus.value = 'suspended_offline';
   } catch (error: any) {
     alert(error.message || 'Failed to submit offline payment');
   } finally {

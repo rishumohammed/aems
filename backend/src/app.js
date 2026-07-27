@@ -1,6 +1,7 @@
 import dotenv from 'dotenv';
 dotenv.config({ path: '../.env' });
 
+import 'express-async-errors';
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
@@ -44,6 +45,7 @@ import adminFinanceRoutes from './routes/admin.finance.routes.js';
 import offlinePaymentRoutes from './routes/offline-payment.routes.js';
 import expenseRoutes from './routes/expenses.routes.js';
 import { authenticateJWT, authorizeRoles } from './middleware/auth.js';
+import { errorHandler } from './middleware/error.middleware.js';
 import { initFollowupJob } from './jobs/followup-reminder.job.js';
 import { initLiveSessionJob } from './jobs/live-session-reminders.job.js';
 import { initDatabaseBackupJob } from './jobs/database-backup.job.js';
@@ -163,6 +165,20 @@ app.use('/api/notice-board', noticeBoardRoutes);
 
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'OK', timestamp: new Date().toISOString() });
+});
+
+// Global Error Handler
+app.use(errorHandler);
+
+// Process-level Error Handlers to prevent silent crashes
+process.on('uncaughtException', (err) => {
+  console.error('UNCAUGHT EXCEPTION! 💥');
+  console.error(err);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('UNHANDLED REJECTION! 💥 at:', promise);
+  console.error('Reason:', reason);
 });
 
 const PORT = process.env.PORT || 5000;

@@ -133,10 +133,17 @@ router.post('/verify-payment', authenticateJWT, async (req, res) => {
 router.get('/check/:courseId', authenticateJWT, async (req, res) => {
   try {
     const [existing] = await pool.query(
-      'SELECT id FROM enrollments WHERE student_id = ? AND course_id = ? AND status IN ("active", "completed")',
+      'SELECT id, status FROM enrollments WHERE student_id = ? AND course_id = ? ORDER BY created_at DESC LIMIT 1',
       [req.user.id, req.params.courseId]
     );
-    res.json({ isEnrolled: existing.length > 0 });
+    if (existing.length === 0) {
+      return res.json({ isEnrolled: false, status: null });
+    }
+    const enroll = existing[0];
+    res.json({ 
+      isEnrolled: ['active', 'completed'].includes(enroll.status),
+      status: enroll.status 
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
