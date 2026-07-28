@@ -25,12 +25,6 @@
         <!-- Applicant Name & Avatar -->
         <template v-slot:item.applicant_name="{ item }">
           <div class="d-flex align-center py-2">
-            <v-avatar
-              size="40"
-              :image="item.avatar_url || '/placeholder-avatar.png'"
-              color="#3a3a3a"
-              class="mr-3"
-            ></v-avatar>
             <div>
               <div class="applicant-name">
                 {{ item.applicant_name }}
@@ -60,22 +54,19 @@
 
         <!-- Status -->
         <template v-slot:item.status="{ item }">
-          <v-select
-            v-model="item.status"
-            :items="['applied', 'viewed', 'shortlisted', 'rejected']"
-            density="compact"
-            variant="outlined"
-            hide-details
-            class="status-select"
-            :color="getStatusColor(item.status)"
-            @update:modelValue="updateStatus(item.id, $event)"
-          >
-            <template v-slot:selection="{ item }">
-              <span class="text-uppercase font-weight-bold" :class="`text-${getStatusColor(item.value)}`">
-                {{ item.title }}
-              </span>
-            </template>
-          </v-select>
+          <div class="status-select">
+            <AppInput
+              v-model="item.status"
+              type="select"
+              :options="[
+                { label: 'Applied', value: 'applied' },
+                { label: 'Viewed', value: 'viewed' },
+                { label: 'Shortlisted', value: 'shortlisted' },
+                { label: 'Rejected', value: 'rejected' }
+              ]"
+              @update:modelValue="updateStatus(item.id, $event)"
+            />
+          </div>
         </template>
 
         <!-- Actions -->
@@ -249,10 +240,5 @@ function exportCSV() {
 
 .status-select {
   min-width: 140px;
-}
-:deep(.status-select .v-field__input) {
-  padding-top: 4px !important;
-  padding-bottom: 4px !important;
-  min-height: 32px !important;
 }
 </style>
