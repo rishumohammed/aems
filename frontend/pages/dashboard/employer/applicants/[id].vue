@@ -191,7 +191,7 @@
                               <v-chip size="x-small" :color="intv.status === 'completed' ? 'success' : 'info'">{{ intv.status }}</v-chip>
                             </div>
                             <div class="text-body-2 mb-1"><v-icon size="small" class="mr-1">mdi-clock-outline</v-icon> Duration: {{ intv.duration }} mins</div>
-                            <div v-if="intv.meeting_link" class="text-body-2 mb-1"><v-icon size="small" class="mr-1">mdi-link</v-icon> <a :href="intv.meeting_link" target="_blank">Meeting Link</a></div>
+                            <div v-if="intv.meeting_link" class="text-body-2 mb-1"><v-icon size="small" class="mr-1">mdi-link</v-icon> <a :href="intv.meeting_link?.startsWith('http') ? intv.meeting_link : 'https://' + intv.meeting_link" target="_blank">Meeting Link</a></div>
                             <div v-if="intv.location" class="text-body-2 mb-1"><v-icon size="small" class="mr-1">mdi-map-marker</v-icon> {{ intv.location }}</div>
                             <div v-if="intv.notes" class="text-caption text-grey mt-2 border-t pt-2">Notes: {{ intv.notes }}</div>
                           </v-card-text>

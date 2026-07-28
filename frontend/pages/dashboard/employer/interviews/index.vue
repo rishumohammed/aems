@@ -30,7 +30,7 @@
         
         <template v-slot:item.details="{ item }">
           <div v-if="item.meeting_link">
-            <v-btn size="small" color="primary" variant="tonal" :href="item.meeting_link" target="_blank" prepend-icon="mdi-video">Join Meeting</v-btn>
+            <v-btn size="small" color="primary" variant="tonal" :href="item.meeting_link?.startsWith('http') ? item.meeting_link : 'https://' + item.meeting_link" target="_blank" prepend-icon="mdi-video">Join Meeting</v-btn>
           </div>
           <div v-else-if="item.location" class="text-caption">
             <v-icon size="small" class="mr-1">mdi-map-marker</v-icon> {{ item.location }}

@@ -83,7 +83,7 @@
             <div class="bg-grey-lighten-4 pa-4 rounded-lg mb-6">
               <div v-if="interview.type === 'Online' || interview.meeting_link">
                 <div class="font-weight-medium mb-2">Meeting Link:</div>
-                <a v-if="interview.meeting_link" :href="interview.meeting_link" target="_blank" class="text-indigo font-weight-bold text-decoration-none d-flex align-center">
+                <a v-if="interview.meeting_link" :href="interview.meeting_link?.startsWith('http') ? interview.meeting_link : 'https://' + interview.meeting_link" target="_blank" class="text-indigo font-weight-bold text-decoration-none d-flex align-center">
                   <v-icon size="20" class="mr-2">mdi-link-variant</v-icon>
                   {{ interview.meeting_link }}
                 </a>
@@ -131,7 +131,7 @@
               rounded="lg" 
               block
               class="font-weight-black mb-4"
-              :href="interview.meeting_link"
+              :href="interview.meeting_link?.startsWith('http') ? interview.meeting_link : 'https://' + interview.meeting_link"
               target="_blank"
             >
               Attend Interview

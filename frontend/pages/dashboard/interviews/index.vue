@@ -69,7 +69,7 @@
                   variant="flat" 
                   rounded="lg" 
                   class="font-weight-black flex-1-1"
-                  :href="i.meeting_link"
+                  :href="i.meeting_link?.startsWith('http') ? i.meeting_link : 'https://' + i.meeting_link"
                   target="_blank"
                 >
                   Attend Interview
