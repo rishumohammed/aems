@@ -2,8 +2,8 @@
   <v-container fluid class="pa-6">
     <div class="d-flex align-center justify-space-between mb-8">
       <div>
-        <h1 class="text-h4 font-weight-bold mb-1">Job Approvals</h1>
-        <p class="text-subtitle-1 text-medium-emphasis mb-6">Review employer submissions and manage live jobs.</p>
+        <h1 class="text-h4 font-weight-bold mb-1">Manage Jobs</h1>
+        <p class="text-subtitle-1 text-medium-emphasis mb-6">Manage all live jobs and review employer submissions.</p>
       </div>
       <div class="d-flex align-center gap-3">
         <TabsPill
@@ -19,12 +19,29 @@
       </div>
     </div>
 
-    <!-- Category Filter -->
-    <div class="mb-6 overflow-x-auto no-scrollbar d-flex gap-2">
-      <SegmentControl
+    <!-- Filters -->
+    <div class="mb-6 d-flex flex-wrap align-center gap-4">
+      <v-text-field
+        v-model="searchQuery"
+        placeholder="Search jobs by title or company..."
+        prepend-inner-icon="mdi-magnify"
+        variant="outlined"
+        density="comfortable"
+        hide-details
+        style="min-width: 250px; flex-grow: 1;"
+      ></v-text-field>
+
+      <v-select
         v-model="activeCategory"
-        :options="[{ label: 'All Categories', value: 'all', icon: 'mdi-apps' }, ...categories.map(c => ({ label: c.name, value: c.id }))]"
-      />
+        :items="[{ title: 'All Categories', value: 'all' }, ...categories.map(c => ({ title: c.name, value: c.id }))]"
+        item-title="title"
+        item-value="value"
+        label="Category"
+        variant="outlined"
+        density="comfortable"
+        hide-details
+        style="min-width: 250px;"
+      ></v-select>
     </div>
 
     <div class="apple-table-card">
@@ -111,6 +128,7 @@ definePageMeta({ layout: 'dashboard', middleware: ['auth', 'role'], role: ['supe
 const api = useApi();
 const activeTab = ref('all');
 const activeCategory = ref('all');
+const searchQuery = ref('');
 const categories = ref<any[]>([]);
 const jobs = ref<any[]>([]);
 const loading = ref(false);
@@ -131,9 +149,19 @@ const headers: any[] = [
 
 const filteredJobs = computed(() => {
   let filtered = jobs.value;
+  
   if (activeCategory.value !== 'all') {
     filtered = filtered.filter(j => j.category === activeCategory.value);
   }
+  
+  if (searchQuery.value.trim()) {
+    const q = searchQuery.value.trim().toLowerCase();
+    filtered = filtered.filter(j => 
+      j.title?.toLowerCase().includes(q) || 
+      j.company?.toLowerCase().includes(q)
+    );
+  }
+  
   return filtered;
 });
 
