@@ -86,20 +86,11 @@
         </template>
 
         <template v-slot:item.actions="{ item }">
-          <div class="d-flex gap-2">
-            <!-- View Full Profile -->
-            <v-btn variant="tonal" color="primary" size="small" prepend-icon="mdi-eye" @click="viewApplicant(item)">View Profile</v-btn>
-            
-            <v-menu location="bottom end">
-              <template v-slot:activator="{ props }">
-                <v-btn icon="mdi-chevron-down" variant="text" size="small" v-bind="props" color="grey-lighten-1"></v-btn>
-              </template>
-              <v-list bg-color="white" class="text-grey-darken-4 border border-opacity-10" rounded="lg">
-                <v-list-item v-if="item.status !== 'shortlisted'" prepend-icon="mdi-star" title="Shortlist" @click="updateStatus(item.id, 'shortlisted')" color="success"></v-list-item>
-                <v-list-item v-if="!item.interview_count" prepend-icon="mdi-calendar-clock" title="Schedule Interview" @click="openInterviewDialog(item)" color="info"></v-list-item>
-                <v-list-item v-if="item.status !== 'rejected'" prepend-icon="mdi-close-circle" title="Reject" @click="updateStatus(item.id, 'rejected')" color="error"></v-list-item>
-              </v-list>
-            </v-menu>
+          <div class="d-flex justify-end gap-1">
+            <v-btn icon="mdi-eye-outline" variant="text" size="small" color="primary" @click="viewApplicant(item)" title="View Profile"></v-btn>
+            <v-btn v-if="item.status !== 'shortlisted'" icon="mdi-star-outline" variant="text" size="small" color="success" @click="updateStatus(item.id, 'shortlisted')" title="Shortlist"></v-btn>
+            <v-btn v-if="!item.interview_count" icon="mdi-calendar-clock" variant="text" size="small" color="info" @click="openInterviewDialog(item)" title="Schedule Interview"></v-btn>
+            <v-btn v-if="item.status !== 'rejected'" icon="mdi-close-circle-outline" variant="text" size="small" color="error" @click="updateStatus(item.id, 'rejected')" title="Reject"></v-btn>
           </div>
         </template>
         
