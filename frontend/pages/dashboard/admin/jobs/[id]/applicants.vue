@@ -1,61 +1,61 @@
 <template>
   <v-container fluid class="pa-6">
     <div class="d-flex align-center gap-4 mb-6">
-      <v-btn icon="mdi-arrow-left" variant="tonal" class="rounded-lg bg-grey-lighten-4 text-grey-darken-3" to="/dashboard/admin/jobs"></v-btn>
+      <AppButton variant="g" icon="mdi-arrow-left" to="/dashboard/admin/jobs"></AppButton>
       <div>
-        <h1 class="text-h4 font-weight-black mb-1 text-grey-darken-4">Applicants: {{ job?.title }}</h1>
-        <p class="text-grey-darken-1 font-weight-medium">
+        <h1 class="text-h4 font-weight-bold mb-1" style="color: var(--g7);">Applicants: {{ job?.title }}</h1>
+        <p style="color: var(--g4); font-size: 13px; font-weight: 500;">
           <v-icon size="small" class="mr-1">mdi-domain</v-icon> {{ job?.company }} <span class="mx-2">|</span> 
           <v-icon size="small" class="mr-1">mdi-map-marker</v-icon> {{ job?.location }}
         </p>
       </div>
       <v-spacer></v-spacer>
-      <v-btn color="primary" variant="tonal" class="rounded-lg bg-blue-lighten-5 font-weight-bold px-6" prepend-icon="mdi-download" @click="exportCSV">
+      <AppButton variant="blue" icon="mdi-download" @click="exportCSV">
         Export CSV
-      </v-btn>
+      </AppButton>
     </div>
 
-    <v-card rounded="xl" border class="shadow-card overflow-hidden">
+    <div class="apple-table-card">
       <v-data-table
         :headers="headers"
         :items="applicants"
         :loading="loading"
-        class="bg-transparent text-grey-darken-3 custom-table"
+        class="apple-data-table"
       >
         <!-- Applicant Name & Avatar -->
-      <template v-slot:item.applicant_name="{ item }">
-  <div class="d-flex align-center gap-3">
-    <v-avatar
-      size="40"
-      :image="item.avatar_url || '/placeholder-avatar.png'"
-      color="grey-darken-3"
-    ></v-avatar>
-
-    <div>
-      <div class="font-weight-bold text-grey-darken-4">
-        {{ item.applicant_name }}
-      </div>
-      <div class="text-caption text-grey">
-        {{ item.applicant_email }}
-      </div>
-    </div>
-  </div>
-</template>
+        <template v-slot:item.applicant_name="{ item }">
+          <div class="d-flex align-center py-2">
+            <v-avatar
+              size="40"
+              :image="item.avatar_url || '/placeholder-avatar.png'"
+              color="#3a3a3a"
+              class="mr-3"
+            ></v-avatar>
+            <div>
+              <div class="applicant-name">
+                {{ item.applicant_name }}
+              </div>
+              <div class="applicant-email">
+                {{ item.applicant_email }}
+              </div>
+            </div>
+          </div>
+        </template>
 
         <!-- AEMS Progress (Courses & Certs) -->
         <template v-slot:item.aems_progress="{ item }">
-          <div class="d-flex flex-column gap-1">
-            <v-chip size="x-small" color="grey-darken-3" variant="tonal" class="font-weight-bold bg-grey-lighten-3">{{ item.courses_completed || 0 }} Courses</v-chip>
-            <v-chip size="x-small" :color="(item.certs_active || 0) > 0 ? 'success' : 'grey-darken-3'" variant="tonal" class="font-weight-bold bg-grey-lighten-4">
+          <div class="d-flex flex-column gap-1 align-start">
+            <Badge color="gray">{{ item.courses_completed || 0 }} Courses</Badge>
+            <Badge :color="(item.certs_active || 0) > 0 ? 'green' : 'gray'">
               {{ item.certs_active || 0 }} Certs
-            </v-chip>
+            </Badge>
           </div>
         </template>
 
         <!-- Experience & Edu -->
         <template v-slot:item.experience="{ item }">
-          <div class="font-weight-medium text-grey-darken-3">{{ item.last_role || 'Fresher' }}</div>
-          <div class="text-caption text-grey">{{ item.experience_years }} Years • {{ item.qualification }}</div>
+          <div class="role-text">{{ item.last_role || 'Fresher' }}</div>
+          <div class="exp-text">{{ item.experience_years }} Years • {{ item.qualification }}</div>
         </template>
 
         <!-- Status -->
@@ -81,45 +81,47 @@
         <!-- Actions -->
         <template v-slot:item.actions="{ item }">
           <div class="d-flex gap-2 justify-end">
-            <v-btn icon="mdi-file-document-outline" size="small" variant="text" color="primary" @click="viewApplication(item)" title="View Cover Note & Details"></v-btn>
-            <v-btn icon="mdi-account-details-outline" size="small" variant="text" color="info" :to="`/dashboard/admin/students/${item.student_id}`" title="Full AEMS Profile"></v-btn>
+            <AppButton size="xs" variant="g" icon="mdi-file-document-outline" @click="viewApplication(item)" title="View Cover Note & Details"></AppButton>
+            <AppButton size="xs" variant="g" icon="mdi-account-details-outline" :to="`/dashboard/admin/students/${item.student_id}`" title="Full AEMS Profile"></AppButton>
           </div>
         </template>
       </v-data-table>
-    </v-card>
+    </div>
 
     <!-- Application Details Modal -->
-    <v-dialog v-model="detailsDialog" max-width="600">
-      <v-card rounded="xl" class="pa-6 border bg-grey-lighten-4" v-if="selectedApp">
-        <div class="d-flex align-center justify-space-between mb-4 border-b pb-4">
-          <h2 class="text-h5 font-weight-bold text-grey-darken-4">Application Details</h2>
-          <v-btn icon="mdi-close" variant="tonal" color="grey-darken-1" size="small" class="rounded-lg bg-grey-lighten-3" @click="detailsDialog = false"></v-btn>
-        </div>
-        
+    <AppModal
+      v-model="detailsDialog"
+      title="Application Details"
+      large
+    >
+      <div v-if="selectedApp">
         <div class="mb-4">
-          <h4 class="text-grey-darken-2 mb-1 font-weight-bold">Contact</h4>
-          <p class="text-grey-darken-4 font-weight-medium">{{ selectedApp.applicant_phone }} • {{ selectedApp.city }}</p>
-          <a v-if="selectedApp.linkedin" :href="selectedApp.linkedin" target="_blank" class="text-primary text-decoration-none font-weight-medium">LinkedIn Profile</a>
+          <h4 class="font-weight-bold mb-1" style="color: var(--g6);">Contact</h4>
+          <p style="color: var(--g7); font-weight: 500; font-size: 14px;">{{ selectedApp.applicant_phone }} • {{ selectedApp.city }}</p>
+          <a v-if="selectedApp.linkedin" :href="selectedApp.linkedin" target="_blank" style="color: var(--blue); text-decoration: none; font-size: 14px; font-weight: 500;">LinkedIn Profile</a>
         </div>
 
         <div class="mb-4">
-          <h4 class="text-grey-darken-2 mb-1 font-weight-bold">Education Snapshot</h4>
-          <p class="text-grey-darken-4 font-weight-medium">{{ selectedApp.qualification }} in {{ selectedApp.field_of_study }}</p>
-          <p class="text-grey-darken-1 text-body-2">{{ selectedApp.institution }} (Class of {{ selectedApp.year_of_passing }}) • Grade: {{ selectedApp.grade }}</p>
+          <h4 class="font-weight-bold mb-1" style="color: var(--g6);">Education Snapshot</h4>
+          <p style="color: var(--g7); font-weight: 500; font-size: 14px;">{{ selectedApp.qualification }} in {{ selectedApp.field_of_study }}</p>
+          <p style="color: var(--g5); font-size: 13px;">{{ selectedApp.institution }} (Class of {{ selectedApp.year_of_passing }}) • Grade: {{ selectedApp.grade }}</p>
         </div>
 
         <div class="mb-4" v-if="selectedApp.cover_note">
-          <h4 class="text-grey-darken-2 mb-1 font-weight-bold">Cover Note</h4>
-          <div class="bg-white pa-4 rounded-lg border text-body-2 text-grey-darken-4 border-grey-lighten-2">
+          <h4 class="font-weight-bold mb-1" style="color: var(--g6);">Cover Note</h4>
+          <div class="bg-white pa-4 rounded-lg text-body-2" style="border: 1px solid var(--border); color: var(--g7);">
             {{ selectedApp.cover_note }}
           </div>
         </div>
 
-        <v-btn block color="blue-grey-darken-3" size="large" variant="flat" class="mt-4 bg-grey-lighten-3 font-weight-bold text-none" v-if="selectedApp.resume_path">
+        <AppButton block size="lg" variant="g" class="mt-4" v-if="selectedApp.resume_path">
           Download Resume
-        </v-btn>
-      </v-card>
-    </v-dialog>
+        </AppButton>
+      </div>
+      <template #footer>
+        <AppButton variant="g" @click="detailsDialog = false">Close</AppButton>
+      </template>
+    </AppModal>
   </v-container>
 </template>
 
@@ -197,32 +199,58 @@ function exportCSV() {
 </script>
 
 <style scoped>
-.shadow-card {
+.apple-table-card {
+  background: white;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
   border: 1px solid var(--border);
-  
 }
-::v-deep(.custom-table) {
+
+.apple-data-table {
   background: transparent !important;
 }
-::v-deep(.custom-table th) {
+
+:deep(.v-data-table-header th) {
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.4px !important;
+  color: var(--g4) !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05) !important;
   background: #cbd5e1 !important;
-  color: #64748b !important;
-  font-weight: 800;
-  text-transform: uppercase;
-  font-size: 0.75rem;
-  letter-spacing: 0.05em;
-  padding: 16px !important;
-  border-bottom: 1px solid rgba(0,0,0,0.05) !important;
 }
-::v-deep(.custom-table td) {
-  border-bottom: 1px solid rgba(0,0,0,0.05) !important;
-  padding-top: 16px !important;
-  padding-bottom: 16px !important;
+
+:deep(.v-data-table__td) {
+  font-size: 13px !important;
+  color: var(--g6) !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.03) !important;
 }
+
+.applicant-name {
+  font-weight: 700;
+  color: var(--g7);
+  line-height: 1.2;
+}
+
+.applicant-email {
+  font-size: 11px;
+  color: var(--g4);
+}
+
+.role-text {
+  font-weight: 600;
+  color: var(--g6);
+}
+
+.exp-text {
+  font-size: 11px;
+  color: var(--g4);
+}
+
 .status-select {
   min-width: 140px;
 }
-::v-deep(.status-select .v-field__input) {
+:deep(.status-select .v-field__input) {
   padding-top: 4px !important;
   padding-bottom: 4px !important;
   min-height: 32px !important;
