@@ -559,8 +559,9 @@ router.get('/employers', async (req, res) => {
 router.get('/employers/:id', async (req, res) => {
   try {
     const [employers] = await pool.query(`
-      SELECT u.id, u.email, u.status, u.created_at, u.name as contact_person,
+      SELECT u.id, u.email, u.status, u.created_at, u.name as contact_person, u.phone,
              ep.company_name, ep.logo_url, ep.industry, ep.website, ep.about_company as description, ep.approval_status,
+             ep.company_size, ep.address, ep.linkedin_url,
              (SELECT COUNT(*) FROM jobs j WHERE j.posted_by = u.id) as total_jobs,
              (SELECT COUNT(*) FROM jobs j WHERE j.posted_by = u.id AND j.status = 'approved') as active_jobs,
              (SELECT COUNT(*) FROM jobs j WHERE j.posted_by = u.id AND j.status = 'pending_approval') as pending_approval_jobs,

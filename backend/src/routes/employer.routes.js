@@ -183,7 +183,12 @@ router.get('/jobs/:id', authenticateJWT, isEmployer, async (req, res) => {
 // Get Employer Profile
 router.get('/profile', authenticateJWT, isEmployer, async (req, res) => {
   try {
-    const [profiles] = await pool.query("SELECT * FROM employer_profiles WHERE user_id = ?", [req.user.id]);
+    const [profiles] = await pool.query(`
+      SELECT ep.*, u.name as contact_person, u.email, u.phone 
+      FROM employer_profiles ep
+      JOIN users u ON ep.user_id = u.id
+      WHERE ep.user_id = ?
+    `, [req.user.id]);
     if (!profiles.length) return res.status(404).json({ message: 'Profile not found' });
     res.json(profiles[0]);
   } catch (error) {
@@ -195,11 +200,14 @@ router.get('/profile', authenticateJWT, isEmployer, async (req, res) => {
 router.put('/profile', authenticateJWT, isEmployer, async (req, res) => {
   const { 
     company_name, company_size, industry, address, logo_url, about_company, website, 
-    linkedin_url, social_links_json, hiring_locations_json, benefits_json 
+    linkedin_url, social_links_json, hiring_locations_json, benefits_json, phone
   } = req.body;
 
+  const connection = await pool.getConnection();
   try {
-    const [result] = await pool.query(
+    await connection.beginTransaction();
+
+    const [result] = await connection.query(
       `UPDATE employer_profiles 
        SET company_name=?, company_size=?, industry=?, address=?, logo_url=?, about_company=?, website=?, 
            linkedin_url=?, social_links_json=?, hiring_locations_json=?, benefits_json=?
@@ -210,10 +218,18 @@ router.put('/profile', authenticateJWT, isEmployer, async (req, res) => {
       ]
     );
 
+    if (phone !== undefined) {
+      await connection.query('UPDATE users SET phone = ? WHERE id = ?', [phone, req.user.id]);
+    }
+
+    await connection.commit();
     if (result.affectedRows === 0) return res.status(404).json({ message: 'Profile not found' });
     res.json({ message: 'Profile updated successfully' });
   } catch (error) {
+    await connection.rollback();
     res.status(500).json({ message: error.message });
+  } finally {
+    connection.release();
   }
 });
 

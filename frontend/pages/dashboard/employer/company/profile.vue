@@ -85,7 +85,17 @@
 
         <h3 class="text-h6 font-weight-bold text-grey-darken-4 mb-4">Links & Contacts</h3>
         <v-row>
-          <v-col cols="12" md="6">
+          <v-col cols="12" md="4">
+            <v-text-field
+              v-model="formData.phone"
+              label="Phone Number"
+              prepend-inner-icon="mdi-phone"
+              variant="outlined"
+              color="primary"
+              class="mb-4"
+            ></v-text-field>
+          </v-col>
+          <v-col cols="12" md="4">
             <v-text-field
               v-model="formData.website"
               label="Website"
@@ -95,7 +105,7 @@
               class="mb-4"
             ></v-text-field>
           </v-col>
-          <v-col cols="12" md="6">
+          <v-col cols="12" md="4">
             <v-text-field
               v-model="formData.linkedin_url"
               label="LinkedIn URL"
@@ -175,6 +185,7 @@ const formData = ref({
   about_company: '',
   website: '',
   linkedin_url: '',
+  phone: '',
   social_links_json: [],
   hiring_locations_json: [],
   benefits_json: []
