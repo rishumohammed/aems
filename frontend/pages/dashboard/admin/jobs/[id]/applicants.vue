@@ -45,8 +45,8 @@
         <!-- AEMS Progress (Courses & Certs) -->
         <template v-slot:item.aems_progress="{ item }">
           <div class="d-flex flex-column gap-1">
-            <v-chip size="x-small" color="primary" variant="tonal">{{ item.courses_completed || 0 }} Courses</v-chip>
-            <v-chip size="x-small" :color="(item.certs_active || 0) > 0 ? 'success' : 'grey'" variant="tonal">
+            <v-chip size="x-small" color="grey-darken-3" variant="tonal" class="font-weight-bold bg-grey-lighten-3">{{ item.courses_completed || 0 }} Courses</v-chip>
+            <v-chip size="x-small" :color="(item.certs_active || 0) > 0 ? 'success' : 'grey-darken-3'" variant="tonal" class="font-weight-bold bg-grey-lighten-4">
               {{ item.certs_active || 0 }} Certs
             </v-chip>
           </div>
@@ -90,32 +90,32 @@
 
     <!-- Application Details Modal -->
     <v-dialog v-model="detailsDialog" max-width="600">
-      <v-card rounded="xl" class="pa-6 border bg-white" v-if="selectedApp">
+      <v-card rounded="xl" class="pa-6 border bg-grey-lighten-4" v-if="selectedApp">
         <div class="d-flex align-center justify-space-between mb-4 border-b pb-4">
           <h2 class="text-h5 font-weight-bold text-grey-darken-4">Application Details</h2>
-          <v-btn icon="mdi-close" variant="tonal" color="grey" size="small" class="rounded-lg" @click="detailsDialog = false"></v-btn>
+          <v-btn icon="mdi-close" variant="tonal" color="grey-darken-1" size="small" class="rounded-lg bg-grey-lighten-3" @click="detailsDialog = false"></v-btn>
         </div>
         
         <div class="mb-4">
-          <h4 class="text-grey-darken-1 mb-1 font-weight-bold">Contact</h4>
+          <h4 class="text-grey-darken-2 mb-1 font-weight-bold">Contact</h4>
           <p class="text-grey-darken-4 font-weight-medium">{{ selectedApp.applicant_phone }} • {{ selectedApp.city }}</p>
           <a v-if="selectedApp.linkedin" :href="selectedApp.linkedin" target="_blank" class="text-primary text-decoration-none font-weight-medium">LinkedIn Profile</a>
         </div>
 
         <div class="mb-4">
-          <h4 class="text-grey-darken-1 mb-1 font-weight-bold">Education Snapshot</h4>
+          <h4 class="text-grey-darken-2 mb-1 font-weight-bold">Education Snapshot</h4>
           <p class="text-grey-darken-4 font-weight-medium">{{ selectedApp.qualification }} in {{ selectedApp.field_of_study }}</p>
-          <p class="text-grey text-body-2">{{ selectedApp.institution }} (Class of {{ selectedApp.year_of_passing }}) • Grade: {{ selectedApp.grade }}</p>
+          <p class="text-grey-darken-1 text-body-2">{{ selectedApp.institution }} (Class of {{ selectedApp.year_of_passing }}) • Grade: {{ selectedApp.grade }}</p>
         </div>
 
         <div class="mb-4" v-if="selectedApp.cover_note">
-          <h4 class="text-grey-darken-1 mb-1 font-weight-bold">Cover Note</h4>
-          <div class="bg-grey-lighten-4 pa-4 rounded-lg border text-body-2 text-grey-darken-3">
+          <h4 class="text-grey-darken-2 mb-1 font-weight-bold">Cover Note</h4>
+          <div class="bg-white pa-4 rounded-lg border text-body-2 text-grey-darken-4 border-grey-lighten-2">
             {{ selectedApp.cover_note }}
           </div>
         </div>
 
-        <v-btn block color="primary" size="large" variant="tonal" class="mt-4" v-if="selectedApp.resume_path">
+        <v-btn block color="blue-grey-darken-3" size="large" variant="flat" class="mt-4 bg-grey-lighten-3 font-weight-bold text-none" v-if="selectedApp.resume_path">
           Download Resume
         </v-btn>
       </v-card>
