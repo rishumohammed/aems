@@ -154,7 +154,8 @@ router.patch('/jobs/:id/submit-approval', authenticateJWT, isEmployer, async (re
 router.get('/jobs', authenticateJWT, isEmployer, async (req, res) => {
   try {
     const [jobs] = await pool.query(
-      `SELECT j.*, jc.name as category_name 
+      `SELECT j.*, jc.name as category_name,
+       (SELECT COUNT(*) FROM job_applications ja WHERE ja.job_id = j.id) as application_count
        FROM jobs j 
        LEFT JOIN job_categories jc ON j.category = jc.id 
        WHERE j.posted_by = ? ORDER BY j.created_at DESC`,

@@ -59,11 +59,9 @@
         </template>
         
         <template v-slot:item.stats="{ item }">
-          <div class="d-flex align-center gap-4 text-caption font-weight-bold">
-            <div class="text-center" title="Total Applications">
-              <v-icon size="small" color="blue" class="mb-1">mdi-account-group</v-icon>
-              <div>{{ item.application_count || 0 }}</div>
-            </div>
+          <div class="d-flex align-center" style="gap: 6px;">
+            <v-icon size="small" color="blue">mdi-account-group</v-icon>
+            <span class="font-weight-bold" style="color: var(--g7);">{{ item.application_count || 0 }}</span>
           </div>
         </template>
 
