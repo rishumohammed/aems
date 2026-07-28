@@ -188,19 +188,8 @@ export const useNavStore = defineStore('nav', {
         }
       }
 
-      // 4. Fetch Tutor Approval badge (pending count)
-      if (authStore.userRole === 'super_admin') {
-        try {
-          const { data } = await api.get('/admin/tutor-approvals');
-          const pendingCount = Array.isArray(data) ? data.length : 0;
-          const item = this.navItems.find(i => i.label === 'Tutor Approvals');
-          if (item) {
-            item.badge = pendingCount > 0 ? pendingCount : undefined;
-          }
-        } catch (err) {
-          console.error('Failed to fetch tutor approval badge count:', err);
-        }
-
+      // 4. Fetch Badges for Super Admin & Placement Coordinator
+      if (['super_admin', 'placement_coordinator'].includes(authStore.userRole)) {
         // Fetch Employer Approval badge
         try {
           const { data } = await api.get('/admin/employer-approvals');
@@ -223,6 +212,19 @@ export const useNavStore = defineStore('nav', {
           }
         } catch (err) {
           console.error('Failed to fetch job approval badge count:', err);
+        }
+      }
+
+      if (authStore.userRole === 'super_admin') {
+        try {
+          const { data } = await api.get('/admin/tutor-approvals');
+          const pendingCount = Array.isArray(data) ? data.length : 0;
+          const item = this.navItems.find(i => i.label === 'Tutor Approvals');
+          if (item) {
+            item.badge = pendingCount > 0 ? pendingCount : undefined;
+          }
+        } catch (err) {
+          console.error('Failed to fetch tutor approval badge count:', err);
         }
 
         // Fetch Course Approvals badge
