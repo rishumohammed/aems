@@ -38,9 +38,14 @@ export const DashboardController = {
       const [pendingTutors] = await pool.query('SELECT COUNT(*) as count FROM users WHERE role = "tutor" AND status = "pending_review"');
       
       const [totalEmployers] = await pool.query('SELECT COUNT(*) as count FROM users WHERE role = "employer" AND status = "active"');
-      const [pendingEmployers] = await pool.query('SELECT COUNT(*) as count FROM users WHERE role = "employer" AND status = "pending_review"');
+      const [pendingEmployers] = await pool.query(`
+        SELECT COUNT(*) as count 
+        FROM users u
+        JOIN employer_profiles ep ON u.id = ep.user_id
+        WHERE u.role = 'employer' AND ep.approval_status = 'pending_approval'
+      `);
       
-      const [pendingCourses] = await pool.query('SELECT COUNT(*) as count FROM courses WHERE status = "pending_review"');
+      const [pendingCourses] = await pool.query('SELECT COUNT(*) as count FROM courses WHERE LOWER(status) = "pending_review"');
       
       const [outstandingRes] = await pool.query('SELECT SUM(balance_due) as total FROM invoices WHERE payment_status IN ("pending", "partial")');
       const outstandingAmount = outstandingRes[0].total || 0;
@@ -88,27 +93,13 @@ export const DashboardController = {
       const currencyIcon = `mdi-currency-${currencyCode}`; // Might not exist for all, but works for major ones. Fallback is fine if empty, or we could just use mdi-cash. Let's use mdi-cash to be universally safe.
       const safeIcon = ['usd', 'eur', 'gbp', 'inr', 'jpy', 'rub', 'krw'].includes(currencyCode) ? `mdi-currency-${currencyCode}` : 'mdi-cash';
 
-      // Month-over-month trends for row1 KPIs
-      const [pendingTutorsLastMonth] = await pool.query("SELECT COUNT(*) as count FROM users WHERE role = 'tutor' AND status = 'pending_review' AND MONTH(created_at) = MONTH(CURRENT_DATE() - INTERVAL 1 MONTH) AND YEAR(created_at) = YEAR(CURRENT_DATE() - INTERVAL 1 MONTH)");
-      const [pendingEmployersLastMonth] = await pool.query("SELECT COUNT(*) as count FROM users WHERE role = 'employer' AND status = 'pending_review' AND MONTH(created_at) = MONTH(CURRENT_DATE() - INTERVAL 1 MONTH) AND YEAR(created_at) = YEAR(CURRENT_DATE() - INTERVAL 1 MONTH)");
-      const [pendingCoursesLastMonth] = await pool.query("SELECT COUNT(*) as count FROM courses WHERE status = 'pending_review' AND MONTH(created_at) = MONTH(CURRENT_DATE() - INTERVAL 1 MONTH) AND YEAR(created_at) = YEAR(CURRENT_DATE() - INTERVAL 1 MONTH)");
-      const [outstandingLastMonthRes] = await pool.query("SELECT SUM(balance_due) as total FROM invoices WHERE payment_status IN ('pending', 'partial') AND created_at <= (CURRENT_DATE() - INTERVAL 1 MONTH)");
-      const outstandingAmountLastMonth = outstandingLastMonthRes[0].total || 0;
-
-      const calcTrend = (current, previous) => {
-        if (previous === 0 && current === 0) return { change: 0, direction: 'neutral' };
-        if (previous === 0) return { change: 100, direction: 'up' };
-        const pct = Math.round(((current - previous) / previous) * 100);
-        return { change: Math.abs(pct), direction: pct > 0 ? 'up' : pct < 0 ? 'down' : 'neutral' };
-      };
-
       res.json({
         kpis: {
           row1: [
-            { title: 'Pending Tutors', value: pendingTutors[0].count, icon: 'mdi-account-clock', color: 'error', trend: calcTrend(pendingTutors[0].count, pendingTutorsLastMonth[0].count) },
-            { title: 'Pending Employers', value: pendingEmployers[0].count, icon: 'mdi-domain-plus', color: 'warning', trend: calcTrend(pendingEmployers[0].count, pendingEmployersLastMonth[0].count) },
-            { title: 'Course Approvals', value: pendingCourses[0].count, icon: 'mdi-book-clock-outline', color: 'primary', trend: calcTrend(pendingCourses[0].count, pendingCoursesLastMonth[0].count) },
-            { title: 'Outstanding Amount', value: currencySymbol + outstandingAmount.toLocaleString(), icon: 'mdi-cash-remove', color: 'info', trend: calcTrend(outstandingAmount, outstandingAmountLastMonth) },
+            { title: 'Pending Tutors', value: pendingTutors[0].count, icon: 'mdi-account-clock', color: 'error' },
+            { title: 'Pending Employers', value: pendingEmployers[0].count, icon: 'mdi-domain-plus', color: 'warning' },
+            { title: 'Course Approvals', value: pendingCourses[0].count, icon: 'mdi-book-clock-outline', color: 'primary' },
+            { title: 'Outstanding Amount', value: currencySymbol + outstandingAmount.toLocaleString(), icon: 'mdi-cash-remove', color: 'info' },
           ],
           row2: [
             { title: 'Monthly Revenue', value: currencySymbol + (revenueMonth[0].total || 0).toLocaleString(), icon: safeIcon, color: 'success' },

@@ -46,7 +46,7 @@
           :icon="stat.icon"
           :color="stat.color === 'error' ? 'red' : stat.color === 'warning' ? 'orange' : stat.color === 'primary' ? 'green' : stat.color === 'info' ? 'purple' : stat.color === 'success' ? 'teal' : stat.color"
           :trend="stat.trend && stat.trend.direction !== 'neutral' ? { value: stat.trend.change, positive: stat.trend.direction === 'up', label: 'vs last month' } : undefined"
-          :subtitle="(!stat.trend || stat.trend.direction === 'neutral') ? 'No change vs last month' : undefined"
+          :subtitle="(!stat.trend || stat.trend.direction === 'neutral') ? 'Current total pending' : undefined"
         />
       </v-col>
     </v-row>
