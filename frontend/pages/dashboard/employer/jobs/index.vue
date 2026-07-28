@@ -70,18 +70,12 @@
         </template>
 
         <template v-slot:item.actions="{ item }">
-          <v-menu location="bottom end">
-            <template v-slot:activator="{ props }">
-              <v-btn icon="mdi-dots-vertical" variant="text" size="small" v-bind="props" color="grey-lighten-1"></v-btn>
-            </template>
-            <v-list bg-color="white" class="text-grey-darken-4 border border-opacity-10" rounded="lg">
-              <v-list-item prepend-icon="mdi-eye" title="View Applications" :to="`/dashboard/employer/applications?job=${item.id}`"></v-list-item>
-              <v-list-item v-if="item.status === 'draft' || item.status === 'rejected' || item.status === 'pending_approval'" prepend-icon="mdi-pencil" title="Edit Job" :to="`/dashboard/employer/jobs/${item.id}/edit`"></v-list-item>
-              <v-list-item v-if="item.status === 'draft' || item.status === 'rejected'" prepend-icon="mdi-send-check" title="Submit for Approval" @click="submitForApproval(item.id)"></v-list-item>
-              <!-- For approved jobs, maybe employer can close them? -->
-              <v-list-item v-if="item.status === 'approved'" prepend-icon="mdi-close-circle" title="Close Job" @click="updateJobStatus(item.id, 'closed')"></v-list-item>
-            </v-list>
-          </v-menu>
+          <div class="d-flex justify-end gap-1">
+            <v-btn icon="mdi-eye-outline" variant="text" size="small" color="info" :to="`/dashboard/employer/applications?job=${item.id}`" title="View Applications"></v-btn>
+            <v-btn v-if="item.status === 'draft' || item.status === 'rejected' || item.status === 'pending_approval'" icon="mdi-pencil-outline" variant="text" size="small" color="grey-darken-1" :to="`/dashboard/employer/jobs/${item.id}/edit`" title="Edit Job"></v-btn>
+            <v-btn v-if="item.status === 'draft' || item.status === 'rejected'" icon="mdi-send-check-outline" variant="text" size="small" color="success" @click="submitForApproval(item.id)" title="Submit for Approval"></v-btn>
+            <v-btn v-if="item.status === 'approved'" icon="mdi-close-circle-outline" variant="text" size="small" color="error" @click="updateJobStatus(item.id, 'closed')" title="Close Job"></v-btn>
+          </div>
         </template>
         
         <template v-slot:no-data>

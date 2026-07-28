@@ -71,14 +71,9 @@
 
         <!-- Actions -->
         <template v-slot:item.actions="{ item }">
-          <v-menu location="bottom end">
-            <template v-slot:activator="{ props }">
-              <v-btn icon="mdi-dots-vertical" variant="text" size="small" v-bind="props" color="grey-lighten-1"></v-btn>
-            </template>
-            <v-list bg-color="white" class="text-grey-darken-4 border border-opacity-10" rounded="lg">
-              <v-list-item prepend-icon="mdi-file-document-outline" title="View Application Details" @click="viewApplication(item)"></v-list-item>
-            </v-list>
-          </v-menu>
+          <div class="d-flex justify-end">
+            <v-btn icon="mdi-file-document-outline" variant="text" size="small" color="grey-darken-1" @click="viewApplication(item)" title="View Application Details"></v-btn>
+          </div>
         </template>
       </v-data-table>
     </div>
