@@ -38,7 +38,7 @@
 
         <!-- AEMS Progress (Courses & Certs) -->
         <template v-slot:item.aems_progress="{ item }">
-          <div class="d-flex flex-column gap-1 align-start">
+          <div class="d-flex flex-column gap-1 align-start justify-center">
             <Badge color="gray">{{ item.courses_completed || 0 }} Courses</Badge>
             <Badge :color="(item.certs_active || 0) > 0 ? 'green' : 'gray'">
               {{ item.certs_active || 0 }} Certs
@@ -71,9 +71,8 @@
 
         <!-- Actions -->
         <template v-slot:item.actions="{ item }">
-          <div class="d-flex gap-2 justify-end">
+          <div class="d-flex justify-end">
             <AppButton size="xs" variant="g" icon="mdi-file-document-outline" @click="viewApplication(item)" title="View Cover Note & Details"></AppButton>
-            <AppButton size="xs" variant="g" icon="mdi-account-details-outline" :to="`/dashboard/admin/students/${item.student_id}`" title="Full AEMS Profile"></AppButton>
           </div>
         </template>
       </v-data-table>
@@ -215,6 +214,9 @@ function exportCSV() {
   font-size: 13px !important;
   color: var(--g6) !important;
   border-bottom: 1px solid rgba(0, 0, 0, 0.03) !important;
+  vertical-align: middle !important;
+  padding-top: 12px !important;
+  padding-bottom: 12px !important;
 }
 
 .applicant-name {
