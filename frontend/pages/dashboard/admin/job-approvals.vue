@@ -30,10 +30,10 @@
 
         <!-- Job Details Column -->
         <template v-slot:item.title="{ item }">
-          <div class="font-weight-bold">{{ item.title }}</div>
-          <div class="text-caption text-blue-grey-300 d-flex align-center gap-2 mt-1">
-            <v-icon size="x-small">mdi-tag</v-icon> {{ item.category_name }}
-            <v-icon size="x-small" class="ml-2">mdi-clock</v-icon> {{ item.type?.replace('_', ' ') }}
+          <div class="font-weight-bold text-body-1 mb-1">{{ item.title }}</div>
+          <div class="d-flex flex-wrap align-center gap-2">
+            <v-chip size="x-small" color="primary" variant="flat" prepend-icon="mdi-tag">{{ item.category_name }}</v-chip>
+            <v-chip size="x-small" color="blue-grey" variant="tonal" prepend-icon="mdi-clock" class="text-capitalize">{{ item.type?.replace('_', ' ') }}</v-chip>
           </div>
         </template>
 
@@ -144,10 +144,44 @@
             <div class="job-description" v-html="selectedJob.description"></div>
           </div>
 
+          <div class="mb-6" v-if="selectedJob.responsibilities">
+            <h4 class="text-subtitle-1 font-weight-bold mb-2">Responsibilities</h4>
+            <div class="job-description" v-html="selectedJob.responsibilities"></div>
+          </div>
+
+          <div class="mb-6 bg-grey-lighten-4 pa-4 rounded-lg" v-if="getRequirements(selectedJob)">
+            <h4 class="text-subtitle-1 font-weight-bold mb-4">Requirements & Skills</h4>
+            
+            <div v-if="getRequirements(selectedJob).required?.length" class="mb-4">
+              <div class="text-caption font-weight-bold text-grey-darken-1 mb-2">REQUIRED SKILLS</div>
+              <div class="d-flex flex-wrap gap-2">
+                <v-chip v-for="skill in getRequirements(selectedJob).required" :key="skill" color="primary" size="small" variant="flat">{{ skill }}</v-chip>
+              </div>
+            </div>
+
+            <div v-if="getRequirements(selectedJob).nice_to_have?.length" class="mb-4">
+              <div class="text-caption font-weight-bold text-grey-darken-1 mb-2">NICE TO HAVE</div>
+              <div class="d-flex flex-wrap gap-2">
+                <v-chip v-for="skill in getRequirements(selectedJob).nice_to_have" :key="skill" color="blue-grey" size="small" variant="tonal">{{ skill }}</v-chip>
+              </div>
+            </div>
+            
+            <v-row class="mt-2 pt-4 border-t">
+              <v-col cols="12" sm="6" v-if="getRequirements(selectedJob).experience_level">
+                <h4 class="text-subtitle-2 font-weight-bold text-grey">Experience Level</h4>
+                <p class="font-weight-medium">{{ getRequirements(selectedJob).experience_level }}</p>
+              </v-col>
+              <v-col cols="12" sm="6" v-if="getRequirements(selectedJob).number_of_openings">
+                <h4 class="text-subtitle-2 font-weight-bold text-grey">Openings</h4>
+                <p class="font-weight-medium">{{ getRequirements(selectedJob).number_of_openings }} Positions</p>
+              </v-col>
+            </v-row>
+          </div>
+
           <v-row>
             <v-col cols="12" sm="6">
               <h4 class="text-subtitle-2 font-weight-bold text-grey">Salary</h4>
-              <p class="font-weight-medium">{{ selectedJob.salary_range || 'Not Disclosed' }}</p>
+              <p class="font-weight-medium text-success font-weight-bold">{{ selectedJob.salary_range || 'Not Disclosed' }}</p>
             </v-col>
             <v-col cols="12" sm="6">
               <h4 class="text-subtitle-2 font-weight-bold text-grey">Job Type</h4>
@@ -182,6 +216,15 @@ const selectedJob = ref<any>(null);
 const rejectTarget = ref<any>(null);
 const approveTarget = ref<any>(null);
 const rejectionReason = ref('');
+
+const getRequirements = (job: any) => {
+  if (!job || !job.requirements_json) return null;
+  try {
+    return typeof job.requirements_json === 'string' ? JSON.parse(job.requirements_json) : job.requirements_json;
+  } catch (e) {
+    return null;
+  }
+};
 
 const headers: any[] = [
   { title: 'Company / Employer', key: 'employer', sortable: false },
