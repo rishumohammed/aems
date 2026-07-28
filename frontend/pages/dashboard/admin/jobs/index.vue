@@ -88,14 +88,17 @@
         </template>
 
         <template v-slot:item.actions="{ item }">
-          <div class="d-flex justify-end gap-1">
-            <template v-if="item.status === 'pending'">
-              <AppButton size="xs" variant="success" icon="mdi-check" @click="approveJob(item)">Approve</AppButton>
-              <AppButton size="xs" variant="danger" icon="mdi-close" @click="openRejectModal(item)">Reject</AppButton>
+          <v-menu location="bottom end">
+            <template v-slot:activator="{ props }">
+              <v-btn icon="mdi-dots-vertical" variant="text" size="small" v-bind="props" color="grey-lighten-1"></v-btn>
             </template>
-            <AppButton size="xs" variant="g" icon="mdi-eye-outline" :to="`/jobs/${item.id}`"></AppButton>
-            <AppButton size="xs" variant="g" icon="mdi-trash-can-outline" @click="deleteJob(item)"></AppButton>
-          </div>
+            <v-list bg-color="white" class="text-grey-darken-4 border border-opacity-10" rounded="lg">
+              <v-list-item v-if="item.status === 'pending'" prepend-icon="mdi-check" title="Approve" @click="approveJob(item)"></v-list-item>
+              <v-list-item v-if="item.status === 'pending'" prepend-icon="mdi-close" title="Reject" @click="openRejectModal(item)"></v-list-item>
+              <v-list-item prepend-icon="mdi-eye-outline" title="View Job" :to="`/jobs/${item.id}`"></v-list-item>
+              <v-list-item prepend-icon="mdi-trash-can-outline" title="Delete Job" base-color="error" @click="deleteJob(item)"></v-list-item>
+            </v-list>
+          </v-menu>
         </template>
       </v-data-table>
     </div>
