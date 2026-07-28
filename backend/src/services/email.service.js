@@ -71,8 +71,9 @@ class EmailService {
       }
       return info;
     } catch (error) {
-      console.error('Error sending email:', error);
-      throw error;
+      console.error('Error sending email:', error.message || error);
+      // We do not throw here to prevent the backend from crashing when SMTP fails
+      return { messageId: 'failed-to-send', error: error.message };
     }
   }
 
