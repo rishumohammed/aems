@@ -52,21 +52,38 @@
         <!-- Actions -->
         <template v-slot:item.actions="{ item }">
           <div class="actions-wrapper">
-            <v-btn
-              size="small" variant="outlined" color="deep-purple" class="rounded-lg action-btn font-weight-bold"
-              prepend-icon="mdi-eye-outline"
-              @click="previewJob(item)"
-            >View Details</v-btn>
-            <v-btn
-              size="small" variant="flat" color="success" class="rounded-lg action-btn font-weight-bold"
-              prepend-icon="mdi-check"
-              @click="confirmApprovePrompt(item)"
-            >Approve</v-btn>
-            <v-btn
-              size="small" variant="outlined" color="error" class="rounded-lg action-btn font-weight-bold"
-              prepend-icon="mdi-close"
-              @click="openRejectDialog(item)"
-            >Reject</v-btn>
+            <v-tooltip text="View Details" location="top">
+              <template v-slot:activator="{ props }">
+                <v-btn
+                  v-bind="props"
+                  size="small" variant="tonal" color="deep-purple" class="rounded-lg"
+                  icon="mdi-eye-outline"
+                  @click="previewJob(item)"
+                ></v-btn>
+              </template>
+            </v-tooltip>
+            
+            <v-tooltip text="Approve" location="top">
+              <template v-slot:activator="{ props }">
+                <v-btn
+                  v-bind="props"
+                  size="small" variant="flat" color="success" class="rounded-lg"
+                  icon="mdi-check"
+                  @click="confirmApprovePrompt(item)"
+                ></v-btn>
+              </template>
+            </v-tooltip>
+
+            <v-tooltip text="Reject" location="top">
+              <template v-slot:activator="{ props }">
+                <v-btn
+                  v-bind="props"
+                  size="small" variant="tonal" color="error" class="rounded-lg"
+                  icon="mdi-close"
+                  @click="openRejectDialog(item)"
+                ></v-btn>
+              </template>
+            </v-tooltip>
           </div>
         </template>
 
@@ -325,17 +342,7 @@ const confirmReject = async () => {
 
 .actions-wrapper {
   display: flex;
-  gap: 12px;
+  gap: 8px;
   justify-content: flex-end;
-  min-width: 240px;
-}
-.action-btn {
-  flex: 1;
-}
-@media (max-width: 960px) {
-  .actions-wrapper {
-    flex-direction: column;
-    align-items: stretch;
-  }
 }
 </style>
