@@ -35,7 +35,17 @@
 
         <v-col cols="12" md="4">
           <v-card rounded="xl" border flat class="pa-6 mb-6 shadow-sm sticky-top">
-            <v-btn block color="primary" size="x-large" rounded="lg" class="font-weight-bold text-capitalize mb-4" @click="showApplyModal = true">Apply for this Job</v-btn>
+            <v-btn 
+              block 
+              :color="hasApplied ? 'grey' : 'primary'" 
+              size="x-large" 
+              rounded="lg" 
+              class="font-weight-bold text-capitalize mb-4" 
+              :disabled="hasApplied"
+              @click="showApplyModal = true"
+            >
+              {{ hasApplied ? 'Already Applied' : 'Apply for this Job' }}
+            </v-btn>
             <v-btn block variant="tonal" size="x-large" rounded="lg" class="font-weight-bold text-capitalize" @click="openCompanyWebsite">Visit Website</v-btn>
             
             <v-divider class="my-6"></v-divider>
@@ -73,8 +83,10 @@
 </template>
 
 <script setup lang="ts">
+import { ref, onMounted } from 'vue';
 import dayjs from 'dayjs';
 import JobApplicationModal from '@/components/jobs/JobApplicationModal.vue';
+import { useApi } from '@/composables/useApi';
 
 definePageMeta({
   layout: 'dashboard',
@@ -85,8 +97,21 @@ const route = useRoute();
 const config = useRuntimeConfig();
 const apiBase = config.public.apiBase;
 const showApplyModal = ref(false);
+const hasApplied = ref(false);
+const api = useApi();
 
 const { data: job } = await useFetch<any>(`${apiBase}/public/jobs/${route.params.id}`);
+
+onMounted(async () => {
+  try {
+    const res = await api.get(`/jobs/${route.params.id}/check-application`);
+    if (res.data && res.data.hasApplied) {
+      hasApplied.value = true;
+    }
+  } catch (error) {
+    console.error('Failed to check application status:', error);
+  }
+});
 
 const openCompanyWebsite = () => {
   if (job.value?.employer_website) {
@@ -102,7 +127,7 @@ const formatDate = (date: string) => dayjs(date).format('MMM D, YYYY');
 
 const onApplySuccess = () => {
   showApplyModal.value = false;
-  // Maybe show a success message or redirect
+  hasApplied.value = true;
 };
 </script>
 

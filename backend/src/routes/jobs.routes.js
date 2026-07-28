@@ -144,4 +144,14 @@ router.post('/:id/apply', authenticateJWT, authorizeRoles('student'), upload.sin
   }
 });
 
+// 4. Check if Student Applied
+router.get('/:id/check-application', authenticateJWT, authorizeRoles('student'), async (req, res) => {
+  try {
+    const [existing] = await pool.query("SELECT id FROM job_applications WHERE job_id = ? AND student_id = ?", [req.params.id, req.user.id]);
+    res.json({ hasApplied: existing.length > 0 });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 export default router;
