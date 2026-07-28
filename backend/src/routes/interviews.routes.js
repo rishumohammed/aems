@@ -210,4 +210,24 @@ router.patch('/:id', authorizeRoles('employer'), async (req, res) => {
   }
 });
 
+// Delete interview
+router.delete('/:id', authorizeRoles('employer', 'super_admin'), async (req, res) => {
+  try {
+    const [existing] = await pool.query(
+      `SELECT i.id FROM job_interviews i 
+       JOIN job_applications a ON i.application_id = a.id
+       JOIN jobs j ON a.job_id = j.id
+       WHERE i.id = ? AND (j.posted_by = ? OR ? = 'super_admin')`,
+      [req.params.id, req.user.id, req.user.role]
+    );
+
+    if (existing.length === 0) return res.status(404).json({ message: 'Interview not found or unauthorized' });
+
+    await pool.query('DELETE FROM job_interviews WHERE id = ?', [req.params.id]);
+    res.json({ message: 'Interview deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 export default router;

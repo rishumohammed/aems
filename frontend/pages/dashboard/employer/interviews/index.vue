@@ -49,15 +49,33 @@
         </template>
 
         <template v-slot:item.actions="{ item }">
-          <v-btn 
-            variant="tonal" 
-            color="primary" 
-            size="small" 
-            prepend-icon="mdi-eye"
-            :to="`/dashboard/employer/applicants/${item.application_id}`"
-          >
-            View Applicant
-          </v-btn>
+          <div class="d-flex justify-end gap-1">
+            <v-btn
+              v-if="item.status === 'scheduled' || item.status === 'rescheduled'"
+              icon="mdi-check"
+              variant="text"
+              size="small"
+              color="success"
+              title="Mark Completed"
+              @click="updateStatus(item.id, 'completed')"
+            ></v-btn>
+            <v-btn
+              icon="mdi-eye-outline"
+              variant="text"
+              size="small"
+              color="blue"
+              title="View Applicant"
+              :to="`/dashboard/employer/applicants/${item.application_id}`"
+            ></v-btn>
+            <v-btn
+              icon="mdi-trash-can-outline"
+              variant="text"
+              size="small"
+              color="error"
+              title="Delete Interview"
+              @click="deleteInterview(item.id)"
+            ></v-btn>
+          </div>
         </template>
         
         <template v-slot:no-data>
@@ -206,6 +224,16 @@ const updateStatus = async (id: string, status: string) => {
     await loadInterviews();
   } catch (error) {
     console.error('Failed to update status', error);
+  }
+};
+
+const deleteInterview = async (id: string) => {
+  if (!confirm('Are you sure you want to delete this interview?')) return;
+  try {
+    await api.delete(`/interviews/${id}`);
+    await loadInterviews();
+  } catch (error: any) {
+    alert(error.response?.data?.message || 'Failed to delete interview');
   }
 };
 
