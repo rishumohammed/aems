@@ -1,26 +1,26 @@
 <template>
   <v-container fluid class="pa-6">
     <div class="d-flex align-center gap-4 mb-6">
-      <v-btn icon="mdi-arrow-left" variant="text" to="/dashboard/admin/jobs"></v-btn>
+      <v-btn icon="mdi-arrow-left" variant="tonal" class="rounded-lg bg-grey-lighten-4 text-grey-darken-3" to="/dashboard/admin/jobs"></v-btn>
       <div>
-        <h1 class="text-h4 font-weight-bold mb-1">Applicants: {{ job?.title }}</h1>
-        <p class="text-blue-grey-300">
-          <v-icon size="small" class="mr-1">mdi-domain</v-icon> {{ job?.company }} | 
-          <v-icon size="small" class="ml-2 mr-1">mdi-map-marker</v-icon> {{ job?.location }}
+        <h1 class="text-h4 font-weight-black mb-1 text-grey-darken-4">Applicants: {{ job?.title }}</h1>
+        <p class="text-grey-darken-1 font-weight-medium">
+          <v-icon size="small" class="mr-1">mdi-domain</v-icon> {{ job?.company }} <span class="mx-2">|</span> 
+          <v-icon size="small" class="mr-1">mdi-map-marker</v-icon> {{ job?.location }}
         </p>
       </div>
       <v-spacer></v-spacer>
-      <v-btn color="primary" variant="tonal" prepend-icon="mdi-download" @click="exportCSV">
+      <v-btn color="primary" variant="tonal" class="rounded-lg bg-blue-lighten-5 font-weight-bold px-6" prepend-icon="mdi-download" @click="exportCSV">
         Export CSV
       </v-btn>
     </div>
 
-    <v-card color="#1a1a2e" rounded="xl" border class="shadow-card">
+    <v-card rounded="xl" border class="shadow-card overflow-hidden">
       <v-data-table
         :headers="headers"
         :items="applicants"
         :loading="loading"
-        class="bg-transparent text-white custom-table"
+        class="bg-transparent text-grey-darken-3 custom-table"
       >
         <!-- Applicant Name & Avatar -->
       <template v-slot:item.applicant_name="{ item }">
@@ -32,10 +32,10 @@
     ></v-avatar>
 
     <div>
-      <div class="font-weight-bold">
+      <div class="font-weight-bold text-grey-darken-4">
         {{ item.applicant_name }}
       </div>
-      <div class="text-caption text-blue-grey-300">
+      <div class="text-caption text-grey">
         {{ item.applicant_email }}
       </div>
     </div>
@@ -54,8 +54,8 @@
 
         <!-- Experience & Edu -->
         <template v-slot:item.experience="{ item }">
-          <div class="font-weight-medium">{{ item.last_role || 'Fresher' }}</div>
-          <div class="text-caption text-blue-grey-300">{{ item.experience_years }} Years • {{ item.qualification }}</div>
+          <div class="font-weight-medium text-grey-darken-3">{{ item.last_role || 'Fresher' }}</div>
+          <div class="text-caption text-grey">{{ item.experience_years }} Years • {{ item.qualification }}</div>
         </template>
 
         <!-- Status -->
@@ -90,27 +90,27 @@
 
     <!-- Application Details Modal -->
     <v-dialog v-model="detailsDialog" max-width="600">
-      <v-card color="#1a1a2e" rounded="xl" class="pa-6 border" v-if="selectedApp">
-        <div class="d-flex align-center justify-space-between mb-4">
-          <h2 class="text-h5 font-weight-bold text-white">Application Details</h2>
-          <v-btn icon="mdi-close" variant="text" @click="detailsDialog = false"></v-btn>
+      <v-card rounded="xl" class="pa-6 border bg-white" v-if="selectedApp">
+        <div class="d-flex align-center justify-space-between mb-4 border-b pb-4">
+          <h2 class="text-h5 font-weight-bold text-grey-darken-4">Application Details</h2>
+          <v-btn icon="mdi-close" variant="tonal" color="grey" size="small" class="rounded-lg" @click="detailsDialog = false"></v-btn>
         </div>
         
         <div class="mb-4">
-          <h4 class="text-blue-grey-300 mb-1">Contact</h4>
-          <p class="text-white">{{ selectedApp.applicant_phone }} • {{ selectedApp.city }}</p>
-          <a v-if="selectedApp.linkedin" :href="selectedApp.linkedin" target="_blank" class="text-primary text-decoration-none">LinkedIn Profile</a>
+          <h4 class="text-grey-darken-1 mb-1 font-weight-bold">Contact</h4>
+          <p class="text-grey-darken-4 font-weight-medium">{{ selectedApp.applicant_phone }} • {{ selectedApp.city }}</p>
+          <a v-if="selectedApp.linkedin" :href="selectedApp.linkedin" target="_blank" class="text-primary text-decoration-none font-weight-medium">LinkedIn Profile</a>
         </div>
 
         <div class="mb-4">
-          <h4 class="text-blue-grey-300 mb-1">Education Snapshot</h4>
-          <p class="text-white">{{ selectedApp.qualification }} in {{ selectedApp.field_of_study }}</p>
-          <p class="text-blue-grey-300 text-body-2">{{ selectedApp.institution }} (Class of {{ selectedApp.year_of_passing }}) • Grade: {{ selectedApp.grade }}</p>
+          <h4 class="text-grey-darken-1 mb-1 font-weight-bold">Education Snapshot</h4>
+          <p class="text-grey-darken-4 font-weight-medium">{{ selectedApp.qualification }} in {{ selectedApp.field_of_study }}</p>
+          <p class="text-grey text-body-2">{{ selectedApp.institution }} (Class of {{ selectedApp.year_of_passing }}) • Grade: {{ selectedApp.grade }}</p>
         </div>
 
         <div class="mb-4" v-if="selectedApp.cover_note">
-          <h4 class="text-blue-grey-300 mb-1">Cover Note</h4>
-          <div class="bg-grey-darken-4 pa-4 rounded-lg border text-body-2">
+          <h4 class="text-grey-darken-1 mb-1 font-weight-bold">Cover Note</h4>
+          <div class="bg-grey-lighten-4 pa-4 rounded-lg border text-body-2 text-grey-darken-3">
             {{ selectedApp.cover_note }}
           </div>
         </div>
@@ -205,17 +205,19 @@ function exportCSV() {
   background: transparent !important;
 }
 ::v-deep(.custom-table th) {
-  background: rgba(0,0,0,0.2) !important;
-  color: #94a3b8 !important;
-  font-weight: 700;
+  background: #cbd5e1 !important;
+  color: #64748b !important;
+  font-weight: 800;
   text-transform: uppercase;
+  font-size: 0.75rem;
   letter-spacing: 0.05em;
-  border-bottom: 1px solid rgba(255,255,255,0.05) !important;
+  padding: 16px !important;
+  border-bottom: 1px solid rgba(0,0,0,0.05) !important;
 }
 ::v-deep(.custom-table td) {
-  border-bottom: 1px solid rgba(255,255,255,0.05) !important;
-  padding-top: 12px !important;
-  padding-bottom: 12px !important;
+  border-bottom: 1px solid rgba(0,0,0,0.05) !important;
+  padding-top: 16px !important;
+  padding-bottom: 16px !important;
 }
 .status-select {
   min-width: 140px;
