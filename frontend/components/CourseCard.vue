@@ -22,23 +22,37 @@
         </template>
         
         <!-- Badges on image -->
-        <div v-if="viewType !== 'list'" class="pa-2 d-flex flex-wrap gap-2 justify-space-between">
-          <v-chip
-            v-if="course.category_name"
-            size="x-small"
-            color="white"
-            variant="flat"
-            class="text-primary font-weight-bold"
-          >
-            {{ course.category_name }}
-          </v-chip>
+        <div v-if="viewType !== 'list'" class="pa-2 d-flex flex-wrap gap-2 justify-space-between w-100">
+          <div class="d-flex gap-2 flex-wrap">
+            <v-chip
+              v-if="course.category_name"
+              size="x-small"
+              color="white"
+              variant="flat"
+              class="text-primary font-weight-bold"
+            >
+              {{ course.category_name }}
+            </v-chip>
+
+            <v-chip
+              v-if="course.course_type"
+              size="x-small"
+              :color="course.course_type === 'live' ? 'error' : 'success'"
+              variant="flat"
+              class="font-weight-bold text-uppercase"
+            >
+              <v-icon start size="12">{{ course.course_type === 'live' ? 'mdi-video-wireless' : 'mdi-play-circle-outline' }}</v-icon>
+              {{ course.course_type === 'live' ? 'Live' : 'Recorded' }}
+            </v-chip>
+          </div>
 
           <v-chip
             v-if="course.course_type === 'live' && course.start_date"
             size="x-small"
-            color="error"
+            color="black"
             variant="flat"
-            class="font-weight-bold"
+            class="font-weight-bold text-white"
+            style="opacity: 0.85;"
           >
             <v-icon start size="12">mdi-clock-outline</v-icon>
             {{ countdownText }}

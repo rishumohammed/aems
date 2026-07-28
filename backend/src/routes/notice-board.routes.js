@@ -34,7 +34,7 @@ router.get('/', async (req, res) => {
   try {
     const [notices] = await pool.query(`
       SELECT * FROM notice_board
-      WHERE is_active = 1 AND event_date >= NOW()
+      WHERE is_active = 1 AND DATE(event_date) >= CURDATE()
       ORDER BY event_date ASC
     `);
     res.json(notices);

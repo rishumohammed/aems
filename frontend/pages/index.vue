@@ -335,9 +335,24 @@ const fetchHomepageData = async () => {
     .then(res => { liveCourses.value = res.data?.courses || []; })
     .catch(err => console.error('Failed to load live courses', err));
 
-  api.get('/notice-board')
-    .then(res => { informationItems.value = res.data || []; })
-    .catch(err => console.error('Failed to load notice board', err));
+  Promise.all([
+    api.get('/notice-board').catch(() => ({ data: [] })),
+    api.get('/live-events').catch(() => ({ data: [] }))
+  ]).then(([noticeRes, liveRes]) => {
+    const notices = noticeRes.data || [];
+    const liveEvents = (liveRes.data || []).map((e: any) => ({
+      id: e.id,
+      title: e.title,
+      event_type: 'Live Session',
+      event_date: e.scheduled_at,
+      image_url: e.thumbnail_url,
+      link: '/live-classes'
+    }));
+    
+    informationItems.value = [...notices, ...liveEvents]
+      .sort((a, b) => new Date(a.event_date).getTime() - new Date(b.event_date).getTime())
+      .slice(0, 6);
+  });
 };
 
 const getEventColor = (type: string) => {
