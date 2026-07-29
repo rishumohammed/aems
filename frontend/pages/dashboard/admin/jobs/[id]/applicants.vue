@@ -62,6 +62,7 @@
                 { label: 'Applied', value: 'applied' },
                 { label: 'Viewed', value: 'viewed' },
                 { label: 'Shortlisted', value: 'shortlisted' },
+                { label: 'Selected', value: 'selected' },
                 { label: 'Rejected', value: 'rejected' }
               ]"
               @update:modelValue="updateStatus(item.id, $event)"
@@ -147,7 +148,7 @@ onMounted(async () => {
   try {
     const { data } = await api.get(`/admin/jobs/${jobId}/applicants`);
     job.value = data?.job;
-    applicants.value = data?.applicants || [];
+    applicants.value = (data?.applicants || []).map((a: any) => ({ ...a, status: a.status || 'applied' }));
   } catch (error) {
     console.error('Failed to load applicants', error);
   } finally {
@@ -160,6 +161,7 @@ function getStatusColor(status: string) {
     case 'applied': return 'grey';
     case 'viewed': return 'info';
     case 'shortlisted': return 'success';
+    case 'selected': return 'primary';
     case 'rejected': return 'error';
     default: return 'grey';
   }
