@@ -82,6 +82,11 @@ class CertificateService {
   async createPDF(filePath, certNumber, studentName, courseTitle, config) {
     return new Promise(async (resolve, reject) => {
       try {
+        const [sysConfigs] = await pool.query('SELECT `value` FROM system_config WHERE `key` = "app_logo"');
+        if (sysConfigs.length > 0) {
+          config.app_logo = sysConfigs[0].value;
+        }
+
         // A4 Landscape: 841.89 x 595.28 points
         const doc = new PDFDocument({ size: 'A4', layout: 'landscape', margin: 50 });
         const stream = fs.createWriteStream(filePath);
@@ -91,9 +96,24 @@ class CertificateService {
         doc.rect(0, 0, 841.89, 595.28).fill('#ffffff');
         doc.rect(20, 20, 801.89, 555.28).lineWidth(5).stroke(config.brand_color || '#3b82f6');
 
-        // Text content
-        doc.fillColor(config.brand_color || '#3b82f6').fontSize(24).font('Helvetica-Bold')
-           .text(config.institution_name || 'AEMS Academy', 0, 80, { align: 'center' });
+        // Logo or Text content
+        let logoDrawn = false;
+        if (config.app_logo) {
+          const logoPath = path.join(process.cwd(), config.app_logo);
+          if (fs.existsSync(logoPath)) {
+            try {
+              doc.image(logoPath, (841.89 - 250) / 2, 50, { fit: [250, 70], align: 'center', valign: 'center' });
+              logoDrawn = true;
+            } catch (e) {
+              console.error('Failed to load logo for certificate:', e);
+            }
+          }
+        }
+        
+        if (!logoDrawn) {
+          doc.fillColor(config.brand_color || '#3b82f6').fontSize(24).font('Helvetica-Bold')
+             .text(config.institution_name || 'AEMS Academy', 0, 80, { align: 'center' });
+        }
 
         doc.fillColor('#000000').fontSize(40).font('Helvetica-Bold')
            .text('CERTIFICATE OF COMPLETION', 0, 150, { align: 'center' });
