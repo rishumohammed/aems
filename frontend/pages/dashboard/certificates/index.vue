@@ -5,12 +5,12 @@
         <h1 class="text-h4 font-weight-bold mb-1">{{ pageTitle }}</h1>
         <p class="text-subtitle-1 text-medium-emphasis mb-6">{{ pageSubtitle }}</p>
       </div>
-      <AppButton v-if="userRole !== 'student'" icon="mdi-certificate-outline" @click="showIssueModal = true">
+      <AppButton v-if="userRole !== 'student'" icon="mdi-certificate-outline" @click="openIssueModal">
         Issue Certificate
       </AppButton>
     </div>
 
-    <IssueCertificateModal v-model="showIssueModal" @issued="fetchData" />
+    <IssueCertificateModal v-model="showIssueModal" :editData="editData" @issued="fetchData" />
     <ExternalCertificateModal v-model="showExternalModal" :certificate="selectedExternalCert" @saved="fetchExternalData" />
 
     <div v-if="userRole === 'student'" class="mb-6">
@@ -58,8 +58,10 @@
 
             <template #item.actions="{ item }">
               <div class="d-flex justify-end gap-1">
-                <AppButton size="xs" variant="g" icon="mdi-download" @click="downloadCertificate(item)">Download</AppButton>
+                <AppButton size="xs" variant="g" icon="mdi-download" @click="downloadCertificate(item)"></AppButton>
                 <AppButton size="xs" variant="g" icon="mdi-whatsapp" @click="shareOnWhatsApp(item)"></AppButton>
+                <AppButton v-if="userRole !== 'student'" size="xs" variant="g" icon="mdi-pencil" @click="openEditModal(item)"></AppButton>
+                <AppButton v-if="userRole !== 'student'" size="xs" variant="g" icon="mdi-delete" class="text-error" @click="confirmDelete(item)"></AppButton>
               </div>
             </template>
           </AppTable>
@@ -152,6 +154,7 @@ const authStore = useAuthStore();
 const api = useApi();
 const loading = ref(true);
 const showIssueModal = ref(false);
+const editData = ref<any>(null);
 const certificates = ref<any[]>([]);
 const userRole = computed(() => authStore.userRole);
 
@@ -186,6 +189,27 @@ const fetchData = async () => {
     console.error('Failed to fetch certificates:', error);
   } finally {
     loading.value = false;
+  }
+};
+
+const openIssueModal = () => {
+  editData.value = null;
+  showIssueModal.value = true;
+};
+
+const openEditModal = (item: any) => {
+  editData.value = item;
+  showIssueModal.value = true;
+};
+
+const confirmDelete = async (item: any) => {
+  if (!confirm(`Are you sure you want to permanently delete certificate ${item.cert_number}?`)) return;
+  try {
+    await api.delete(`/certs/admin/${item.cert_number}`);
+    await fetchData();
+  } catch (error) {
+    console.error('Failed to delete certificate:', error);
+    alert('Failed to delete certificate');
   }
 };
 
