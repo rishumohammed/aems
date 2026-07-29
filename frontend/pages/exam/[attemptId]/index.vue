@@ -196,20 +196,20 @@
 
     <!-- Submit Confirmation Dialog -->
     <v-dialog v-model="confirmSubmit" max-width="460" persistent>
-      <v-card rounded="xl" color="#1a1a2e" border>
-        <v-card-text class="pa-8 text-center">
+      <v-card rounded="xl" class="pa-4 bg-white" border>
+        <v-card-text class="text-center">
           <v-icon size="56" color="warning" class="mb-4">mdi-alert-circle-outline</v-icon>
-          <h2 class="text-h5 font-weight-bold text-white mb-2">Submit Exam?</h2>
-          <p class="text-blue-grey-300 mb-4">
-            You have answered <strong class="text-white">{{ examStore.answeredCount }}</strong> of
-            <strong class="text-white">{{ examStore.totalQuestions }}</strong> questions.
+          <h2 class="text-h5 font-weight-bold text-dark mb-2">Submit Exam?</h2>
+          <p class="text-secondary mb-4">
+            You have answered <strong class="text-primary">{{ examStore.answeredCount }}</strong> of
+            <strong class="text-primary">{{ examStore.totalQuestions }}</strong> questions.
             <span v-if="examStore.unansweredCount > 0" class="d-block mt-2 text-warning">
               {{ examStore.unansweredCount }} question{{ examStore.unansweredCount !== 1 ? 's' : '' }} will be left blank.
             </span>
           </p>
           <div class="d-flex gap-3 justify-center">
-            <v-btn variant="tonal" color="grey" @click="confirmSubmit = false">Review Answers</v-btn>
-            <v-btn color="error" :loading="examStore.isSubmitting" @click="doSubmit">Submit Now</v-btn>
+            <v-btn variant="tonal" color="secondary" rounded="pill" class="px-6 font-weight-bold text-capitalize" @click="confirmSubmit = false">Review Answers</v-btn>
+            <v-btn color="primary" rounded="pill" class="px-6 font-weight-bold text-capitalize" :loading="examStore.isSubmitting" @click="doSubmit">Submit Now</v-btn>
           </div>
         </v-card-text>
       </v-card>
@@ -217,11 +217,11 @@
 
     <!-- Auto-submit warning -->
     <v-dialog v-model="autoSubmitWarning" max-width="380" persistent>
-      <v-card rounded="xl" color="#1a1a2e" border>
-        <v-card-text class="pa-8 text-center">
+      <v-card rounded="xl" class="pa-4 bg-white" border>
+        <v-card-text class="text-center">
           <v-icon size="56" color="error" class="mb-4">mdi-timer-alert</v-icon>
-          <h2 class="text-h5 font-weight-bold text-white mb-2">Time's Up!</h2>
-          <p class="text-blue-grey-300">Auto-submitting in <strong class="text-error text-h5">{{ autoSubmitCountdown }}</strong>s...</p>
+          <h2 class="text-h5 font-weight-bold text-dark mb-2">Time's Up!</h2>
+          <p class="text-secondary">Auto-submitting in <strong class="text-error text-h5">{{ autoSubmitCountdown }}</strong>s...</p>
         </v-card-text>
       </v-card>
     </v-dialog>
