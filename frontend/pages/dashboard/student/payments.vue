@@ -22,7 +22,7 @@
     <v-row class="mb-8">
       <v-col cols="12" sm="4">
         <v-card rounded="xl" flat border class="pa-6 bg-gradient-blue text-white h-100">
-          <div class="text-caption text-white-50 mb-1 font-weight-bold uppercase">Total Invested</div>
+          <div class="text-caption text-white-50 mb-1 font-weight-bold uppercase">Total Paid</div>
           <div class="text-h4 font-weight-black mb-1">₹{{ totalSpent.toLocaleString() }}</div>
           <div class="text-caption text-white-50 d-flex align-center">
             <v-icon size="14" class="mr-1">mdi-check-circle</v-icon> Across {{ invoices.length }} enrollments
