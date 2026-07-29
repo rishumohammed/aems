@@ -340,6 +340,30 @@ router.post('/admin/:certNumber/reissue', authenticateJWT, isAdmin, async (req, 
   }
 });
 
+// Update Certificate
+router.put('/admin/:certNumber', authenticateJWT, isAdmin, async (req, res) => {
+  try {
+    const { studentId, courseId } = req.body;
+    if (!studentId || !courseId) {
+      return res.status(400).json({ message: 'studentId and courseId are required' });
+    }
+    const result = await certificateService.updateCertificate(req.params.certNumber, studentId, courseId);
+    res.json({ message: 'Certificate updated', ...result });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Delete Certificate
+router.delete('/admin/:certNumber', authenticateJWT, isAdmin, async (req, res) => {
+  try {
+    await certificateService.deleteCertificate(req.params.certNumber);
+    res.json({ message: 'Certificate deleted' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 // Get Template Config
 router.get('/admin/template-config', authenticateJWT, isAdmin, async (req, res) => {
   try {

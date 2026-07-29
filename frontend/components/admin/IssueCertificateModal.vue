@@ -3,14 +3,14 @@
     <v-card rounded="xl" class="pa-4">
       <v-card-title class="d-flex align-center">
         <v-icon color="primary" class="mr-2">mdi-certificate-outline</v-icon>
-        <span class="text-h6 font-weight-bold">Manual Certificate Issuance</span>
+        <span class="text-h6 font-weight-bold">{{ props.editData ? 'Edit Certificate' : 'Manual Certificate Issuance' }}</span>
         <v-spacer></v-spacer>
         <v-btn icon="mdi-close" variant="text" size="small" @click="show = false"></v-btn>
       </v-card-title>
 
       <v-card-text class="mt-4">
         <p class="text-secondary mb-6">
-          Manually issue a certificate to a student. This will bypass exam requirements.
+          {{ props.editData ? 'Update an existing certificate. This will regenerate the PDF.' : 'Manually issue a certificate to a student. This will bypass exam requirements.' }}
         </p>
 
         <v-autocomplete
@@ -53,7 +53,7 @@
           :disabled="!selectedStudent || !selectedCourse"
           @click="issueCertificate"
         >
-          Issue Now
+          {{ props.editData ? 'Update' : 'Issue Now' }}
         </v-btn>
       </v-card-actions>
     </v-card>
@@ -65,7 +65,11 @@ import { ref, watch, onMounted, computed } from 'vue';
 import { useApi } from '@/composables/useApi';
 
 const props = defineProps({
-  modelValue: Boolean
+  modelValue: Boolean,
+  editData: {
+    type: Object,
+    default: null
+  }
 });
 
 const emit = defineEmits(['update:modelValue', 'issued']);
@@ -91,10 +95,20 @@ const filteredCourses = computed(() => {
   return list;
 });
 
-watch(() => props.modelValue, (val) => {
+watch(() => props.modelValue, async (val) => {
   show.value = val;
   if (val) {
-    loadData();
+    await loadData();
+    if (props.editData) {
+      selectedStudent.value = props.editData.student_id;
+      // Wait for courses to load then set selected course
+      setTimeout(() => {
+        selectedCourse.value = props.editData.course_id;
+      }, 500);
+    } else {
+      selectedStudent.value = null;
+      selectedCourse.value = null;
+    }
   }
 });
 
@@ -154,20 +168,27 @@ const issueCertificate = async () => {
 
   issuing.value = true;
   try {
-    await api.post('/certs/admin/issue-manual', {
-      studentId: selectedStudent.value,
-      courseId: selectedCourse.value
-    });
+    if (props.editData) {
+      await api.put(`/certs/admin/${props.editData.cert_number}`, {
+        studentId: selectedStudent.value,
+        courseId: selectedCourse.value
+      });
+      alert('Certificate updated successfully!');
+    } else {
+      await api.post('/certs/admin/issue-manual', {
+        studentId: selectedStudent.value,
+        courseId: selectedCourse.value
+      });
+      alert('Certificate issued successfully!');
+    }
     
     emit('issued');
     show.value = false;
     selectedStudent.value = null;
     selectedCourse.value = null;
-    
-    alert('Certificate issued successfully!');
   } catch (error: any) {
-    console.error('Failed to issue certificate:', error);
-    alert(error.response?.data?.message || 'Failed to issue certificate');
+    console.error('Failed to issue/update certificate:', error);
+    alert(error.response?.data?.message || 'Failed to process certificate');
   } finally {
     issuing.value = false;
   }

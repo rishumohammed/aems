@@ -6,7 +6,7 @@
         <p class="text-blue-grey-300">View, revoke, and re-issue student certificates</p>
       </div>
       <div class="d-flex gap-2">
-        <v-btn v-if="authStore.userRole === 'super_admin'" color="success" variant="flat" rounded="lg" prepend-icon="mdi-plus" @click="showIssueModal = true">
+        <v-btn v-if="authStore.userRole === 'super_admin'" color="success" variant="flat" rounded="lg" prepend-icon="mdi-plus" @click="openModal()">
           Issue Certificate
         </v-btn>
         <v-btn v-if="authStore.userRole === 'super_admin'" color="primary" variant="tonal" rounded="lg" prepend-icon="mdi-palette" to="/dashboard/admin/certificate-template">
@@ -15,7 +15,7 @@
       </div>
     </div>
 
-    <IssueCertificateModal v-model="showIssueModal" @issued="loadCerts" />
+    <IssueCertificateModal v-model="showIssueModal" :editData="editData" @issued="loadCerts" />
 
     <v-card color="#1a1a2e" rounded="xl" border>
       <v-card-title class="pa-4 d-flex align-center">
@@ -75,6 +75,15 @@
           <div class="d-flex gap-2">
             <v-btn icon="mdi-download" size="small" variant="text" color="primary" @click="downloadCert(item.cert_number)"></v-btn>
             <v-btn 
+              v-if="authStore.userRole === 'super_admin'"
+              icon="mdi-pencil" 
+              size="small" 
+              variant="text" 
+              color="info"
+              @click="openModal(item)"
+              title="Edit Certificate"
+            ></v-btn>
+            <v-btn 
               v-if="item.status === 'active' && authStore.userRole === 'super_admin'"
               icon="mdi-close-octagon" 
               size="small" 
@@ -91,6 +100,15 @@
               color="warning"
               @click="confirmReissue(item)"
               title="Re-issue Certificate"
+            ></v-btn>
+            <v-btn 
+              v-if="authStore.userRole === 'super_admin'"
+              icon="mdi-delete" 
+              size="small" 
+              variant="text" 
+              color="error"
+              @click="confirmDelete(item)"
+              title="Delete Certificate"
             ></v-btn>
           </div>
         </template>
@@ -112,6 +130,7 @@ const authStore = useAuthStore();
 const certs = ref<any[]>([]);
 const loading = ref(false);
 const showIssueModal = ref(false);
+const editData = ref<any>(null);
 const search = ref('');
 const statusFilter = ref('All');
 
@@ -143,6 +162,11 @@ const loadCerts = async () => {
   } finally {
     loading.value = false;
   }
+};
+
+const openModal = (item: any = null) => {
+  editData.value = item;
+  showIssueModal.value = true;
 };
 
 const downloadCert = async (certNumber: string) => {
@@ -180,6 +204,16 @@ const confirmReissue = async (item: any) => {
     await loadCerts();
   } catch (err) {
     alert('Failed to re-issue certificate');
+  }
+};
+
+const confirmDelete = async (item: any) => {
+  if (!confirm(`Are you sure you want to permanently delete certificate ${item.cert_number}?`)) return;
+  try {
+    await api.delete(`/certs/admin/${item.cert_number}`);
+    await loadCerts();
+  } catch (err) {
+    alert('Failed to delete certificate');
   }
 };
 </script>

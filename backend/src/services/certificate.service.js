@@ -226,7 +226,8 @@ class CertificateService {
   // Admin Actions
   async getAllCertificates(userId, role) {
     let query = `SELECT c.id, c.cert_number, c.issued_at, c.status, c.revoked_at, c.pdf_path,
-              co.title as course_title, u.name as student_name, u.email
+              co.title as course_title, u.name as student_name, u.email,
+              c.student_id, c.course_id
        FROM certificates c
        JOIN courses co ON c.course_id = co.id
        JOIN users u ON c.student_id = u.id`;
@@ -361,6 +362,55 @@ class CertificateService {
     );
 
     return { certId, certNumber, pdfUrl };
+  }
+
+  async updateCertificate(certNumber, studentId, courseId) {
+    const [certs] = await pool.query('SELECT pdf_path FROM certificates WHERE cert_number = ?', [certNumber]);
+    if (certs.length === 0) throw new Error('Certificate not found');
+
+    const [students] = await pool.query('SELECT name FROM users WHERE id = ?', [studentId]);
+    const [courses] = await pool.query('SELECT title FROM courses WHERE id = ?', [courseId]);
+
+    if (students.length === 0) throw new Error('Student not found');
+    if (courses.length === 0) throw new Error('Course not found');
+
+    const studentName = students[0].name;
+    const courseTitle = courses[0].title;
+
+    const [configs] = await pool.query('SELECT * FROM cert_template_config WHERE id = 1');
+    const config = configs[0] || {};
+
+    // Remove old PDF
+    const oldPdfPath = path.join(process.cwd(), certs[0].pdf_path);
+    if (fs.existsSync(oldPdfPath)) {
+      fs.unlinkSync(oldPdfPath);
+    }
+
+    const pdfDir = path.join(process.cwd(), 'uploads', 'certificates');
+    const pdfPathLocal = path.join(pdfDir, `${certNumber}.pdf`);
+    const pdfUrl = `/uploads/certificates/${certNumber}.pdf`;
+
+    await this.createPDF(pdfPathLocal, certNumber, studentName, courseTitle, config);
+
+    await pool.query(
+      'UPDATE certificates SET student_id = ?, course_id = ?, pdf_path = ? WHERE cert_number = ?',
+      [studentId, courseId, pdfUrl, certNumber]
+    );
+
+    return { certNumber, pdfUrl };
+  }
+
+  async deleteCertificate(certNumber) {
+    const [certs] = await pool.query('SELECT pdf_path FROM certificates WHERE cert_number = ?', [certNumber]);
+    if (certs.length === 0) throw new Error('Certificate not found');
+
+    const pdfPath = path.join(process.cwd(), certs[0].pdf_path);
+    if (fs.existsSync(pdfPath)) {
+      fs.unlinkSync(pdfPath);
+    }
+
+    await pool.query('DELETE FROM certificates WHERE cert_number = ?', [certNumber]);
+    return true;
   }
 
   // Config
