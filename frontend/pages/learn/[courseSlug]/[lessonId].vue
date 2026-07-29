@@ -17,15 +17,26 @@
           <v-icon color="primary" size="48">mdi-lock-outline</v-icon>
         </v-avatar>
         <h2 class="text-h4 font-weight-black mb-4">This lesson is locked</h2>
-        <p class="text-body-1 text-grey-darken-1 mb-8 max-width-500 mx-auto">
-          Your payment for <span class="font-weight-bold text-grey-darken-4">{{ enrollment?.title || 'this course' }}</span> is incomplete. Please settle your pending invoice to unlock this lesson.
-        </p>
-        <v-btn color="primary" size="large" rounded="pill" class="px-10 font-weight-black" to="/dashboard/finance">
-          Complete Payment
-        </v-btn>
-        <v-btn variant="text" color="primary" class="mt-4 text-none font-weight-bold" @click="navigateToFirstPreview">
-          Watch Free Preview
-        </v-btn>
+        
+        <template v-if="enrollment?.status === 'suspended_offline'">
+          <p class="text-body-1 text-grey-darken-1 mb-8 max-width-500 mx-auto">
+            Payment waiting for approval, For more details contact Support
+          </p>
+          <v-btn variant="text" color="primary" class="mt-4 text-none font-weight-bold" @click="navigateToFirstPreview">
+            Watch Free Preview
+          </v-btn>
+        </template>
+        <template v-else>
+          <p class="text-body-1 text-grey-darken-1 mb-8 max-width-500 mx-auto">
+            Your payment for <span class="font-weight-bold text-grey-darken-4">{{ enrollment?.title || 'this course' }}</span> is incomplete. Please settle your pending invoice to unlock this lesson.
+          </p>
+          <v-btn color="primary" size="large" rounded="pill" class="px-10 font-weight-black" to="/dashboard/finance">
+            Complete Payment
+          </v-btn>
+          <v-btn variant="text" color="primary" class="mt-4 text-none font-weight-bold" @click="navigateToFirstPreview">
+            Watch Free Preview
+          </v-btn>
+        </template>
       </div>
 
       <!-- Video Area -->
