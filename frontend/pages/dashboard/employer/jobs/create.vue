@@ -149,6 +149,56 @@
               persistent-hint
             ></v-combobox>
           </v-col>
+          <v-col cols="12" md="6">
+            <v-select
+              v-model="formData.gender_preference"
+              label="Gender Preference"
+              :items="[{title:'Any',value:'any'}, {title:'Male',value:'male'}, {title:'Female',value:'female'}, {title:'Other',value:'other'}]"
+              variant="outlined"
+              color="primary"
+            ></v-select>
+          </v-col>
+          <v-col cols="12" md="6">
+            <v-select
+              v-model="formData.qualification_req"
+              label="Minimum Qualification"
+              :items="['High School', 'Diploma', 'Bachelors', 'Masters', 'PhD']"
+              variant="outlined"
+              color="primary"
+              clearable
+            ></v-select>
+          </v-col>
+          <v-col cols="12" md="6">
+            <v-select
+              v-model="formData.language_req"
+              label="Required Languages"
+              :items="['English', 'Spanish', 'French', 'German', 'Mandarin', 'Hindi', 'Arabic']"
+              multiple
+              chips
+              variant="outlined"
+              color="primary"
+              clearable
+            ></v-select>
+          </v-col>
+          <v-col cols="12" md="6">
+            <v-text-field
+              v-model="formData.specialization_req"
+              label="Field / Specialization"
+              variant="outlined"
+              color="primary"
+              placeholder="e.g. Computer Science"
+            ></v-text-field>
+          </v-col>
+          <v-col cols="12" md="6">
+            <v-select
+              v-model="formData.joining_status_req"
+              label="Expected Joining Status"
+              :items="['Immediate', '15 Days', '30 Days', '60 Days', '90 Days']"
+              variant="outlined"
+              color="primary"
+              clearable
+            ></v-select>
+          </v-col>
         </v-row>
 
         <v-divider class="my-6 opacity-20"></v-divider>
@@ -222,7 +272,12 @@ const formData = ref({
   experience_level: '',
   number_of_openings: 1,
   deadline: '',
-  apply_url: ''
+  apply_url: '',
+  gender_preference: 'any',
+  qualification_req: null,
+  language_req: [],
+  specialization_req: '',
+  joining_status_req: null
 });
 
 const editor = shallowRef<Editor | undefined>(undefined);

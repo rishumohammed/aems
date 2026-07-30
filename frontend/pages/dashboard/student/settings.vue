@@ -320,6 +320,12 @@
               <v-col cols="12">
                 <v-combobox v-model="form.skills" label="Key Skills" multiple chips variant="outlined" rounded="lg" density="comfortable" hint="Press enter to add skill" persistent-hint></v-combobox>
               </v-col>
+              <v-col cols="12" md="6">
+                <v-combobox v-model="form.language_proficiency" label="Language Proficiency" multiple chips variant="outlined" rounded="lg" density="comfortable" hint="Press enter to add languages (e.g. English, Spanish)" persistent-hint></v-combobox>
+              </v-col>
+              <v-col cols="12" md="6">
+                <v-select v-model="form.joining_status" :items="['Immediate', '15 Days', '30 Days', '60 Days', '90 Days']" label="Joining Status (Notice Period)" variant="outlined" rounded="lg" density="comfortable" clearable></v-select>
+              </v-col>
             </v-row>
 
             <v-divider class="my-6"></v-divider>
@@ -561,7 +567,9 @@ const form = ref({
   current_status: 'fresher',
   experience_years: 0,
   education_json: [] as any[],
-  experience_json: [] as any[]
+  experience_json: [] as any[],
+  language_proficiency: [] as string[],
+  joining_status: null as string | null
 });
 
 const jobCategories = ref<any[]>([]);
@@ -631,7 +639,9 @@ const loadProfile = async () => {
       current_status: data.profile?.current_status || 'fresher',
       experience_years: data.profile?.experience_years || 0,
       education_json: data.profile?.education_json ? (typeof data.profile.education_json === 'string' ? JSON.parse(data.profile.education_json) : data.profile.education_json) : [],
-      experience_json: data.profile?.experience_json ? (typeof data.profile.experience_json === 'string' ? JSON.parse(data.profile.experience_json) : data.profile.experience_json) : []
+      experience_json: data.profile?.experience_json ? (typeof data.profile.experience_json === 'string' ? JSON.parse(data.profile.experience_json) : data.profile.experience_json) : [],
+      language_proficiency: data.profile?.language_proficiency ? (typeof data.profile.language_proficiency === 'string' ? JSON.parse(data.profile.language_proficiency) : data.profile.language_proficiency) : [],
+      joining_status: data.profile?.joining_status || null
     };
 
     // Load Notification Settings if they exist

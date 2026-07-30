@@ -7,8 +7,8 @@
       </div>
     </div>
 
-    <v-row class="mb-6">
-      <v-col cols="12" sm="4">
+    <v-row class="mb-4">
+      <v-col cols="12" sm="3">
         <v-select
           v-model="statusFilter"
           :items="['All', 'Applied', 'Viewed', 'Shortlisted', 'Rejected']"
@@ -20,7 +20,45 @@
           class="text-grey-darken-4"
         ></v-select>
       </v-col>
-      <v-col cols="12" sm="8">
+      <v-col cols="12" sm="3">
+        <v-select
+          v-model="genderFilter"
+          :items="['All', 'male', 'female', 'other']"
+          label="Gender"
+          variant="outlined"
+          color="primary"
+          bg-color="rgba(255,255,255,0.05)"
+          hide-details
+          class="text-grey-darken-4"
+        ></v-select>
+      </v-col>
+      <v-col cols="12" sm="3">
+        <v-select
+          v-model="qualificationFilter"
+          :items="['All', 'High School', 'Diploma', 'Bachelors', 'Masters', 'PhD']"
+          label="Qualification"
+          variant="outlined"
+          color="primary"
+          bg-color="rgba(255,255,255,0.05)"
+          hide-details
+          class="text-grey-darken-4"
+        ></v-select>
+      </v-col>
+      <v-col cols="12" sm="3">
+        <v-select
+          v-model="joiningStatusFilter"
+          :items="['All', 'Immediate', '15 Days', '30 Days', '60 Days', '90 Days']"
+          label="Joining Status"
+          variant="outlined"
+          color="primary"
+          bg-color="rgba(255,255,255,0.05)"
+          hide-details
+          class="text-grey-darken-4"
+        ></v-select>
+      </v-col>
+    </v-row>
+    <v-row class="mb-6">
+      <v-col cols="12">
         <v-text-field
           v-model="search"
           prepend-inner-icon="mdi-magnify"
@@ -131,6 +169,9 @@
               <p><strong>Institution:</strong> {{ selectedApplicant.institution || 'N/A' }} ({{ selectedApplicant.year_of_passing || 'N/A' }})</p>
               <p><strong>Experience:</strong> {{ selectedApplicant.experience_years || 0 }} years</p>
               <p><strong>Last Role:</strong> {{ selectedApplicant.last_role || 'N/A' }} at {{ selectedApplicant.last_company || 'N/A' }}</p>
+              <p><strong>Gender:</strong> <span class="text-capitalize">{{ selectedApplicant.applicant_gender || 'Not specified' }}</span></p>
+              <p><strong>Joining Status:</strong> {{ selectedApplicant.joining_status || 'Not specified' }}</p>
+              <p><strong>Languages:</strong> {{ parseLanguages(selectedApplicant.language_proficiency) }}</p>
             </v-col>
             <v-col cols="12" md="6">
               <h4 class="text-subtitle-1 font-weight-bold mb-2">Skills & Links</h4>
@@ -235,7 +276,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, watch } from 'vue';
 import { useApi } from '@/composables/useApi';
 
 definePageMeta({ layout: 'dashboard', middleware: ['auth', 'role'], role: ['employer'] });
@@ -246,6 +287,9 @@ const applications = ref<any[]>([]);
 const loading = ref(false);
 const search = ref('');
 const statusFilter = ref('All');
+const genderFilter = ref('All');
+const qualificationFilter = ref('All');
+const joiningStatusFilter = ref('All');
 
 const detailDialog = ref(false);
 const selectedApplicant = ref<any>(null);
@@ -278,7 +322,12 @@ onMounted(async () => {
 const loadApplications = async () => {
   loading.value = true;
   try {
-    const res = await api.get('/employers/applications');
+    let url = '/employers/applications?';
+    if (genderFilter.value !== 'All') url += `gender=${encodeURIComponent(genderFilter.value)}&`;
+    if (qualificationFilter.value !== 'All') url += `qualification=${encodeURIComponent(qualificationFilter.value)}&`;
+    if (joiningStatusFilter.value !== 'All') url += `joining_status=${encodeURIComponent(joiningStatusFilter.value)}&`;
+    
+    const res = await api.get(url);
     applications.value = res.data || res;
   } catch (error) {
     console.error('Failed to load applications', error);
@@ -286,6 +335,10 @@ const loadApplications = async () => {
     loading.value = false;
   }
 };
+
+watch([genderFilter, qualificationFilter, joiningStatusFilter], () => {
+  loadApplications();
+});
 
 const filteredApplications = computed(() => {
   if (statusFilter.value === 'All') return applications.value;
@@ -298,6 +351,19 @@ const parseSkills = (skillsJson: any) => {
     try { return JSON.parse(skillsJson); } catch(e) { return []; }
   }
   return skillsJson;
+};
+
+const parseLanguages = (langsJson: any) => {
+  if (!langsJson) return 'Not specified';
+  if (typeof langsJson === 'string') {
+    try {
+      const arr = JSON.parse(langsJson);
+      if (Array.isArray(arr) && arr.length > 0) return arr.join(', ');
+    } catch(e) {}
+  } else if (Array.isArray(langsJson) && langsJson.length > 0) {
+    return langsJson.join(', ');
+  }
+  return 'Not specified';
 };
 
 const getResumeUrl = (path: string) => {

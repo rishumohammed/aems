@@ -61,7 +61,7 @@ router.post('/jobs', authenticateJWT, isEmployer, async (req, res) => {
   const { 
     title, category_id, location, is_remote, type, salary_range, description, 
     required_skills, nice_to_have_skills, experience_level, number_of_openings, deadline, apply_url,
-    action
+    action, gender_preference, qualification_req, language_req, specialization_req, joining_status_req
   } = req.body;
   
   try {
@@ -87,9 +87,9 @@ router.post('/jobs', authenticateJWT, isEmployer, async (req, res) => {
     const status = action === 'submit' ? 'pending_approval' : 'draft';
 
     await pool.query(
-      `INSERT INTO jobs (id, title, company, category, location, is_remote, type, salary_range, description, requirements_json, deadline, apply_url, posted_by, status)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [jobId, title, company, category_id, location, is_remote ? 1 : 0, type, salary_range, description, requirements, deadline || null, apply_url, req.user.id, status]
+      `INSERT INTO jobs (id, title, company, category, location, is_remote, type, salary_range, description, requirements_json, deadline, apply_url, posted_by, status, gender_preference, qualification_req, language_req, specialization_req, joining_status_req)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [jobId, title, company, category_id, location, is_remote ? 1 : 0, type, salary_range, description, requirements, deadline || null, apply_url, req.user.id, status, gender_preference || 'any', qualification_req || null, language_req ? JSON.stringify(language_req) : null, specialization_req || null, joining_status_req || null]
     );
 
     res.status(201).json({ message: status === 'pending_approval' ? 'Job submitted for review' : 'Job saved as draft', jobId });
@@ -103,7 +103,7 @@ router.put('/jobs/:id', authenticateJWT, isEmployer, async (req, res) => {
   const { 
     title, category_id, location, is_remote, type, salary_range, description, 
     required_skills, nice_to_have_skills, experience_level, number_of_openings, deadline, apply_url,
-    action
+    action, gender_preference, qualification_req, language_req, specialization_req, joining_status_req
   } = req.body;
   try {
     const requirements = JSON.stringify({ 
@@ -125,9 +125,9 @@ router.put('/jobs/:id', authenticateJWT, isEmployer, async (req, res) => {
     const newStatus = action === 'submit' ? 'pending_approval' : currentStatus;
 
     const [result] = await pool.query(
-      `UPDATE jobs SET title=?, category=?, location=?, is_remote=?, type=?, salary_range=?, description=?, requirements_json=?, deadline=?, apply_url=?, status=?
+      `UPDATE jobs SET title=?, category=?, location=?, is_remote=?, type=?, salary_range=?, description=?, requirements_json=?, deadline=?, apply_url=?, status=?, gender_preference=?, qualification_req=?, language_req=?, specialization_req=?, joining_status_req=?
        WHERE id=? AND posted_by=?`,
-      [title, category_id, location, is_remote ? 1 : 0, type, salary_range, description, requirements, deadline || null, apply_url, newStatus, req.params.id, req.user.id]
+      [title, category_id, location, is_remote ? 1 : 0, type, salary_range, description, requirements, deadline || null, apply_url, newStatus, gender_preference || 'any', qualification_req || null, language_req ? JSON.stringify(language_req) : null, specialization_req || null, joining_status_req || null, req.params.id, req.user.id]
     );
 
     res.json({ message: newStatus === 'pending_approval' ? 'Job resubmitted for review' : 'Job updated' });

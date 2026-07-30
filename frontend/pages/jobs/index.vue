@@ -57,7 +57,72 @@
                 </div>
               </div>
 
+              <div class="mb-6">
+                <div class="text-subtitle-2 font-weight-bold mb-3">Gender Preference</div>
+                <v-select
+                  v-model="selectedGender"
+                  :items="['male', 'female', 'other', 'any']"
+                  variant="outlined"
+                  density="compact"
+                  hide-details
+                  clearable
+                  placeholder="Any"
+                ></v-select>
+              </div>
 
+              <div class="mb-6">
+                <div class="text-subtitle-2 font-weight-bold mb-3">Qualification</div>
+                <v-select
+                  v-model="selectedQualification"
+                  :items="['High School', 'Diploma', 'Bachelors', 'Masters', 'PhD']"
+                  variant="outlined"
+                  density="compact"
+                  hide-details
+                  clearable
+                  placeholder="Any"
+                ></v-select>
+              </div>
+
+              <div class="mb-6">
+                <div class="text-subtitle-2 font-weight-bold mb-3">Languages</div>
+                <v-select
+                  v-model="selectedLanguages"
+                  :items="['English', 'Spanish', 'French', 'German', 'Mandarin', 'Hindi', 'Arabic']"
+                  multiple
+                  chips
+                  variant="outlined"
+                  density="compact"
+                  hide-details
+                  clearable
+                  placeholder="Any"
+                ></v-select>
+              </div>
+
+              <div class="mb-6">
+                <div class="text-subtitle-2 font-weight-bold mb-3">Specialization</div>
+                <v-text-field
+                  v-model="selectedSpecialization"
+                  variant="outlined"
+                  density="compact"
+                  hide-details
+                  clearable
+                  placeholder="e.g. Computer Science"
+                  @update:model-value="debounceSearch"
+                ></v-text-field>
+              </div>
+
+              <div class="mb-6">
+                <div class="text-subtitle-2 font-weight-bold mb-3">Joining Status</div>
+                <v-select
+                  v-model="selectedJoiningStatus"
+                  :items="['Immediate', '15 Days', '30 Days', '60 Days', '90 Days']"
+                  variant="outlined"
+                  density="compact"
+                  hide-details
+                  clearable
+                  placeholder="Any"
+                ></v-select>
+              </div>
             </v-card>
           </v-col>
 
@@ -125,6 +190,11 @@ const apiBase = config.public.apiBase;
 const search = ref('');
 const selectedCategories = ref([]);
 const selectedTypes = ref([]);
+const selectedGender = ref(null);
+const selectedQualification = ref(null);
+const selectedLanguages = ref([]);
+const selectedSpecialization = ref('');
+const selectedJoiningStatus = ref(null);
 const sortBy = ref('Newest');
 const page = ref(1);
 const limit = 10;
@@ -148,8 +218,13 @@ const { data: jobsData, pending, refresh } = await useFetch<any>(() => {
     if (search.value) url += `&search=${encodeURIComponent(search.value)}`;
     if (selectedCategories.value.length > 0) url += `&category=${selectedCategories.value.join(',')}`;
     if (selectedTypes.value.length > 0) url += `&type=${selectedTypes.value.join(',')}`;
+    if (selectedGender.value) url += `&gender=${encodeURIComponent(selectedGender.value)}`;
+    if (selectedQualification.value) url += `&qualification=${encodeURIComponent(selectedQualification.value)}`;
+    if (selectedLanguages.value.length > 0) url += `&languages=${selectedLanguages.value.map(l => encodeURIComponent(l)).join(',')}`;
+    if (selectedSpecialization.value) url += `&specialization=${encodeURIComponent(selectedSpecialization.value)}`;
+    if (selectedJoiningStatus.value) url += `&joining_status=${encodeURIComponent(selectedJoiningStatus.value)}`;
     return url;
-}, { watch: [page, selectedCategories, selectedTypes] });
+}, { watch: [page, selectedCategories, selectedTypes, selectedGender, selectedQualification, selectedLanguages, selectedJoiningStatus] });
 
 const jobs = computed(() => jobsData.value?.jobs || []);
 const totalJobs = computed(() => jobsData.value?.total || 0);
@@ -169,6 +244,11 @@ const resetFilters = () => {
   search.value = '';
   selectedCategories.value = [];
   selectedTypes.value = [];
+  selectedGender.value = null;
+  selectedQualification.value = null;
+  selectedLanguages.value = [];
+  selectedSpecialization.value = '';
+  selectedJoiningStatus.value = null;
   page.value = 1;
   refresh();
 };

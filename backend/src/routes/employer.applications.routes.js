@@ -11,16 +11,31 @@ const isEmployer = authorizeRoles('employer');
 // Get all applications for employer's jobs
 router.get('/', authenticateJWT, isEmployer, async (req, res) => {
   try {
-    const [applications] = await pool.query(
-      `SELECT ja.*, j.title as job_title, u.name as user_name, u.email as user_email, u.phone as user_phone,
+    const { gender, qualification, joining_status } = req.query;
+    let query = `SELECT ja.*, j.title as job_title, u.name as user_name, u.email as user_email, u.phone as user_phone,
               (SELECT COUNT(*) FROM job_interviews WHERE application_id = ja.id) as interview_count
        FROM job_applications ja
        JOIN jobs j ON ja.job_id = j.id
        JOIN users u ON ja.student_id = u.id
-       WHERE j.posted_by = ?
-       ORDER BY ja.applied_at DESC`,
-      [req.user.id]
-    );
+       WHERE j.posted_by = ?`;
+    const params = [req.user.id];
+
+    if (gender) {
+      query += ` AND ja.applicant_gender = ?`;
+      params.push(gender);
+    }
+    if (qualification) {
+      query += ` AND ja.qualification = ?`;
+      params.push(qualification);
+    }
+    if (joining_status) {
+      query += ` AND ja.joining_status = ?`;
+      params.push(joining_status);
+    }
+
+    query += ` ORDER BY ja.applied_at DESC`;
+
+    const [applications] = await pool.query(query, params);
     res.json(applications);
   } catch (error) {
     res.status(500).json({ message: error.message });

@@ -325,7 +325,7 @@ router.get('/verify-certificate/:certId', async (req, res) => {
 
 // --- Job Board ---
 router.get('/jobs', async (req, res) => {
-  const { search, category, type, page = 1, limit = 10 } = req.query;
+  const { search, category, type, page = 1, limit = 10, gender, qualification, languages, specialization, joining_status } = req.query;
   const offset = (page - 1) * limit;
 
   let query = `
@@ -352,6 +352,34 @@ router.get('/jobs', async (req, res) => {
     const types = type.split(',');
     query += ` AND j.type IN (${types.map(() => '?').join(',')})`;
     params.push(...types);
+  }
+
+  if (gender) {
+    query += ' AND (j.gender_preference = ? OR j.gender_preference = "any")';
+    params.push(gender);
+  }
+
+  if (qualification) {
+    query += ' AND j.qualification_req = ?';
+    params.push(qualification);
+  }
+
+  if (languages) {
+    const langs = languages.split(',');
+    langs.forEach(lang => {
+      query += ' AND JSON_CONTAINS(j.language_req, ?)';
+      params.push(`"${lang.trim()}"`);
+    });
+  }
+
+  if (specialization) {
+    query += ' AND j.specialization_req = ?';
+    params.push(specialization);
+  }
+
+  if (joining_status) {
+    query += ' AND j.joining_status_req = ?';
+    params.push(joining_status);
   }
 
   query += ' ORDER BY j.created_at DESC LIMIT ? OFFSET ?';
@@ -428,12 +456,23 @@ router.post('/jobs/:id/apply', async (req, res) => {
 
   try {
     const id = uuidv4();
+    
+    // Fetch profile data
+    const [profiles] = await pool.query(
+      `SELECT gender, language_proficiency, joining_status FROM student_profiles WHERE user_id = ?`,
+      [studentId]
+    );
+    
+    const applicantGender = profiles.length > 0 ? profiles[0].gender : null;
+    const langProf = profiles.length > 0 && profiles[0].language_proficiency ? JSON.stringify(profiles[0].language_proficiency) : null;
+    const joinStatus = profiles.length > 0 ? profiles[0].joining_status : null;
+
     await pool.query(`
       INSERT INTO job_applications (
         id, job_id, student_id, applied_at, status, cover_note, resume_path,
-        applicant_name, applicant_email, applicant_phone
-      ) VALUES (?, ?, ?, CURRENT_TIMESTAMP, 'applied', ?, ?, ?, ?, ?)
-    `, [id, jobId, studentId, coverNote, resumePath, applicantName, applicantEmail, applicantPhone]);
+        applicant_name, applicant_email, applicant_phone, applicant_gender, language_proficiency, joining_status
+      ) VALUES (?, ?, ?, CURRENT_TIMESTAMP, 'applied', ?, ?, ?, ?, ?, ?, ?, ?)
+    `, [id, jobId, studentId, coverNote, resumePath, applicantName, applicantEmail, applicantPhone, applicantGender, langProf, joinStatus]);
 
     res.status(201).json({ message: 'Application submitted successfully', id });
   } catch (error) {
