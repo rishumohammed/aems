@@ -4,7 +4,7 @@
 
     <div class="d-flex align-center justify-space-between mb-10">
       <div>
-        <h1 class="text-h3 font-weight-black text-grey-darken-4 mb-2">Talent Portal</h1>
+        <h1 class="text-h3 font-weight-black text-grey-darken-4 mb-2">Employer Portal</h1>
         <p class="text-h6 text-blue-grey-200">Connect with top-tier graduates and manage your active listings.</p>
       </div>
       <v-btn
