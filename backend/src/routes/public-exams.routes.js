@@ -736,7 +736,7 @@ router.get('/attempts/:id/certificate', async (req, res) => {
     } else {
       // Default text header watermark
       doc.fontSize(10).font('Helvetica-Bold').fillColor('#C2C2C2')
-         .text('AEMS PUBLIC PRACTICE PORTAL · PRACTICE COMPLETION CERTIFICATE', 0, 50, { align: 'center', characterSpacing: 1.5 });
+         .text('BRIXIFY PUBLIC PRACTICE PORTAL · PRACTICE COMPLETION CERTIFICATE', 0, 50, { align: 'center', characterSpacing: 1.5 });
     }
 
     // Certificate Title
@@ -798,7 +798,7 @@ router.get('/attempts/:id/certificate', async (req, res) => {
       }
     } else {
       doc.fontSize(12).font('Helvetica-Bold').fillColor(darkText)
-         .text('AEMS Practice Portal Team', 300, 500, { align: 'center' });
+         .text('Brixify Practice Portal Team', 300, 500, { align: 'center' });
     }
 
     const signatoryLabel = custom.footer_text || 'Authorized Practice Signatory';

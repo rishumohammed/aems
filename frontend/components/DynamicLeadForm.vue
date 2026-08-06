@@ -339,7 +339,7 @@ const handleSubmit = async () => {
       success.value = true;
       waLink.value = generateWALink(
         formData.value.phone, 
-        `Hi, I just submitted an enquiry on AEMS Academy and would like to know more.`
+        `Hi, I just submitted an enquiry on Brixify and would like to know more.`
       );
     }
   } catch (err) {

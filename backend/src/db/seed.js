@@ -58,9 +58,9 @@ async function seed() {
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         uuidv4(), 
-        'AEMS Academy', 
+        'Brixify', 
         'Empowering Minds, Shaping Futures', 
-        'AEMS Academy started with a vision to make quality education accessible to everyone. We believe that learning is a lifelong journey.', 
+        'Brixify started with a vision to make quality education accessible to everyone. We believe that learning is a lifelong journey.', 
         'With a team of industry experts and a robust curriculum, we provide hands-on training and mentorship to our students.', 
         'Join us and be part of a community that values innovation, dedication, and excellence.',
         'Our mission is to provide world-class education and job placement support.',
@@ -70,8 +70,8 @@ async function seed() {
         '123 Education Lane, Knowledge City',
         '+91 9876543210',
         '+91 9876543210',
-        'info@aems.local',
-        'admissions@aems.local',
+        'info@brixify.online',
+        'admissions@brixify.online',
         'Mon-Fri: 9 AM - 6 PM',
         2020,
         'Bangalore'
@@ -128,7 +128,7 @@ async function seed() {
     await connection.query(
       `INSERT INTO testimonials (id, student_name, employer_name, job_title, salary_lpa, quote, is_featured, order_index) 
        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-      [uuidv4(), 'Rahul Kumar', 'Google', 'SDE-1', 12.5, 'AEMS Academy changed my life. The mentorship was top-notch.', true, 0]
+      [uuidv4(), 'Rahul Kumar', 'Google', 'SDE-1', 12.5, 'Brixify changed my life. The mentorship was top-notch.', true, 0]
     );
 
     await connection.commit();

@@ -171,7 +171,7 @@
             <v-expansion-panel elevation="0">
               <v-expansion-panel-title class="font-weight-bold">Can I pay in installments?</v-expansion-panel-title>
               <v-expansion-panel-text class="text-body-2">
-                Yes! We offer flexible installment plans for premium courses. Please contact our billing team at support@aems.local to set up a custom schedule.
+                Yes! We offer flexible installment plans for premium courses. Please contact our billing team at support@brixify.online to set up a custom schedule.
               </v-expansion-panel-text>
             </v-expansion-panel>
 
@@ -348,7 +348,7 @@ const payNow = async (invoice: any) => {
       key: (useRuntimeConfig()).public.razorpayKeyId, // Need this in public config
       amount: order.amount,
       currency: order.currency,
-      name: "AEMS Academy",
+      name: "Brixify",
       description: `Payment for ${invoice.course_title}`,
       order_id: order.id,
       handler: async (response: any) => {
@@ -444,7 +444,7 @@ const formatDate = (dateStr: string) => {
 };
 
 const contactEmail = () => {
-  window.location.href = 'mailto:support@aems.local?subject=Payment Inquiry - ' + (useAuthStore().user?.name || '');
+  window.location.href = 'mailto:support@brixify.online?subject=Payment Inquiry - ' + (useAuthStore().user?.name || '');
 };
 </script>
 

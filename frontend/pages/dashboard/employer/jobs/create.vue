@@ -222,7 +222,7 @@
           label="External Application URL or Email (Optional)"
           variant="outlined"
           color="primary"
-          hint="Leave blank to use AEMS internal application system"
+          hint="Leave blank to use Brixify internal application system"
           persistent-hint
           class="mb-8"
         ></v-text-field>

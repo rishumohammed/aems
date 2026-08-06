@@ -1,4 +1,4 @@
-// AEMS-YYYY-XXXXXX format
+// BRX-YYYY-XXXXXX format
 
 export const generateCertNumber = () => {
   const year = new Date().getFullYear();
@@ -9,5 +9,5 @@ export const generateCertNumber = () => {
     randomStr += chars.charAt(Math.floor(Math.random() * chars.length));
   }
 
-  return `AEMS-${year}-${randomStr}`;
+  return `BRX-${year}-${randomStr}`;
 };

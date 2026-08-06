@@ -26,7 +26,7 @@
       <!-- Bottom -->
       <div class="cert-bottom">
         <div class="cert-id">
-          <p>Cert ID: AEMS-2026-X7Y8Z9</p>
+          <p>Cert ID: BRX-2026-X7Y8Z9</p>
         </div>
         <div class="signatory">
           <div class="sig-line"></div>

@@ -119,7 +119,7 @@ router.post('/jobs', authenticateJWT, hasAccess, async (req, res) => {
     await pool.query(
       `INSERT INTO jobs (id, title, company, category, location, is_remote, type, salary_range, description, requirements_json, deadline, apply_url, posted_by, status)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [jobId, title, company || 'AEMS Academy', category_id, location, is_remote ? 1 : 0, type, salary_range, description, requirements, deadline || null, apply_url, req.user.id, status]
+      [jobId, title, company || 'Brixify', category_id, location, is_remote ? 1 : 0, type, salary_range, description, requirements, deadline || null, apply_url, req.user.id, status]
     );
 
     res.status(201).json({ message: status === 'approved' ? 'Job published' : 'Job submitted for review', jobId });
@@ -164,6 +164,91 @@ router.put('/jobs/:id/reject', authenticateJWT, hasAccess, async (req, res) => {
     }
 
     res.json({ message: 'Job rejected' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Get single job for admin editing
+router.get('/jobs/:id', authenticateJWT, hasAccess, async (req, res) => {
+  try {
+    const [jobs] = await pool.query(`
+      SELECT j.*, jc.name as category_name, jc.slug as category_slug, u.name as employer_name, u.email as employer_email
+      FROM jobs j
+      LEFT JOIN job_categories jc ON j.category = jc.id
+      LEFT JOIN users u ON j.posted_by = u.id
+      WHERE j.id = ?
+    `, [req.params.id]);
+
+    if (jobs.length === 0) return res.status(404).json({ message: 'Job not found' });
+    res.json(jobs[0]);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Update job details (Admin)
+router.put('/jobs/:id', authenticateJWT, hasAccess, async (req, res) => {
+  const { 
+    title, company, category_id, location, is_remote, type, salary_range, description, 
+    required_skills, nice_to_have_skills, experience_level, number_of_openings, deadline, apply_url,
+    status, gender_preference, qualification_req, language_req, specialization_req, joining_status_req
+  } = req.body;
+
+  try {
+    const requirements = JSON.stringify({ 
+      required: required_skills || [], 
+      nice_to_have: nice_to_have_skills || [],
+      experience_level: experience_level || '',
+      number_of_openings: number_of_openings || 1
+    });
+
+    const [existing] = await pool.query('SELECT id FROM jobs WHERE id = ?', [req.params.id]);
+    if (existing.length === 0) return res.status(404).json({ message: 'Job not found' });
+
+    await pool.query(
+      `UPDATE jobs SET 
+        title = ?, 
+        company = ?, 
+        category = ?, 
+        location = ?, 
+        is_remote = ?, 
+        type = ?, 
+        salary_range = ?, 
+        description = ?, 
+        requirements_json = ?, 
+        deadline = ?, 
+        apply_url = ?, 
+        status = ?, 
+        gender_preference = ?, 
+        qualification_req = ?, 
+        language_req = ?, 
+        specialization_req = ?, 
+        joining_status_req = ?
+       WHERE id = ?`,
+      [
+        title, 
+        company || 'Brixify', 
+        category_id, 
+        location, 
+        is_remote ? 1 : 0, 
+        type, 
+        salary_range, 
+        description, 
+        requirements, 
+        deadline || null, 
+        apply_url, 
+        status || 'approved', 
+        gender_preference || 'any', 
+        qualification_req || null, 
+        language_req ? (typeof language_req === 'string' ? language_req : JSON.stringify(language_req)) : null, 
+        specialization_req || null, 
+        joining_status_req || null, 
+        req.params.id
+      ]
+    );
+
+    res.json({ message: 'Job updated successfully' });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

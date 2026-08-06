@@ -2,10 +2,10 @@
   <div class="change-password-page">
     <div class="card-wrap">
       <NuxtLink to="/" class="brand" style="text-decoration:none;">
-        <img v-if="appLogo" :src="baseUrl + appLogo" :alt="instituteName" style="max-height: 40px; max-width: 160px; object-fit: contain;" />
+        <img v-if="appLogo" :src="baseUrl + appLogo" :alt="instituteName || 'Brixify'" style="max-height: 40px; max-width: 160px; object-fit: contain;" />
         <template v-else>
           <span class="brand-icon">◈</span>
-          <span class="brand-name">{{ instituteName || 'AEMS Academy' }}</span>
+          <span class="brand-name">{{ instituteName || 'Brixify' }}</span>
         </template>
       </NuxtLink>
 
@@ -100,8 +100,8 @@ const router = useRouter();
 const config = useRuntimeConfig();
 const baseUrl = computed(() => config.public.apiBase.replace('/api', ''));
 
-const instituteName = useState('instituteName');
-const appLogo = useState('appLogo');
+const instituteName = useState<string | undefined>('instituteName');
+const appLogo = useState<string | undefined>('appLogo');
 
 const password = ref('');
 const confirmPassword = ref('');

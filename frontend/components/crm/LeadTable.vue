@@ -161,7 +161,7 @@ const formatTime = (date: string) => dayjs(date).format('h:mm A');
 
 const openWhatsApp = (lead: any) => {
   const phone = lead.phone.replace(/\D/g, '');
-  window.open(`https://wa.me/${phone}?text=Hello ${lead.name}, this is from AEMS Academy...`, '_blank');
+  window.open(`https://wa.me/${phone}?text=Hello ${lead.name}, this is from Brixify...`, '_blank');
 };
 </script>
 

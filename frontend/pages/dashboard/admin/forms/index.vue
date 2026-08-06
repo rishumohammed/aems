@@ -63,8 +63,8 @@
         <p class="text-body-2 mb-4">Copy and paste this code into your website where you want the form to appear.</p>
         <div class="bg-grey-darken-4 pa-4 rounded-lg text-white font-monospace text-caption position-relative">
           <code>
-            &lt;div id="aems-form-{{ embedModal.formId }}"&gt;&lt;/div&gt;<br>
-            &lt;script src="https://aems.local/js/embed.js" async&gt;&lt;/script&gt;
+            &lt;div id="brixify-form-{{ embedModal.formId }}"&gt;&lt;/div&gt;<br>
+            &lt;script src="https://brixify.online/js/embed.js" async&gt;&lt;/script&gt;
           </code>
           <v-btn icon="mdi-content-copy" variant="text" size="x-small" class="position-absolute top-0 right-0 ma-2" @click="copyEmbed"></v-btn>
         </div>
@@ -84,7 +84,7 @@ const forms = ref<any[]>([]);
 const embedModal = ref({ show: false, formId: '' });
 
 const copyEmbed = () => {
-  const text = `<div id="aems-form-${embedModal.value.formId}"></div>\n<script src="https://aems.local/js/embed.js" async><\/script>`;
+  const text = `<div id="brixify-form-${embedModal.value.formId}"></div>\n<script src="https://brixify.online/js/embed.js" async><\/script>`;
   navigator.clipboard.writeText(text);
 };
 

@@ -640,7 +640,7 @@ const highlights = [
 useSeoMeta({
   title: () => `${course.value?.title || 'Course Details'}`,
   description: () => course.value?.description?.substring(0, 160) || 'Detailed course information and curriculum.',
-  ogImage: () => course.value?.thumbnail_url || 'https://aems.local/default-course-og.png'
+  ogImage: () => course.value?.thumbnail_url || 'https://brixify.online/default-course-og.png'
 });
 
 const handleEnroll = async () => {

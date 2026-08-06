@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS system_config (
 
 -- Branding Initial Config
 INSERT IGNORE INTO system_config (`key`, `value`, `group`, `description`) VALUES 
-('institute_name', 'AEMS Academy', 'branding', 'The name of the institution'),
+('institute_name', 'Brixify', 'branding', 'The name of the institution'),
 ('tagline', 'Empowering Minds, Shaping Futures', 'branding', 'Institution tagline'),
 ('brand_primary_color', '#007AFF', 'branding', 'Primary brand color'),
 ('brand_secondary_color', '#5856D6', 'branding', 'Secondary brand color');
@@ -22,8 +22,8 @@ INSERT IGNORE INTO system_config (`key`, `value`, `group`, `description`, `is_se
 ('smtp_port', '2525', 'email', 'SMTP server port', FALSE),
 ('smtp_user', '', 'email', 'SMTP username', FALSE),
 ('smtp_pass', '', 'email', 'SMTP password', TRUE),
-('smtp_from_name', 'AEMS Academy', 'email', 'Sender name for emails', FALSE),
-('smtp_from_email', 'noreply@aems.local', 'email', 'Sender email address', FALSE);
+('smtp_from_name', 'Brixify', 'email', 'Sender name for emails', FALSE),
+('smtp_from_email', 'noreply@brixify.online', 'email', 'Sender email address', FALSE);
 
 -- WhatsApp Initial Config
 INSERT IGNORE INTO system_config (`key`, `value`, `group`, `description`, `is_sensitive`) VALUES 

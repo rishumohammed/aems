@@ -60,7 +60,7 @@ class EmailService {
 
     try {
       const info = await this.transporter.sendMail({
-        from: `"AEMS Academy" <${process.env.SMTP_FROM || 'noreply@aems.local'}>`,
+        from: `"Brixify" <${process.env.SMTP_FROM || 'noreply@brixify.online'}>`,
         to,
         subject,
         html
@@ -83,7 +83,7 @@ class EmailService {
       const html = `
         <div style="font-family: sans-serif; padding: 20px; color: #333; max-width: 600px; margin: auto; border: 1px solid #eee; border-radius: 12px;">
           <h2 style="color: #007AFF;">Reset Your Password</h2>
-          <p>You requested a password reset for your AEMS Academy account.</p>
+          <p>You requested a password reset for your Brixify account.</p>
           <p>Please click the button below to set a new password:</p>
           <div style="text-align: center; margin: 30px 0;">
             <a href="${resetLink}" style="display: inline-block; padding: 14px 30px; background: #007AFF; color: #fff; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px;">Reset Password</a>
@@ -96,7 +96,7 @@ class EmailService {
 
       await this.sendEmail({
         to: email,
-        subject: 'Reset Your Password - AEMS Academy',
+        subject: 'Reset Your Password - Brixify',
         html
       });
     } catch (error) {
@@ -190,7 +190,7 @@ class EmailService {
           </div>
           <p style="font-size: 14px; color: #666;">If you have any questions, feel free to contact your career counselor or the employer directly.</p>
           <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
-          <p style="font-size: 12px; color: #999;">AEMS Academy Placement Cell</p>
+          <p style="font-size: 12px; color: #999;">Brixify Placement Cell</p>
         </div>
       `;
 

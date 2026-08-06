@@ -254,7 +254,7 @@ class EnrollmentService {
         await createNotification({
           userId: studentId,
           type: 'system',
-          title: 'Welcome to AEMS!',
+          title: 'Welcome to Brixify!',
           message: `Your account has been created successfully. Your temporary password is: ${tempPassword}. Please change it upon your first login.`,
           link: '/settings',
           emailNotify: false // Email is already handled by emailService

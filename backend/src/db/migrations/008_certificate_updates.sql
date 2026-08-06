@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS cert_template_config (
 
 -- Insert default config
 INSERT IGNORE INTO cert_template_config (id, institution_name, brand_color, signatory_name, signatory_title)
-VALUES (1, 'AEMS Academy', '#007AFF', 'Director', 'Head of Education');
+VALUES (1, 'Brixify', '#007AFF', 'Director', 'Head of Education');
 
 -- 3. New: cert_verification_logs
 CREATE TABLE IF NOT EXISTS cert_verification_logs (

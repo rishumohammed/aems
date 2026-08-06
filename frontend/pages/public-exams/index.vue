@@ -155,7 +155,7 @@ onMounted(() => {
 });
 
 useSeoMeta({
-  title: 'AEMS Scholarship & Talent Examination',
+  title: 'Brixify Scholarship & Talent Examination',
   description: 'Test your skills, earn scholarships, unlock course discounts, and get recognized through our certified examination.',
   robots: 'noindex, nofollow'
 });

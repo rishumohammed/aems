@@ -188,7 +188,7 @@ definePageMeta({
 
 useSeoMeta({
   title: 'Contact Us',
-  description: 'Get in touch with AEMS Academy.'
+  description: 'Get in touch with Brixify.'
 });
 
 const config = useRuntimeConfig();
@@ -196,12 +196,12 @@ const config = useRuntimeConfig();
 const submitting = ref(false);
 const success = ref(false);
 const errorMsg = ref('');
-const coursesList = ref([]);
+const coursesList = ref<any[]>([]);
 
 // Fetch available courses for the dropdown
 onMounted(async () => {
   try {
-    const res = await $fetch(`${config.public.apiBase}/public/courses?limit=100`);
+    const res = await $fetch<{ courses?: any[] }>(`${config.public.apiBase}/public/courses?limit=100`);
     if (res && res.courses) {
       coursesList.value = res.courses;
     }

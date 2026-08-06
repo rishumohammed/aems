@@ -164,7 +164,7 @@ class ExamService {
             html: `<h2>Congratulations ${users[0].name}!</h2>
              <p>You have successfully passed the <strong>${courses[0].title}</strong> exam.</p>
              <p>Your certificate number is: <strong>${result.certNumber}</strong></p>
-             <p>You can download your PDF certificate from your AEMS dashboard.</p>`
+             <p>You can download your PDF certificate from your Brixify dashboard.</p>`
           }).catch(err => console.warn('Certificate email failed:', err.message));
         }
       }

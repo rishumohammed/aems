@@ -155,7 +155,7 @@
                       <h3 class="text-subtitle-1 font-weight-bold mb-1 text-truncate">{{ course.title }}</h3>
                       <div class="text-caption text-grey-darken-1 mb-4 d-flex align-center">
                         <v-icon size="14" class="mr-1">mdi-account-tie</v-icon>
-                        {{ course.instructor_name || 'AEMS Instructor' }}
+                        {{ course.instructor_name || 'Brixify Instructor' }}
                       </div>
                       
                       <UiProgressFraction
@@ -514,12 +514,12 @@ const claimCertificate = async (courseId) => {
 };
 
 const shareOnLinkedIn = (cert) => {
-  const url = `https://www.linkedin.com/profile/add?startTask=CERTIFICATION_NAME&name=${encodeURIComponent(cert.course_title)}&organizationName=AEMS%20Academy&issueYear=${dayjs(cert.issued_at).year()}&issueMonth=${dayjs(cert.issued_at).month() + 1}&certUrl=${window.location.origin}/verify?id=${cert.cert_number}`;
+  const url = `https://www.linkedin.com/profile/add?startTask=CERTIFICATION_NAME&name=${encodeURIComponent(cert.course_title)}&organizationName=Brixify&issueYear=${dayjs(cert.issued_at).year()}&issueMonth=${dayjs(cert.issued_at).month() + 1}&certUrl=${window.location.origin}/verify?id=${cert.cert_number}`;
   window.open(url, '_blank');
 };
 
 const shareOnWhatsApp = (cert) => {
-  const text = `I'm proud to share my certificate for ${cert.course_title} from AEMS Academy! Verify here: ${window.location.origin}/verify?id=${cert.cert_number}`;
+  const text = `I'm proud to share my certificate for ${cert.course_title} from Brixify! Verify here: ${window.location.origin}/verify?id=${cert.cert_number}`;
   const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
   window.open(url, '_blank');
 };

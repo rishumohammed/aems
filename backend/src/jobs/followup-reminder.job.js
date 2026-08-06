@@ -45,8 +45,8 @@ export const initFollowupJob = () => {
           const mailOptions = {
             from: process.env.SMTP_FROM,
             to: agent.email,
-            subject: `AEMS: Your Follow-up Reminders for Today`,
-            text: `Hello ${agent.name},\n\nYou have ${followups.length} follow-ups scheduled for today:\n\n${followupList}\n\nGood luck!\n- AEMS CRM System`
+            subject: `Brixify: Your Follow-up Reminders for Today`,
+            text: `Hello ${agent.name},\n\nYou have ${followups.length} follow-ups scheduled for today:\n\n${followupList}\n\nGood luck!\n- Brixify CRM System`
           };
 
           try {

@@ -13,7 +13,7 @@
     <v-card rounded="xl" border class="shadow-card pa-12 text-center bg-grey-lighten-4 border-grey-lighten-2 elevation-0">
       <v-icon size="64" color="grey" class="mb-4">mdi-hammer-wrench</v-icon>
       <h2 class="text-h5 font-weight-bold text-grey-darken-3 mb-2">Profile Under Construction</h2>
-      <p class="text-grey-darken-1 text-body-1">The detailed AEMS profile view for student <strong>{{ studentId }}</strong> is currently being built.</p>
+      <p class="text-grey-darken-1 text-body-1">The detailed Brixify profile view for student <strong>{{ studentId }}</strong> is currently being built.</p>
       <v-btn color="primary" variant="flat" class="mt-6 font-weight-bold rounded-lg px-6 text-none" @click="$router.back()">
         Go Back
       </v-btn>

@@ -35,7 +35,7 @@ const openCheckout = async () => {
     key: props.order.key_id || config.public.razorpayKeyId || 'rzp_test_placeholder', // Should be in public config
     amount: props.order.amount,
     currency: props.order.currency,
-    name: 'AEMS Academy',
+    name: 'Brixify',
     description: `Enrollment in ${props.order.course_title}`,
     order_id: props.order.order_id,
     handler: function (response) {

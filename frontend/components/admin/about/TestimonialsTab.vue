@@ -84,8 +84,8 @@
                         <v-col cols="12" md="4"><v-text-field v-model="modal.form.months_to_placement" label="Months to placement" type="number"></v-text-field></v-col>
                         <v-col cols="12" md="4"><v-text-field v-model="modal.form.exam_score" label="Exam Score (%)" type="number"></v-text-field></v-col>
                         <v-col cols="12" md="4"><v-text-field v-model="modal.form.interview_count" label="Interviews" type="number"></v-text-field></v-col>
-                        <v-col cols="12" md="6"><v-textarea v-model="modal.form.before_description" label="Before AEMS (student's situation before joining)" rows="3" hint="Shown in the featured testimonial Before card"></v-textarea></v-col>
-                        <v-col cols="12" md="6"><v-textarea v-model="modal.form.after_description" label="After AEMS (outcome after joining)" rows="3" hint="Shown in the featured testimonial After card"></v-textarea></v-col>
+                        <v-col cols="12" md="6"><v-textarea v-model="modal.form.before_description" label="Before Brixify (student's situation before joining)" rows="3" hint="Shown in the featured testimonial Before card"></v-textarea></v-col>
+                        <v-col cols="12" md="6"><v-textarea v-model="modal.form.after_description" label="After Brixify (outcome after joining)" rows="3" hint="Shown in the featured testimonial After card"></v-textarea></v-col>
                     </v-row>
                     <div class="d-flex justify-end mt-4 gap-3">
                         <v-btn variant="text" @click="modal.show = false">Cancel</v-btn>

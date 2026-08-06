@@ -48,7 +48,7 @@ export const generateInvoicePDF = async (invoice, student, course, institute, ou
       doc.fillColor(COLOR_WHITE)
          .font('Helvetica-Bold')
          .fontSize(22)
-         .text(institute.name || 'AEMS Academy', MARGIN, 38, { width: 220 });
+         .text(institute.name || 'Brixify', MARGIN, 38, { width: 220 });
     }
 
     // "INVOICE" label (right side of header)
@@ -96,7 +96,7 @@ export const generateInvoicePDF = async (invoice, student, course, institute, ou
        .text('FROM', COL_LEFT, Y);
     Y += 14;
     doc.fillColor(COLOR_TEXT).font('Helvetica-Bold').fontSize(11)
-       .text(institute.name || 'AEMS Academy', COL_LEFT, Y);
+       .text(institute.name || 'Brixify', COL_LEFT, Y);
     Y += 16;
     doc.fillColor(COLOR_MUTED).font('Helvetica').fontSize(9);
     if (institute.address) {
@@ -193,7 +193,7 @@ export const generateInvoicePDF = async (invoice, student, course, institute, ou
     rect(doc, 0, footerY, W, 61.89, headerColor); // 841.89 - 780
 
     doc.fillColor('rgba(255,255,255,0.9)').font('Helvetica-Bold').fontSize(11)
-       .text(`Thank you for choosing ${institute.name || 'AEMS Academy'}!`, 0, footerY + 12, { align: 'center', width: W });
+       .text(`Thank you for choosing ${institute.name || 'Brixify'}!`, 0, footerY + 12, { align: 'center', width: W });
     doc.fillColor('rgba(255,255,255,0.6)').font('Helvetica').fontSize(8)
        .text('This is a computer-generated invoice and does not require a signature.', 0, footerY + 32, { align: 'center', width: W });
 

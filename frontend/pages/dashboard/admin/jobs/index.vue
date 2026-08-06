@@ -89,10 +89,11 @@
 
         <template v-slot:item.actions="{ item }">
           <div class="d-flex justify-end gap-1">
-            <template v-if="item.status === 'pending'">
+            <template v-if="item.status === 'pending' || item.status === 'pending_approval'">
               <v-btn icon="mdi-check" variant="text" size="small" color="success" @click="approveJob(item)" title="Approve"></v-btn>
               <v-btn icon="mdi-close" variant="text" size="small" color="error" @click="openRejectModal(item)" title="Reject"></v-btn>
             </template>
+            <v-btn icon="mdi-pencil-outline" variant="text" size="small" color="primary" :to="`/dashboard/admin/jobs/${item.id}/edit`" title="Edit Job"></v-btn>
             <v-btn icon="mdi-eye-outline" variant="text" size="small" color="grey-darken-1" :to="`/jobs/${item.id}`" title="View Job"></v-btn>
             <v-btn icon="mdi-trash-can-outline" variant="text" size="small" color="error" @click="deleteJob(item)" title="Delete Job"></v-btn>
           </div>

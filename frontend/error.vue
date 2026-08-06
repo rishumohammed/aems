@@ -54,7 +54,7 @@ const reload = () => window.location.reload();
 
 useSeoMeta({
   title: is404.value ? '404 - Page Not Found' : 'Error Occurred',
-  description: 'Something went wrong on AEMS Academy.'
+  description: 'Something went wrong on Brixify.'
 });
 </script>
 

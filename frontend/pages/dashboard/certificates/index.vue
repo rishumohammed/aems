@@ -279,7 +279,7 @@ const shareOnLinkedIn = (cert: any) => {
 };
 
 const shareOnWhatsApp = (cert: any) => {
-  const text = `I'm proud to share my certificate for ${cert.course_title} from AEMS Academy! Verify here: ${window.location.origin}/verify?id=${cert.cert_number}`;
+  const text = `I'm proud to share my certificate for ${cert.course_title} from Brixify! Verify here: ${window.location.origin}/verify?id=${cert.cert_number}`;
   const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
   window.open(url, '_blank');
 };

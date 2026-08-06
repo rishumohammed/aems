@@ -32,7 +32,7 @@
           <section>
             <h2 class="text-h5 font-weight-bold mb-4">4. Contact Us</h2>
             <p class="text-body-1 text-secondary">
-              If you have any questions about this Privacy Policy, please contact us at info@aems.local.
+              If you have any questions about this Privacy Policy, please contact us at info@brixify.online.
             </p>
           </section>
         </div>
@@ -48,7 +48,7 @@ definePageMeta({
 
 useSeoMeta({
   title: 'Privacy Policy',
-  description: 'Understand how AEMS Academy protects and manages your personal data.'
+  description: 'Understand how Brixify protects and manages your personal data.'
 });
 </script>
 

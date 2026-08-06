@@ -36,8 +36,8 @@
           </div>
         </template>
 
-        <!-- AEMS Progress (Courses & Certs) -->
-        <template v-slot:item.aems_progress="{ item }">
+        <!-- Brixify Progress (Courses & Certs) -->
+        <template v-slot:item.brixify_progress="{ item }">
           <div class="d-flex flex-column gap-1 align-start justify-center">
             <Badge color="gray">{{ item.courses_completed || 0 }} Courses</Badge>
             <Badge :color="(item.certs_active || 0) > 0 ? 'green' : 'gray'">
@@ -136,7 +136,7 @@ const selectedApp = ref<any>(null);
 
 const headers: any[] = [
   { title: 'Applicant', key: 'applicant_name', sortable: true },
-  { title: 'AEMS Progress', key: 'aems_progress', sortable: false },
+  { title: 'Brixify Progress', key: 'brixify_progress', sortable: false },
   { title: 'Experience/Edu', key: 'experience', sortable: true },
   { title: 'Applied On', key: 'applied_at', sortable: true },
   { title: 'Status', key: 'status', sortable: true, width: '150px' },

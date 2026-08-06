@@ -49,7 +49,7 @@ class CertificateService {
     // 4. Fetch Config
     const [configs] = await pool.query('SELECT * FROM cert_template_config WHERE id = 1');
     const config = configs[0] || {
-      institution_name: 'AEMS Academy',
+      institution_name: 'Brixify',
       brand_color: '#3b82f6',
       signatory_name: 'Director',
       signatory_title: 'Head of Education'
@@ -112,7 +112,7 @@ class CertificateService {
         
         if (!logoDrawn) {
           doc.fillColor(config.brand_color || '#3b82f6').fontSize(24).font('Helvetica-Bold')
-             .text(config.institution_name || 'AEMS Academy', 0, 80, { align: 'center' });
+             .text(config.institution_name || 'Brixify', 0, 80, { align: 'center' });
         }
 
         doc.fillColor('#000000').fontSize(40).font('Helvetica-Bold')

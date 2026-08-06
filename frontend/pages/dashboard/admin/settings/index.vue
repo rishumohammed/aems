@@ -80,7 +80,7 @@
             <v-divider class="mb-8"></v-divider>
 
             <div class="fr2 mb-4">
-              <AppInput v-model="form.institute_name" label="Institution Name" placeholder="AEMS Academy" large />
+              <AppInput v-model="form.institute_name" label="Institution Name" placeholder="Brixify" large />
               <AppInput v-model="form.tagline" label="Tagline" placeholder="Learn the future" large />
             </div>
             <div class="fr2">
@@ -165,8 +165,8 @@
               <AppInput v-model="form.smtp_pass" label="Password" type="password" placeholder="••••••••" large />
             </div>
             <div class="fr2 mb-6">
-              <AppInput v-model="form.smtp_from_name" label="From Name" placeholder="AEMS Team" large />
-              <AppInput v-model="form.smtp_from_email" label="From Email" placeholder="noreply@aems.local" large />
+              <AppInput v-model="form.smtp_from_name" label="From Name" placeholder="Brixify Team" large />
+              <AppInput v-model="form.smtp_from_email" label="From Email" placeholder="noreply@brixify.online" large />
             </div>
             <AppButton variant="g" icon="mdi-send-outline" @click="testEmail">Send Test Email</AppButton>
           </div>
@@ -175,11 +175,11 @@
           <div v-if="activeTab[0] === 'contact'" class="fade-in">
             <h2 class="text-h6 font-weight-bold mb-6">Contact Information</h2>
             <div class="fr2 mb-4">
-              <AppInput v-model="form.contact_email" label="Contact Email" placeholder="contact@aems.local" large />
+              <AppInput v-model="form.contact_email" label="Contact Email" placeholder="contact@brixify.online" large />
               <AppInput v-model="form.contact_phone" label="Contact Phone" placeholder="+1234567890" large />
             </div>
             <div class="mb-6">
-              <AppInput v-model="form.contact_address" label="Institution Address" placeholder="123 AEMS Campus" large />
+              <AppInput v-model="form.contact_address" label="Institution Address" placeholder="123 Brixify Campus" large />
             </div>
           </div>
 
