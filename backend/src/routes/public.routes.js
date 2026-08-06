@@ -404,9 +404,11 @@ router.get('/jobs', async (req, res) => {
 router.get('/jobs/:id', async (req, res) => {
   try {
     const [jobs] = await pool.query(`
-      SELECT j.*, jc.name as category_name
+      SELECT j.*, jc.name as category_name, jc.icon as category_icon, u.name as employer_name, up.avatar_url as company_logo, up.bio as company_bio, up.linkedin as company_website
       FROM jobs j
       LEFT JOIN job_categories jc ON j.category = jc.id
+      LEFT JOIN users u ON j.posted_by = u.id
+      LEFT JOIN user_profiles up ON u.id = up.user_id
       WHERE j.id = ? AND j.status = 'approved'
     `, [req.params.id]);
 
