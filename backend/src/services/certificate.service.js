@@ -320,6 +320,20 @@ class CertificateService {
     const studentName = students[0].name;
     const courseTitle = courses[0].title;
 
+    // Check if certificate already exists for this student & course
+    const [existing] = await pool.query(
+      'SELECT id, cert_number, pdf_path FROM certificates WHERE student_id = ? AND course_id = ? AND status = "active" LIMIT 1',
+      [studentId, courseId]
+    );
+    if (existing.length > 0) {
+      return {
+        certId: existing[0].id,
+        certNumber: existing[0].cert_number,
+        pdfUrl: existing[0].pdf_path,
+        message: 'Certificate already exists'
+      };
+    }
+
     // 1.5 Verify exam completion if the course has an exam
     const [exams] = await pool.query('SELECT id FROM exams WHERE course_id = ?', [courseId]);
     if (exams.length > 0) {

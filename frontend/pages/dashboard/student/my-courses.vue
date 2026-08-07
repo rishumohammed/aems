@@ -42,7 +42,7 @@
                 
                 <UiProgressFraction
                   :current="course.completed_lessons || 0"
-                  :total="course.total_lessons || 100"
+                  :total="course.total_lessons || 0"
                   class="mb-4"
                 />
 

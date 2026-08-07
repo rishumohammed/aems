@@ -105,7 +105,9 @@ app.use('/uploads', (req, res, next) => {
 // Rate Limiting
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: process.env.NODE_ENV === 'test' ? 10000 : 100, // limit each IP to 100 requests per windowMs
+  max: process.env.NODE_ENV === 'test' ? 10000 : 2500, // limit each IP to 2500 requests per windowMs
+  standardHeaders: true,
+  legacyHeaders: false,
   skip: (req) => {
     return process.env.NODE_ENV === 'test' || 
            req.ip === '127.0.0.1' || 

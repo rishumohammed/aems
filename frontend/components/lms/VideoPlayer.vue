@@ -123,7 +123,7 @@ const startProgressTracking = (getCurrentTime) => {
   progressInterval = setInterval(() => {
     const time = getCurrentTime();
     if (time > 0) saveProgress(time);
-  }, 10000); // Every 10 seconds
+  }, 20000); // Every 20 seconds
 };
 
 // YouTube Integration

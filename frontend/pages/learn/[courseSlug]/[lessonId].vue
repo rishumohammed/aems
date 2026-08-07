@@ -397,7 +397,18 @@ const loadExamState = async () => {
 
 const fetchData = async () => {
   try {
-    // We need courseId. Let's find it from slug or have an API that takes slug
+    // If curriculum is already loaded for this course, update currentLesson without reloading all APIs
+    if (curriculum.value.length > 0 && enrollment.value && enrollment.value.slug === courseSlug.value) {
+      const allLessons = curriculum.value.flatMap(c => (c.modules || []).flatMap(m => m.lessons || []));
+      const targetLesson = allLessons.find(l => l.id === lessonId.value);
+      if (targetLesson) {
+        currentLesson.value = targetLesson;
+        await loadExamState();
+        return;
+      }
+    }
+
+    // Load dashboard & curriculum
     const resDashboard = await api.get('/lms/student/dashboard');
     const enrollments = resDashboard.data?.enrollments || resDashboard.enrollments || [];
     const enroll = enrollments.find(e => e.slug === courseSlug.value);
@@ -449,7 +460,7 @@ const takeQuiz = async () => {
 };
 
 const markComplete = async () => {
-  if (currentLesson.value.completed) return;
+  if (!currentLesson.value || currentLesson.value.completed || !enrollment.value) return;
   markingComplete.value = true;
   try {
     const res = await api.post('/lms/student/progress', {
@@ -459,13 +470,25 @@ const markComplete = async () => {
       completed: true
     });
     currentLesson.value.completed = true;
-    
-    // Refresh enrollment progress
-    const resDashboard = await api.get('/lms/student/dashboard');
-    const enrollments = resDashboard.data?.enrollments || resDashboard.enrollments || [];
-    enrollment.value = enrollments.find(e => e.id === enrollment.value.id);
 
-    if (res.data?.course_completed) {
+    // Update local enrollment completion percentage immediately
+    const resData = res.data || res;
+    if (resData.completion_percentage !== undefined && enrollment.value) {
+      enrollment.value.completion_percentage = resData.completion_percentage;
+    }
+    
+    // Update completed status in curriculum tree
+    for (const section of curriculum.value) {
+      for (const mod of (section.modules || [])) {
+        for (const l of (mod.lessons || [])) {
+          if (l.id === currentLesson.value.id) {
+            l.completed = true;
+          }
+        }
+      }
+    }
+
+    if (resData.course_completed) {
       showCompletionModal.value = true;
     }
   } catch (error) {

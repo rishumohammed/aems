@@ -210,10 +210,14 @@ router.get('/courses/:courseId/curriculum', async (req, res) => {
 
 // Track Progress
 router.post('/progress', async (req, res) => {
-  const connection = await pool.getConnection();
+  let connection;
   try {
     const { lesson_id, enrollment_id, watched_seconds, completed } = req.body;
     const userId = req.user.id;
+
+    if (!lesson_id || !enrollment_id) {
+      return res.status(400).json({ message: 'lesson_id and enrollment_id are required' });
+    }
 
     // Verify ownership
     const [enrollment] = await pool.query(
@@ -232,19 +236,11 @@ router.post('/progress', async (req, res) => {
     );
     if (invoices.length > 0) {
       const paymentStatus = invoices[0].payment_status;
-      if (paymentStatus !== 'paid') {
-        let hasPaymentAccess = true;
-        if (paymentStatus === 'partial') {
-          hasPaymentAccess = true; // Unconditionally allow progress tracking for partial payments
-        } else {
-          hasPaymentAccess = false; // pending or voided
-        }
-        if (!hasPaymentAccess) {
-          // Check if lesson is free preview
-          const [lessons] = await pool.query('SELECT is_free_preview FROM course_lessons WHERE id = ?', [lesson_id]);
-          if (lessons.length === 0 || !lessons[0].is_free_preview) {
-            return res.status(403).json({ message: 'Payment required to access this lesson.' });
-          }
+      if (paymentStatus !== 'paid' && paymentStatus !== 'partial') {
+        // Check if lesson is free preview
+        const [lessons] = await pool.query('SELECT is_free_preview FROM course_lessons WHERE id = ?', [lesson_id]);
+        if (lessons.length === 0 || !lessons[0].is_free_preview) {
+          return res.status(403).json({ message: 'Payment required to access this lesson.' });
         }
       }
     }
@@ -257,6 +253,7 @@ router.post('/progress', async (req, res) => {
       }
     }
 
+    connection = await pool.getConnection();
     await connection.beginTransaction();
 
     // Upsert progress
@@ -268,7 +265,7 @@ router.post('/progress', async (req, res) => {
         completed = CASE WHEN completed = TRUE THEN TRUE ELSE VALUES(completed) END,
         completed_at = CASE WHEN completed = TRUE AND completed_at IS NULL THEN VALUES(completed_at) ELSE completed_at END
     `, [
-      uuidv4(), enrollment_id, lesson_id, watched_seconds, completed, completed ? new Date() : null
+      uuidv4(), enrollment_id, lesson_id, watched_seconds || 0, !!completed, completed ? new Date() : null
     ]);
 
     // Recalculate enrollment completion
@@ -280,8 +277,8 @@ router.post('/progress', async (req, res) => {
          WHERE cs.course_id = ?) as total_count
     `, [enrollment_id, enrollment[0].course_id]);
 
-    const { completed_count, total_count } = counts[0];
-    const percentage = total_count > 0 ? Math.round((completed_count / total_count) * 100) : 0;
+    const { completed_count, total_count } = counts[0] || { completed_count: 0, total_count: 0 };
+    const percentage = total_count > 0 ? Math.min(100, Math.round((completed_count / total_count) * 100)) : 0;
 
     await connection.query(
       'UPDATE enrollments SET completion_percentage = ? WHERE id = ?',
@@ -289,19 +286,31 @@ router.post('/progress', async (req, res) => {
     );
 
     await connection.commit();
+    connection.release();
+    connection = null;
 
     let course_completed = false;
     if (percentage === 100) {
-      course_completed = await courseCompletionService.validateAndCompleteCourse(userId, enrollment[0].course_id, enrollment_id);
+      try {
+        course_completed = await courseCompletionService.validateAndCompleteCourse(userId, enrollment[0].course_id, enrollment_id);
+      } catch (completionErr) {
+        console.warn('Course completion validation warning:', completionErr.message);
+      }
     }
 
     res.json({ message: 'Progress saved', completion_percentage: percentage, course_completed });
   } catch (error) {
-    await connection.rollback();
+    if (connection) {
+      try {
+        await connection.rollback();
+      } catch (rbErr) {
+        console.error('Rollback error:', rbErr.message);
+      }
+    }
     console.error('Error saving progress:', error);
     res.status(500).json({ message: 'Internal server error' });
   } finally {
-    connection.release();
+    if (connection) connection.release();
   }
 });
 // Get upcoming live sessions
@@ -545,7 +554,7 @@ router.put('/profile', async (req, res) => {
         linkedin_url, github_url, portfolio_url, instagram_url, twitter_url, youtube_url, other_urls, preferred_job_categories,
         current_status, experience_years, education_json, experience_json, language_proficiency, joining_status
       )
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       ON DUPLICATE KEY UPDATE
         date_of_birth = VALUES(date_of_birth),
         gender = VALUES(gender),

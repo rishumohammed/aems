@@ -160,7 +160,7 @@
                       
                       <UiProgressFraction
                         :current="course.completed_lessons || 0"
-                        :total="course.total_lessons || 100"
+                        :total="course.total_lessons || 0"
                         label="Course Progress"
                         class="mb-6"
                       />
