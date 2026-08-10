@@ -1,31 +1,38 @@
 <template>
   <div class="jobs-page-wrapper">
     <div class="jobs-page bg-background min-h-screen">
-      <!-- Header -->
-      <div class="bg-white border-b py-12">
-        <v-container>
-          <div class="d-flex flex-column flex-md-row align-center justify-space-between gap-6">
-            <div>
-              <h1 class="text-h3 font-weight-black tracking-tight mb-2">Job Board</h1>
-              <p class="text-grey-darken-1">Discover your next career move with our top hiring partners.</p>
+      <!-- Hero Section -->
+      <v-container class="pt-6">
+        <div 
+          class="job-portal-hero position-relative rounded-2xl overflow-hidden mb-6 d-flex align-center"
+          :style="(heroImgSrc ? `background-image: url('${heroImgSrc}');` : 'background-color: #f8f9fc; border: 1px solid rgba(0,0,0,0.08);') + ' min-height: 280px;'"
+        >
+          <div class="hero-overlay" v-if="heroImgSrc"></div>
+          <div class="position-relative pa-8 pa-md-16 w-100" style="z-index: 2;">
+            <div class="d-flex flex-column flex-md-row align-center justify-space-between gap-6">
+              <div :class="heroImgSrc ? 'text-white' : ''">
+                <h1 class="text-h3 font-weight-black tracking-tight mb-2">{{ heroTitle }}</h1>
+                <p :class="heroImgSrc ? 'text-white opacity-80' : 'text-grey-darken-1'">{{ heroSubtitle }}</p>
+              </div>
+              
+              <v-text-field
+                v-model="search"
+                prepend-inner-icon="mdi-magnify"
+                placeholder="Search jobs, companies, or keywords..."
+                variant="solo"
+                hide-details
+                rounded="lg"
+                class="search-bar"
+                clearable
+                elevation="2"
+                @update:model-value="debounceSearch"
+              ></v-text-field>
             </div>
-            
-            <v-text-field
-              v-model="search"
-              prepend-inner-icon="mdi-magnify"
-              placeholder="Search jobs, companies, or keywords..."
-              variant="outlined"
-              hide-details
-              rounded="lg"
-              class="search-bar"
-              clearable
-              @update:model-value="debounceSearch"
-            ></v-text-field>
           </div>
-        </v-container>
-      </div>
+        </div>
+      </v-container>
 
-      <v-container class="py-8">
+      <v-container class="pb-12">
         <v-row>
           <!-- Filter Sidebar -->
           <v-col cols="12" md="3">
@@ -180,12 +187,24 @@
 </template>
 
 <script setup lang="ts">
+import { ref, computed } from 'vue';
+
 definePageMeta({
   layout: 'public'
 });
 
 const config = useRuntimeConfig();
 const apiBase = config.public.apiBase;
+const baseUrl = apiBase.replace('/api', '');
+
+const heroTitle = useState('jobportal_hero_title', () => 'Job Portal');
+const heroSubtitle = useState('jobportal_hero_subtitle', () => 'Discover your next career move with our top hiring partners.');
+const heroImage = useState('jobportal_hero_image', () => '');
+
+const heroImgSrc = computed(() => {
+  if (heroImage.value) return baseUrl + heroImage.value;
+  return '';
+});
 
 const search = ref('');
 const selectedCategories = ref([]);
@@ -254,17 +273,34 @@ const resetFilters = () => {
 };
 
 useSeoMeta({
-  title: 'Job Board',
+  title: 'Job Portal',
   description: 'Explore career opportunities from our hiring partners. Apply to full-time, part-time, and internship roles.'
 });
 </script>
 
 <style scoped>
-.tracking-tight { letter-spacing: -0.04em; }
-.search-bar { max-width: 400px; width: 100%; }
+.job-portal-hero {
+  background-size: cover;
+  background-position: center;
+  position: relative;
+}
+.hero-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 1;
+}
+.search-bar {
+  max-width: 400px;
+  width: 100%;
+}
 .sticky-top {
   position: sticky;
-  top: 100px;
+  top: 80px;
 }
 .gap-6 { gap: 24px; }
+.tracking-tight { letter-spacing: -0.02em !important; }
 </style>

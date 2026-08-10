@@ -109,6 +109,35 @@
           <p class="text-body-2" style="color: #64748b;">Enter a certificate ID above to view the credentials.</p>
         </div>
 
+        <!-- External Verification Links -->
+        <div class="text-center mt-16 pt-8" style="border-top: 1px solid rgba(0,0,0,0.05);">
+          <div class="text-caption text-uppercase font-weight-bold mb-4" style="color: #64748b; letter-spacing: 1px;">Other Verification Portals</div>
+          <div class="d-flex justify-center gap-4 flex-wrap">
+            <v-btn
+              href="https://www.highfieldqualifications.com/checkcert/verify"
+              target="_blank"
+              variant="tonal"
+              color="primary"
+              rounded="pill"
+              class="px-6 text-none font-weight-medium"
+              prepend-icon="mdi-open-in-new"
+            >
+              Verify Highfield Certificate
+            </v-btn>
+            <v-btn
+              href="https://checkcpdcert.uk/"
+              target="_blank"
+              variant="tonal"
+              color="primary"
+              rounded="pill"
+              class="px-6 text-none font-weight-medium"
+              prepend-icon="mdi-open-in-new"
+            >
+              Verify CPD Certificate
+            </v-btn>
+          </div>
+        </div>
+
       </v-container>
     </section>
   </div>

@@ -80,6 +80,9 @@ importers:
       razorpay:
         specifier: ^2.9.6
         version: 2.9.6(debug@4.4.3(supports-color@5.5.0))
+      slugify:
+        specifier: ^1.6.9
+        version: 1.6.9
       socket.io:
         specifier: ^4.8.3
         version: 4.8.3(supports-color@5.5.0)
@@ -4174,6 +4177,10 @@ packages:
   slash@5.1.0:
     resolution: {integrity: sha512-ZA6oR3T/pEyuqwMgAKT0/hAv8oAXckzbkmR0UkUosQ+Mc4RxGoJkRmwHgHufaenlyAgE1Mxgpdcrf75y6XcnDg==}
     engines: {node: '>=14.16'}
+
+  slugify@1.6.9:
+    resolution: {integrity: sha512-vZ7rfeehZui7wQs438JXBckYLkIIdfHOXsaVEUMyS5fHo1483l1bMdo0EDSWYclY0yZKFOipDy4KHuKs6ssvdg==}
+    engines: {node: '>=8.0.0'}
 
   smob@1.6.1:
     resolution: {integrity: sha512-KAkBqZl3c2GvNgNhcoyJae1aKldDW0LO279wF9bk1PnluRTETKBq0WyzRXxEhoQLk56yHaOY4JCBEKDuJIET5g==}
@@ -9393,6 +9400,8 @@ snapshots:
       vue: 3.5.32
 
   slash@5.1.0: {}
+
+  slugify@1.6.9: {}
 
   smob@1.6.1: {}
 

@@ -137,6 +137,26 @@
 
             <v-divider class="my-6"></v-divider>
 
+            <h3 class="text-subtitle-1 font-weight-bold mb-4">Course Display Options</h3>
+            <div class="mb-4 d-flex align-center gap-4">
+              <v-switch
+                v-model="form.course_show_rating"
+                color="primary"
+                label="Show Rating Stars on Course Cards"
+                hide-details
+              ></v-switch>
+            </div>
+            <div class="mb-4 d-flex align-center gap-4">
+              <v-switch
+                v-model="form.course_show_students"
+                color="primary"
+                label="Show Student Count on Course Cards"
+                hide-details
+              ></v-switch>
+            </div>
+
+            <v-divider class="my-6"></v-divider>
+
             <h3 class="text-subtitle-1 font-weight-bold mb-4">Student Profile Options</h3>
             <div class="mb-2">
               <v-combobox
@@ -320,8 +340,14 @@
                     v-model="form.homepage_hero_image_url"
                     label="Or paste image URL"
                     placeholder="https://images.unsplash.com/..."
+                    class="mb-3"
                   />
-                  <div class="text-caption text-secondary mt-1">If set, URL takes priority over uploaded file.</div>
+                  <AppInput
+                    v-model="form.homepage_hero_video_url"
+                    label="Or paste video URL (.mp4, YouTube)"
+                    placeholder="https://example.com/video.mp4 or YouTube link"
+                  />
+                  <div class="text-caption text-secondary mt-1">If video URL is set, it takes priority over image. Image is fallback.</div>
                 </v-col>
               </v-row>
             </v-card>
@@ -436,6 +462,73 @@
               </v-row>
             </v-card>
 
+            <!-- Job Portal Hero Settings -->
+            <v-card variant="outlined" class="rounded-xl pa-6 mb-6">
+              <div class="d-flex align-center mb-4">
+                <v-avatar color="indigo" size="40" class="mr-3">
+                  <v-icon color="white" size="20">mdi-briefcase-image</v-icon>
+                </v-avatar>
+                <div>
+                  <div class="text-subtitle-1 font-weight-bold">Job Portal Hero Section</div>
+                  <div class="text-caption text-secondary">Manage the hero image and text on the public Job Portal page</div>
+                </div>
+              </div>
+
+              <v-row class="mb-2">
+                <v-col cols="12" md="6">
+                  <AppInput
+                    v-model="form.jobportal_hero_title"
+                    label="Hero Title"
+                    placeholder="e.g. Job Portal"
+                  />
+                </v-col>
+                <v-col cols="12" md="6">
+                  <AppInput
+                    v-model="form.jobportal_hero_subtitle"
+                    label="Hero Subtitle"
+                    placeholder="e.g. Discover your next career move..."
+                  />
+                </v-col>
+              </v-row>
+
+              <!-- Preview -->
+              <div v-if="form.jobportal_hero_image" class="mb-4">
+                <img
+                  :src="form.jobportal_hero_image?.startsWith('/') ? (baseUrl + form.jobportal_hero_image) : form.jobportal_hero_image"
+                  alt="Job Portal Hero Image Preview"
+                  style="width:100%; max-height:200px; object-fit:cover; border-radius:12px; border:1px solid rgba(0,0,0,0.08);"
+                />
+              </div>
+              <div v-else class="mb-4 pa-6 rounded-xl d-flex align-center justify-center" style="background:#f8f9fc; border:1px dashed rgba(0,0,0,0.12); min-height:120px;">
+                <div class="text-center text-secondary">
+                  <v-icon size="40" color="grey-lighten-2" class="mb-2">mdi-image-outline</v-icon>
+                  <div class="text-caption">No image set — using default</div>
+                </div>
+              </div>
+
+              <v-row>
+                <v-col cols="12" md="6">
+                  <v-file-input
+                    v-model="jobportalHeroImageFile"
+                    accept="image/*"
+                    label="Upload new hero image"
+                    variant="outlined"
+                    density="compact"
+                    prepend-icon=""
+                    prepend-inner-icon="mdi-upload"
+                    hide-details
+                    class="mb-3"
+                  />
+                  <v-btn color="indigo" variant="tonal" rounded="lg" size="small" :loading="saving" @click="uploadHomepageImages" class="text-none">
+                    <v-icon start>mdi-cloud-upload</v-icon> Upload Hero Image
+                  </v-btn>
+                </v-col>
+                <v-col cols="12" md="6">
+                  <div class="text-caption text-secondary mt-6 pt-2">Note: Settings are saved when you click "Save URL Settings" below or when uploading a file.</div>
+                </v-col>
+              </v-row>
+            </v-card>
+
             <div class="d-flex justify-end gap-3 mt-8 pt-6 border-t">
               <AppButton variant="g" size="lg" icon="mdi-refresh" @click="fetchData">Reset</AppButton>
               <AppButton size="lg" icon="mdi-check" :loading="saving" @click="save">Save URL Settings</AppButton>
@@ -494,9 +587,10 @@ const regenerating = ref(false);
 const form = ref<any>({});
 const logoFile = ref(null);
 const faviconFile = ref(null);
-const heroImageFile = ref(null);
-const aboutImageFile = ref(null);
-const aboutpageWhoImageFile = ref(null);
+const heroImageFile = ref<File | null>(null);
+const aboutImageFile = ref<File | null>(null);
+const aboutpageWhoImageFile = ref<File | null>(null);
+const jobportalHeroImageFile = ref<File | null>(null);
 
 const snackbar = ref(false);
 const snackbarMessage = ref('');
@@ -534,6 +628,8 @@ const fetchData = async () => {
     } else {
       configMap.education_levels = [];
     }
+    configMap.course_show_rating = configMap.course_show_rating === 'true' || configMap.course_show_rating === '1';
+    configMap.course_show_students = configMap.course_show_students === 'true' || configMap.course_show_students === '1';
     form.value = configMap;
   } catch (err) {
     console.error('Failed to fetch config');
@@ -573,7 +669,7 @@ const uploadBranding = async () => {
 };
 
 const uploadHomepageImages = async () => {
-  if (!heroImageFile.value && !aboutImageFile.value && !aboutpageWhoImageFile.value) return;
+  if (!heroImageFile.value && !aboutImageFile.value && !aboutpageWhoImageFile.value && !jobportalHeroImageFile.value) return;
 
   saving.value = true;
   const formData = new FormData();
@@ -581,10 +677,12 @@ const uploadHomepageImages = async () => {
   const hero = Array.isArray(heroImageFile.value) ? heroImageFile.value[0] : heroImageFile.value;
   const about = Array.isArray(aboutImageFile.value) ? aboutImageFile.value[0] : aboutImageFile.value;
   const aboutWho = Array.isArray(aboutpageWhoImageFile.value) ? aboutpageWhoImageFile.value[0] : aboutpageWhoImageFile.value;
+  const jobportal = Array.isArray(jobportalHeroImageFile.value) ? jobportalHeroImageFile.value[0] : jobportalHeroImageFile.value;
 
   if (hero) formData.append('hero_image', hero);
   if (about) formData.append('about_image', about);
   if (aboutWho) formData.append('aboutpage_who_image', aboutWho);
+  if (jobportal) formData.append('jobportal_hero_image', jobportal);
 
   try {
     const { data } = await api.post('/admin/config/branding/upload', formData, {
@@ -593,12 +691,14 @@ const uploadHomepageImages = async () => {
     if (data.updates.homepage_hero_image) form.value.homepage_hero_image = data.updates.homepage_hero_image;
     if (data.updates.homepage_about_image) form.value.homepage_about_image = data.updates.homepage_about_image;
     if (data.updates.aboutpage_who_image) form.value.aboutpage_who_image = data.updates.aboutpage_who_image;
+    if (data.updates.jobportal_hero_image) form.value.jobportal_hero_image = data.updates.jobportal_hero_image;
     snackbarMessage.value = 'Images uploaded successfully';
     snackbarColor.value = 'success';
     snackbar.value = true;
     heroImageFile.value = null;
     aboutImageFile.value = null;
     aboutpageWhoImageFile.value = null;
+    jobportalHeroImageFile.value = null;
   } catch (err) {
     snackbarMessage.value = 'Failed to upload homepage images';
     snackbarColor.value = 'error';
@@ -613,11 +713,15 @@ const save = async () => {
   try {
     const payload = { ...form.value };
     if (Array.isArray(payload.course_languages)) {
-      payload.course_languages = payload.course_languages.join(',');
+      payload.course_languages = payload.course_languages.join(', ');
     }
     if (Array.isArray(payload.education_levels)) {
-      payload.education_levels = payload.education_levels.join(',');
+      payload.education_levels = payload.education_levels.join(', ');
     }
+    
+    payload.course_show_rating = payload.course_show_rating ? 'true' : 'false';
+    payload.course_show_students = payload.course_show_students ? 'true' : 'false';
+
     await api.put('/admin/config', payload);
     snackbarMessage.value = 'Settings saved successfully. Reloading to apply changes...';
     snackbarColor.value = 'success';

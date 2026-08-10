@@ -24,39 +24,7 @@
         <!-- Badges on image -->
         <div v-if="viewType !== 'list'" class="pa-2 d-flex flex-wrap gap-2 justify-space-between w-100">
           <div class="d-flex gap-2 flex-wrap">
-            <v-chip
-              v-if="course.category_name"
-              size="x-small"
-              color="white"
-              variant="flat"
-              class="text-primary font-weight-bold"
-            >
-              {{ course.category_name }}
-            </v-chip>
-
-            <v-chip
-              v-if="course.course_type"
-              size="x-small"
-              :color="course.course_type === 'live' ? 'error' : 'success'"
-              variant="flat"
-              class="font-weight-bold text-uppercase"
-            >
-              <v-icon start size="12">{{ course.course_type === 'live' ? 'mdi-video-wireless' : 'mdi-play-circle-outline' }}</v-icon>
-              {{ course.course_type === 'live' ? 'Live' : 'Recorded' }}
-            </v-chip>
           </div>
-
-          <v-chip
-            v-if="course.course_type === 'live' && course.start_date"
-            size="x-small"
-            color="black"
-            variant="flat"
-            class="font-weight-bold text-white"
-            style="opacity: 0.85;"
-          >
-            <v-icon start size="12">mdi-clock-outline</v-icon>
-            {{ countdownText }}
-          </v-chip>
         </div>
       </v-img>
 
@@ -71,8 +39,9 @@
           {{ course.title }}
         </h3>
 
-        <div class="d-flex align-center mb-3">
+        <div v-if="displayRating || displayStudents" class="d-flex align-center mb-3">
           <v-rating
+            v-if="displayRating"
             :model-value="course.rating || 0"
             color="amber-darken-2"
             density="compact"
@@ -80,15 +49,15 @@
             half-increments
             readonly
           ></v-rating>
-          <span class="text-caption text-grey-darken-1 ml-2">({{ course.students_count || 0 }} students)</span>
+          <span v-if="displayStudents" class="text-caption text-grey-darken-1 ml-2">({{ course.students_count || 0 }} students)</span>
         </div>
 
         <v-spacer></v-spacer>
 
         <div class="d-flex align-center justify-space-between mt-2">
           <div>
-            <span v-if="course.price_type === 'custom'" class="text-subtitle-1 font-weight-bold text-primary">
-              Get Quote
+            <span v-if="course.price_type === 'custom' || !course.price || course.price == 0" class="text-subtitle-1 font-weight-bold text-primary">
+              Enquiry
             </span>
             <span v-else class="text-h6 font-weight-bold">
               {{ course.currency_symbol || '₹' }}{{ course.price }}
@@ -121,8 +90,22 @@ const props = defineProps({
   viewType: {
     type: String,
     default: 'grid'
+  },
+  showRating: {
+    type: Boolean,
+    default: undefined
+  },
+  showStudents: {
+    type: Boolean,
+    default: undefined
   }
 })
+
+const globalShowRating = useState('course_show_rating', () => true)
+const globalShowStudents = useState('course_show_students', () => true)
+
+const displayRating = computed(() => props.showRating !== undefined ? props.showRating : globalShowRating.value)
+const displayStudents = computed(() => props.showStudents !== undefined ? props.showStudents : globalShowStudents.value)
 
 const config = useRuntimeConfig()
 

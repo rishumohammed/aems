@@ -238,6 +238,12 @@ import { useEditor, EditorContent } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
 import CurriculumEditor from '~/components/lms/CurriculumEditor.vue'
 
+definePageMeta({
+  layout: 'dashboard',
+  middleware: ['auth', 'role'],
+  role: ['super_admin', 'sub_admin', 'tutor']
+})
+
 const api = useApi()
 const route = useRoute()
 const authStore = useAuthStore()

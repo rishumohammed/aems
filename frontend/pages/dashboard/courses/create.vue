@@ -588,7 +588,8 @@ import { useAuthStore } from '@/stores/auth';
 
 definePageMeta({
   layout: 'dashboard',
-  middleware: ['auth', 'role']
+  middleware: ['auth', 'role'],
+  role: ['super_admin', 'sub_admin', 'tutor']
 });
 
 const api = useApi();

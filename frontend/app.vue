@@ -79,6 +79,9 @@ onMounted(async () => {
       if (data.homepage_hero_image_url) {
         useState('homepage_hero_image_url').value = data.homepage_hero_image_url;
       }
+      if (data.homepage_hero_video_url) {
+        useState('homepage_hero_video_url').value = data.homepage_hero_video_url;
+      }
       if (data.homepage_about_image) {
         useState('homepage_about_image').value = data.homepage_about_image;
       }
@@ -90,6 +93,23 @@ onMounted(async () => {
       }
       if (data.aboutpage_who_image_url) {
         useState('aboutpage_who_image_url').value = data.aboutpage_who_image_url;
+      }
+      // Job Portal image config
+      if (data.jobportal_hero_image) {
+        useState('jobportal_hero_image').value = data.jobportal_hero_image;
+      }
+      if (data.jobportal_hero_title) {
+        useState('jobportal_hero_title').value = data.jobportal_hero_title;
+      }
+      if (data.jobportal_hero_subtitle) {
+        useState('jobportal_hero_subtitle').value = data.jobportal_hero_subtitle;
+      }
+      // Course Card configs
+      if (data.course_show_rating) {
+        useState('course_show_rating').value = data.course_show_rating === 'true' || data.course_show_rating === '1';
+      }
+      if (data.course_show_students) {
+        useState('course_show_students').value = data.course_show_students === 'true' || data.course_show_students === '1';
       }
       // Contact details
       if (data.contact_address) contactAddress.value = data.contact_address;

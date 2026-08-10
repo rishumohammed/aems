@@ -33,8 +33,7 @@ export const useNavStore = defineStore('nav', {
       // ADMIN COURSES (LMS)
       { label: 'Courses', icon: 'mdi-book-open-page-variant-outline', route: '/dashboard/courses', roles: ['super_admin', 'lms_user'], section: 'LMS' },
       { label: 'Categories', icon: 'mdi-shape-outline', route: '/dashboard/admin/course-categories', roles: ['super_admin', 'lms_user'], section: 'LMS' },
-      { label: 'Live Events', icon: 'mdi-video-outline', route: '/dashboard/admin/live-events', roles: ['super_admin', 'lms_user'], section: 'LMS' },
-      { label: 'Live Events', icon: 'mdi-video-outline', route: '/dashboard/tutor/live-events', roles: ['tutor'], section: 'LMS' },
+      { label: 'Highlights', icon: 'mdi-star-circle-outline', route: '/dashboard/admin/highlights', roles: ['super_admin', 'lms_user'], section: 'LMS' },
       { label: 'Course Approvals', icon: 'mdi-check-decagram-outline', route: '/dashboard/admin/course-approvals', roles: ['super_admin', 'lms_user'], section: 'LMS', badge: undefined },
       
       // EXAMS
@@ -46,7 +45,7 @@ export const useNavStore = defineStore('nav', {
       
 
       // JOBS
-      { label: 'Job Board', icon: 'mdi-briefcase-outline', route: '/dashboard/jobs', roles: ['super_admin', 'placement_coordinator', 'student'], section: 'JOBS' },
+      { label: 'Job Portal', icon: 'mdi-briefcase-outline', route: '/dashboard/jobs', roles: ['super_admin', 'placement_coordinator', 'student'], section: 'JOBS' },
       { label: 'Manage Jobs', icon: 'mdi-briefcase-edit-outline', route: '/dashboard/admin/jobs', roles: ['super_admin', 'placement_coordinator'], section: 'JOBS' },
       { label: 'Job Approvals', icon: 'mdi-briefcase-check', route: '/dashboard/admin/job-approvals', roles: ['super_admin', 'placement_coordinator'], section: 'JOBS', badge: undefined },
       { label: 'Job Categories', icon: 'mdi-shape-outline', route: '/dashboard/admin/job-categories', roles: ['super_admin', 'placement_coordinator'], section: 'JOBS' },
@@ -77,6 +76,7 @@ export const useNavStore = defineStore('nav', {
       
       // ANNOUNCEMENTS
       { label: 'Notice Board', icon: 'mdi-bullhorn-outline', route: '/dashboard/admin/notice-board', roles: ['super_admin'], section: 'ANNOUNCEMENTS' },
+      { label: 'News', icon: 'mdi-newspaper-variant-outline', route: '/dashboard/admin/news', roles: ['super_admin', 'content_manager'], section: 'ANNOUNCEMENTS' },
 
       // SETTINGS
       { label: 'System Users', icon: 'mdi-account-group', route: '/dashboard/admin/settings/system-users', roles: ['super_admin'], section: 'SETTINGS' },

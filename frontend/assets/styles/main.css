@@ -150,18 +150,18 @@ body {
 }
 /* The <h2> inside a section header */
 .section-title {
-  font-size:   clamp(1.6rem, 3vw, 2.25rem);
+  font-size: 2.125rem;
   font-weight: 900;
-  letter-spacing: -0.03em;
-  line-height: 1.1;
-  color: var(--g7);
-  margin-bottom: var(--sp-3);    /* 12px → subtext */
+  letter-spacing: 0.00735em;
+  line-height: 1.175;
+  color: #1B1B3A;
+  margin-bottom: 8px;
 }
 /* The <p> subtitle below the section title */
 .section-sub {
-  font-size:   1rem;
-  color: var(--g5);
-  line-height: 1.7;
+  font-size: 1rem;
+  color: #6B6B76;
+  line-height: 1.5;
   max-width: 600px;
   margin: 0 auto;
 }

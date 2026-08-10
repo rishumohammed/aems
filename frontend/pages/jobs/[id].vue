@@ -346,7 +346,7 @@ const hasEligibilityDetails = computed(() => {
 
 const breadcrumbs = [
   { title: 'Home', disabled: false, to: '/' },
-  { title: 'Job Board', disabled: false, to: '/jobs' },
+  { title: 'Job Portal', disabled: false, to: '/jobs' },
   { title: 'Job Detail', disabled: true }
 ];
 

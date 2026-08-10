@@ -30,6 +30,8 @@ import studentLmsRoutes from './routes/lms.student.routes.js';
 import qaRoutes from './routes/lms.qa.routes.js';
 import announcementRoutes from './routes/lms.announcements.routes.js';
 import messageRoutes from './routes/messages.routes.js';
+import adminNewsRoutes from './routes/admin.news.routes.js';
+import publicNewsRoutes from './routes/public.news.routes.js';
 import notificationRoutes from './routes/notifications.routes.js';
 import examRoutes from './routes/exam.routes.js';
 import proctoringRoutes from './routes/proctoring.routes.js';
@@ -54,7 +56,7 @@ import adminRoutes from './routes/admin.routes.js';
 import interviewsRoutes from './routes/interviews.routes.js';
 import adminSystemUsersRoutes from './routes/admin.system-users.routes.js';
 import adminMasterStandardsRoutes from './routes/admin.master-standards.routes.js';
-import liveEventsRoutes from './routes/live-events.routes.js';
+import highlightsRoutes from './routes/highlights.routes.js';
 import noticeBoardRoutes from './routes/notice-board.routes.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -146,6 +148,8 @@ app.use('/api/lms/student/placements', studentPlacementsRoutes);
 app.use('/api/lms/qa', qaRoutes);
 app.use('/api/lms/announcements', announcementRoutes);
 app.use('/api/messages', messageRoutes);
+app.use('/api/admin/news', adminNewsRoutes);
+app.use('/api/public/news', publicNewsRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/exams', examRoutes);
 app.use('/api/proctoring', proctoringRoutes);
@@ -162,7 +166,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/admin/system-users', adminSystemUsersRoutes);
 app.use('/api/admin/master-standards', adminMasterStandardsRoutes);
 app.use('/api/interviews', interviewsRoutes);
-app.use('/api/live-events', liveEventsRoutes);
+app.use('/api/highlights', highlightsRoutes);
 app.use('/api/notice-board', noticeBoardRoutes);
 
 app.get('/health', (req, res) => {

@@ -12,7 +12,7 @@
         <!-- Badge -->
         <div class="hero-badge">
           <span class="badge-dot"></span>
-          Global Food Safety & Certification
+          Brixify your Career
         </div>
 
         <!-- Headline -->
@@ -66,10 +66,33 @@
 
       <!-- Right: Visual panel -->
       <div class="hero-visual" v-motion-slide-right>
-        <!-- Main image -->
+        <!-- Main visual -->
         <div class="image-frame">
+          <!-- YouTube Video -->
+          <iframe
+            v-if="heroVideoUrl && isYouTube"
+            :src="processedVideoUrl"
+            title="Hero Video"
+            frameborder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen
+            class="hero-video"
+            style="width: 100%; aspect-ratio: 4/3; display: block; border-radius: inherit; z-index: 1; position: relative;"
+          ></iframe>
+          
+          <!-- Native Video -->
+          <video
+            v-else-if="heroVideoUrl && !isYouTube"
+            :src="processedVideoUrl"
+            autoplay
+            loop
+            muted
+            playsinline
+            class="hero-video"
+            style="width: 100%; aspect-ratio: 4/3; object-fit: cover; display: block; border-radius: inherit; z-index: 1; position: relative;"
+          ></video>
           <img
-            v-if="heroImgSrc"
+            v-else-if="heroImgSrc"
             :src="heroImgSrc"
             alt="Food technology quality control"
             class="hero-img"
@@ -77,11 +100,11 @@
             height="450"
           />
           <!-- Scrim at bottom -->
-          <div class="image-scrim"></div>
+          <div v-if="!heroVideoUrl" class="image-scrim"></div>
         </div>
 
         <!-- Floating stat: Placement rate -->
-        <div class="float-card float-top" v-motion-roll-visible-top>
+        <div v-if="!heroVideoUrl" class="float-card float-top" v-motion-roll-visible-top>
           <div class="float-icon float-icon--green">
             <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="18" height="18">
               <path d="M3 17l5-5 4 4 9-9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -97,7 +120,7 @@
         </div>
 
         <!-- Floating stat: Certified -->
-        <div class="float-card float-bottom" v-motion-roll-visible-bottom>
+        <div v-if="!heroVideoUrl" class="float-card float-bottom" v-motion-roll-visible-bottom>
           <div class="float-icon float-icon--blue">
             <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="18" height="18">
               <path d="M9 12l2 2 4-4M12 2a10 10 0 100 20A10 10 0 0012 2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -121,6 +144,34 @@ const baseUrl = computed(() => config.public.apiBase.replace('/api', ''));
 
 const heroImageConfig = useState('homepage_hero_image', () => '');
 const heroImageUrlConfig = useState('homepage_hero_image_url', () => '');
+const heroVideoUrlConfig = useState('homepage_hero_video_url', () => '');
+
+const heroVideoUrl = computed(() => heroVideoUrlConfig.value || '');
+
+const isYouTube = computed(() => {
+  if (!heroVideoUrl.value) return false;
+  return heroVideoUrl.value.includes('youtube.com') || heroVideoUrl.value.includes('youtu.be');
+});
+
+const processedVideoUrl = computed(() => {
+  if (!heroVideoUrl.value) return '';
+  if (isYouTube.value) {
+    let videoId = '';
+    if (heroVideoUrl.value.includes('youtu.be/')) {
+      videoId = heroVideoUrl.value.split('youtu.be/')[1].split('?')[0];
+    } else if (heroVideoUrl.value.includes('watch?v=')) {
+      videoId = heroVideoUrl.value.split('watch?v=')[1].split('&')[0];
+    } else if (heroVideoUrl.value.includes('embed/')) {
+      videoId = heroVideoUrl.value.split('embed/')[1].split('?')[0];
+    }
+    
+    if (videoId) {
+      // Add autoplay, mute, loop, and hide controls for background video effect
+      return `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&controls=0&playlist=${videoId}`;
+    }
+  }
+  return heroVideoUrl.value;
+});
 
 const heroImgSrc = computed(() => {
   if (heroImageUrlConfig.value) return heroImageUrlConfig.value;

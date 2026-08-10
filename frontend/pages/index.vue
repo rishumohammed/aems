@@ -30,16 +30,13 @@
       </div>
 
       <!-- Latest Courses -->
-      <div class="section-default">
+      <div class="section-default" id="courses">
         <v-container>
           <div class="d-flex align-center justify-space-between mb-12">
             <div>
-              <h2 class="section-title">Latest Courses</h2>
+              <h2 class="section-title">Food Industry Qualifications</h2>
               <p class="section-sub" style="max-width:none">Explore our most recently published programs.</p>
             </div>
-            <v-btn variant="outlined" rounded="lg" color="primary" class="text-capitalize font-weight-bold" to="/courses">
-              View All Courses
-            </v-btn>
           </div>
 
           <v-row>
@@ -203,74 +200,71 @@
         </v-container>
       </div>
 
-      <!-- Information Panel (Notice Board) -->
+      <!-- Highlights Section -->
       <div class="section-default bg-surface-light">
         <v-container>
           <div class="d-flex align-center justify-space-between mb-8">
             <div>
-              <h2 class="text-h4 font-weight-black mb-2">Upcoming Events</h2>
-              <p class="text-body-1 text-secondary">Latest webinars, workshops, and talent exams.</p>
+              <h2 class="section-title">Highlights</h2>
+              <p class="section-sub">Latest updates, events, and important news.</p>
             </div>
-            <v-btn variant="tonal" rounded="lg" color="primary" class="text-capitalize font-weight-bold d-none d-sm-flex" to="/live-classes">
-              View All Events
-            </v-btn>
           </div>
 
-          <v-row>
-            <v-col v-for="item in informationItems" :key="item.id" cols="12" md="6" lg="4">
-              <v-card variant="outlined" class="rounded-xl border-surface bg-white h-100 pa-0 d-flex flex-column transition-transform overflow-hidden" hover :href="item.link" :target="item.link?.startsWith('http') ? '_blank' : '_self'">
+          <v-slide-group show-arrows>
+            <v-slide-group-item v-for="item in highlights" :key="item.id">
+              <v-card width="280" variant="outlined" class="rounded-xl border-surface bg-white h-100 pa-0 d-flex flex-column ma-3">
                 <v-img v-if="item.image_url" :src="baseUrl + item.image_url" height="140" cover></v-img>
                 <div class="pa-5 flex-grow-1 d-flex flex-column">
-                  <div class="d-flex align-center mb-3">
-                    <v-avatar v-if="!item.image_url" :color="getEventColor(item.event_type)" variant="tonal" rounded size="48" class="mr-4">
-                      <v-icon size="24">{{ getEventIcon(item.event_type) }}</v-icon>
-                    </v-avatar>
-                    <div>
-                      <v-chip size="x-small" :color="getEventColor(item.event_type)" class="font-weight-bold text-uppercase mb-1">{{ item.event_type }}</v-chip>
-                      <div class="text-caption font-weight-bold text-secondary">
-                        <v-icon size="14" start>mdi-calendar-clock</v-icon>
-                        {{ new Date(item.event_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) }}
-                      </div>
-                    </div>
-                  </div>
-                  <h3 class="text-subtitle-1 font-weight-bold line-clamp-2 mb-4 flex-grow-1" style="line-height: 1.4;">{{ item.title }}</h3>
-                  <div class="d-flex align-center text-primary font-weight-bold text-caption text-uppercase mt-auto">
-                    View Details
-                    <v-icon size="16" class="ml-1">mdi-arrow-right</v-icon>
-                  </div>
+                  <h3 class="text-subtitle-1 font-weight-bold line-clamp-2 mb-2 flex-grow-1" style="line-height: 1.4;">{{ item.title }}</h3>
+                  <p class="text-body-2 text-secondary line-clamp-3">{{ item.description }}</p>
                 </div>
               </v-card>
-            </v-col>
-          </v-row>
+            </v-slide-group-item>
+          </v-slide-group>
           
-          <div v-if="informationItems.length === 0" class="text-center py-10">
-            <v-icon size="48" color="grey-lighten-2">mdi-information-outline</v-icon>
-            <p class="text-grey mt-3">No upcoming events or announcements.</p>
+          <div v-if="!highlights.length" class="text-center py-12 text-secondary">
+            <v-icon size="48" color="grey-lighten-2" class="mb-4">mdi-information-outline</v-icon>
+            <p>No highlights available.</p>
           </div>
         </v-container>
       </div>
 
-      <!-- How it Works -->
-      <div class="how-it-works section-default">
+      <!-- News & Updates -->
+      <div class="news-section section-default bg-grey-lighten-4">
         <v-container>
           <div class="section-header section-header--center">
-            <div class="eyebrow-label mb-3">The Process</div>
-            <h2 class="section-title">How it Works</h2>
-            <p class="section-sub">Your journey from learning to professional success in three simple steps.</p>
+            <div class="eyebrow-label mb-3">Stay Informed</div>
+            <h2 class="section-title">News & Updates</h2>
+            <p class="section-sub">Read our latest announcements and industry insights.</p>
           </div>
           
-          <v-row class="mt-4">
-            <v-col v-for="(step, i) in steps" :key="i" cols="12" md="4">
-              <v-card class="pa-8 text-center h-100 step-card" flat border v-motion-fade-visible-once>
-                <div class="step-number mb-4">{{ i + 1 }}</div>
-                <v-avatar color="primary" size="64" class="mb-5">
-                  <v-icon color="white" size="32">{{ step.icon }}</v-icon>
-                </v-avatar>
-                <h3 class="text-h6 font-weight-bold mb-3">{{ step.title }}</h3>
-                <p class="text-body-2 text-grey-darken-1">{{ step.description }}</p>
+          <v-row class="mt-4" v-if="latestNews.length > 0">
+            <v-col v-for="item in latestNews" :key="item.id" cols="12" md="4">
+              <v-card class="h-100 rounded-xl overflow-hidden d-flex flex-column bg-white news-card" elevation="0" border :to="`/news/${item.slug}`" v-motion-fade-visible-once>
+                <div class="thumbnail-wrapper position-relative" style="height: 200px;">
+                  <v-img 
+                    v-if="item.image_url" 
+                    :src="baseUrl + item.image_url" 
+                    cover 
+                    height="100%"
+                  ></v-img>
+                  <div v-else class="w-100 h-100 bg-grey-lighten-4 d-flex align-center justify-center">
+                    <v-icon size="48" color="grey-lighten-2">mdi-newspaper-variant-outline</v-icon>
+                  </div>
+                </div>
+                
+                <div class="pa-6 flex-grow-1 d-flex flex-column">
+                  <div class="text-caption font-weight-bold text-primary mb-2 text-uppercase tracking-wider">
+                    {{ new Date(item.published_at || item.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) }}
+                  </div>
+                  <h3 class="text-h6 font-weight-bold mb-2 line-clamp-2" style="line-height: 1.3;">{{ item.title }}</h3>
+                </div>
               </v-card>
             </v-col>
           </v-row>
+          <div v-else class="text-center mt-8 text-secondary">
+            No news articles available yet.
+          </div>
         </v-container>
       </div>
 
@@ -320,10 +314,11 @@ const baseUrl = computed(() => apiBase.replace('/api', ''));
 const latestCourses = ref<any[]>([]);
 const featuredCourses = ref<any[]>([]);
 const liveCourses = ref<any[]>([]);
-const informationItems = ref<any[]>([]);
+const highlights = ref<any[]>([]);
+const latestNews = ref<any[]>([]);
 
 const fetchHomepageData = async () => {
-  api.get('/public/courses?course_type=recorded&sort=newest&limit=8')
+  api.get('/public/courses?course_type=recorded&sort=newest')
     .then(res => { latestCourses.value = res.data?.courses || []; })
     .catch(err => console.error('Failed to load latest courses', err));
 
@@ -335,24 +330,13 @@ const fetchHomepageData = async () => {
     .then(res => { liveCourses.value = res.data?.courses || []; })
     .catch(err => console.error('Failed to load live courses', err));
 
-  Promise.all([
-    api.get('/notice-board').catch(() => ({ data: [] })),
-    api.get('/live-events').catch(() => ({ data: [] }))
-  ]).then(([noticeRes, liveRes]) => {
-    const notices = noticeRes.data || [];
-    const liveEvents = (liveRes.data || []).map((e: any) => ({
-      id: e.id,
-      title: e.title,
-      event_type: 'Live Session',
-      event_date: e.scheduled_at,
-      image_url: e.thumbnail_url,
-      link: '/live-classes'
-    }));
-    
-    informationItems.value = [...notices, ...liveEvents]
-      .sort((a, b) => new Date(a.event_date).getTime() - new Date(b.event_date).getTime())
-      .slice(0, 6);
-  });
+  api.get('/highlights')
+    .then(res => { highlights.value = res.data || []; })
+    .catch(err => console.error('Failed to load highlights', err));
+
+  api.get('/public/news?limit=3')
+    .then((res: any) => { latestNews.value = res.news || []; })
+    .catch(err => console.error('Failed to load news', err));
 };
 
 const getEventColor = (type: string) => {
@@ -380,14 +364,6 @@ const aboutImgSrc = computed(() => {
   if (aboutImageConfig.value) return baseUrl.value + aboutImageConfig.value;
   return '/img/commercial-food-processing.png';
 });
-
-
-
-const steps = [
-  { title: 'Enroll', description: 'Choose from online, in-person, or hybrid courses tailored to your schedule.', icon: 'mdi-account-plus' },
-  { title: 'Learn', description: 'Learn from industry professionals with real-world experience and practical knowledge.', icon: 'mdi-laptop' },
-  { title: 'Get Certified', description: 'Adopt best practices, meet global standards, and foster a culture of safety.', icon: 'mdi-certificate' }
-];
 
 const whyPoints = [
   { icon: 'mdi-shield-star', color: 'primary', title: 'Accredited Programs', sub: 'Internationally recognized' },
@@ -703,6 +679,19 @@ useSeoMeta({
 }
 
 /* ── Background orbs ───────────────────────────────────── */
+.testimonial-card {
+  transition: all 0.3s ease;
+  background: white;
+}
+.news-card {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+}
+.news-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 16px 32px rgba(0,0,0,0.08) !important;
+}
+.tracking-wider { letter-spacing: 0.05em; }
 .shape {
   position: absolute;
   background: rgba(255, 255, 255, 0.06);
