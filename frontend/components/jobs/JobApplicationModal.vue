@@ -130,7 +130,17 @@
             <div class="pa-6">
               <h3 class="text-h6 font-weight-bold mb-4">Section D: Application</h3>
               <v-textarea v-model="form.cover_note" label="Cover Note / Message to Employer" variant="outlined" color="primary" rows="4"></v-textarea>
-              <v-file-input v-model="resumeFile" label="Resume Upload (PDF max 5MB)" accept=".pdf" variant="outlined" color="primary" prepend-icon="mdi-file-pdf-box" class="mt-2"></v-file-input>
+              <v-file-input
+                v-model="resumeFile"
+                label="Resume Upload (PDF max 5MB)"
+                accept=".pdf"
+                variant="outlined"
+                color="primary"
+                prepend-icon="mdi-file-pdf-box"
+                class="mt-2"
+                hint="Please upload only PDF format files"
+                persistent-hint
+              ></v-file-input>
               
               <v-alert type="info" variant="tonal" class="mt-4 text-body-2 rounded-lg">
                 Your application snapshot will be saved and sent to the employer. Make sure your profile details are accurate for this role!
