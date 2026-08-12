@@ -545,6 +545,82 @@
             <CertificationsTab />
           </div>
 
+          <!-- Marketing Tab -->
+          <div v-if="activeTab[0] === 'marketing'" class="fade-in">
+            <h2 class="text-h6 font-weight-bold mb-2">Marketing & Promotional Popup</h2>
+            <p class="text-body-2 text-secondary mb-8">Manage the global promotional popup ad that displays when users visit the site.</p>
+
+            <v-card variant="outlined" class="rounded-xl pa-6 mb-6">
+              <div class="d-flex align-center justify-space-between mb-4">
+                <div class="d-flex align-center">
+                  <v-avatar color="deep-purple" size="40" class="mr-3">
+                    <v-icon color="white" size="20">mdi-monitor-screenshot</v-icon>
+                  </v-avatar>
+                  <div>
+                    <div class="text-subtitle-1 font-weight-bold">Popup Ad Configuration</div>
+                    <div class="text-caption text-secondary">Enable the popup and set its properties</div>
+                  </div>
+                </div>
+                <v-switch
+                  v-model="form.ad_popup_enabled"
+                  color="primary"
+                  label="Enable Popup"
+                  hide-details
+                  class="flex-grow-0"
+                ></v-switch>
+              </div>
+
+              <!-- Preview -->
+              <div v-if="form.ad_popup_image" class="mb-4">
+                <img
+                  :src="form.ad_popup_image?.startsWith('/') ? (baseUrl + form.ad_popup_image) : form.ad_popup_image"
+                  alt="Ad Image Preview"
+                  style="width:100%; max-height:200px; object-fit:cover; border-radius:12px; border:1px solid rgba(0,0,0,0.08);"
+                />
+              </div>
+              <div v-else class="mb-4 pa-6 rounded-xl d-flex align-center justify-center" style="background:#f8f9fc; border:1px dashed rgba(0,0,0,0.12); min-height:120px;">
+                <div class="text-center text-secondary">
+                  <v-icon size="40" color="grey-lighten-2" class="mb-2">mdi-image-outline</v-icon>
+                  <div class="text-caption">No ad image set — using default placeholder</div>
+                </div>
+              </div>
+
+              <v-row>
+                <v-col cols="12" md="6">
+                  <v-file-input
+                    v-model="adPopupImageFile"
+                    accept="image/*"
+                    label="Upload new ad banner"
+                    variant="outlined"
+                    density="compact"
+                    prepend-icon=""
+                    prepend-inner-icon="mdi-upload"
+                    hide-details
+                    class="mb-3"
+                  />
+                  <v-btn color="deep-purple" variant="tonal" rounded="lg" size="small" :loading="saving" @click="uploadMarketingImages" class="text-none">
+                    <v-icon start>mdi-cloud-upload</v-icon> Upload Ad Image
+                  </v-btn>
+                </v-col>
+                <v-col cols="12" md="6">
+                  <AppInput
+                    v-model="form.ad_popup_link"
+                    label="Ad Target Link"
+                    placeholder="/#courses or https://external.com"
+                    class="mb-3"
+                  />
+                  <div class="text-caption text-secondary mb-4">Where users are redirected when they click the button.</div>
+                  <AppInput
+                    v-model="form.ad_popup_button_text"
+                    label="Button Text"
+                    placeholder="Claim Offer Now"
+                  />
+                  <div class="text-caption text-secondary mt-1">The label displayed on the call-to-action button.</div>
+                </v-col>
+              </v-row>
+            </v-card>
+          </div>
+
           <div class="d-flex justify-end gap-3 mt-12 pt-6 border-t" v-if="activeTab[0] !== 'social' && activeTab[0] !== 'currencies' && activeTab[0] !== 'homepage' && activeTab[0] !== 'certifications'">
             <AppButton variant="g" size="lg" icon="mdi-refresh" @click="fetchData">
               Reset Changes
@@ -591,6 +667,7 @@ const heroImageFile = ref<File | null>(null);
 const aboutImageFile = ref<File | null>(null);
 const aboutpageWhoImageFile = ref<File | null>(null);
 const jobportalHeroImageFile = ref<File | null>(null);
+const adPopupImageFile = ref<File | null>(null);
 
 const snackbar = ref(false);
 const snackbarMessage = ref('');
@@ -608,6 +685,7 @@ const tabs = [
   { label: 'Social Platforms', value: 'social', icon: 'mdi-account-group-outline' },
   { label: 'Currencies', value: 'currencies', icon: 'mdi-currency-usd' },
   { label: 'Certifications', value: 'certifications', icon: 'mdi-certificate-outline' },
+  { label: 'Marketing', value: 'marketing', icon: 'mdi-bullhorn-outline' },
 ];
 
 
@@ -630,6 +708,7 @@ const fetchData = async () => {
     }
     configMap.course_show_rating = configMap.course_show_rating === 'true' || configMap.course_show_rating === '1';
     configMap.course_show_students = configMap.course_show_students === 'true' || configMap.course_show_students === '1';
+    configMap.ad_popup_enabled = configMap.ad_popup_enabled === 'true' || configMap.ad_popup_enabled === '1';
     form.value = configMap;
   } catch (err) {
     console.error('Failed to fetch config');
@@ -708,6 +787,33 @@ const uploadHomepageImages = async () => {
   }
 };
 
+const uploadMarketingImages = async () => {
+  if (!adPopupImageFile.value) return;
+
+  saving.value = true;
+  const formData = new FormData();
+  const adPopup = Array.isArray(adPopupImageFile.value) ? adPopupImageFile.value[0] : adPopupImageFile.value;
+
+  if (adPopup) formData.append('ad_popup_image', adPopup);
+
+  try {
+    const { data } = await api.post('/admin/config/branding/upload', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+    if (data.updates.ad_popup_image) form.value.ad_popup_image = data.updates.ad_popup_image;
+    snackbarMessage.value = 'Ad image uploaded successfully';
+    snackbarColor.value = 'success';
+    snackbar.value = true;
+    adPopupImageFile.value = null;
+  } catch (err) {
+    snackbarMessage.value = 'Failed to upload ad image';
+    snackbarColor.value = 'error';
+    snackbar.value = true;
+  } finally {
+    saving.value = false;
+  }
+};
+
 const save = async () => {
   saving.value = true;
   try {
@@ -721,6 +827,7 @@ const save = async () => {
     
     payload.course_show_rating = payload.course_show_rating ? 'true' : 'false';
     payload.course_show_students = payload.course_show_students ? 'true' : 'false';
+    payload.ad_popup_enabled = payload.ad_popup_enabled ? 'true' : 'false';
 
     await api.put('/admin/config', payload);
     snackbarMessage.value = 'Settings saved successfully. Reloading to apply changes...';

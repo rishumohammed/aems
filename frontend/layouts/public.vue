@@ -152,6 +152,7 @@
         </div>
       </v-container>
     </v-footer>
+    <AdPopup />
   </v-app>
 </template>
 

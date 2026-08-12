@@ -7,6 +7,7 @@ import QRCode from 'qrcode';
 import { pool } from '../db/connection.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import certificateService from '../services/certificate.service.js';
 
 const PUBLIC_EXAM_JWT_SECRET = process.env.PUBLIC_EXAM_JWT_SECRET || 'aems_public_exam_secret_key_2024';
 
@@ -435,7 +436,7 @@ router.post('/attempts/:id/submit', verifyCandidateToken, async (req, res) => {
     await connection.beginTransaction();
 
     const [attempts] = await connection.query(`
-      SELECT a.*, e.passing_marks, e.total_marks, e.negative_marking, e.pass_percentage
+      SELECT a.*, e.passing_marks, e.total_marks, e.negative_marking, e.pass_percentage, e.enable_certificate
       FROM public_exam_attempts a
       JOIN public_exams e ON a.exam_id = e.id
       WHERE a.id = ?
@@ -539,12 +540,23 @@ router.post('/attempts/:id/submit', verifyCandidateToken, async (req, res) => {
     await connection.commit();
     connection.release();
 
+    let cert_number = null;
+    if (passed && attempt.enable_certificate) {
+      try {
+        const certResult = await certificateService.generatePublicExamCertificate(attemptId);
+        cert_number = certResult.certNumber;
+      } catch (certError) {
+        console.error('Failed to auto-generate public exam certificate on submit:', certError);
+      }
+    }
+
     res.json({
       message: 'Exam submitted successfully',
       result_id: resultId,
       score: calculatedScore,
       percentage,
-      passed
+      passed,
+      cert_number
     });
   } catch (error) {
     await connection.rollback();
@@ -675,6 +687,19 @@ router.get('/:id/leaderboard', async (req, res) => {
 router.get('/attempts/:id/certificate', async (req, res) => {
   try {
     const attemptId = req.params.id;
+
+    // Check if pre-generated certificate exists in DB and filesystem
+    const [dbCerts] = await pool.query(
+      'SELECT pdf_path FROM certificates WHERE exam_attempt_id = ? AND status = "active"',
+      [attemptId]
+    );
+
+    if (dbCerts.length > 0 && dbCerts[0].pdf_path) {
+      const fullPath = path.join(process.cwd(), dbCerts[0].pdf_path);
+      if (fs.existsSync(fullPath)) {
+        return res.download(fullPath, `Practice-Certificate-${attemptId}.pdf`);
+      }
+    }
 
     // Fetch result & attempt details
     const [rows] = await pool.query(`

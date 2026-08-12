@@ -427,6 +427,190 @@ class CertificateService {
     return true;
   }
 
+  async generatePublicExamCertificate(attemptId) {
+    // 1. Fetch Attempt, Exam, Result, Candidate details
+    const [attempts] = await pool.query(
+      `SELECT r.*, a.guest_name, a.candidate_id, e.name as exam_name, e.total_marks, e.enable_certificate
+       FROM public_exam_results r
+       JOIN public_exam_attempts a ON r.attempt_id = a.id
+       JOIN public_exams e ON r.exam_id = e.id
+       WHERE r.attempt_id = ?`,
+      [attemptId]
+    );
+
+    if (attempts.length === 0) {
+      throw new Error('Valid passed exam attempt not found');
+    }
+
+    const attempt = attempts[0];
+    if (!attempt.passed) {
+      throw new Error('Attempt did not pass');
+    }
+
+    if (!attempt.enable_certificate) {
+      throw new Error('Certificates are disabled for this exam');
+    }
+
+    // 2. Idempotency Check
+    const [existing] = await pool.query(
+      'SELECT id, cert_number, pdf_path FROM certificates WHERE exam_attempt_id = ?',
+      [attemptId]
+    );
+    if (existing.length > 0) {
+      return { message: 'Certificate already exists', certNumber: existing[0].cert_number, pdfUrl: existing[0].pdf_path };
+    }
+
+    // 3. Generate unique cert number
+    let certNumber = `CERT-PE-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+    let isUnique = false;
+    while (!isUnique) {
+      const [check] = await pool.query('SELECT id FROM certificates WHERE cert_number = ?', [certNumber]);
+      if (check.length === 0) isUnique = true;
+      else certNumber = `CERT-PE-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+    }
+
+    // 4. Fetch Custom Certificate Settings
+    const [customCerts] = await pool.query('SELECT * FROM public_exam_certificates WHERE exam_id = ?', [attempt.exam_id]);
+    const custom = customCerts[0] || {};
+
+    const pdfDir = path.join(process.cwd(), 'uploads', 'public_certificates');
+    if (!fs.existsSync(pdfDir)) {
+      fs.mkdirSync(pdfDir, { recursive: true });
+    }
+
+    const pdfFilename = `cert-${attemptId}.pdf`;
+    const pdfPathLocal = path.join(pdfDir, pdfFilename);
+    const pdfUrl = `/uploads/public_certificates/${pdfFilename}`;
+
+    // 5. Generate PDF
+    await this.createPublicExamPDF(pdfPathLocal, attemptId, attempt, custom);
+
+    // 6. DB Record
+    const certId = uuidv4();
+    await pool.query(
+      `INSERT INTO certificates (id, student_id, candidate_id, course_id, exam_attempt_id, cert_number, pdf_path, status)
+       VALUES (?, NULL, ?, NULL, ?, ?, ?, 'active')`,
+      [certId, attempt.candidate_id || null, attemptId, certNumber, pdfUrl]
+    );
+
+    return { certId, certNumber, pdfUrl };
+  }
+
+  async createPublicExamPDF(filePath, attemptId, data, custom) {
+    return new Promise(async (resolve, reject) => {
+      try {
+        const doc = new PDFDocument({ size: 'A4', layout: 'landscape', margin: 40 });
+        const stream = fs.createWriteStream(filePath);
+        doc.pipe(stream);
+
+        // Styling configuration (harmonious colors)
+        const primaryColor = '#5624D0'; // Sleek Udemy Purple
+        const goldAccent = '#E59819';   // Premium Gold
+        const darkText = '#1A1A2E';
+
+        // Outer premium borders
+        doc.rect(15, 15, 811.89, 565.28).fill('#ffffff');
+        doc.rect(25, 25, 791.89, 545.28).lineWidth(4).stroke(primaryColor);
+        doc.rect(32, 32, 777.89, 531.28).lineWidth(1.5).stroke(goldAccent);
+
+        // Render Custom Logo if present, otherwise default text
+        let logoDrawn = false;
+        if (custom.logo_url && custom.logo_url.startsWith('data:image')) {
+          try {
+            const logoData = custom.logo_url.split(',')[1];
+            doc.image(Buffer.from(logoData, 'base64'), 395, 45, { width: 50 });
+            logoDrawn = true;
+          } catch (err) {
+            console.warn('Failed to render base64 logo in PDF:', err.message);
+          }
+        }
+        
+        if (!logoDrawn) {
+          // Default text header watermark
+          doc.fontSize(10).font('Helvetica-Bold').fillColor('#C2C2C2')
+             .text('BRIXIFY PUBLIC PRACTICE PORTAL · PRACTICE COMPLETION CERTIFICATE', 0, 50, { align: 'center', characterSpacing: 1.5 });
+        }
+
+        // Certificate Title
+        const certTitle = custom.title || 'Practice Exam Certificate';
+        doc.fontSize(36).font('Helvetica-Bold').fillColor(primaryColor)
+           .text(certTitle, 0, 110, { align: 'center' });
+
+        // Subtitle warnings
+        doc.fontSize(11).font('Helvetica-Oblique').fillColor('#E15241')
+           .text('Not Official Certification · Practice Completion Only', 0, 158, { align: 'center' });
+
+        // Decorative line
+        doc.moveTo(250, 185).lineTo(591.89, 185).lineWidth(1.5).stroke(goldAccent);
+
+        // Main body text
+        doc.fontSize(16).font('Helvetica').fillColor('#666666')
+           .text('This is to certify that the public visitor', 0, 220, { align: 'center' });
+
+        // Student/Guest Name
+        doc.fontSize(36).font('Helvetica-Bold').fillColor(darkText)
+           .text(data.guest_name, 0, 255, { align: 'center' });
+
+        doc.fontSize(16).font('Helvetica').fillColor('#666666')
+           .text('has successfully completed the practice entrance exam', 0, 320, { align: 'center' });
+
+        // Exam Name
+        doc.fontSize(22).font('Helvetica-Bold').fillColor(primaryColor)
+           .text(data.exam_name, 0, 355, { align: 'center' });
+
+        // Score & Percentage
+        doc.fontSize(14).font('Helvetica').fillColor('#444444')
+           .text(`Scoring ${data.score} out of ${data.total_marks} marks (${data.percentage}%)`, 0, 395, { align: 'center' });
+
+        // Completed Date
+        const completedDate = new Date(data.created_at).toLocaleDateString('en-US', {
+          year: 'numeric', month: 'long', day: 'numeric'
+        });
+        doc.fontSize(13).font('Helvetica').fillColor('#666666')
+           .text(`Awarded on ${completedDate}`, 0, 435, { align: 'center' });
+
+        // QR Code for verification
+        const portalUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/public-exams`;
+        const qrBuffer = await QRCode.toBuffer(portalUrl, { width: 90, margin: 1 });
+        doc.image(qrBuffer, 690, 435, { width: 75 });
+        doc.fontSize(8).font('Helvetica').fillColor('#999999')
+           .text('Scan to take exams', 680, 515, { width: 95, align: 'center' });
+
+        // Footer info
+        doc.fontSize(9).font('Helvetica').fillColor('#A2A2A2')
+           .text(`Attempt Verification ID: ${attemptId}`, 50, 520);
+
+        // Custom Signature image or default signatory text
+        let sigDrawn = false;
+        if (custom.signature_url && custom.signature_url.startsWith('data:image')) {
+          try {
+            const sigData = custom.signature_url.split(',')[1];
+            doc.image(Buffer.from(sigData, 'base64'), 380, 470, { width: 80 });
+            sigDrawn = true;
+          } catch (err) {
+            console.warn('Failed to render signature in PDF:', err.message);
+          }
+        }
+        
+        if (!sigDrawn) {
+          doc.fontSize(12).font('Helvetica-Bold').fillColor(darkText)
+             .text('Brixify Practice Portal Team', 300, 500, { align: 'center' });
+        }
+
+        const signatoryLabel = custom.footer_text || 'Authorized Practice Signatory';
+        doc.fontSize(10).font('Helvetica').fillColor('#666666')
+           .text(signatoryLabel, 300, 518, { align: 'center' });
+
+        doc.end();
+
+        stream.on('finish', () => resolve(true));
+        stream.on('error', reject);
+      } catch (err) {
+        reject(err);
+      }
+    });
+  }
+
   // Config
   async getConfig() {
     const [rows] = await pool.query('SELECT * FROM cert_template_config WHERE id = 1');

@@ -106,6 +106,16 @@
             <div class="text-caption text-secondary mt-1">
               {{ item.duration_minutes }} min &bull; {{ item.passing_marks }} ({{ item.pass_percentage }}%) Pass
             </div>
+            <v-chip
+              v-if="item.enable_proctoring"
+              size="x-small"
+              color="orange"
+              variant="tonal"
+              class="mt-1 font-weight-bold"
+              prepend-icon="mdi-cctv"
+            >
+              Proctored
+            </v-chip>
           </div>
         </template>
 
@@ -188,6 +198,16 @@
                   color="grey-darken-2"
                   @click="changeStatus(item.id, 'draft')"
                   title="Unpublish (Set to Draft)"
+                />
+
+                <!-- Enable / Disable Proctoring Toggle -->
+                <v-btn
+                  :icon="item.enable_proctoring ? 'mdi-cctv' : 'mdi-cctv-off'"
+                  variant="tonal"
+                  size="small"
+                  :color="item.enable_proctoring ? 'orange' : 'grey'"
+                  :title="item.enable_proctoring ? 'Disable Proctoring' : 'Enable Proctoring'"
+                  @click="toggleProctoring(item)"
                 />
 
                 <!-- Stop / Open Registration -->
@@ -389,6 +409,25 @@ async function changeStatus(id: string, newStatus: string) {
     loadData();
   } catch (err) {
     console.error('Failed to toggle status:', err);
+  }
+}
+
+async function toggleProctoring(exam: any) {
+  const newValue = !exam.enable_proctoring;
+  try {
+    await api.put(`/admin/public-exams/${exam.id}`, { enable_proctoring: newValue });
+    // Optimistic update — reflect instantly in the table
+    exam.enable_proctoring = newValue;
+    snackbarText.value = newValue
+      ? `Proctoring enabled for "${exam.name}".`
+      : `Proctoring disabled for "${exam.name}".`;
+    snackbarColor.value = newValue ? 'orange' : 'grey-darken-2';
+    snackbar.value = true;
+  } catch (err) {
+    console.error('Failed to toggle proctoring:', err);
+    snackbarText.value = 'Failed to update proctoring. Please try again.';
+    snackbarColor.value = 'error';
+    snackbar.value = true;
   }
 }
 

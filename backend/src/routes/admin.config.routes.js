@@ -84,7 +84,8 @@ router.post('/branding/upload', authenticateJWT, authorizeRoles('super_admin'), 
   { name: 'hero_image', maxCount: 1 },
   { name: 'about_image', maxCount: 1 },
   { name: 'aboutpage_who_image', maxCount: 1 },
-  { name: 'jobportal_hero_image', maxCount: 1 }
+  { name: 'jobportal_hero_image', maxCount: 1 },
+  { name: 'ad_popup_image', maxCount: 1 }
 ]), async (req, res) => {
   try {
     const updates = {};
@@ -105,6 +106,9 @@ router.post('/branding/upload', authenticateJWT, authorizeRoles('super_admin'), 
     }
     if (req.files['jobportal_hero_image']) {
       updates.jobportal_hero_image = `/uploads/branding/${req.files['jobportal_hero_image'][0].filename}`;
+    }
+    if (req.files['ad_popup_image']) {
+      updates.ad_popup_image = `/uploads/branding/${req.files['ad_popup_image'][0].filename}`;
     }
     
     if (Object.keys(updates).length > 0) {

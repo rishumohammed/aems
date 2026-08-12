@@ -116,6 +116,19 @@ onMounted(async () => {
       if (data.contact_phone)   contactPhone.value   = data.contact_phone;
       if (data.contact_email)   contactEmail.value   = data.contact_email;
       if (data.contact_whatsapp) contactWhatsapp.value = data.contact_whatsapp;
+      // Ad Popup
+      if (data.ad_popup_enabled) {
+        useState('ad_popup_enabled').value = data.ad_popup_enabled === 'true' || data.ad_popup_enabled === '1';
+      }
+      if (data.ad_popup_image) {
+        useState('ad_popup_image').value = data.ad_popup_image;
+      }
+      if (data.ad_popup_link) {
+        useState('ad_popup_link').value = data.ad_popup_link;
+      }
+      if (data.ad_popup_button_text) {
+        useState('ad_popup_button_text').value = data.ad_popup_button_text;
+      }
     }
   } catch (err) {
     console.error('Failed to fetch public config', err);
