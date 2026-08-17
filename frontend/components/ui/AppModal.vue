@@ -56,7 +56,14 @@ defineEmits(['update:modelValue', 'submit']);
 .modal-card {
   background: white !important;
   border: 1px solid var(--border);
-  
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh;
+}
+
+.modal-body {
+  overflow-y: auto;
+  flex-grow: 1;
 }
 
 .modal-header {
