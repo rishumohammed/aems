@@ -105,7 +105,7 @@
           </div>
         </div>
 
-        <AppButton block size="lg" variant="g" class="mt-4" v-if="selectedApp.resume_path">
+        <AppButton block size="lg" variant="g" class="mt-4" v-if="selectedApp.resume_path" @click="downloadResume(selectedApp.resume_path)">
           Download Resume
         </AppButton>
       </div>
@@ -187,6 +187,20 @@ function viewApplication(app: any) {
 
 function exportCSV() {
   alert('Exporting CSV...');
+}
+
+function downloadResume(path: string) {
+  if (!path) return;
+  if (path.startsWith('http')) {
+    window.open(path, '_blank');
+    return;
+  }
+  const config = useRuntimeConfig();
+  const apiBase = (config.public.apiBase as string) || '';
+  const rootUrl = apiBase.replace(/\/api(\/v1)?\/?$/, '');
+  const cleanPath = path.replace(/\\/g, '/');
+  const fullUrl = `${rootUrl}/${cleanPath.startsWith('/') ? cleanPath.slice(1) : cleanPath}`;
+  window.open(fullUrl, '_blank');
 }
 </script>
 
