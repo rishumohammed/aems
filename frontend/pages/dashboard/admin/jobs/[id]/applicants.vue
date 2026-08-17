@@ -86,16 +86,51 @@
       large
     >
       <div v-if="selectedApp">
+        <!-- Personal & Contact -->
         <div class="mb-4">
-          <h4 class="font-weight-bold mb-1" style="color: var(--g6);">Contact</h4>
-          <p style="color: var(--g7); font-weight: 500; font-size: 14px;">{{ selectedApp.applicant_phone }} • {{ selectedApp.city }}</p>
+          <h4 class="font-weight-bold mb-1" style="color: var(--g6);">Personal & Contact</h4>
+          <p style="color: var(--g7); font-weight: 500; font-size: 14px; line-height: 1.6;">
+            <strong>Email:</strong> {{ selectedApp.applicant_email }} <br>
+            <strong>Phone:</strong> {{ selectedApp.applicant_phone }} <br>
+            <strong>Location:</strong> {{ selectedApp.city || 'N/A' }} <br>
+            <strong>Gender:</strong> {{ selectedApp.gender || 'N/A' }} <br>
+            <strong>DOB:</strong> {{ selectedApp.dob ? new Date(selectedApp.dob).toLocaleDateString() : 'N/A' }}
+          </p>
           <a v-if="selectedApp.linkedin" :href="selectedApp.linkedin" target="_blank" style="color: var(--blue); text-decoration: none; font-size: 14px; font-weight: 500;">LinkedIn Profile</a>
         </div>
 
+        <!-- Education Snapshot -->
         <div class="mb-4">
-          <h4 class="font-weight-bold mb-1" style="color: var(--g6);">Education Snapshot</h4>
+          <h4 class="font-weight-bold mb-1" style="color: var(--g6);">Education</h4>
           <p style="color: var(--g7); font-weight: 500; font-size: 14px;">{{ selectedApp.qualification }} in {{ selectedApp.field_of_study }}</p>
-          <p style="color: var(--g5); font-size: 13px;">{{ selectedApp.institution }} (Class of {{ selectedApp.year_of_passing }}) • Grade: {{ selectedApp.grade }}</p>
+          <p style="color: var(--g5); font-size: 13px;">{{ selectedApp.institution }} (Class of {{ selectedApp.year_of_passing || 'N/A' }}) • Grade: {{ selectedApp.grade || 'N/A' }}</p>
+        </div>
+
+        <!-- Experience Snapshot -->
+        <div class="mb-4">
+          <h4 class="font-weight-bold mb-1" style="color: var(--g6);">Experience</h4>
+          <p style="color: var(--g7); font-weight: 500; font-size: 14px;">
+            {{ selectedApp.experience_years }} Years of Experience
+          </p>
+          <p v-if="selectedApp.last_company || selectedApp.last_role" style="color: var(--g5); font-size: 13px;">
+            Last Role: {{ selectedApp.last_role || 'N/A' }} at {{ selectedApp.last_company || 'N/A' }}
+          </p>
+          <div v-if="getSkills(selectedApp.skills_json).length" class="mt-2 d-flex flex-wrap gap-2">
+            <v-chip v-for="skill in getSkills(selectedApp.skills_json)" :key="skill" size="small" color="primary" variant="flat">
+              {{ skill }}
+            </v-chip>
+          </div>
+        </div>
+
+        <!-- Cover Note -->
+        <div class="mb-4" v-if="selectedApp.completed_course_names">
+          <h4 class="font-weight-bold mb-1" style="color: var(--g6);">Platform Courses Completed</h4>
+          <div class="mt-2 d-flex flex-wrap gap-2">
+            <v-chip v-for="course in selectedApp.completed_course_names.split('||')" :key="course" size="small" color="success" variant="flat">
+              <v-icon start size="small">mdi-check-circle</v-icon>
+              {{ course }}
+            </v-chip>
+          </div>
         </div>
 
         <div class="mb-4" v-if="selectedApp.cover_note">
@@ -201,6 +236,21 @@ function downloadResume(path: string) {
   const cleanPath = path.replace(/\\/g, '/');
   const fullUrl = `${rootUrl}/${cleanPath.startsWith('/') ? cleanPath.slice(1) : cleanPath}`;
   window.open(fullUrl, '_blank');
+}
+
+function getSkills(skillsStr: any): string[] {
+  if (!skillsStr) return [];
+  if (Array.isArray(skillsStr)) return skillsStr;
+  try {
+    const parsed = JSON.parse(skillsStr);
+    if (Array.isArray(parsed)) return parsed;
+    return [];
+  } catch (e) {
+    if (typeof skillsStr === 'string') {
+      return skillsStr.split(',').map(s => s.trim()).filter(Boolean);
+    }
+    return [];
+  }
 }
 </script>
 

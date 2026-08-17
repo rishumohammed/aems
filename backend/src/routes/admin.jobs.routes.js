@@ -267,6 +267,12 @@ router.get('/jobs/:id/applicants', authenticateJWT, hasAccess, async (req, res) 
       SELECT ja.*, 
              u.name as fallback_name, u.email as fallback_email, up.avatar_url,
              (SELECT COUNT(*) FROM enrollments e WHERE e.student_id = ja.student_id AND e.status = 'completed') as courses_completed,
+             (
+               SELECT GROUP_CONCAT(c.title SEPARATOR '||')
+               FROM enrollments e
+               JOIN courses c ON e.course_id = c.id
+               WHERE e.student_id = ja.student_id AND e.status = 'completed'
+             ) as completed_course_names,
              (SELECT COUNT(*) FROM certificates c WHERE c.student_id = ja.student_id AND c.status = 'active') as certs_active
       FROM job_applications ja
       JOIN users u ON ja.student_id = u.id
