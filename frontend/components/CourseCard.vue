@@ -29,11 +29,6 @@
       </v-img>
 
       <div :class="viewType === 'list' ? 'flex-grow-1 px-5' : 'card-body--tight d-flex flex-column flex-grow-1'">
-        <!-- Meta info -->
-        <div class="d-flex align-center mb-1 text-caption text-grey-darken-1">
-          <v-icon size="14" class="mr-1">mdi-account-tie</v-icon>
-          <span>{{ course.tutor_name || 'Expert Instructor' }}</span>
-        </div>
 
         <h3 :class="viewType === 'list' ? 'text-subtitle-1' : 'text-h6'" class="font-weight-bold mb-2 line-clamp-2">
           {{ course.title }}

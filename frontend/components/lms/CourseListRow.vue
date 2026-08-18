@@ -32,7 +32,6 @@
           </v-chip>
           </div>
           <div class="d-flex align-center gap-4 text-caption text-grey">
-            <span class="d-flex align-center"><v-icon size="14" class="mr-1">mdi-account-tie</v-icon>{{ course.tutor_name }}</span>
             <span class="d-flex align-center"><v-icon size="14" class="mr-1">mdi-tag</v-icon>{{ course.category_name }}</span>
             <span class="d-flex align-center"><v-icon size="14" class="mr-1">mdi-account-group</v-icon>{{ course.enrolled_count || 0 }}</span>
           </div>

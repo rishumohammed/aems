@@ -53,10 +53,7 @@
     </div>
 
     <v-card-text class="pa-4 flex-grow-1 d-flex flex-column">
-      <div class="d-flex align-center mb-1 text-caption text-grey">
-        <v-icon size="14" class="mr-1">mdi-account-tie</v-icon>
-        <span class="text-truncate">{{ course.tutor_name || 'Expert' }}</span>
-        <v-spacer></v-spacer>
+      <div class="d-flex align-center justify-end mb-1 text-caption text-grey">
         <v-icon size="14" class="mr-1">mdi-star</v-icon>
         <span class="font-weight-bold">4.8</span>
       </div>
