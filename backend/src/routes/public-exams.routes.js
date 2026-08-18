@@ -9,6 +9,21 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import certificateService from '../services/certificate.service.js';
 
+function safeParseJSON(jsonStr, fallback = []) {
+  if (!jsonStr) return fallback;
+  if (typeof jsonStr !== 'string') return jsonStr;
+  try {
+    return JSON.parse(jsonStr);
+  } catch (e) {
+    return fallback;
+  }
+}
+
+function safeParseOptions(optionsJson) {
+  const parsed = safeParseJSON(optionsJson, []);
+  return Array.isArray(parsed) ? parsed : [];
+}
+
 const PUBLIC_EXAM_JWT_SECRET = process.env.PUBLIC_EXAM_JWT_SECRET || 'aems_public_exam_secret_key_2024';
 
 // Middleware: verify candidate JWT for exam access
@@ -363,7 +378,7 @@ router.post('/:id/attempt', verifyCandidateToken, async (req, res) => {
     `, [examId]);
 
     let formattedQuestions = questions.map(q => {
-      let opts = q.options_json ? (typeof q.options_json === 'string' ? JSON.parse(q.options_json) : q.options_json) : [];
+      let opts = safeParseOptions(q.options_json);
       if (exam.randomize_options && Array.isArray(opts)) {
         opts = [...opts].sort(() => Math.random() - 0.5);
       }
@@ -595,16 +610,16 @@ router.get('/attempts/:id/result', async (req, res) => {
       ORDER BY order_index ASC
     `, [result.exam_id]);
 
-    const parsedAnswers = typeof result.answers_json === 'string' ? JSON.parse(result.answers_json) : result.answers_json;
+    const parsedAnswers = safeParseJSON(result.answers_json, []);
 
     const reviewQuestions = questions.map(q => {
-      const gAns = parsedAnswers.find(ga => ga.question_id === q.id);
+      const gAns = Array.isArray(parsedAnswers) ? parsedAnswers.find(ga => ga.question_id === q.id) : null;
       
       const val = {
         id: q.id,
         question_text: q.question_text,
         type: q.type,
-        options: q.options_json ? (typeof q.options_json === 'string' ? JSON.parse(q.options_json) : q.options_json) : [],
+        options: safeParseOptions(q.options_json),
         marks: q.marks,
         guest_answer: gAns?.answer || null,
         is_correct: gradeQuestion(q.type, q.correct_answer, gAns?.answer)

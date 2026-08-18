@@ -1,4 +1,3 @@
-import nodemailer from 'nodemailer';
 import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -12,45 +11,18 @@ class EmailService {
   }
 
   async init() {
-    if (process.env.SMTP_USER && process.env.SMTP_PASS) {
-      this.transporter = nodemailer.createTransport({
-        host: process.env.SMTP_HOST || 'smtp.mailtrap.io',
-        port: process.env.SMTP_PORT || 2525,
-        auth: {
-          user: process.env.SMTP_USER,
-          pass: process.env.SMTP_PASS
-        }
-      });
+    if (process.env.RESEND_API_KEY) {
       this.ready = true;
+      this.apiKey = process.env.RESEND_API_KEY;
     } else {
-      // Create test account for development
-      try {
-        const testAccount = await nodemailer.createTestAccount();
-        this.transporter = nodemailer.createTransport({
-          host: 'smtp.ethereal.email',
-          port: 587,
-          secure: false,
-          auth: {
-            user: testAccount.user,
-            pass: testAccount.pass
-          }
-        });
-        console.log('\n--- TEST EMAIL ACCOUNT CREATED ---');
-        console.log('User:', testAccount.user);
-        console.log('Pass:', testAccount.pass);
-        console.log('View emails at: https://ethereal.email');
-        console.log('----------------------------------\n');
-        this.ready = true;
-      } catch (err) {
-        console.warn('Failed to create test email account, emails will only be logged to console.');
-        this.ready = false;
-      }
+      console.warn('RESEND_API_KEY is not set, emails will only be logged to console.');
+      this.ready = false;
     }
   }
 
   async sendEmail({ to, subject, html }) {
     if (!this.ready) {
-      console.log('\n--- EMAIL LOG (NO SMTP) ---');
+      console.log('\n--- EMAIL LOG (NO RESEND API KEY) ---');
       console.log('To:', to);
       console.log('Subject:', subject);
       console.log('Content:', html);
@@ -59,20 +31,32 @@ class EmailService {
     }
 
     try {
-      const info = await this.transporter.sendMail({
-        from: `"Brixify" <${process.env.SMTP_FROM || 'noreply@brixify.online'}>`,
-        to,
-        subject,
-        html
+      const response = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${this.apiKey}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          from: `"Brixify" <${process.env.RESEND_FROM || process.env.SMTP_FROM || 'onboarding@resend.dev'}>`,
+          to: Array.isArray(to) ? to : [to],
+          subject,
+          html
+        })
       });
-      console.log('Email sent: %s', info.messageId);
-      if (info.host === 'smtp.ethereal.email') {
-        console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        console.error('Resend API Error:', data);
+        return { messageId: 'failed-to-send', error: data.message };
       }
-      return info;
+
+      console.log('Email sent via Resend: %s', data.id);
+      return { messageId: data.id, ...data };
     } catch (error) {
-      console.error('Error sending email:', error.message || error);
-      // We do not throw here to prevent the backend from crashing when SMTP fails
+      console.error('Error sending email via Resend:', error.message || error);
+      // We do not throw here to prevent the backend from crashing when email fails
       return { messageId: 'failed-to-send', error: error.message };
     }
   }

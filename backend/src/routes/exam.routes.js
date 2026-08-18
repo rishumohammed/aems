@@ -6,6 +6,16 @@ import { validateExamSession } from '../middleware/examSession.js';
 import examService from '../services/exam.service.js';
 import courseCompletionService from '../services/course-completion.service.js';
 
+function safeParseOptions(optionsJson) {
+  if (!optionsJson) return [];
+  try {
+    const parsed = JSON.parse(optionsJson);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (e) {
+    return [];
+  }
+}
+
 async function autoCompleteLessonForExam(connection, studentId, courseId, enrollmentId, examId) {
   const [lessons] = await connection.query(
     'SELECT id, duration_seconds FROM course_lessons WHERE type IN ("quiz", "exam") AND quiz_id = ?',
@@ -189,7 +199,7 @@ router.post('/attempts/:id/start', authenticateJWT, isStudent, async (req, res) 
       return res.json({
         already_started: true,
         remaining_seconds: Math.max(0, remainingSeconds),
-        questions: questions.map(q => ({ ...q, options: q.options_json ? JSON.parse(q.options_json) : [], options_json: undefined }))
+        questions: questions.map(q => ({ ...q, options: safeParseOptions(q.options_json), options_json: undefined }))
       });
     }
 
@@ -211,12 +221,12 @@ router.post('/attempts/:id/start', authenticateJWT, isStudent, async (req, res) 
       type: q.type,
       marks: q.marks,
       order_index: q.order_index,
-      options: q.options_json ? JSON.parse(q.options_json) : [],
+      options: safeParseOptions(q.options_json),
     }));
 
     if (attempt.randomize_questions) questions = questions.sort(() => Math.random() - 0.5);
     if (attempt.randomize_options) {
-      questions = questions.map(q => ({ ...q, options: q.options?.sort(() => Math.random() - 0.5) }));
+      questions = questions.map(q => ({ ...q, options: q.options.sort(() => Math.random() - 0.5) }));
     }
 
     await pool.query(
@@ -349,7 +359,7 @@ router.get('/attempts/:id/results', authenticateJWT, async (req, res) => {
       `, [req.params.id]);
       questionBreakdown = answers.map(a => ({
         ...a,
-        options: a.options_json ? JSON.parse(a.options_json) : [],
+        options: safeParseOptions(a.options_json),
         options_json: undefined
       }));
     }
@@ -443,11 +453,7 @@ router.get('/:id', authenticateJWT, async (req, res) => {
       [req.params.id]
     );
     exam.questions = questions.map(q => {
-      let parsedOptions = [];
-      if (q.options_json) {
-        try { parsedOptions = JSON.parse(q.options_json); } catch(e) { console.error('Invalid JSON for question', q.id); }
-      }
-      return { ...q, options: parsedOptions };
+      return { ...q, options: safeParseOptions(q.options_json) };
     });
     res.json(exam);
   } catch (err) {
