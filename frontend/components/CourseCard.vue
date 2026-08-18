@@ -1,19 +1,19 @@
 <template>
   <v-card
     class="course-card h-100 d-flex flex-column"
-    flat
-    border
+    elevation="1"
+    rounded="xl"
     @click="navigateTo(`/courses/${course.slug}`)"
     v-motion-fade-visible-once
   >
-    <div :class="viewType === 'list' ? 'd-flex align-center pa-2' : ''">
+    <div :class="viewType === 'list' ? 'd-flex h-100' : ''">
       <!-- Thumbnail -->
       <v-img
         :src="imageUrl"
         :aspect-ratio="viewType === 'list' ? 1 : 16/9"
-        :width="viewType === 'list' ? 120 : '100%'"
+        :width="viewType === 'list' ? 180 : '100%'"
         cover
-        class="bg-grey-lighten-2 rounded-lg"
+        class="bg-grey-lighten-2 flex-shrink-0"
       >
         <template v-slot:placeholder>
           <div class="d-flex align-center justify-center fill-height">
@@ -28,9 +28,9 @@
         </div>
       </v-img>
 
-      <div :class="viewType === 'list' ? 'flex-grow-1 px-5' : 'card-body--tight d-flex flex-column flex-grow-1'">
+      <div :class="viewType === 'list' ? 'pa-4 d-flex flex-column flex-grow-1 justify-center' : 'pa-4 d-flex flex-column flex-grow-1'">
 
-        <h3 :class="viewType === 'list' ? 'text-subtitle-1' : 'text-h6'" class="font-weight-bold mb-2 line-clamp-2">
+        <h3 :class="viewType === 'list' ? 'text-h6' : 'text-subtitle-1'" class="font-weight-bold mb-2 line-clamp-2 text-grey-darken-4" style="line-height: 1.4;">
           {{ course.title }}
         </h3>
 
@@ -49,22 +49,24 @@
 
         <v-spacer></v-spacer>
 
-        <div class="d-flex align-center justify-space-between mt-2">
+        <v-divider class="my-3 opacity-20"></v-divider>
+
+        <div class="d-flex align-center justify-space-between mt-auto">
           <div>
             <span v-if="course.price_type === 'custom' || !course.price || course.price == 0" class="text-subtitle-1 font-weight-bold text-primary">
               Enquiry
             </span>
-            <span v-else class="text-h6 font-weight-bold">
+            <span v-else class="text-h6 font-weight-bold text-grey-darken-4">
               {{ course.currency_symbol || '₹' }}{{ course.price }}
             </span>
           </div>
           
           <v-btn
-            variant="tonal"
+            variant="flat"
             color="primary"
             rounded="lg"
-            size="small"
-            class="text-capitalize font-weight-bold"
+            class="text-capitalize font-weight-bold px-5"
+            elevation="0"
           >
             Enroll
           </v-btn>
