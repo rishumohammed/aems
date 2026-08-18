@@ -1,18 +1,6 @@
 import cron from 'node-cron';
-import nodemailer from 'nodemailer';
+import emailService from '../services/email.service.js';
 import { pool } from '../db/connection.js';
-import dotenv from 'dotenv';
-
-dotenv.config({ path: '../../.env' });
-
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
-  port: process.env.SMTP_PORT,
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS
-  }
-});
 
 export const initFollowupJob = () => {
   // Schedule to run every day at 8:00 AM
@@ -42,15 +30,11 @@ export const initFollowupJob = () => {
             - ${f.lead_name} (${f.lead_phone}) at ${new Date(f.scheduled_at).toLocaleTimeString()}: ${f.note || 'No note'}
           `).join('\n');
 
-          const mailOptions = {
-            from: process.env.SMTP_FROM,
-            to: agent.email,
-            subject: `Brixify: Your Follow-up Reminders for Today`,
-            text: `Hello ${agent.name},\n\nYou have ${followups.length} follow-ups scheduled for today:\n\n${followupList}\n\nGood luck!\n- Brixify CRM System`
-          };
+          const subject = `Brixify: Your Follow-up Reminders for Today`;
+          const html = `<p>Hello ${agent.name},</p><p>You have ${followups.length} follow-ups scheduled for today:</p><pre>${followupList}</pre><p>Good luck!<br>- Brixify CRM System</p>`;
 
           try {
-            await transporter.sendMail(mailOptions);
+            await emailService.sendRawEmail(agent.email, subject, html);
             console.log(`Sent reminder email to ${agent.email}`);
           } catch (mailError) {
             console.error(`Failed to send email to ${agent.email}:`, mailError);

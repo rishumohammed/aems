@@ -147,7 +147,7 @@ class EnrollmentService {
       await connection.query(
         `INSERT INTO invoices (id, student_id, course_id, amount, total_fee, amount_paid, balance_due, balance_amount, payment_mode, payment_status, gateway_order_id) 
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        [invoiceId, studentId, courseId, amount, amount, amountPaid, balanceDue, balanceDue, invoicePaymentMode, paymentStatus, payment.gatewayOrderId]
+        [invoiceId, studentId, courseId, amount, amount, amountPaid, balanceDue, balanceDue, invoicePaymentMode, paymentStatus, payment.gatewayOrderId || null]
       );
 
       // 4. Record Payment Transaction
@@ -156,7 +156,7 @@ class EnrollmentService {
         const payRef = payment.mode === 'online' ? payment.gatewayOrderId : payment.reference;
         await connection.query(
           'INSERT INTO invoice_payments (id, invoice_id, amount, mode, reference, installment_number) VALUES (?, ?, ?, ?, ?, ?)',
-          [uuidv4(), invoiceId, amountPaid, payMode, payRef, 1]
+          [uuidv4(), invoiceId, amountPaid, payMode, payRef || null, 1]
         );
       }
 
