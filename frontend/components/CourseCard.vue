@@ -30,7 +30,7 @@
 
       <div :class="viewType === 'list' ? 'pa-4 d-flex flex-column flex-grow-1 justify-center' : 'pa-4 d-flex flex-column flex-grow-1'">
 
-        <h3 :class="viewType === 'list' ? 'text-h6' : 'text-subtitle-1'" class="font-weight-bold mb-2 line-clamp-2 text-grey-darken-4" style="line-height: 1.4;">
+        <h3 :class="viewType === 'list' ? 'text-h6' : 'text-subtitle-1'" class="font-weight-bold mb-2 line-clamp-2 text-grey-darken-4" style="line-height: 1.4; min-height: 2.8em;">
           {{ course.title }}
         </h3>
 
