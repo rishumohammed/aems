@@ -87,7 +87,7 @@ router.post('/', authenticateJWT, authorizeRoles('super_admin'), async (req, res
 
     // Optionally send email with plainPassword
     try {
-      await emailService.sendMail({
+      await emailService.sendEmail({
         to: email,
         subject: 'Your System Account has been created',
         html: `
@@ -199,7 +199,7 @@ router.post('/:id/reset-password', authenticateJWT, authorizeRoles('super_admin'
     await connection.commit();
 
     try {
-      await emailService.sendMail({
+      await emailService.sendEmail({
         to: existing[0].email,
         subject: 'Password Reset',
         html: `
