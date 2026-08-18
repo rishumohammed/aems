@@ -80,7 +80,7 @@ export const useNavStore = defineStore('nav', {
 
       // SETTINGS
       { label: 'System Users', icon: 'mdi-account-group', route: '/dashboard/admin/settings/system-users', roles: ['super_admin'], section: 'SETTINGS' },
-      { label: 'Profile', icon: 'mdi-account-outline', route: '/dashboard/profile', roles: ['super_admin', 'sub_admin', 'tutor', 'student', 'employer', 'crm_agent', 'placement_coordinator', 'finance_staff', 'lms_user', 'support_staff'], section: 'SETTINGS' },
+      { label: 'Settings', icon: 'mdi-cog-outline', route: '/dashboard/profile', roles: ['super_admin', 'sub_admin', 'tutor', 'student', 'employer', 'crm_agent', 'placement_coordinator', 'finance_staff', 'lms_user', 'support_staff'], section: 'SETTINGS' },
       { label: 'Logout', icon: 'mdi-logout', action: 'logout', roles: ['super_admin', 'sub_admin', 'tutor', 'student', 'employer', 'crm_agent', 'placement_coordinator', 'finance_staff', 'lms_user', 'support_staff'], section: 'SETTINGS' },
     ] as NavItem[]
   }),
@@ -132,8 +132,8 @@ export const useNavStore = defineStore('nav', {
             if (role === 'student') return { ...item, route: '/dashboard/courses' };
           }
 
-          // Dynamically point "Profile" to the role-specific profile/settings page
-          if (item.label === 'Profile' && item.route === '/dashboard/profile') {
+          // Dynamically point "Settings" to the role-specific profile/settings page
+          if (item.label === 'Settings' && item.route === '/dashboard/profile') {
             let profileRoute = '/dashboard/profile';
             if (role === 'student') profileRoute = '/dashboard/student/settings';
             else if (role === 'tutor') profileRoute = '/dashboard/tutor/settings';

@@ -175,14 +175,12 @@
 
           <!-- Email Tab -->
           <div v-if="activeTab[0] === 'email'" class="fade-in">
-            <h2 class="text-h6 font-weight-bold mb-6">Email Settings (SMTP)</h2>
-            <div class="fr2 mb-4" style="grid-template-columns: 2fr 1fr;">
-              <AppInput v-model="form.smtp_host" label="SMTP Host" placeholder="smtp.gmail.com" large />
-              <AppInput v-model="form.smtp_port" label="Port" placeholder="587" large />
+            <h2 class="text-h6 font-weight-bold mb-6">Email Settings (Resend REST API)</h2>
+            <div class="mb-4 text-body-2 text-medium-emphasis">
+              We now use Resend via REST API for enhanced deliverability. You can configure your API Key in your <b>.env</b> file as <code>RESEND_API_KEY</code>, or provide it below (which will be saved securely).
             </div>
             <div class="fr2 mb-4">
-              <AppInput v-model="form.smtp_user" label="Username" placeholder="user@example.com" large />
-              <AppInput v-model="form.smtp_pass" label="Password" type="password" placeholder="••••••••" large />
+              <AppInput v-model="form.smtp_pass" label="Resend API Key" type="password" placeholder="re_..." large />
             </div>
             <div class="fr2 mb-6">
               <AppInput v-model="form.smtp_from_name" label="From Name" placeholder="Brixify Team" large />

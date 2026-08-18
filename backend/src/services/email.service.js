@@ -11,13 +11,38 @@ class EmailService {
   }
 
   async init() {
-    if (process.env.RESEND_API_KEY) {
+    let apiKey = process.env.RESEND_API_KEY;
+    let fromEmail = process.env.RESEND_FROM || process.env.SMTP_FROM || 'onboarding@resend.dev';
+    
+    // Try to load from database config if not in .env
+    try {
+      const { ConfigService } = await import('./config.service.js');
+      const dbPass = await ConfigService.getByKey('smtp_pass', false);
+      const dbFrom = await ConfigService.getByKey('smtp_from_email');
+      const dbFromName = await ConfigService.getByKey('smtp_from_name');
+      
+      if (!apiKey && dbPass && dbPass.value) {
+        apiKey = dbPass.value;
+      }
+      if (dbFrom && dbFrom.value) {
+        fromEmail = dbFromName && dbFromName.value ? `"${dbFromName.value}" <${dbFrom.value}>` : dbFrom.value;
+      }
+    } catch (e) {
+      console.error('Failed to load email config from database:', e.message);
+    }
+
+    if (apiKey) {
       this.ready = true;
-      this.apiKey = process.env.RESEND_API_KEY;
+      this.apiKey = apiKey;
+      this.fromEmail = fromEmail;
     } else {
-      console.warn('RESEND_API_KEY is not set, emails will only be logged to console.');
+      console.warn('RESEND_API_KEY is not set in .env or database, emails will only be logged to console.');
       this.ready = false;
     }
+  }
+
+  async sendRawEmail(to, subject, html) {
+    return this.sendEmail({ to, subject, html });
   }
 
   async sendEmail({ to, subject, html }) {
@@ -38,7 +63,7 @@ class EmailService {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          from: `"Brixify" <${process.env.RESEND_FROM || process.env.SMTP_FROM || 'onboarding@resend.dev'}>`,
+          from: this.fromEmail,
           to: Array.isArray(to) ? to : [to],
           subject,
           html
