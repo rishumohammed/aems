@@ -152,6 +152,17 @@ const save = async () => {
   const valid = await formRef.value?.validate();
   if (!valid?.valid) return;
 
+  for (let i = 0; i < form.value.questions.length; i++) {
+    const q = form.value.questions[i];
+    if (q.type === 'mcq') {
+      const validOptions = q.options ? q.options.filter((o: string) => o.trim()) : [];
+      if (validOptions.length < 2) {
+        alert(`Question ${i + 1} (MCQ) must have at least 2 valid options.`);
+        return;
+      }
+    }
+  }
+
   saving.value = true;
   try {
     let examId = (route.params as any).id;

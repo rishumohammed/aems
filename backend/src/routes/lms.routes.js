@@ -272,7 +272,7 @@ router.get('/tutor/quizzes/:id', authenticateJWT, isTutorOrAdmin, async (req, re
       ...quizzes[0],
       questions: questions.map(q => ({
         ...q,
-        options: q.options ? JSON.parse(q.options) : []
+        options: q.options ? (typeof q.options === 'string' ? JSON.parse(q.options) : q.options) : []
       }))
     });
   } catch (error) {

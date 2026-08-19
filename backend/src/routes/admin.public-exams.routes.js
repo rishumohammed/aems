@@ -637,6 +637,10 @@ router.post('/:id/questions', async (req, res) => {
       return res.status(400).json({ message: 'Question text, type, and correct answer are required' });
     }
 
+    if (['mcq', 'msq'].includes(type) && (!Array.isArray(options) || options.filter(o => typeof o === 'string' && o.trim()).length < 2)) {
+      return res.status(400).json({ message: 'MCQ/MSQ questions must have at least 2 options' });
+    }
+
     const [maxOrder] = await pool.query('SELECT COALESCE(MAX(order_index), 0) as max_order FROM public_exam_questions WHERE exam_id = ?', [examId]);
     const id = uuidv4();
 
@@ -671,6 +675,10 @@ router.put('/:id/questions/:qid', async (req, res) => {
   try {
     const { question_text, type, options, correct_answer, explanation, marks, order_index, difficulty_level } = req.body;
     const { id: examId, qid } = req.params;
+
+    if (['mcq', 'msq'].includes(type) && (!Array.isArray(options) || options.filter(o => typeof o === 'string' && o.trim()).length < 2)) {
+      return res.status(400).json({ message: 'MCQ/MSQ questions must have at least 2 options' });
+    }
 
     const fields = [];
     const values = [];
@@ -774,6 +782,10 @@ router.post('/:id/questions/bulk', async (req, res) => {
       if (!q.question_text || !q.type || q.correct_answer === undefined || q.correct_answer === null) {
         connection.release();
         return res.status(400).json({ message: 'Each question must have question_text, type, and correct_answer' });
+      }
+      if (['mcq', 'msq'].includes(q.type) && (!Array.isArray(q.options) || q.options.filter(o => typeof o === 'string' && o.trim()).length < 2)) {
+        connection.release();
+        return res.status(400).json({ message: 'MCQ/MSQ questions must have at least 2 options' });
       }
     }
 

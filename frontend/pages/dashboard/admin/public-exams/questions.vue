@@ -103,7 +103,7 @@
               <code>Type,Question,Options,Correct Answer,Explanation,Marks,Difficulty<br/>"mcq","Which is a prime number?","2|4|6|8","2","2 is the only even prime.",4,"Easy"</code>
             </p>
             <div class="d-flex gap-2 mb-4">
-              <v-btn color="primary" variant="outlined" class="text-none py-6 flex-grow-1" style="border-style: dashed" @click="$refs.csvFileInput.click()">
+              <v-btn color="primary" variant="outlined" class="text-none py-6 flex-grow-1" style="border-style: dashed" @click="csvFileInput?.click()">
                 <v-icon left size="24" class="mr-2">mdi-cloud-upload</v-icon> Click to Select CSV File
               </v-btn>
               <v-btn color="info" variant="tonal" class="text-none py-6" @click="downloadSampleCsv">
@@ -437,9 +437,9 @@ const difficultyFilter = ref('All Difficulties');
 
 // Bulk Import State
 const importOpen = ref(false);
-const importMode = ref<'json' | 'csv'>('json');
+const importMode = ref<'json' | 'csv'>('csv');
 const importJsonText = ref('');
-const csvFileInput = ref(null);
+const csvFileInput = ref<HTMLInputElement | null>(null);
 const selectedCsvFileName = ref('');
 const parsedCsvData = ref<any[]>([]);
 const importing = ref(false);
@@ -728,6 +728,14 @@ function removeOptionField(idx: number | string) {
 async function saveQuestion() {
   const { valid } = await questionForm.value.validate();
   if (!valid) return;
+
+  if (['mcq', 'msq'].includes(questionFields.value.type)) {
+    const validOptions = questionFields.value.options.filter((o: string) => o.trim());
+    if (validOptions.length < 2) {
+      alert('MCQ/MSQ questions must have at least 2 valid options.');
+      return;
+    }
+  }
 
   savingQuestion.value = true;
   try {

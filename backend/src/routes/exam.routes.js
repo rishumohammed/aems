@@ -8,6 +8,7 @@ import courseCompletionService from '../services/course-completion.service.js';
 
 function safeParseOptions(optionsJson) {
   if (!optionsJson) return [];
+  if (typeof optionsJson !== 'string') return Array.isArray(optionsJson) ? optionsJson : [];
   try {
     const parsed = JSON.parse(optionsJson);
     return Array.isArray(parsed) ? parsed : [];
@@ -588,6 +589,13 @@ router.post('/:id/questions/bulk', authenticateJWT, isTutorOrAdmin, async (req, 
       return res.status(400).json({ message: 'Invalid questions format. Expected an array.' });
     }
 
+    for (const q of questions) {
+      if ((q.type === 'mcq' || q.type === 'msq') && (!Array.isArray(q.options) || q.options.filter(o => typeof o === 'string' && o.trim()).length < 2)) {
+        connection.release();
+        return res.status(400).json({ message: 'MCQ questions must have at least 2 options.' });
+      }
+    }
+
     const [maxOrder] = await connection.query('SELECT COALESCE(MAX(order_index),0) as max_order FROM exam_questions WHERE exam_id = ?', [req.params.id]);
     let orderIdx = maxOrder[0].max_order;
 
@@ -613,6 +621,11 @@ router.post('/:id/questions/bulk', authenticateJWT, isTutorOrAdmin, async (req, 
 router.post('/:id/questions', authenticateJWT, isTutorOrAdmin, async (req, res) => {
   try {
     const { question_text, type, options, correct_answer, marks, explanation } = req.body;
+    
+    if ((type === 'mcq' || type === 'msq') && (!Array.isArray(options) || options.filter(o => typeof o === 'string' && o.trim()).length < 2)) {
+      return res.status(400).json({ message: 'MCQ questions must have at least 2 options.' });
+    }
+
     const [maxOrder] = await pool.query('SELECT COALESCE(MAX(order_index),0) as max_order FROM exam_questions WHERE exam_id = ?', [req.params.id]);
     const id = uuidv4();
     await pool.query(
@@ -629,6 +642,10 @@ router.post('/:id/questions', authenticateJWT, isTutorOrAdmin, async (req, res) 
 router.put('/:id/questions/:qid', authenticateJWT, isTutorOrAdmin, async (req, res) => {
   try {
     const { question_text, type, options, correct_answer, marks, explanation, order_index } = req.body;
+
+    if ((type === 'mcq' || type === 'msq') && (!Array.isArray(options) || options.filter(o => typeof o === 'string' && o.trim()).length < 2)) {
+      return res.status(400).json({ message: 'MCQ questions must have at least 2 options.' });
+    }
     await pool.query(
       'UPDATE exam_questions SET question_text=?, type=?, options_json=?, correct_answer=?, marks=?, explanation=?, order_index=? WHERE id=?',
       [question_text, type, options ? JSON.stringify(options) : null, correct_answer || null, marks || 1, explanation || null, order_index || 0, req.params.qid]
