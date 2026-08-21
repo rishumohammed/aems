@@ -1,7 +1,10 @@
 <template>
   <v-navigation-drawer
-    permanent
-    :scrim="false"
+    :permanent="!mobile"
+    :temporary="mobile"
+    :model-value="mobile ? uiStore.isSidebarOpen : true"
+    @update:model-value="(v) => { if (mobile) uiStore.isSidebarOpen = v; }"
+    :scrim="true"
     elevation="0"
     id="app-sidebar"
     :width="280"
@@ -77,13 +80,15 @@ const navStore = useNavStore();
 const uiStore = useUIStore();
 const authStore = useAuthStore();
 const display = useDisplay();
+const { mobile } = useDisplay();
 const instituteName = useState('instituteName', () => '');
 
 const handleItemClick = (item: any) => {
   if (item.action === 'logout') {
     authStore.logout();
   }
-  if (display.mobile.value) {
+  // Always close sidebar on mobile when navigating
+  if (mobile.value) {
     uiStore.isSidebarOpen = false;
   }
 };

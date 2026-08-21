@@ -1,10 +1,10 @@
 <template>
-  <v-container fluid class="pa-6">
-    <v-container class="py-8">
+  <v-container fluid class="pa-2 pa-sm-4 pa-md-6">
+    <v-container class="py-4 py-sm-8">
       <!-- Header -->
-      <header class="mb-10 d-flex align-center justify-space-between">
+      <header class="mb-6 mb-sm-10 d-flex align-center justify-space-between flex-wrap gap-3">
         <div>
-          <h1 class="text-h4 font-weight-bold mb-1">My Enrolled Courses</h1>
+          <h1 class="text-h5 text-sm-h4 font-weight-bold mb-1">My Enrolled Courses</h1>
           <p class="text-subtitle-1 text-medium-emphasis mb-6">Manage your active learning and review completed courses.</p>
         </div>
         <v-btn color="primary" prepend-icon="mdi-magnify" variant="flat" rounded="pill" class="px-6" to="/dashboard/courses">

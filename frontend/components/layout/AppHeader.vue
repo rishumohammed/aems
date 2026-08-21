@@ -4,9 +4,20 @@
     id="app-header"
     height="56"
   >
-    <div class="header-content d-flex align-center px-6 w-100">
+    <div class="header-content d-flex align-center px-4 px-sm-6 w-100">
 
-      <div class="d-flex align-center ml-2">
+      <!-- Hamburger: mobile only -->
+      <v-btn
+        icon
+        variant="text"
+        class="mr-2 d-flex d-lg-none"
+        @click="uiStore.isSidebarOpen = !uiStore.isSidebarOpen"
+        aria-label="Toggle menu"
+      >
+        <v-icon icon="mdi-menu" size="22" />
+      </v-btn>
+
+      <div class="d-flex align-center">
         <div class="logo-box d-flex align-center justify-center" :style="{ width: appLogo ? 'auto' : '32px', height: '32px' }">
           <img v-if="appLogo" :src="fullLogoUrl" alt="Logo" style="max-height: 32px; object-fit: contain;" />
           <v-icon v-else icon="mdi-orbit" color="primary" size="32" class="logo-icon"></v-icon>

@@ -1,6 +1,6 @@
 <template>
-  <v-container fluid class="pa-6">
-    <v-container class="pt-4 pb-8">
+  <v-container fluid class="pa-2 pa-sm-4 pa-md-6">
+    <v-container class="pt-2 pt-sm-4 pb-8">
       
       <div v-if="loading" class="pa-6">
         <v-skeleton-loader type="image" class="rounded-xl mb-6" height="200"></v-skeleton-loader>
@@ -21,18 +21,18 @@
 
       <template v-else>
         <!-- Top Section: Welcome -->
-        <header class="mb-8 welcome-header pa-8 rounded-xl text-white elevation-4 overflow-hidden position-relative">
+        <header class="mb-6 mb-sm-8 welcome-header pa-5 pa-sm-8 rounded-xl text-white elevation-4 overflow-hidden position-relative">
           <v-row align="center" class="position-relative" style="z-index: 2">
             <v-col cols="12" md="8">
-              <h1 class="text-h3 font-weight-black mb-2 tracking-tight">
+              <h1 class="text-h5 text-sm-h4 text-md-h3 font-weight-black mb-2 tracking-tight">
                 Welcome back, {{ authStore.user?.name?.split(' ')[0] || 'Learner' }}! 👋
               </h1>
-              <p class="text-h6 opacity-90 font-weight-medium">
+              <p class="text-body-1 text-sm-h6 opacity-90 font-weight-medium">
                 You have <span class="text-amber-accent-2 font-weight-black">{{ stats.pending_assignments || 0 }}</span> tasks waiting for you.
               </p>
             </v-col>
             <v-col cols="12" md="4" class="text-md-right">
-              <v-btn color="white" variant="flat" size="large" prepend-icon="mdi-play" class="rounded-xl px-8 font-weight-black text-primary shadow-apple" to="/dashboard/courses">
+              <v-btn color="white" variant="flat" size="large" prepend-icon="mdi-play" class="rounded-xl px-6 px-sm-8 font-weight-black text-primary shadow-apple" to="/dashboard/courses">
                 Resume Learning
               </v-btn>
             </v-col>
@@ -261,11 +261,11 @@
                   <div class="text-subtitle-2 text-grey-lighten-1 font-weight-medium">Matches</div>
                 </v-col>
               </v-row>
-              <div class="d-flex gap-3">
-                <v-btn flex-grow-1 color="#ffc107" variant="flat" rounded="lg" class="font-weight-bold text-black" size="large" to="/dashboard/student/applications">
+              <div class="d-flex ga-3">
+                <v-btn color="#ffc107" variant="flat" rounded="lg" class="flex-grow-1 font-weight-bold text-black" size="large" to="/dashboard/student/applications">
                   Applications
                 </v-btn>
-                <v-btn flex-grow-1 style="background-color: rgba(255,255,255,0.15) !important;" variant="flat" rounded="lg" class="font-weight-bold text-white" size="large" elevation="0" to="/dashboard/jobs">
+                <v-btn style="background-color: rgba(255,255,255,0.15) !important;" variant="flat" rounded="lg" class="flex-grow-1 font-weight-bold text-white" size="large" elevation="0" to="/dashboard/jobs">
                   Browse Jobs
                 </v-btn>
               </div>

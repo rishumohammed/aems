@@ -11,7 +11,7 @@
           </div>
 
           <v-card rounded="xl" class="shadow-soft overflow-hidden border-0">
-            <v-tabs v-model="roleTab" grow color="primary" class="bg-white border-b">
+            <v-tabs v-model="roleTab" grow color="primary" class="bg-white border-b" show-arrows>
               <v-tab value="student">
                 <v-icon start>mdi-account-school</v-icon>
                 Student

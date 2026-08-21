@@ -1,13 +1,31 @@
 <template>
-  <v-container fluid class="pa-6">
-    <div class="mb-8">
-      <h1 class="text-h4 font-weight-bold mb-1">Account Settings</h1>
+  <v-container fluid class="pa-2 pa-sm-4 pa-md-6">
+    <div class="mb-4 mb-sm-8">
+      <h1 class="text-h5 text-sm-h4 font-weight-bold mb-1">Account Settings</h1>
       <p class="text-secondary">Manage your profile, preferences, and security.</p>
     </div>
 
     <v-row>
+      <!-- Settings nav: sidebar on md+, horizontal tabs on mobile -->
       <v-col cols="12" md="4">
-        <v-card rounded="xl" class="pa-6 border shadow-sm h-100">
+        <!-- Mobile: show as tabs -->
+        <v-card rounded="xl" class="border shadow-sm d-flex d-md-none mb-4">
+          <v-tabs
+            v-model="activeTab"
+            color="primary"
+            show-arrows
+            grow
+          >
+            <v-tab value="personal"><v-icon size="18">mdi-account-outline</v-icon></v-tab>
+            <v-tab value="education"><v-icon size="18">mdi-school-outline</v-icon></v-tab>
+            <v-tab value="experience"><v-icon size="18">mdi-briefcase-outline</v-icon></v-tab>
+            <v-tab value="security"><v-icon size="18">mdi-shield-lock-outline</v-icon></v-tab>
+            <v-tab value="notifications"><v-icon size="18">mdi-bell-outline</v-icon></v-tab>
+          </v-tabs>
+        </v-card>
+
+        <!-- Desktop: show as sidebar card -->
+        <v-card rounded="xl" class="pa-6 border shadow-sm h-100 d-none d-md-flex flex-column">
           <div class="text-center mb-6">
             <v-avatar size="100" color="primary-lighten-4" class="mb-4">
               <span class="text-h4 font-weight-bold text-primary">{{ userInitials }}</span>
@@ -17,58 +35,18 @@
           </div>
           <v-divider class="mb-6"></v-divider>
           <v-list density="compact" nav>
-            <v-list-item 
-              prepend-icon="mdi-account-outline" 
-              title="Personal Info" 
-              value="personal" 
-              :active="activeTab === 'personal'" 
-              color="primary" 
-              rounded="lg"
-              @click="activeTab = 'personal'"
-            ></v-list-item>
-            <v-list-item 
-              prepend-icon="mdi-school-outline" 
-              title="Education" 
-              value="education" 
-              :active="activeTab === 'education'" 
-              color="primary" 
-              rounded="lg"
-              @click="activeTab = 'education'"
-            ></v-list-item>
-            <v-list-item 
-              prepend-icon="mdi-briefcase-outline" 
-              title="Experience" 
-              value="experience" 
-              :active="activeTab === 'experience'" 
-              color="primary" 
-              rounded="lg"
-              @click="activeTab = 'experience'"
-            ></v-list-item>
-            <v-list-item 
-              prepend-icon="mdi-shield-lock-outline" 
-              title="Security" 
-              value="security" 
-              :active="activeTab === 'security'" 
-              color="primary" 
-              rounded="lg"
-              @click="activeTab = 'security'"
-            ></v-list-item>
-            <v-list-item 
-              prepend-icon="mdi-bell-outline" 
-              title="Notifications" 
-              value="notifications" 
-              :active="activeTab === 'notifications'" 
-              color="primary" 
-              rounded="lg"
-              @click="activeTab = 'notifications'"
-            ></v-list-item>
+            <v-list-item prepend-icon="mdi-account-outline" title="Personal Info" value="personal" :active="activeTab === 'personal'" color="primary" rounded="lg" @click="activeTab = 'personal'"></v-list-item>
+            <v-list-item prepend-icon="mdi-school-outline" title="Education" value="education" :active="activeTab === 'education'" color="primary" rounded="lg" @click="activeTab = 'education'"></v-list-item>
+            <v-list-item prepend-icon="mdi-briefcase-outline" title="Experience" value="experience" :active="activeTab === 'experience'" color="primary" rounded="lg" @click="activeTab = 'experience'"></v-list-item>
+            <v-list-item prepend-icon="mdi-shield-lock-outline" title="Security" value="security" :active="activeTab === 'security'" color="primary" rounded="lg" @click="activeTab = 'security'"></v-list-item>
+            <v-list-item prepend-icon="mdi-bell-outline" title="Notifications" value="notifications" :active="activeTab === 'notifications'" color="primary" rounded="lg" @click="activeTab = 'notifications'"></v-list-item>
           </v-list>
         </v-card>
       </v-col>
 
       <v-col cols="12" md="8">
         <!-- Personal Info Form -->
-        <v-card v-if="activeTab === 'personal'" rounded="xl" class="pa-8 border shadow-sm">
+        <v-card v-if="activeTab === 'personal'" rounded="xl" class="pa-4 pa-sm-8 border shadow-sm">
           <div class="text-h6 font-weight-bold mb-6">Personal Information</div>
           
           <v-form @submit.prevent="saveProfile" :disabled="saving">

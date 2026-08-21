@@ -1,9 +1,9 @@
 <template>
-  <v-container fluid class="pa-6">
+  <v-container fluid class="pa-2 pa-sm-4 pa-md-6">
     <!-- Header -->
-    <div class="d-flex justify-space-between align-center mb-8">
+    <div class="d-flex justify-space-between align-center mb-4 mb-sm-8 flex-wrap gap-3">
       <div>
-        <h1 class="text-h4 font-weight-bold mb-1">My Payments</h1>
+        <h1 class="text-h5 text-sm-h4 font-weight-bold mb-1">My Payments</h1>
         <p class="text-subtitle-1 text-medium-emphasis mb-6">Track your course enrollments, invoices, and payment history.</p>
       </div>
       <v-btn 

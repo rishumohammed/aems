@@ -77,7 +77,7 @@
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowfullscreen
             class="hero-video"
-            style="width: 100%; aspect-ratio: 4/3; display: block; border-radius: inherit; z-index: 1; position: relative;"
+            style="width: 100%; max-width: 100%; aspect-ratio: 4/3; display: block; border-radius: inherit; z-index: 1; position: relative;"
           ></iframe>
           
           <!-- Native Video -->
@@ -185,9 +185,11 @@ const heroImgSrc = computed(() => {
 .hero-section {
   position: relative;
   overflow: hidden;
+  overflow-x: hidden; /* Prevent iframe causing horizontal scroll on mobile */
   background: #fdfdfd; /* Clean, light background */
   color: var(--g7);
   padding: 0 0 0 0;
+  max-width: 100vw;
 }
 
 /* ── Minimal Background Designs ───────────────────────── */
@@ -253,9 +255,7 @@ const heroImgSrc = computed(() => {
     padding: var(--sp-20) var(--sp-6) var(--sp-16); /* 80px 24px 64px */
     gap: var(--sp-12); /* 48px */
   }
-  .hero-visual {
-    order: -1;
-  }
+  /* hero-visual intentionally NOT reordered — text (hero-copy) stays first */
 }
 
 /* ── Badge ────────────────────────────────────────────── */
