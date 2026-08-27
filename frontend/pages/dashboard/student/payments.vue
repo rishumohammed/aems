@@ -348,7 +348,7 @@ const payNow = async (invoice: any) => {
       key: (useRuntimeConfig()).public.razorpayKeyId, // Need this in public config
       amount: order.amount,
       currency: order.currency,
-      name: "Brixify",
+      name: "Brix Certifications",
       description: `Payment for ${invoice.course_title}`,
       order_id: order.id,
       handler: async (response: any) => {

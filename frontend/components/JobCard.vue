@@ -7,7 +7,8 @@
     <div class="d-flex align-start gap-4">
       <!-- Company Logo / Icon -->
       <v-avatar color="grey-lighten-4" size="64" rounded="lg" class="border flex-shrink-0">
-        <img v-if="job.company_logo" :src="job.company_logo" :alt="job.company" style="width: 100%; height: 100%; object-fit: cover;" />
+        <v-icon v-if="job.hide_company_name" color="primary" size="32">mdi-shield-lock-outline</v-icon>
+        <img v-else-if="job.company_logo" :src="job.company_logo" :alt="job.company" style="width: 100%; height: 100%; object-fit: cover;" />
         <v-icon v-else color="grey-darken-1" size="32">mdi-office-building</v-icon>
       </v-avatar>
       
@@ -16,7 +17,7 @@
           <div>
             <h3 class="text-h6 font-weight-bold text-grey-darken-4 mb-0">{{ job.title }}</h3>
             <div class="text-subtitle-2 font-weight-medium text-primary">
-              {{ job.company }}
+              {{ job.hide_company_name ? 'Confidential Organization' : (job.company || 'Direct Hiring') }}
             </div>
           </div>
 

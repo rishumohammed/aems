@@ -308,7 +308,7 @@ onMounted(() => {
   loadTermsPrivacy();
 });
 
-useSeoMeta({ title: 'Register for Exam - Brixify' });
+useSeoMeta({ title: 'Register for Exam - Brix Certifications' });
 </script>
 
 <style scoped>

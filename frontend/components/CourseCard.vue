@@ -10,7 +10,7 @@
       <!-- Thumbnail -->
       <v-img
         :src="imageUrl"
-        :aspect-ratio="viewType === 'list' ? 1 : 16/9"
+        :aspect-ratio="1"
         :width="viewType === 'list' ? 180 : '100%'"
         cover
         class="bg-grey-lighten-2 flex-shrink-0"
@@ -67,17 +67,39 @@
             rounded="lg"
             class="text-capitalize font-weight-bold px-5"
             elevation="0"
+            @click.stop="handleEnrollClick"
           >
-            Enroll
+            {{ (course.price_type === 'custom' || !course.price || course.price == 0) ? 'Enquiry' : 'Enroll' }}
           </v-btn>
         </div>
       </div>
     </div>
+    <!-- Inquiry Modal -->
+    <v-dialog v-model="showInquiry" max-width="600" persistent @click.stop>
+      <v-card class="rounded-xl pa-4" @click.stop>
+        <v-card-title class="d-flex align-center justify-space-between pb-0">
+          <span class="text-h5 font-weight-bold">Course Inquiry</span>
+          <v-btn icon="mdi-close" variant="text" @click="showInquiry = false"></v-btn>
+        </v-card-title>
+        <v-card-text class="pt-4">
+          <p class="text-body-2 text-grey-darken-1 mb-6">
+            Fill out the form below to get more details about <strong>{{ course.title }}</strong>. Our team will get back to you shortly.
+          </p>
+          <DynamicLeadForm 
+            form-id="course-inquiry-form" 
+            :source="'course_card_' + course.slug"
+            :initial-data="{ course: course.title }"
+          />
+        </v-card-text>
+      </v-card>
+    </v-dialog>
   </v-card>
 </template>
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
+
+const showInquiry = ref(false)
 
 const props = defineProps({
   course: {
@@ -122,6 +144,14 @@ const updateCountdown = () => {
   timeRemaining.value = start - now
 }
 
+const handleEnrollClick = () => {
+  if (props.course.price_type === 'custom' || !props.course.price || parseFloat(props.course.price) === 0) {
+    showInquiry.value = true
+  } else {
+    navigateTo(`/courses/${props.course.slug}`)
+  }
+}
+
 onMounted(() => {
   if (props.course.course_type === 'live' && props.course.start_date) {
     updateCountdown()
@@ -162,6 +192,7 @@ const countdownText = computed(() => {
 .line-clamp-2 {
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }

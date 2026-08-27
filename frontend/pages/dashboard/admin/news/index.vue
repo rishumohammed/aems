@@ -113,9 +113,9 @@ const limit = 12;
 const fetchNews = async () => {
   loading.value = true;
   try {
-    const res = await api.get(`/admin/news?page=${page.value}&limit=${limit}&search=${encodeURIComponent(searchQuery.value)}`);
-    news.value = res.news;
-    totalPages.value = Math.ceil(res.total / limit);
+    const { data } = await api.get(`/admin/news?page=${page.value}&limit=${limit}&search=${encodeURIComponent(searchQuery.value)}`);
+    news.value = data.news || [];
+    totalPages.value = Math.ceil((data.total || 0) / limit);
   } catch (err) {
     console.error('Failed to fetch news', err);
   } finally {

@@ -14,7 +14,7 @@
         <v-avatar color="primary" size="40" class="mr-3 rounded-lg" variant="tonal">
           <v-icon color="primary" size="24">mdi-seal</v-icon>
         </v-avatar>
-        <span class="text-h5 font-weight-black tracking-tight" style="color: var(--primary);">BRIXIFY</span>
+        <span class="text-h5 font-weight-black tracking-tight" style="color: var(--primary);">Brix Certifications</span>
       </div>
       
       <div class="text-h6 font-weight-bold text-grey-darken-1 mb-2 tracking-widest uppercase" style="letter-spacing: 0.15em !important;">Certificate of Completion</div>

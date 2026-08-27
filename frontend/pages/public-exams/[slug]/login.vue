@@ -239,7 +239,7 @@ onMounted(() => {
   fetchExam();
 });
 
-useSeoMeta({ title: 'Candidate Login - Brixify Exam Portal' });
+useSeoMeta({ title: 'Candidate Login - Brix Certifications Exam Portal' });
 </script>
 
 <style scoped>

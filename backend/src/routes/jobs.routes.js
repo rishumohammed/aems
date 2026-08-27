@@ -35,15 +35,50 @@ const upload = multer({
 router.get('/', async (req, res) => {
   try {
     const [jobs] = await pool.query(`
-      SELECT j.*, jc.name as category_name, jc.icon as category_icon, jc.slug as category_slug, u.name as employer_name, up.avatar_url as company_logo
+      SELECT j.*, jc.name as category_name, jc.icon as category_icon, jc.slug as category_slug, 
+             u.name as employer_name, u.role as poster_role,
+             ep.logo_url as employer_logo, ep.about_company as employer_bio, ep.website as employer_website
       FROM jobs j
       LEFT JOIN job_categories jc ON j.category = jc.id
       LEFT JOIN users u ON j.posted_by = u.id
-      LEFT JOIN user_profiles up ON u.id = up.user_id
+      LEFT JOIN employer_profiles ep ON (u.id = ep.user_id AND u.role = 'employer')
       WHERE j.status = 'approved'
       ORDER BY j.created_at DESC
     `);
-    res.json(jobs);
+
+    const formattedJobs = jobs.map(job => {
+      let finalCompany = job.company;
+      if (job.poster_role !== 'employer' && finalCompany === 'Brixify') {
+        finalCompany = null;
+      }
+      if (job.hide_company_name) {
+        return {
+          ...job,
+          company: 'Confidential Organization',
+          company_logo: null,
+          company_bio: null,
+          company_website: null
+        };
+      }
+      if (job.poster_role === 'employer') {
+        return {
+          ...job,
+          company: finalCompany,
+          company_logo: job.employer_logo || null,
+          company_bio: job.employer_bio || null,
+          company_website: job.employer_website || null
+        };
+      }
+      return {
+        ...job,
+        company: finalCompany,
+        company_logo: null,
+        company_bio: null,
+        company_website: null
+      };
+    });
+
+    res.json(formattedJobs);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -53,16 +88,42 @@ router.get('/', async (req, res) => {
 router.get('/:id', async (req, res) => {
   try {
     const [jobs] = await pool.query(`
-      SELECT j.*, jc.name as category_name, jc.icon as category_icon, u.name as employer_name, up.avatar_url as company_logo, up.bio as company_bio, up.linkedin as company_website
+      SELECT j.*, jc.name as category_name, jc.icon as category_icon, 
+             u.name as employer_name, u.role as poster_role,
+             ep.logo_url as employer_logo, ep.about_company as employer_bio, ep.website as employer_website
       FROM jobs j
       LEFT JOIN job_categories jc ON j.category = jc.id
       LEFT JOIN users u ON j.posted_by = u.id
-      LEFT JOIN user_profiles up ON u.id = up.user_id
+      LEFT JOIN employer_profiles ep ON (u.id = ep.user_id AND u.role = 'employer')
       WHERE j.id = ? AND j.status = 'approved'
     `, [req.params.id]);
     
     if (jobs.length === 0) return res.status(404).json({ message: 'Job posting not found or is no longer active' });
-    res.json(jobs[0]);
+    
+    const job = jobs[0];
+    let finalCompany = job.company;
+    if (job.poster_role !== 'employer' && finalCompany === 'Brixify') {
+      finalCompany = null;
+    }
+
+    if (job.hide_company_name) {
+      job.company = 'Confidential Organization';
+      job.company_logo = null;
+      job.company_bio = null;
+      job.company_website = null;
+    } else if (job.poster_role === 'employer') {
+      job.company = finalCompany;
+      job.company_logo = job.employer_logo || null;
+      job.company_bio = job.employer_bio || null;
+      job.company_website = job.employer_website || null;
+    } else {
+      job.company = finalCompany;
+      job.company_logo = null;
+      job.company_bio = null;
+      job.company_website = null;
+    }
+
+    res.json(job);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

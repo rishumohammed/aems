@@ -179,9 +179,9 @@
                   class="text-capitalize font-weight-bold mb-4" 
                   elevation="0" 
                   @click="handleEnroll"
-                  :disabled="['suspended_offline', 'suspended_gateway'].includes(enrollmentStatus)"
+                  :disabled="['suspended_offline', 'suspended_gateway'].includes(enrollmentStatus || '')"
                 >
-                  <template v-if="['suspended_offline', 'suspended_gateway'].includes(enrollmentStatus)">
+                  <template v-if="['suspended_offline', 'suspended_gateway'].includes(enrollmentStatus || '')">
                     Waiting for Approval
                   </template>
                   <template v-else-if="isEnrolled">
@@ -649,7 +649,7 @@ const handleEnroll = async () => {
     return;
   }
 
-  if (course.value.price_type === 'custom') {
+  if (course.value.price_type === 'custom' || !course.value.price || parseFloat(course.value.price) === 0) {
     showInquiry.value = true;
     return;
   }
@@ -657,11 +657,6 @@ const handleEnroll = async () => {
   if (!authStore.isAuthenticated) {
     // Redirect to login with return path
     router.push({ path: '/login', query: { redirect: route.fullPath } });
-    return;
-  }
-
-  if (parseFloat(course.value.price) === 0) {
-    await proceedToCheckout();
     return;
   }
 

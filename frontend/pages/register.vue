@@ -7,7 +7,7 @@
             <img v-if="appLogo" :src="baseUrl + appLogo" :alt="instituteName" style="max-height: 56px; max-width: 200px; object-fit: contain;" class="mb-4" />
             <v-icon v-else icon="mdi-orbit" color="primary" size="48" class="mb-4"></v-icon>
             <h1 class="text-h4 font-weight-black mb-2">Create Your Account</h1>
-            <p class="text-grey">Join {{ instituteName || 'Brixify' }} and start your journey today</p>
+            <p class="text-grey">Join {{ instituteName || 'Brix Certifications' }} and start your journey today</p>
           </div>
 
           <v-card rounded="xl" class="shadow-soft overflow-hidden border-0">

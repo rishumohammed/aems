@@ -11,7 +11,7 @@
           <section class="mb-8">
             <h2 class="text-h5 font-weight-bold mb-4">1. Acceptance of Terms</h2>
             <p class="text-body-1 text-secondary">
-              By accessing or using the Brixify platform, you agree to be bound by these Terms of Service and all applicable laws and regulations.
+              By accessing or using the Brix Certifications platform, you agree to be bound by these Terms of Service and all applicable laws and regulations.
             </p>
           </section>
 
@@ -25,21 +25,21 @@
           <section class="mb-8">
             <h2 class="text-h5 font-weight-bold mb-4">3. Course Content & Intellectual Property</h2>
             <p class="text-body-1 text-secondary">
-              All course materials, including videos, documents, and assessments, are the intellectual property of Brixify and are provided for your personal, non-commercial use only.
+              All course materials, including videos, documents, and assessments, are the intellectual property of Brix Certifications and are provided for your personal, non-commercial use only.
             </p>
           </section>
 
           <section class="mb-8">
             <h2 class="text-h5 font-weight-bold mb-4">4. Placement Portal Usage</h2>
             <p class="text-body-1 text-secondary">
-              Usage of the Brixify Placement Portal is subject to the completion of relevant course requirements and adherence to professional conduct standards.
+              Usage of the Brix Certifications Placement Portal is subject to the completion of relevant course requirements and adherence to professional conduct standards.
             </p>
           </section>
 
           <section>
             <h2 class="text-h5 font-weight-bold mb-4">5. Limitation of Liability</h2>
             <p class="text-body-1 text-secondary">
-              Brixify shall not be liable for any indirect, incidental, special, or consequential damages resulting from the use or inability to use our services.
+              Brix Certifications shall not be liable for any indirect, incidental, special, or consequential damages resulting from the use or inability to use our services.
             </p>
           </section>
         </div>
@@ -55,7 +55,7 @@ definePageMeta({
 
 useSeoMeta({
   title: 'Terms of Service',
-  description: 'Review the terms and conditions for using the Brixify platform.'
+  description: 'Review the terms and conditions for using the Brix Certifications platform.'
 });
 </script>
 

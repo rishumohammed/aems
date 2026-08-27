@@ -66,7 +66,7 @@
                   <v-icon size="80" color="success" class="mb-6">mdi-check-circle</v-icon>
                   <h3 class="text-h4 font-weight-bold mb-4">Message Sent!</h3>
                   <p class="text-body-1 text-grey-darken-1 mb-8 max-w-md mx-auto">
-                    We've received your message and will get back to you shortly. Thank you for reaching out to Brixify.
+                    We've received your message and will get back to you shortly. Thank you for reaching out to Brix Certifications.
                   </p>
                   <v-btn color="primary" size="large" @click="success = false" rounded="lg" class="text-none font-weight-bold px-8">Send Another Message</v-btn>
                 </div>
@@ -188,7 +188,7 @@ definePageMeta({
 
 useSeoMeta({
   title: 'Contact Us',
-  description: 'Get in touch with Brixify.'
+  description: 'Get in touch with Brix Certifications.'
 });
 
 const config = useRuntimeConfig();

@@ -50,24 +50,31 @@
             </div>
           </v-col>
 
-          <v-col cols="12" md="6" class="d-flex flex-column justify-center">
-            <v-switch
-              v-model="formData.is_published"
-              label="Publish Immediately"
-              color="success"
-              inset
-              hide-details
-            ></v-switch>
-            <p class="text-caption text-secondary mt-2 ms-1">
-              If enabled, the article will be visible on the public website immediately upon saving.
+          <v-col cols="12" md="6" class="d-flex flex-column">
+            <p class="text-subtitle-2 font-weight-medium mb-2">Publishing Options</p>
+            <v-radio-group v-model="publishMode" inline hide-details class="mb-2">
+              <v-radio label="Draft" value="draft" color="grey"></v-radio>
+              <v-radio label="Publish Now" value="immediate" color="success"></v-radio>
+              <v-radio label="Schedule" value="schedule" color="blue"></v-radio>
+            </v-radio-group>
+            
+            <div v-if="publishMode === 'schedule'" class="mt-2">
+              <AppInput 
+                v-model="formData.published_at"
+                type="datetime-local" 
+                label="Scheduled Date & Time" 
+                :rules="[(v: any) => !!v || 'Scheduled time is required']"
+                hide-details
+              />
+            </div>
+            <p v-else-if="publishMode === 'immediate'" class="text-caption text-secondary mt-2 ms-1">
+              The article will be visible on the public website immediately upon saving.
             </p>
           </v-col>
 
           <v-col cols="12">
             <p class="text-subtitle-2 font-weight-medium mb-2">Content</p>
-            <ClientOnly>
-              <RichTextEditor v-model="formData.content" />
-            </ClientOnly>
+            <RichTextEditor v-model="formData.content" />
           </v-col>
         </v-row>
 
@@ -84,6 +91,7 @@
 import { ref } from 'vue';
 import { useApi } from '~/composables/useApi';
 import { useRouter } from 'vue-router';
+import RichTextEditor from '~/components/RichTextEditor.vue';
 
 definePageMeta({
   layout: 'dashboard',
@@ -99,10 +107,12 @@ const isValid = ref(false);
 const saving = ref(false);
 const fileInput = ref<any>(null);
 
+const publishMode = ref('draft');
+
 const formData = ref({
   title: '',
   content: '',
-  is_published: false
+  published_at: ''
 });
 
 const selectedFile = ref<File | null>(null);
@@ -137,7 +147,10 @@ const save = async () => {
     const fd = new FormData();
     fd.append('title', formData.value.title);
     fd.append('content', formData.value.content);
-    fd.append('is_published', String(formData.value.is_published));
+    fd.append('publish_mode', publishMode.value);
+    if (publishMode.value === 'schedule' && formData.value.published_at) {
+      fd.append('published_at', new Date(formData.value.published_at).toISOString());
+    }
     
     if (selectedFile.value) {
       fd.append('image', selectedFile.value);

@@ -76,7 +76,7 @@ const homeRoute = computed(() => {
   font-size: clamp(80px, 15vw, 160px);
   font-weight: 900;
   line-height: 1;
-  background: linear-gradient(135deg, #5624D0 0%, #A435F0 100%);
+  background: linear-gradient(135deg, #221E72 0%, #A435F0 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;

@@ -35,7 +35,7 @@
       <!-- Content -->
       <v-container class="mt-n8 position-relative z-10">
         <v-row justify="center">
-          <v-col cols="12" md="10" lg="8">
+          <v-col cols="12" lg="10" xl="8">
             <v-card class="pa-6 pa-md-12 rounded-xl bg-white shadow-sm" border="0" elevation="0">
               <!-- Render HTML content -->
               <div class="news-content prose" v-html="news.content"></div>
@@ -79,12 +79,12 @@ const news = ref<any>(null);
 const fetchNews = async () => {
   try {
     const slug = route.params.slug as string;
-    const res = await api.get(`/public/news/${slug}`) as any;
-    news.value = res;
+    const { data } = await api.get(`/public/news/${slug}`) as any;
+    news.value = data;
     
     useSeoMeta({
-      title: `${res.title} - Brixify News`,
-      description: res.content ? res.content.replace(/<[^>]*>?/gm, '').substring(0, 150) + '...' : ''
+      title: `${data.title} - Brix Certifications News`,
+      description: data.content ? data.content.replace(/<[^>]*>?/gm, '').substring(0, 150) + '...' : ''
     });
   } catch (err) {
     console.error('Failed to load news article', err);

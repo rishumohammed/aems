@@ -21,7 +21,6 @@
           <v-btn variant="text" to="/" class="text-capitalize px-4 font-weight-medium">Home</v-btn>
           <v-btn variant="text" to="/#courses" :active="false" class="text-capitalize px-4 font-weight-medium">Courses</v-btn>
 
-          <v-btn variant="text" to="/about" class="text-capitalize px-4 font-weight-medium">About</v-btn>
           <v-btn variant="text" to="/verify" class="text-capitalize px-4 font-weight-medium">Verify Certificate</v-btn>
           <v-btn variant="text" to="/jobs" class="text-capitalize px-4 font-weight-medium">Job Portal</v-btn>
           
@@ -49,7 +48,6 @@
         <v-list-item to="/" prepend-icon="mdi-home" title="Home" class="rounded-lg mb-2"></v-list-item>
         <v-list-item to="/#courses" :active="false" prepend-icon="mdi-book-open-variant" title="Courses" class="rounded-lg mb-2"></v-list-item>
 
-        <v-list-item to="/about" prepend-icon="mdi-information" title="About" class="rounded-lg mb-2"></v-list-item>
         <v-list-item to="/verify" prepend-icon="mdi-certificate" title="Verify Certificate" class="rounded-lg mb-2"></v-list-item>
         <v-list-item to="/jobs" prepend-icon="mdi-briefcase" title="Job Portal" class="rounded-lg mb-2"></v-list-item>
         
@@ -99,7 +97,7 @@
           </v-col>
           
           <v-col cols="6" md="2">
-            <h4 class="text-subtitle-1 font-weight-bold mb-4 tracking-tight">Learn</h4>
+            <h4 class="text-subtitle-1 font-weight-bold mb-4 tracking-tight">Certifications</h4>
             <v-list density="compact" class="bg-transparent pa-0 footer-list">
 
               <v-list-item v-for="cat in footerCategories" :key="cat.id" :to="`/courses?category=${cat.slug}`" class="footer-link">
@@ -231,4 +229,16 @@ onMounted(async () => {
 .text-dark { color: var(--color-text-primary) !important; }
 .text-secondary { color: var(--color-text-secondary) !important; }
 .color-inherit { color: inherit !important; }
+
+/* Apply brand color to standard/outlined buttons on hover */
+:deep(.v-btn:not(.v-btn--variant-text):not(.v-btn--variant-plain):not(.v-btn--icon):not(.social-btn):hover) {
+  background-color: #221e72 !important;
+  color: #ffffff !important;
+  border-color: #221e72 !important;
+}
+
+/* Apply brand color to text/icon buttons on hover without changing background */
+:deep(.v-btn.v-btn--variant-text:hover) {
+  color: #221e72 !important;
+}
 </style>

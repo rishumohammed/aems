@@ -285,12 +285,12 @@ const data = ref<AdminDashboardData>({
 });
 
 const stageColors = [
-  '#5624D0', '#7C3AED', '#2563EB', '#0EA5E9',
+  '#221E72', '#7C3AED', '#2563EB', '#0EA5E9',
   '#10B981', '#F59E0B', '#EF4444', '#6366F1'
 ];
 
 const stageColorsByName: Record<string, string> = {
-  new: '#5624D0',
+  new: '#221E72',
   contacted: '#7C3AED',
   qualified: '#2563EB',
   proposal: '#0EA5E9',

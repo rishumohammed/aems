@@ -130,7 +130,7 @@
 
         <v-card rounded="xl" class="pa-6 border-0 shadow-apple text-center mb-6">
           <div class="pa-4 bg-grey-lighten-4 rounded-xl mb-6">
-            <div class="text-caption text-secondary font-weight-black mb-1">BRIXIFY SECURITY ID</div>
+            <div class="text-caption text-secondary font-weight-black mb-1">Brix Certifications SECURITY ID</div>
             <code class="text-body-2 font-weight-bold text-primary">{{ authStore.user?.id || 'N/A' }}</code>
           </div>
 

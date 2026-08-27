@@ -3,6 +3,19 @@ import { NewsService } from '../services/news.service.js';
 export class NewsController {
   static async create(req, res) {
     const data = req.body;
+    
+    if (data.publish_mode) {
+      data.is_published = data.publish_mode === 'immediate' || data.publish_mode === 'schedule' ? 1 : 0;
+      if (data.publish_mode === 'immediate') {
+        data.published_at = new Date();
+      } else if (data.publish_mode === 'schedule' && data.published_at) {
+        data.published_at = new Date(data.published_at);
+      } else if (data.publish_mode === 'draft') {
+        data.published_at = null;
+      }
+    } else if (data.is_published !== undefined) {
+      data.is_published = data.is_published === 'true' || data.is_published === true || data.is_published === 1;
+    }
     if (req.file) {
       data.image_url = `/uploads/news/${req.file.filename}`;
     }
@@ -14,8 +27,16 @@ export class NewsController {
     const { id } = req.params;
     const data = req.body;
     
-    // Handle specific fields boolean coercion if needed
-    if (data.is_published !== undefined) {
+    if (data.publish_mode) {
+      data.is_published = data.publish_mode === 'immediate' || data.publish_mode === 'schedule' ? 1 : 0;
+      if (data.publish_mode === 'immediate') {
+        data.published_at = new Date();
+      } else if (data.publish_mode === 'schedule' && data.published_at) {
+        data.published_at = new Date(data.published_at);
+      } else if (data.publish_mode === 'draft') {
+        data.published_at = null;
+      }
+    } else if (data.is_published !== undefined) {
       data.is_published = data.is_published === 'true' || data.is_published === true || data.is_published === 1;
     }
 

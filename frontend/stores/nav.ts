@@ -34,6 +34,7 @@ export const useNavStore = defineStore('nav', {
       { label: 'Courses', icon: 'mdi-book-open-page-variant-outline', route: '/dashboard/courses', roles: ['super_admin', 'lms_user'], section: 'LMS' },
       { label: 'Categories', icon: 'mdi-shape-outline', route: '/dashboard/admin/course-categories', roles: ['super_admin', 'lms_user'], section: 'LMS' },
       { label: 'Highlights', icon: 'mdi-star-circle-outline', route: '/dashboard/admin/highlights', roles: ['super_admin', 'lms_user'], section: 'LMS' },
+      { label: 'Certifications', icon: 'mdi-certificate-outline', route: '/dashboard/admin/certifications', roles: ['super_admin', 'lms_user'], section: 'LMS' },
       { label: 'Course Approvals', icon: 'mdi-check-decagram-outline', route: '/dashboard/admin/course-approvals', roles: ['super_admin', 'lms_user'], section: 'LMS', badge: undefined },
       
       // EXAMS

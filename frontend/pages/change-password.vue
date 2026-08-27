@@ -2,10 +2,10 @@
   <div class="change-password-page">
     <div class="card-wrap">
       <NuxtLink to="/" class="brand" style="text-decoration:none;">
-        <img v-if="appLogo" :src="baseUrl + appLogo" :alt="instituteName || 'Brixify'" style="max-height: 40px; max-width: 160px; object-fit: contain;" />
+        <img v-if="appLogo" :src="baseUrl + appLogo" :alt="instituteName || 'Brix Certifications'" style="max-height: 40px; max-width: 160px; object-fit: contain;" />
         <template v-else>
           <span class="brand-icon">◈</span>
-          <span class="brand-name">{{ instituteName || 'Brixify' }}</span>
+          <span class="brand-name">{{ instituteName || 'Brix Certifications' }}</span>
         </template>
       </NuxtLink>
 

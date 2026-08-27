@@ -76,7 +76,7 @@
         </v-container>
       </div>
 
-      <!-- Why Brixify — Split Image Section -->
+      <!-- Why Brix Certifications — Split Image Section -->
       <div class="why-section section-default">
         <v-container>
           <v-row align="center" class="why-row">
@@ -98,10 +98,10 @@
               </div>
             </v-col>
             <v-col cols="12" md="6" class="pl-md-12">
-              <div class="eyebrow-label mb-4">Why Brixify</div>
+              <div class="eyebrow-label mb-4">Why Brix Certifications</div>
               <h2 class="section-title mb-4" style="max-width:480px">Expert-Led Training Trusted Globally</h2>
               <p class="text-body-1 text-grey-darken-1 mb-8" style="max-width:480px; line-height:1.8">
-                Brixify brings together experienced auditors, food scientists, and regulatory professionals passionate about ensuring the integrity of food products — from farm to table.
+                Brix Certifications brings together experienced auditors, food scientists, and regulatory professionals passionate about ensuring the integrity of food products — from farm to table.
               </p>
               <v-row>
                 <v-col cols="12" sm="6" v-for="(f, i) in whyPoints" :key="i" class="pb-0 mb-4">
@@ -190,11 +190,13 @@
           </div>
           <v-row justify="center">
             <v-col cols="6" sm="4" md="2" v-for="std in standards" :key="std.name">
-              <div class="std-card">
-                <v-icon :color="std.color" size="36" class="mb-3">{{ std.icon }}</v-icon>
-                <div class="std-name">{{ std.name }}</div>
-                <div class="std-sub">{{ std.sub }}</div>
-              </div>
+              <NuxtLink :to="`/certifications/${std.slug || std.id}`" class="text-decoration-none">
+                <div class="std-card">
+                  <v-icon :color="std.color" size="36" class="mb-3">{{ std.icon }}</v-icon>
+                  <div class="std-name">{{ std.name }}</div>
+                  <div class="std-sub">{{ std.sub }}</div>
+                </div>
+              </NuxtLink>
             </v-col>
           </v-row>
         </v-container>
@@ -210,17 +212,19 @@
             </div>
           </div>
 
-          <v-slide-group show-arrows>
-            <v-slide-group-item v-for="item in highlights" :key="item.id">
-              <v-card width="280" variant="outlined" class="rounded-xl border-surface bg-white h-100 pa-0 d-flex flex-column ma-3">
-                <v-img v-if="item.image_url" :src="baseUrl + item.image_url" height="140" cover></v-img>
-                <div class="pa-5 flex-grow-1 d-flex flex-column">
-                  <h3 class="text-subtitle-1 font-weight-bold line-clamp-2 mb-2 flex-grow-1" style="line-height: 1.4;">{{ item.title }}</h3>
-                  <p class="text-body-2 text-secondary line-clamp-3">{{ item.description }}</p>
-                </div>
-              </v-card>
-            </v-slide-group-item>
-          </v-slide-group>
+          <div v-if="highlights.length > 0" class="marquee-container" @mouseenter="isPaused = true" @mouseleave="isPaused = false">
+            <div class="marquee-track" :class="{ 'paused': isPaused }">
+              <div class="marquee-content" v-for="loopIndex in (highlights.length < 4 ? 12 : 6)" :key="loopIndex">
+                <v-card v-for="item in highlights" :key="`${loopIndex}-${item.id}`" width="280" variant="outlined" class="rounded-xl border-surface bg-white flex-shrink-0 pa-0 d-flex flex-column ma-3" style="min-height: 280px;">
+                  <v-img v-if="item.image_url" :src="baseUrl + item.image_url" height="280" cover></v-img>
+                  <div class="pa-5 flex-grow-1 d-flex flex-column">
+                    <h3 class="text-subtitle-1 font-weight-bold line-clamp-2 mb-2 flex-grow-1" style="line-height: 1.4;">{{ item.title }}</h3>
+                    <p class="text-body-2 text-secondary line-clamp-3">{{ item.description }}</p>
+                  </div>
+                </v-card>
+              </div>
+            </div>
+          </div>
           
           <div v-if="!highlights.length" class="text-center py-12 text-secondary">
             <v-icon size="48" color="grey-lighten-2" class="mb-4">mdi-information-outline</v-icon>
@@ -269,13 +273,13 @@
       </div>
 
       <!-- Trusted By / Quote band -->
-      <div class="trust-band section-default" style="background: var(--primary, #211d71);">
+      <div class="trust-band section-default" style="background: var(--ink, #1B1B3A);">
         <v-container>
           <div class="trust-inner">
             <div class="trust-left">
               <div class="eyebrow-label mb-3" style="color:rgba(255,255,255,0.6)">Our Impact</div>
               <h2 class="trust-headline">Hundreds of clients.<br/>One trusted partner.</h2>
-              <p class="trust-sub">From startups to enterprise food manufacturers, Brixify helps organisations achieve and maintain global standards.</p>
+              <p class="trust-sub">From startups to enterprise food manufacturers, Brix Certifications helps organisations achieve and maintain global standards.</p>
               <v-btn color="white" variant="outlined" rounded="lg" class="mt-6 text-none font-weight-bold" to="/courses">
                 Explore Our Programs
               </v-btn>
@@ -305,6 +309,7 @@ definePageMeta({
 });
 
 const api = useApi();
+const isPaused = ref(false);
 
 const config = useRuntimeConfig();
 const apiBase = config.public.apiBase;
@@ -335,7 +340,7 @@ const fetchHomepageData = async () => {
     .catch(err => console.error('Failed to load highlights', err));
 
   api.get('/public/news?limit=3')
-    .then((res: any) => { latestNews.value = res.news || []; })
+    .then((res: any) => { latestNews.value = res.data.news || []; })
     .catch(err => console.error('Failed to load news', err));
 };
 
@@ -399,7 +404,7 @@ const { generateWALink } = useWhatsApp();
 
 useSeoMeta({
   title: 'Advanced Learning & Placements',
-  description: 'Brixify is a global leader in food technology training, certification, and consultancy. Elevate your standards and ensure global compliance.'
+  description: 'Brix Certifications is a global leader in food technology training, certification, and consultancy. Elevate your standards and ensure global compliance.'
 });
 </script>
 
@@ -411,7 +416,7 @@ useSeoMeta({
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 1.5px;
-  color: var(--primary, #211d71);
+  color: var(--ink, #1B1B3A);
   opacity: 0.75;
 }
 
@@ -710,6 +715,33 @@ useSeoMeta({
   height: 480px;
   bottom: -240px;
   right: -120px;
+}
+
+.marquee-container {
+  overflow: hidden;
+  width: 100%;
+  display: flex;
+  padding: 10px 0;
+}
+
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: scroll-left 40s linear infinite;
+}
+
+.marquee-track.paused {
+  animation-play-state: paused;
+}
+
+.marquee-content {
+  display: flex;
+  flex-shrink: 0;
+}
+
+@keyframes scroll-left {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
 }
 </style>
 

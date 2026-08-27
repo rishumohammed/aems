@@ -470,7 +470,7 @@ onMounted(() => {
 
 .explanation-box {
   background-color: #f1f5f9;
-  border-left: 4px solid #5624D0;
+  border-left: 4px solid #221E72;
 }
 
 .review-option-item {

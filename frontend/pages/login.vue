@@ -5,14 +5,14 @@
         <img v-if="appLogo" :src="baseUrl + appLogo" :alt="instituteName" style="max-height: 40px; max-width: 160px; object-fit: contain;" />
         <template v-else>
           <span class="brand-icon">◈</span>
-          <span class="brand-name">{{ instituteName || 'Brixify' }}</span>
+          <span class="brand-name">{{ instituteName || 'Brix Certifications' }}</span>
         </template>
       </NuxtLink>
 
       <div class="login-card">
         <div class="login-card-header">
           <h1 class="login-title">Welcome back</h1>
-          <p class="login-sub">Sign in to your {{ instituteName || 'Brixify' }} account</p>
+          <p class="login-sub">Sign in to your {{ instituteName || 'Brix Certifications' }} account</p>
         </div>
 
         <v-form @submit.prevent="handleLogin" :disabled="loading">

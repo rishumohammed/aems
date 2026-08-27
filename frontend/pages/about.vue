@@ -38,10 +38,10 @@
       </div>
 
       <v-container class="about-hero-inner">
-        <div class="eyebrow-label mb-4">About Brixify</div>
+        <div class="eyebrow-label mb-4">About Brix Certifications</div>
         <h1 class="about-hero-title">Elevating Global Food<br class="d-none d-md-block" /> Industry Excellence</h1>
         <p class="about-hero-sub">
-          At Brixify, we are committed to setting the benchmark for quality and safety in the global food industry through comprehensive certification, training, and consultancy services.
+          At Brix Certifications, we are committed to setting the benchmark for quality and safety in the global food industry through comprehensive certification, training, and consultancy services.
         </p>
         <div class="d-flex gap-3 flex-wrap">
           <v-btn color="primary" rounded="lg" size="large" class="text-none font-weight-bold" to="/courses">
@@ -63,7 +63,7 @@
               <img
                 v-if="aboutWhoImageUrl"
                 :src="aboutWhoImageUrl"
-                alt="Brixify food science lab"
+                alt="Brix Certifications food science lab"
                 class="who-img"
               />
               <div class="who-badge">
@@ -79,10 +79,10 @@
             <div class="eyebrow-label mb-4">Who We Are</div>
             <h2 class="section-title mb-5">Passionate Experts in Food Technology</h2>
             <p class="text-body-1 text-grey-darken-1 mb-4" style="line-height:1.85">
-              <strong>Welcome to Brixify</strong> — where we provide high-quality food technology training and consultancy services to help businesses and professionals meet the highest standards in food safety and quality.
+              <strong>Welcome to Brix Certifications</strong> — where we provide high-quality food technology training and consultancy services to help businesses and professionals meet the highest standards in food safety and quality.
             </p>
             <p class="text-body-1 text-grey-darken-1 mb-6" style="line-height:1.85">
-              Brixify brings together experienced auditors, food scientists, and regulatory professionals passionate about ensuring the integrity of food products from farm to table.
+              Brix Certifications brings together experienced auditors, food scientists, and regulatory professionals passionate about ensuring the integrity of food products from farm to table.
             </p>
             <!-- 4 quick bullets -->
             <v-row dense>
@@ -109,7 +109,7 @@
         <div class="section-header section-header--center mb-12">
           <div class="eyebrow-label mb-3">Purpose</div>
           <h2 class="section-title">Our Mission &amp; Vision</h2>
-          <p class="section-sub">The principles that drive everything we do at Brixify.</p>
+          <p class="section-sub">The principles that drive everything we do at Brix Certifications.</p>
         </div>
         <v-row>
           <v-col cols="12" md="6">
@@ -166,7 +166,7 @@
         <div class="section-header section-header--center mb-12">
           <div class="eyebrow-label mb-3">Why Choose Us</div>
           <h2 class="section-title">Our Trust Pillars</h2>
-          <p class="section-sub">The foundations that make Brixify the most trusted name in food technology certification.</p>
+          <p class="section-sub">The foundations that make Brix Certifications the most trusted name in food technology certification.</p>
         </div>
         <v-row>
           <v-col cols="12" sm="6" md="3" v-for="(p, i) in trustPillars" :key="i">
@@ -187,7 +187,7 @@
           <div class="trust-left">
             <div class="eyebrow-label mb-3" style="color:rgba(255,255,255,0.6)">Get Started</div>
             <h2 class="trust-headline">Join Our Learning Community</h2>
-            <p class="trust-sub">Whether you're a student, professional, or organisation — Brixify has the expertise to help you succeed and stay globally compliant.</p>
+            <p class="trust-sub">Whether you're a student, professional, or organisation — Brix Certifications has the expertise to help you succeed and stay globally compliant.</p>
             <div class="d-flex gap-3 flex-wrap mt-6">
               <v-btn color="white" rounded="lg" class="text-none font-weight-bold" style="color:var(--primary, #211d71)" size="large" to="/register">
                 Get Started Today <v-icon end>mdi-arrow-right</v-icon>
@@ -219,7 +219,7 @@ definePageMeta({ layout: 'public' });
 
 useSeoMeta({
   title: 'About',
-  description: 'Brixify is a leading certification body specialising in the food industry. We provide high-quality food technology training and consultancy services.'
+  description: 'Brix Certifications is a leading certification body specialising in the food industry. We provide high-quality food technology training and consultancy services.'
 });
 
 const config = useRuntimeConfig();
@@ -245,7 +245,7 @@ const offerings = [
   { icon: 'mdi-magnify-scan', color: 'success', title: 'Quality Assurance', desc: 'Thorough inspections and audits ensuring food production processes meet standards of hygiene, safety, and quality.' },
   { icon: 'mdi-school-outline', color: 'teal', title: 'Training & Education', desc: 'Specialised training from food safety management to sustainable production practices and international standards.' },
   { icon: 'mdi-lightbulb-on-outline', color: 'deep-purple', title: 'Consulting Services', desc: 'Expert consulting helping businesses navigate complex regulatory environments and achieve international compliance.' },
-  { icon: 'mdi-handshake-outline', color: 'indigo', title: 'Advocacy & Policy', desc: 'Brixify advocates for policies supporting food safety, sustainability, and innovation across the industry.' },
+  { icon: 'mdi-handshake-outline', color: 'indigo', title: 'Advocacy & Policy', desc: 'Brix Certifications advocates for policies supporting food safety, sustainability, and innovation across the industry.' },
 ];
 
 const trustPillars = [

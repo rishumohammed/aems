@@ -1,4 +1,4 @@
-import pool from '../db/connection.js';
+import { pool } from '../db/connection.js';
 import { v4 as uuidv4 } from 'uuid';
 import slugify from 'slugify';
 
@@ -22,7 +22,7 @@ export class NewsService {
       VALUES (?, ?, ?, ?, ?, ?, ?)
     `;
     const isPublished = data.is_published ? 1 : 0;
-    const publishedAt = isPublished ? new Date() : null;
+    const publishedAt = data.published_at !== undefined ? data.published_at : (isPublished ? new Date() : null);
 
     await pool.query(query, [
       id, data.title, slug, data.content || '', data.image_url || null, isPublished, publishedAt
@@ -58,6 +58,11 @@ export class NewsService {
     if (data.is_published !== undefined) { 
       updates.push('is_published = ?'); 
       values.push(data.is_published ? 1 : 0);
+    }
+    if (data.published_at !== undefined) {
+      updates.push('published_at = ?');
+      values.push(data.published_at);
+    } else if (data.is_published !== undefined) {
       if (data.is_published && !current.is_published) {
         updates.push('published_at = ?');
         values.push(new Date());
@@ -115,8 +120,9 @@ export class NewsService {
 
   static async listPublic(page = 1, limit = 10) {
     const offset = (page - 1) * limit;
-    const [countResult] = await pool.query('SELECT COUNT(*) as total FROM news WHERE is_published = 1');
-    const [data] = await pool.query('SELECT * FROM news WHERE is_published = 1 ORDER BY published_at DESC LIMIT ? OFFSET ?', [parseInt(limit), parseInt(offset)]);
+    const queryCond = 'WHERE is_published = 1 AND (published_at IS NULL OR published_at <= NOW())';
+    const [countResult] = await pool.query(`SELECT COUNT(*) as total FROM news ${queryCond}`);
+    const [data] = await pool.query(`SELECT * FROM news ${queryCond} ORDER BY published_at DESC LIMIT ? OFFSET ?`, [parseInt(limit), parseInt(offset)]);
 
     return {
       total: countResult[0].total,

@@ -35,6 +35,23 @@ router.get('/standards', async (req, res) => {
   }
 });
 
+// GET /api/public/standards/:slug - Single certification standard detail by slug
+router.get('/standards/:slug', async (req, res) => {
+  try {
+    const [standards] = await pool.query(
+      'SELECT * FROM master_standards WHERE (slug = ? OR id = ?) AND is_active = 1',
+      [req.params.slug, req.params.slug]
+    );
+    if (!standards.length) {
+      return res.status(404).json({ message: 'Certification standard not found' });
+    }
+    res.json(standards[0]);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
 // GET /api/public/job-categories - List all active job categories
 router.get('/job-categories', async (req, res) => {
   try {

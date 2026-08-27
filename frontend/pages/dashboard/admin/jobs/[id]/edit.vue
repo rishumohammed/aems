@@ -101,12 +101,22 @@
           <v-col cols="12" md="6">
             <v-text-field
               v-model="formData.company"
-              label="Company Name"
-              placeholder="e.g. Brixify or Employer Organization"
+              label="Company Name (Optional if Hidden)"
+              placeholder="e.g. Brix Certifications or Employer Organization"
               variant="outlined"
               color="primary"
-              :rules="[v => !!v || 'Company name is required']"
+              :disabled="formData.hide_company_name"
             ></v-text-field>
+          </v-col>
+
+          <v-col cols="12" md="6" class="d-flex align-center">
+            <v-switch
+              v-model="formData.hide_company_name"
+              label="Hide Company Name (Confidential Posting)"
+              color="primary"
+              hide-details
+              inset
+            ></v-switch>
           </v-col>
 
           <v-col cols="12" md="6">
@@ -338,7 +348,7 @@
           placeholder="https://company.com/careers/apply or hr@company.com"
           variant="outlined"
           color="primary"
-          hint="Leave blank to use the Brixify integrated one-click applicant management system."
+          hint="Leave blank to use the Brix Certifications integrated one-click applicant management system."
           persistent-hint
           class="mb-6"
         ></v-text-field>
@@ -400,6 +410,7 @@ const snackbarColor = ref('success');
 const formData = ref({
   title: '',
   company: '',
+  hide_company_name: false,
   status: 'approved',
   category_id: null as any,
   location: '',
@@ -457,7 +468,8 @@ async function loadJobDetails() {
       postedByInfo.value = job.employer_name ? `${job.employer_name} (${job.employer_email})` : '';
 
       formData.value.title = job.title || '';
-      formData.value.company = job.company || 'Brixify';
+      formData.value.company = job.company || 'Brix Certifications';
+      formData.value.hide_company_name = !!job.hide_company_name;
       formData.value.status = job.status || 'approved';
       formData.value.category_id = job.category;
       formData.value.location = job.location || '';

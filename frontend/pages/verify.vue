@@ -28,7 +28,7 @@
           <div class="eyebrow-label mb-4">Official Credentials</div>
           <h1 class="about-hero-title">Verify Certificate</h1>
           <p class="about-hero-sub mx-auto" style="margin-bottom: 0;">
-            Ensure the authenticity of any Brixify certificate by entering its unique identification number below.
+            Ensure the authenticity of any Brix Certifications certificate by entering its unique identification number below.
           </p>
         </div>
 
@@ -197,7 +197,7 @@ onMounted(() => {
 
 useSeoMeta({
   title: 'Verify Certificate',
-  description: 'Public verification portal for Brixify certificates and credentials.'
+  description: 'Public verification portal for Brix Certifications certificates and credentials.'
 });
 </script>
 

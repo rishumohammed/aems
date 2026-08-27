@@ -48,7 +48,7 @@ definePageMeta({
 
 useSeoMeta({
   title: 'Privacy Policy',
-  description: 'Understand how Brixify protects and manages your personal data.'
+  description: 'Understand how Brix Certifications protects and manages your personal data.'
 });
 </script>
 

@@ -18,7 +18,7 @@
     <v-app-bar flat color="#1A1A2E" class="text-white border-b px-4" height="64">
       <div class="d-flex align-center cursor-pointer" @click="confirmExit">
         <v-icon color="primary" class="mr-2" size="28">mdi-rhombus-split</v-icon>
-        <span class="font-weight-black tracking-tight text-body-1">BRIXIFY EXAM STUDIO</span>
+        <span class="font-weight-black tracking-tight text-body-1">Brix Certifications EXAM STUDIO</span>
       </div>
 
       <v-divider vertical inset class="mx-4 border-grey-darken-3"></v-divider>
@@ -867,7 +867,7 @@ function handleBeforeUnload(e: BeforeUnloadEvent) {
 }
 
 .option-item-selected {
-  border-color: #5624D0 !important;
+  border-color: #221E72 !important;
   background-color: rgba(86, 36, 208, 0.06);
   border: 1px solid var(--border);
   

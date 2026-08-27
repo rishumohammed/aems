@@ -91,7 +91,7 @@ definePageMeta({ layout: 'dashboard', middleware: ['auth', 'role'], roles: ['sup
 
 const api = useApi();
 const config = ref({
-  institution_name: 'Brixify',
+  institution_name: 'Brix Certifications',
   brand_color: '#3b82f6',
   signatory_name: 'Jane Doe',
   signatory_title: 'Director of Education'

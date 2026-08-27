@@ -5,7 +5,7 @@
         <img v-if="appLogo" :src="baseUrl + appLogo" :alt="instituteName" style="max-height: 40px; max-width: 160px; object-fit: contain;" />
         <template v-else>
           <span class="brand-icon">◈</span>
-          <span class="brand-name">{{ instituteName || 'Brixify' }}</span>
+          <span class="brand-name">{{ instituteName || 'Brix Certifications' }}</span>
         </template>
       </NuxtLink>
 

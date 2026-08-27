@@ -54,24 +54,31 @@
             </div>
           </v-col>
 
-          <v-col cols="12" md="6" class="d-flex flex-column justify-center">
-            <v-switch
-              v-model="formData.is_published"
-              label="Publish Immediately"
-              color="success"
-              inset
-              hide-details
-            ></v-switch>
-            <p class="text-caption text-secondary mt-2 ms-1">
-              If enabled, the article will be visible on the public website immediately upon saving.
+          <v-col cols="12" md="6" class="d-flex flex-column">
+            <p class="text-subtitle-2 font-weight-medium mb-2">Publishing Options</p>
+            <v-radio-group v-model="publishMode" inline hide-details class="mb-2">
+              <v-radio label="Draft" value="draft" color="grey"></v-radio>
+              <v-radio label="Publish Now" value="immediate" color="success"></v-radio>
+              <v-radio label="Schedule" value="schedule" color="blue"></v-radio>
+            </v-radio-group>
+            
+            <div v-if="publishMode === 'schedule'" class="mt-2">
+              <AppInput 
+                v-model="formData.published_at"
+                type="datetime-local" 
+                label="Scheduled Date & Time" 
+                :rules="[(v: any) => !!v || 'Scheduled time is required']"
+                hide-details
+              />
+            </div>
+            <p v-else-if="publishMode === 'immediate'" class="text-caption text-secondary mt-2 ms-1">
+              The article will be visible on the public website immediately upon saving.
             </p>
           </v-col>
 
           <v-col cols="12">
             <p class="text-subtitle-2 font-weight-medium mb-2">Content</p>
-            <ClientOnly>
               <RichTextEditor v-model="formData.content" />
-            </ClientOnly>
           </v-col>
         </v-row>
 
@@ -88,6 +95,7 @@
 import { ref, onMounted } from 'vue';
 import { useApi } from '~/composables/useApi';
 import { useRouter, useRoute } from 'vue-router';
+import RichTextEditor from '~/components/RichTextEditor.vue';
 import { useRuntimeConfig } from '#app';
 
 definePageMeta({
@@ -109,10 +117,12 @@ const fileInput = ref<any>(null);
 
 const id = route.params.id as string;
 
+const publishMode = ref('draft');
+
 const formData = ref({
   title: '',
   content: '',
-  is_published: false
+  published_at: ''
 });
 
 const selectedFile = ref<File | null>(null);
@@ -141,12 +151,26 @@ const clearImage = () => {
 
 const fetchNews = async () => {
   try {
-    const res = await api.get(`/admin/news/${id}`) as any;
-    formData.value.title = res.title;
-    formData.value.content = res.content || '';
-    formData.value.is_published = !!res.is_published;
-    if (res.image_url) {
-      imagePreview.value = config.public.apiBase.replace('/api', '') + res.image_url;
+    const { data } = await api.get(`/admin/news/${id}`);
+    formData.value.title = data.title;
+    formData.value.content = data.content || '';
+    
+    if (data.is_published && data.published_at) {
+      const pubDate = new Date(data.published_at);
+      if (pubDate > new Date()) {
+        publishMode.value = 'schedule';
+        const offset = pubDate.getTimezoneOffset() * 60000;
+        const localISOTime = (new Date(pubDate.getTime() - offset)).toISOString().slice(0,16);
+        formData.value.published_at = localISOTime;
+      } else {
+        publishMode.value = 'immediate';
+      }
+    } else {
+      publishMode.value = 'draft';
+    }
+
+    if (data.image_url) {
+      imagePreview.value = config.public.apiBase.replace('/api', '') + data.image_url;
     }
   } catch (err) {
     console.error(err);
@@ -169,7 +193,10 @@ const save = async () => {
     const fd = new FormData();
     fd.append('title', formData.value.title);
     fd.append('content', formData.value.content);
-    fd.append('is_published', String(formData.value.is_published));
+    fd.append('publish_mode', publishMode.value);
+    if (publishMode.value === 'schedule' && formData.value.published_at) {
+      fd.append('published_at', new Date(formData.value.published_at).toISOString());
+    }
     
     if (selectedFile.value) {
       fd.append('image', selectedFile.value);

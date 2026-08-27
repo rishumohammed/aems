@@ -11,13 +11,15 @@
             <v-card flat border class="pa-6 pa-md-8 rounded-xl mb-8 bg-white header-card">
               <div class="d-flex align-center gap-6 mb-6">
                 <v-avatar color="grey-lighten-4" size="80" rounded="xl" class="border">
-                  <img v-if="job.company_logo" :src="job.company_logo" :alt="job.company" style="width: 100%; height: 100%; object-fit: cover;" />
+                  <v-icon v-if="job.hide_company_name" color="primary" size="40">mdi-shield-lock-outline</v-icon>
+                  <img v-else-if="job.company_logo" :src="job.company_logo" :alt="job.company" style="width: 100%; height: 100%; object-fit: cover;" />
                   <v-icon v-else color="grey-darken-1" size="40">mdi-office-building</v-icon>
                 </v-avatar>
                 <div>
                   <h1 class="text-h4 text-md-h3 font-weight-black tracking-tight mb-2">{{ job.title }}</h1>
                   <div class="text-h6 text-primary font-weight-bold d-flex align-center gap-2">
-                    {{ job.company }}
+                    <span v-if="job.hide_company_name">Confidential Organization</span>
+                    <span v-else-if="job.company">{{ job.company }}</span>
                     <v-chip v-if="job.category_name" size="x-small" color="primary" variant="tonal" class="font-weight-bold">
                       {{ job.category_name }}
                     </v-chip>
@@ -230,12 +232,30 @@
                 </v-list>
               </v-card>
 
-              <!-- Company Info -->
-              <v-card flat border class="pa-6 rounded-xl bg-white mb-6">
+              <!-- Confidential Organization Notice -->
+              <v-card v-if="job.hide_company_name" flat border class="pa-6 rounded-xl bg-white mb-6">
+                <h3 class="text-h6 font-weight-bold mb-4">Hiring Organization</h3>
+                <div class="d-flex align-center gap-4 mb-3">
+                  <v-avatar color="blue-lighten-5" size="48" rounded="lg">
+                    <v-icon color="primary">mdi-shield-lock-outline</v-icon>
+                  </v-avatar>
+                  <div>
+                    <div class="text-subtitle-1 font-weight-bold">Confidential Organization</div>
+                    <div class="text-caption text-grey">Identity Protected</div>
+                  </div>
+                </div>
+                <p class="text-body-2 text-grey-darken-1 mb-0">
+                  This employer has chosen to keep their organization name and profile confidential for this position.
+                </p>
+              </v-card>
+
+              <!-- Company Info (Only when company profile exists and is not hidden) -->
+              <v-card v-else-if="job.company_bio || job.company_website || job.poster_role === 'employer'" flat border class="pa-6 rounded-xl bg-white mb-6">
                 <h3 class="text-h6 font-weight-bold mb-4">Company Profile</h3>
                 <div class="d-flex align-center gap-4 mb-4">
                   <v-avatar color="grey-lighten-4" size="48" rounded="lg">
-                    <v-icon color="grey-darken-1">mdi-office-building</v-icon>
+                    <img v-if="job.company_logo" :src="job.company_logo" :alt="job.company" style="width: 100%; height: 100%; object-fit: cover;" />
+                    <v-icon v-else color="grey-darken-1">mdi-office-building</v-icon>
                   </v-avatar>
                   <div>
                     <div class="text-subtitle-1 font-weight-bold">{{ job.company }}</div>
@@ -406,7 +426,7 @@ const copyLink = () => {
 };
 
 useSeoMeta({
-  title: () => `${job.value?.title || 'Job Detail'} - ${job.value?.company || 'Brixify'}`,
+  title: () => `${job.value?.title || 'Job Detail'} - ${job.value?.company || 'Brix Certifications'}`,
   description: () => job.value?.description?.replace(/<[^>]*>?/gm, '').substring(0, 160) || 'Job detail and application.'
 });
 </script>

@@ -80,7 +80,7 @@
             <v-divider class="mb-8"></v-divider>
 
             <div class="fr2 mb-4">
-              <AppInput v-model="form.institute_name" label="Institution Name" placeholder="Brixify" large />
+              <AppInput v-model="form.institute_name" label="Institution Name" placeholder="Brix Certifications" large />
               <AppInput v-model="form.tagline" label="Tagline" placeholder="Learn the future" large />
             </div>
             <div class="fr2">
@@ -183,7 +183,7 @@
               <AppInput v-model="form.smtp_pass" label="Resend API Key" type="password" placeholder="re_..." large />
             </div>
             <div class="fr2 mb-6">
-              <AppInput v-model="form.smtp_from_name" label="From Name" placeholder="Brixify Team" large />
+              <AppInput v-model="form.smtp_from_name" label="From Name" placeholder="Brix Certifications Team" large />
               <AppInput v-model="form.smtp_from_email" label="From Email" placeholder="noreply@brixify.online" large />
             </div>
             <AppButton variant="g" icon="mdi-send-outline" @click="testEmail">Send Test Email</AppButton>
@@ -197,7 +197,7 @@
               <AppInput v-model="form.contact_phone" label="Contact Phone" placeholder="+1234567890" large />
             </div>
             <div class="mb-6">
-              <AppInput v-model="form.contact_address" label="Institution Address" placeholder="123 Brixify Campus" large />
+              <AppInput v-model="form.contact_address" label="Institution Address" placeholder="123 Brix Certifications Campus" large />
             </div>
           </div>
 
@@ -357,8 +357,8 @@
                   <v-icon color="white" size="20">mdi-image-multiple</v-icon>
                 </v-avatar>
                 <div>
-                  <div class="text-subtitle-1 font-weight-bold">"Why Brixify" Section Image</div>
-                  <div class="text-caption text-secondary">Shown on the left side of the Why Brixify split section</div>
+                  <div class="text-subtitle-1 font-weight-bold">"Why Brix Certifications" Section Image</div>
+                  <div class="text-caption text-secondary">Shown on the left side of the Why Brix Certifications split section</div>
                 </div>
               </div>
 
@@ -538,11 +538,6 @@
             <CurrenciesTab />
           </div>
 
-          <!-- Certifications Tab -->
-          <div v-if="activeTab[0] === 'certifications'" class="fade-in">
-            <CertificationsTab />
-          </div>
-
           <!-- Marketing Tab -->
           <div v-if="activeTab[0] === 'marketing'" class="fade-in">
             <h2 class="text-h6 font-weight-bold mb-2">Marketing & Promotional Popup</h2>
@@ -682,7 +677,6 @@ const tabs = [
   { label: 'Terms & Privacy', value: 'terms_privacy', icon: 'mdi-shield-lock-outline' },
   { label: 'Social Platforms', value: 'social', icon: 'mdi-account-group-outline' },
   { label: 'Currencies', value: 'currencies', icon: 'mdi-currency-usd' },
-  { label: 'Certifications', value: 'certifications', icon: 'mdi-certificate-outline' },
   { label: 'Marketing', value: 'marketing', icon: 'mdi-bullhorn-outline' },
 ];
 

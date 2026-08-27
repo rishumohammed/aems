@@ -38,7 +38,7 @@
               </v-img>
               <v-card-text class="pa-4">
                 <h3 class="text-subtitle-2 font-weight-bold mb-1 text-truncate">{{ course.title }}</h3>
-                <div class="text-caption text-grey-darken-1 mb-4">{{ course.instructor_name || 'Brixify Instructor' }}</div>
+                <div class="text-caption text-grey-darken-1 mb-4">{{ course.instructor_name || 'Brix Certifications Instructor' }}</div>
                 
                 <UiProgressFraction
                   :current="course.completed_lessons || 0"

@@ -173,7 +173,7 @@ const submitForm = async () => {
 }
 
 .native-select:focus {
-  border-color: #5624D0;
+  border-color: #221E72;
   border-width: 2px;
 }
 

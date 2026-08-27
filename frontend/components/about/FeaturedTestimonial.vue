@@ -50,7 +50,7 @@
             <!-- After Card -->
             <v-card flat border class="pa-4 rounded-lg bg-primary-lighten-5 position-relative overflow-hidden border-primary">
                 <div class="d-flex align-center mb-2">
-                    <v-badge color="primary" text="After Brixify" inline class="font-weight-bold"></v-badge>
+                    <v-badge color="primary" text="After Brix Certifications" inline class="font-weight-bold"></v-badge>
                 </div>
                 <p class="text-body-2 text-grey-darken-2 font-weight-medium">{{ testimonial.after_description }}</p>
                 <v-icon color="primary" opacity="0.1" size="64" class="position-absolute" style="bottom: -10px; right: -10px;">mdi-star-face</v-icon>

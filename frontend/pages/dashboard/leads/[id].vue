@@ -602,7 +602,7 @@ const getStatusColor = (status: string) => {
 
 const openWhatsApp = () => {
   const phone = lead.value.phone.replace(/\D/g, '');
-  window.open(`https://wa.me/${phone}?text=Hello ${lead.value.name}, this is from Brixify...`, '_blank');
+  window.open(`https://wa.me/${phone}?text=Hello ${lead.value.name}, this is from Brix Certifications...`, '_blank');
 };
 
 watch(() => route.params.id, (newId) => {
