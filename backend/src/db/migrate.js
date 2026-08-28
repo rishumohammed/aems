@@ -52,7 +52,8 @@ async function runMigrations() {
             'ER_DUP_UNIQUE',
             'ER_CANT_CREATE_TABLE',
             'ER_BAD_FIELD_ERROR',
-            1005, 1050, 1060, 1061, 1091, 1054, 1826
+            'ER_BAD_NULL_ERROR',
+            1005, 1050, 1060, 1061, 1091, 1054, 1048, 1826
           ];
           const isIgnored = ignoreCodes.includes(queryError.code) || 
                             ignoreCodes.includes(queryError.errno) ||

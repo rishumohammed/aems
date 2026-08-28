@@ -3,7 +3,7 @@
     <div class="position-relative">
       <v-img
         :src="course.thumbnail_url ? ($config.public.apiBase.replace('/api', '') + course.thumbnail_url) : ''"
-        aspect-ratio="16/9"
+        :aspect-ratio="1"
         cover
         class="bg-grey-lighten-3"
       >
@@ -58,7 +58,7 @@
         <span class="font-weight-bold">4.8</span>
       </div>
 
-      <h3 class="text-subtitle-1 font-weight-bold mb-2 line-clamp-2" style="height: 3rem;">
+      <h3 class="course-grid-title font-weight-bold mb-2 line-clamp-2">
         {{ course.title }}
       </h3>
 
@@ -167,9 +167,24 @@ const formatStatus = (course) => {
   border: 2px solid #FFC107 !important;
   box-shadow: 0 0 0 3px rgba(255, 193, 7, 0.15);
 }
+.course-grid-title {
+  font-size: clamp(1.05rem, 4vw, 1.2rem) !important;
+  font-weight: 800 !important;
+  line-height: 1.3;
+  min-height: 2.6rem;
+}
+
+@media (max-width: 600px) {
+  .course-grid-title {
+    font-size: 1.40rem !important;
+    line-height: 1.3 !important;
+    min-height: auto !important;
+  }
+}
 .line-clamp-2 {
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }

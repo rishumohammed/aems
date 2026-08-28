@@ -154,10 +154,10 @@ body {
 }
 /* The <h2> inside a section header */
 .section-title {
-  font-size: 2.125rem;
+  font-size: clamp(1.5rem, 4vw, 2.125rem);
   font-weight: 900;
-  letter-spacing: 0.00735em;
-  line-height: 1.175;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
   color: var(--ink, #1B1B3A);
   margin-bottom: 8px;
 }

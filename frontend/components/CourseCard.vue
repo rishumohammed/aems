@@ -30,7 +30,7 @@
 
       <div :class="viewType === 'list' ? 'pa-4 d-flex flex-column flex-grow-1 justify-center' : 'pa-4 d-flex flex-column flex-grow-1'">
 
-        <h3 :class="viewType === 'list' ? 'text-h6' : 'text-subtitle-1'" class="font-weight-bold mb-2 line-clamp-2 text-grey-darken-4" style="line-height: 1.4; min-height: 2.8em;">
+        <h3 :class="viewType === 'list' ? 'text-h5' : ''" class="course-card-title font-weight-bold mb-2 line-clamp-2 text-grey-darken-4">
           {{ course.title }}
         </h3>
 
@@ -187,6 +187,21 @@ const countdownText = computed(() => {
 .course-card:hover {
   border-color: rgb(var(--v-theme-primary));
   transform: translateY(-2px);
+}
+
+.course-card-title {
+  font-size: clamp(1.1rem, 4.2vw, 1.25rem) !important;
+  font-weight: 800 !important;
+  line-height: 1.3 !important;
+  min-height: 2.6em;
+}
+
+@media (max-width: 600px) {
+  .course-card-title {
+    font-size: 1.40rem !important;
+    line-height: 1.3 !important;
+    min-height: auto !important;
+  }
 }
 
 .line-clamp-2 {
