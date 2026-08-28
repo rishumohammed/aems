@@ -39,28 +39,44 @@ router.get('/standards', async (req, res) => {
 // GET /api/public/standards/:slug - Single certification standard detail by slug
 router.get('/standards/:slug', async (req, res) => {
   try {
-    const param = req.params.slug ? req.params.slug.trim() : '';
+    const rawParam = req.params.slug ? String(req.params.slug).trim() : '';
+    if (!rawParam) {
+      return res.status(400).json({ message: 'Slug parameter is required' });
+    }
 
     let checkStatus = true;
     const authHeader = req.headers.authorization || req.headers.Authorization;
     if (authHeader && authHeader.startsWith('Bearer ')) {
       const token = authHeader.split(' ')[1];
-      try {
-        const decoded = jwt.verify(token, process.env.JWT_ACCESS_SECRET);
-        if (['super_admin', 'sub_admin', 'lms_user', 'tutor'].includes(decoded.role)) {
-          checkStatus = false;
-        }
-      } catch (e) {}
+      if (token && token !== 'null' && token !== 'undefined') {
+        try {
+          const secret = process.env.JWT_ACCESS_SECRET || 'fallback_secret';
+          const decoded = jwt.verify(token, secret);
+          if (decoded && ['super_admin', 'sub_admin', 'lms_user', 'tutor'].includes(decoded.role)) {
+            checkStatus = false;
+          }
+        } catch (e) {}
+      }
     }
 
-    let sql = 'SELECT * FROM master_standards WHERE (LOWER(slug) = LOWER(?) OR LOWER(name) = LOWER(?) OR id = ?)';
-    const params = [param, param, param];
+    const isNumeric = /^\d+$/.test(rawParam);
+    const numId = isNumeric ? parseInt(rawParam, 10) : 0;
+
+    let sql = 'SELECT * FROM master_standards WHERE (LOWER(slug) = LOWER(?) OR LOWER(name) = LOWER(?)';
+    const params = [rawParam, rawParam];
+
+    if (isNumeric) {
+      sql += ' OR id = ?';
+      params.push(numId);
+    }
+    sql += ')';
+
     if (checkStatus) {
       sql += ' AND is_active = 1';
     }
 
     const [standards] = await pool.query(sql, params);
-    if (standards.length > 0) {
+    if (Array.isArray(standards) && standards.length > 0) {
       return res.json(standards[0]);
     }
 
@@ -70,20 +86,32 @@ router.get('/standards/:slug', async (req, res) => {
       allSql += ' WHERE is_active = 1';
     }
     const [all] = await pool.query(allSql);
-    const matched = all.find(s => 
-      (s.slug && s.slug.toLowerCase() === param.toLowerCase()) || 
-      (s.name && slugify(s.name, { lower: true, strict: true }) === slugify(param, { lower: true, strict: true })) ||
-      String(s.id) === param
-    );
+    if (Array.isArray(all)) {
+      const matched = all.find(s => {
+        if (!s) return false;
+        if (s.slug && String(s.slug).toLowerCase() === rawParam.toLowerCase()) return true;
+        if (s.name && String(s.name).toLowerCase() === rawParam.toLowerCase()) return true;
+        if (isNumeric && String(s.id) === rawParam) return true;
+        
+        try {
+          if (s.name && typeof s.name === 'string') {
+            const cleanSName = slugify(s.name, { lower: true, strict: true });
+            const cleanParam = slugify(rawParam, { lower: true, strict: true });
+            if (cleanSName && cleanParam && cleanSName === cleanParam) return true;
+          }
+        } catch (e) {}
+        return false;
+      });
 
-    if (matched) {
-      return res.json(matched);
+      if (matched) {
+        return res.json(matched);
+      }
     }
 
     return res.status(404).json({ message: 'Certification standard not found' });
   } catch (error) {
     console.error('Public Standard Fetch Error:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(500).json({ message: 'Internal server error', error: error.message });
   }
 });
 
