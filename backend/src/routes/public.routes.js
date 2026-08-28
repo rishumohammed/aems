@@ -1,5 +1,6 @@
 import express from 'express';
 import jwt from 'jsonwebtoken';
+import slugify from 'slugify';
 import { v4 as uuidv4 } from 'uuid';
 import { pool } from '../db/connection.js';
 import { COURSE_STATUS, CONTACT_STATUS } from '@aems/shared';
@@ -38,16 +39,50 @@ router.get('/standards', async (req, res) => {
 // GET /api/public/standards/:slug - Single certification standard detail by slug
 router.get('/standards/:slug', async (req, res) => {
   try {
-    const [standards] = await pool.query(
-      'SELECT * FROM master_standards WHERE (slug = ? OR id = ?) AND is_active = 1',
-      [req.params.slug, req.params.slug]
-    );
-    if (!standards.length) {
-      return res.status(404).json({ message: 'Certification standard not found' });
+    const param = req.params.slug ? req.params.slug.trim() : '';
+
+    let checkStatus = true;
+    const authHeader = req.headers.authorization || req.headers.Authorization;
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      const token = authHeader.split(' ')[1];
+      try {
+        const decoded = jwt.verify(token, process.env.JWT_ACCESS_SECRET);
+        if (['super_admin', 'sub_admin', 'lms_user', 'tutor'].includes(decoded.role)) {
+          checkStatus = false;
+        }
+      } catch (e) {}
     }
-    res.json(standards[0]);
+
+    let sql = 'SELECT * FROM master_standards WHERE (LOWER(slug) = LOWER(?) OR LOWER(name) = LOWER(?) OR id = ?)';
+    const params = [param, param, param];
+    if (checkStatus) {
+      sql += ' AND is_active = 1';
+    }
+
+    const [standards] = await pool.query(sql, params);
+    if (standards.length > 0) {
+      return res.json(standards[0]);
+    }
+
+    // Fallback search across all standards (by slugified name match)
+    let allSql = 'SELECT * FROM master_standards';
+    if (checkStatus) {
+      allSql += ' WHERE is_active = 1';
+    }
+    const [all] = await pool.query(allSql);
+    const matched = all.find(s => 
+      (s.slug && s.slug.toLowerCase() === param.toLowerCase()) || 
+      (s.name && slugify(s.name, { lower: true, strict: true }) === slugify(param, { lower: true, strict: true })) ||
+      String(s.id) === param
+    );
+
+    if (matched) {
+      return res.json(matched);
+    }
+
+    return res.status(404).json({ message: 'Certification standard not found' });
   } catch (error) {
-    console.error(error);
+    console.error('Public Standard Fetch Error:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 });

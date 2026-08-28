@@ -81,7 +81,7 @@
             <v-tab value="content" class="text-none font-weight-bold">Rich HTML Explanation</v-tab>
           </v-tabs>
 
-          <v-form ref="form" @submit.prevent="save" v-model="isValid">
+          <v-form ref="form" @submit.prevent="save">
             <v-window v-model="modalTab">
               <!-- Basic & Sidebar Tab -->
               <v-window-item value="basic">
@@ -90,14 +90,12 @@
                     <AppInput
                       v-model="editedItem.name"
                       label="Certification Name (e.g. ISO, FSSC)"
-                      :rules="[v => !!v || 'Name is required']"
                     />
                   </v-col>
                   <v-col cols="12" sm="6">
                     <AppInput
                       v-model="editedItem.sub"
                       label="Subtitle / Focus Area (e.g. Food Safety)"
-                      :rules="[v => !!v || 'Subtitle is required']"
                     />
                   </v-col>
 
@@ -130,7 +128,6 @@
                       v-model="editedItem.icon"
                       label="MDI Icon Class"
                       placeholder="mdi-certificate-outline"
-                      :rules="[v => !!v || 'Icon is required']"
                     >
                       <template v-slot:append-inner>
                         <v-icon :color="editedItem.color">{{ editedItem.icon }}</v-icon>
@@ -205,8 +202,8 @@
 
                 <v-card v-for="(h, idx) in editedItem.highlights" :key="idx" variant="outlined" class="pa-4 mb-3 rounded-lg border">
                   <div class="d-flex align-center justify-space-between mb-2">
-                    <span class="text-caption font-weight-bold text-primary">Highlight #{{ idx + 1 }}</span>
-                    <v-btn icon="mdi-delete" size="x-small" color="error" variant="text" @click="removeHighlight(idx)"></v-btn>
+                    <span class="text-caption font-weight-bold text-primary">Highlight #{{ Number(idx) + 1 }}</span>
+                    <v-btn icon="mdi-delete" size="x-small" color="error" variant="text" @click="removeHighlight(Number(idx))"></v-btn>
                   </div>
                   <v-row dense>
                     <v-col cols="12" sm="3">
@@ -238,8 +235,8 @@
 
                 <v-card v-for="(b, idx) in editedItem.benefits" :key="idx" variant="outlined" class="pa-4 mb-3 rounded-lg border">
                   <div class="d-flex align-center justify-space-between mb-2">
-                    <span class="text-caption font-weight-bold text-primary">Benefit #{{ idx + 1 }}</span>
-                    <v-btn icon="mdi-delete" size="x-small" color="error" variant="text" @click="removeBenefit(idx)"></v-btn>
+                    <span class="text-caption font-weight-bold text-primary">Benefit #{{ Number(idx) + 1 }}</span>
+                    <v-btn icon="mdi-delete" size="x-small" color="error" variant="text" @click="removeBenefit(Number(idx))"></v-btn>
                   </div>
                   <v-row dense>
                     <v-col cols="12" sm="5">
@@ -281,15 +278,20 @@
         
         <v-card-actions class="pa-6 pt-0 d-flex justify-end gap-3 border-t">
           <v-btn class="text-none font-weight-bold" @click="closeDialog" :disabled="saving" variant="text">Cancel</v-btn>
-          <AppButton @click="save" :loading="saving" :disabled="!isValid" icon="mdi-check">Save Certification Standard</AppButton>
+          <AppButton @click="save" :loading="saving" :disabled="!isFormValid" icon="mdi-check">Save Certification Standard</AppButton>
         </v-card-actions>
       </v-card>
     </v-dialog>
+
+    <!-- Snackbar Notification -->
+    <v-snackbar v-model="snackbar" :color="snackbarColor" rounded="lg" timeout="3000">
+      {{ snackbarMessage }}
+    </v-snackbar>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, shallowRef, onMounted, onBeforeUnmount } from 'vue';
+import { ref, shallowRef, computed, onMounted, onBeforeUnmount } from 'vue';
 import { Editor, EditorContent } from '@tiptap/vue-3';
 import StarterKit from '@tiptap/starter-kit';
 import { useApi } from '@/composables/useApi';
@@ -299,8 +301,11 @@ const standards = ref<any[]>([]);
 const dialog = ref(false);
 const modalTab = ref('basic');
 const form = ref<any>(null);
-const isValid = ref(false);
 const saving = ref(false);
+
+const snackbar = ref(false);
+const snackbarMessage = ref('');
+const snackbarColor = ref('success');
 
 const defaultItem = {
   name: '',
@@ -333,6 +338,14 @@ const editedId = ref<number | null>(null);
 const editedItem = ref<any>({ ...defaultItem });
 
 const editor = shallowRef<Editor | undefined>(undefined);
+
+const isFormValid = computed(() => {
+  return !!(
+    editedItem.value?.name && String(editedItem.value.name).trim() &&
+    editedItem.value?.sub && String(editedItem.value.sub).trim() &&
+    editedItem.value?.icon && String(editedItem.value.icon).trim()
+  );
+});
 
 onMounted(() => {
   editor.value = new Editor({
@@ -407,21 +420,25 @@ const addHighlight = () => {
   editedItem.value.highlights.push({ icon: 'mdi-star', title: 'New Highlight', sub: 'Subtitle' });
 };
 
-const removeHighlight = (idx: number) => {
-  editedItem.value.highlights.splice(idx, 1);
+const removeHighlight = (idx: number | string) => {
+  const index = typeof idx === 'string' ? parseInt(idx, 10) : idx;
+  editedItem.value.highlights.splice(index, 1);
 };
 
 const addBenefit = () => {
   editedItem.value.benefits.push({ title: 'New Benefit', desc: 'Description of the benefit...' });
 };
 
-const removeBenefit = (idx: number) => {
-  editedItem.value.benefits.splice(idx, 1);
+const removeBenefit = (idx: number | string) => {
+  const index = typeof idx === 'string' ? parseInt(idx, 10) : idx;
+  editedItem.value.benefits.splice(index, 1);
 };
 
 const save = async () => {
-  if (!isValid.value) {
-    if (form.value) form.value.validate();
+  if (!isFormValid.value) {
+    snackbarMessage.value = 'Please fill in required fields: Name, Subtitle, and Icon';
+    snackbarColor.value = 'warning';
+    snackbar.value = true;
     return;
   }
 
@@ -436,13 +453,20 @@ const save = async () => {
 
     if (editedId.value) {
       await api.put(`/admin/master-standards/${editedId.value}`, payload);
+      snackbarMessage.value = 'Certification standard updated successfully';
     } else {
       await api.post('/admin/master-standards', payload);
+      snackbarMessage.value = 'Certification standard created successfully';
     }
+    snackbarColor.value = 'success';
+    snackbar.value = true;
     await fetchStandards();
     closeDialog();
-  } catch (error) {
+  } catch (error: any) {
     console.error('Failed to save standard:', error);
+    snackbarMessage.value = error.response?.data?.message || 'Failed to save certification standard';
+    snackbarColor.value = 'error';
+    snackbar.value = true;
   } finally {
     saving.value = false;
   }
@@ -452,9 +476,15 @@ const deleteItem = async (id: number) => {
   if (confirm('Are you sure you want to delete this standard?')) {
     try {
       await api.delete(`/admin/master-standards/${id}`);
+      snackbarMessage.value = 'Certification standard deleted successfully';
+      snackbarColor.value = 'success';
+      snackbar.value = true;
       await fetchStandards();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to delete standard:', error);
+      snackbarMessage.value = error.response?.data?.message || 'Failed to delete certification standard';
+      snackbarColor.value = 'error';
+      snackbar.value = true;
     }
   }
 };

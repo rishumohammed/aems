@@ -166,7 +166,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
 import { useApi } from '@/composables/useApi';
 import DynamicLeadForm from '@/components/DynamicLeadForm.vue';
 
@@ -183,15 +183,26 @@ const loading = ref(true);
 
 const slugParam = computed(() => route.params.slug as string);
 
-onMounted(async () => {
+const loadStandard = async () => {
+  if (!slugParam.value) return;
+  loading.value = true;
   try {
     const res = await api.get(`/public/standards/${slugParam.value}`);
-    standard.value = res.data || res;
+    standard.value = res.data || null;
   } catch (error) {
     console.error('Failed to load certification standard details:', error);
+    standard.value = null;
   } finally {
     loading.value = false;
   }
+};
+
+onMounted(() => {
+  loadStandard();
+});
+
+watch(slugParam, () => {
+  loadStandard();
 });
 
 const heroStyle = computed(() => {
