@@ -212,14 +212,42 @@
             </div>
           </div>
 
-          <div v-if="highlights.length > 0" class="marquee-container" @mouseenter="isPaused = true" @mouseleave="isPaused = false">
-            <div class="marquee-track" :class="{ 'paused': isPaused }">
-              <div class="marquee-content" v-for="loopIndex in (highlights.length < 4 ? 12 : 6)" :key="loopIndex">
-                <v-card v-for="item in highlights" :key="`${loopIndex}-${item.id}`" width="280" variant="outlined" class="rounded-xl border-surface bg-white flex-shrink-0 pa-0 d-flex flex-column ma-3" style="min-height: 280px;">
-                  <v-img v-if="item.image_url" :src="baseUrl + item.image_url" height="280" cover></v-img>
+          <!-- Static Grid for 1-4 items -->
+          <div v-if="highlights.length > 0 && highlights.length <= 4">
+            <v-row justify="center">
+              <v-col 
+                v-for="item in highlights" 
+                :key="item.id" 
+                cols="12" 
+                sm="6" 
+                md="4" 
+                lg="3"
+                class="d-flex"
+              >
+                <v-card 
+                  variant="outlined" 
+                  class="rounded-xl border-surface bg-white w-100 pa-0 d-flex flex-column" 
+                  style="min-height: 280px;"
+                >
+                  <v-img v-if="item.image_url" :src="baseUrl + item.image_url" height="240" cover></v-img>
                   <div class="pa-5 flex-grow-1 d-flex flex-column">
                     <h3 class="text-subtitle-1 font-weight-bold line-clamp-2 mb-2 flex-grow-1" style="line-height: 1.4;">{{ item.title }}</h3>
-                    <p class="text-body-2 text-secondary line-clamp-3">{{ item.description }}</p>
+                    <p class="text-body-2 text-secondary line-clamp-3 mb-0">{{ item.description }}</p>
+                  </div>
+                </v-card>
+              </v-col>
+            </v-row>
+          </div>
+
+          <!-- Infinite Marquee for > 4 items -->
+          <div v-else-if="highlights.length > 4" class="marquee-container" @mouseenter="isPaused = true" @mouseleave="isPaused = false">
+            <div class="marquee-track" :class="{ 'paused': isPaused }">
+              <div class="marquee-content" v-for="loopIndex in 2" :key="loopIndex">
+                <v-card v-for="item in highlights" :key="`${loopIndex}-${item.id}`" width="280" variant="outlined" class="rounded-xl border-surface bg-white flex-shrink-0 pa-0 d-flex flex-column ma-3" style="min-height: 280px;">
+                  <v-img v-if="item.image_url" :src="baseUrl + item.image_url" height="240" cover></v-img>
+                  <div class="pa-5 flex-grow-1 d-flex flex-column">
+                    <h3 class="text-subtitle-1 font-weight-bold line-clamp-2 mb-2 flex-grow-1" style="line-height: 1.4;">{{ item.title }}</h3>
+                    <p class="text-body-2 text-secondary line-clamp-3 mb-0">{{ item.description }}</p>
                   </div>
                 </v-card>
               </div>
