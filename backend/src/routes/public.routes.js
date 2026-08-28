@@ -60,52 +60,45 @@ router.get('/standards/:slug', async (req, res) => {
     }
 
     const isNumeric = /^\d+$/.test(rawParam);
-    const numId = isNumeric ? parseInt(rawParam, 10) : 0;
 
-    let sql = 'SELECT * FROM master_standards WHERE (LOWER(slug) = LOWER(?) OR LOWER(name) = LOWER(?)';
-    const params = [rawParam, rawParam];
-
-    if (isNumeric) {
-      sql += ' OR id = ?';
-      params.push(numId);
-    }
-    sql += ')';
-
-    if (checkStatus) {
-      sql += ' AND is_active = 1';
-    }
-
-    const [standards] = await pool.query(sql, params);
-    if (Array.isArray(standards) && standards.length > 0) {
-      return res.json(standards[0]);
-    }
-
-    // Fallback search across all standards (by slugified name match)
     let allSql = 'SELECT * FROM master_standards';
     if (checkStatus) {
-      allSql += ' WHERE is_active = 1';
+      allSql += ' WHERE is_active = 1 OR is_active IS NULL';
     }
-    const [all] = await pool.query(allSql);
-    if (Array.isArray(all)) {
-      const matched = all.find(s => {
-        if (!s) return false;
-        if (s.slug && String(s.slug).toLowerCase() === rawParam.toLowerCase()) return true;
-        if (s.name && String(s.name).toLowerCase() === rawParam.toLowerCase()) return true;
-        if (isNumeric && String(s.id) === rawParam) return true;
-        
-        try {
-          if (s.name && typeof s.name === 'string') {
-            const cleanSName = slugify(s.name, { lower: true, strict: true });
-            const cleanParam = slugify(rawParam, { lower: true, strict: true });
-            if (cleanSName && cleanParam && cleanSName === cleanParam) return true;
-          }
-        } catch (e) {}
-        return false;
-      });
+    allSql += ' ORDER BY sort_order ASC';
 
-      if (matched) {
-        return res.json(matched);
-      }
+    const [rows] = await pool.query(allSql);
+    if (!Array.isArray(rows) || rows.length === 0) {
+      return res.status(404).json({ message: 'Certification standard not found' });
+    }
+
+    const matched = rows.find(s => {
+      if (!s) return false;
+      if (s.slug && String(s.slug).toLowerCase() === rawParam.toLowerCase()) return true;
+      if (s.name && String(s.name).toLowerCase() === rawParam.toLowerCase()) return true;
+      if (isNumeric && String(s.id) === rawParam) return true;
+
+      try {
+        if (s.name && typeof s.name === 'string') {
+          const cleanSName = slugify(s.name, { lower: true, strict: true });
+          const cleanParam = slugify(rawParam, { lower: true, strict: true });
+          if (cleanSName && cleanParam && cleanSName === cleanParam) return true;
+        }
+      } catch (e) {}
+      return false;
+    });
+
+    if (matched) {
+      const safeMatched = {
+        ...matched,
+        slug: matched.slug || (matched.name ? slugify(matched.name, { lower: true, strict: true }) : String(matched.id)),
+        scope: matched.scope || 'International Standard',
+        compliance_info: matched.compliance_info || 'GFSI & ISO Aligned',
+        description: matched.description || '',
+        highlights_json: matched.highlights_json || null,
+        benefits_json: matched.benefits_json || null
+      };
+      return res.json(safeMatched);
     }
 
     return res.status(404).json({ message: 'Certification standard not found' });
