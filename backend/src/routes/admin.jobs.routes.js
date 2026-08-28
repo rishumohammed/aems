@@ -109,24 +109,60 @@ router.get('/job-approvals', authenticateJWT, hasAccess, async (req, res) => {
 });
 
 router.post('/jobs', authenticateJWT, hasAccess, async (req, res) => {
-  const { title, company, category_id, location, is_remote, type, salary_range, description, required_skills, nice_to_have_skills, deadline, apply_url, hide_company_name } = req.body;
+  const { 
+    title, company, category_id, location, is_remote, type, salary_range, description, 
+    required_skills, nice_to_have_skills, experience_level, number_of_openings, deadline, apply_url, 
+    hide_company_name, gender_preference, qualification_req, language_req, specialization_req, joining_status_req 
+  } = req.body;
+
   try {
     const jobId = uuidv4();
-    const requirements = JSON.stringify({ required: required_skills || [], nice_to_have: nice_to_have_skills || [] });
+    const requirements = JSON.stringify({ 
+      required: required_skills || [], 
+      nice_to_have: nice_to_have_skills || [],
+      experience_level: experience_level || '',
+      number_of_openings: number_of_openings || 1
+    });
     
     const status = req.user.role === 'super_admin' ? 'approved' : 'pending_approval';
     const isCompanyHidden = hide_company_name ? 1 : 0;
-    const companyName = isCompanyHidden ? 'Confidential Organization' : (company?.trim() || null);
+    const defaultCompany = req.user?.name || 'Brix Certifications';
+    const companyName = isCompanyHidden ? 'Confidential Organization' : (company?.trim() || defaultCompany);
     
     await pool.query(
-      `INSERT INTO jobs (id, title, company, category, location, is_remote, type, salary_range, description, requirements_json, deadline, apply_url, posted_by, status, hide_company_name)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [jobId, title, companyName, category_id, location, is_remote ? 1 : 0, type, salary_range, description, requirements, deadline || null, apply_url, req.user.id, status, isCompanyHidden]
+      `INSERT INTO jobs (
+        id, title, company, category, location, is_remote, type, salary_range, description, 
+        requirements_json, deadline, apply_url, posted_by, status, hide_company_name,
+        gender_preference, qualification_req, language_req, specialization_req, joining_status_req
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        jobId, 
+        title, 
+        companyName, 
+        category_id, 
+        location || '', 
+        is_remote ? 1 : 0, 
+        type || 'full_time', 
+        salary_range || 'Not Disclosed', 
+        description || '', 
+        requirements, 
+        deadline || null, 
+        apply_url || null, 
+        req.user.id, 
+        status, 
+        isCompanyHidden,
+        gender_preference || 'any',
+        qualification_req || null,
+        language_req ? (typeof language_req === 'string' ? language_req : JSON.stringify(language_req)) : null,
+        specialization_req || null,
+        joining_status_req || null
+      ]
     );
 
-    res.status(201).json({ message: status === 'approved' ? 'Job published' : 'Job submitted for review', jobId });
+    res.status(201).json({ message: status === 'approved' ? 'Job published successfully' : 'Job submitted for review', jobId });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error('Error posting admin job:', error);
+    res.status(500).json({ message: error.message || 'Failed to post job' });
   }
 });
 

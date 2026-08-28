@@ -12,15 +12,23 @@
       <v-form ref="form">
         <v-row>
           <!-- Basic Info -->
-          <v-col cols="12">
-            <h3 class="text-h6 font-weight-bold text-grey-darken-4 mb-4">Basic Information</h3>
+          <v-col cols="12" md="6">
             <v-text-field
               v-model="formData.title"
               label="Job Title"
               variant="outlined"
               color="primary"
               :rules="[v => !!v || 'Title is required']"
-              class="mb-4"
+            ></v-text-field>
+          </v-col>
+
+          <v-col cols="12" md="6">
+            <v-text-field
+              v-model="formData.company"
+              label="Company / Organization Name (Optional)"
+              variant="outlined"
+              color="primary"
+              placeholder="e.g. Brix Certifications"
             ></v-text-field>
           </v-col>
 
@@ -261,6 +269,7 @@ const categories = ref<any[]>([]);
 
 const formData = ref({
   title: '',
+  company: '',
   category_id: null,
   location: '',
   is_remote: false,
@@ -290,15 +299,8 @@ onMounted(async () => {
       formData.value.description = tiptapEditor.getHTML();
     }
   });
-  // Fetch categories (Wait, Admin has categories, but public/employer needs to fetch them)
-  // Let's use a public endpoint if one exists, or we might need to create one.
-  // Assuming GET /api/admin/job-categories might be blocked for employers if not handled.
-  // Actually, wait, job-categories requires isAdmin in admin.jobs.routes.js!
-  // I need to add a public endpoint for job categories in public.routes.js or employer.routes.js.
+
   try {
-    // For now, let's try calling the admin one. If it fails, we handle it or we use hardcoded for a sec.
-    // Let's add a quick fix in public.routes to fetch categories or we will just use a fetch to the backend directly if possible.
-    // I'll fetch it from the backend server route that's available.
     const { data } = await api.get('/public/job-categories');
     categories.value = data;
   } catch (error) {
@@ -332,7 +334,8 @@ const submitJob = async (action: 'draft' | 'submit') => {
       router.push('/dashboard/employer');
     }
   } catch (error: any) {
-    alert(error.data?.message || 'Failed to submit job.');
+    console.error('Job submission error:', error);
+    alert(error.response?.data?.message || error.message || 'Failed to submit job.');
   } finally {
     loading.value = false;
   }
