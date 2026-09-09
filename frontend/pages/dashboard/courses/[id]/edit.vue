@@ -99,11 +99,16 @@
         <v-window-item value="pricing">
           <v-row justify="center">
             <v-col cols="12" md="6">
-              <v-radio-group v-model="course.price_type" class="mb-6">
-                <v-radio label="Fixed Price" value="fixed"></v-radio>
-                <v-radio label="Custom Quote" value="custom"></v-radio>
+              <v-radio-group v-model="course.price_type" class="mb-6" @update:model-value="val => { if (val === 'free') course.price = 0; if (val === 'custom') course.price = null; }">
+                <v-radio label="Fixed Price" value="fixed" color="primary"></v-radio>
+                <v-radio label="Free Course" value="free" color="success"></v-radio>
+                <v-radio label="Custom Quote (Enquiry)" value="custom" color="primary"></v-radio>
               </v-radio-group>
               <v-text-field v-if="course.price_type === 'fixed'" v-model="course.price" prefix="₹" label="Price" variant="outlined" rounded="lg"></v-text-field>
+              <v-alert v-else-if="course.price_type === 'free'" type="success" variant="tonal" rounded="lg" class="text-body-2 mb-4">
+                <v-icon start color="success">mdi-check-circle-outline</v-icon>
+                This course is 100% free. Students can enroll instantly without payment.
+              </v-alert>
             </v-col>
           </v-row>
         </v-window-item>

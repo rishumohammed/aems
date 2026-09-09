@@ -170,10 +170,59 @@
                   </v-col>
 
                   <v-col cols="12">
+                    <div class="text-subtitle-2 font-weight-bold mb-2">Banner / Hero Image</div>
+                    
+                    <!-- Image Preview & File Upload Card -->
+                    <v-card variant="outlined" class="pa-4 rounded-xl border mb-3 bg-grey-lighten-5">
+                      <div v-if="editedItem.banner_image" class="mb-3 position-relative">
+                        <v-img
+                          :src="getImageUrl(editedItem.banner_image)"
+                          height="180"
+                          cover
+                          class="rounded-lg bg-grey-lighten-3 border"
+                        >
+                          <div class="pa-2 d-flex justify-end">
+                            <v-btn
+                              size="small"
+                              color="error"
+                              variant="flat"
+                              icon="mdi-close"
+                              title="Remove Banner Image"
+                              @click="editedItem.banner_image = ''"
+                            ></v-btn>
+                          </div>
+                        </v-img>
+                        <div class="text-caption text-secondary mt-1 text-truncate">
+                          Current Banner: <code>{{ editedItem.banner_image }}</code>
+                        </div>
+                      </div>
+
+                      <div class="d-flex align-center gap-3 flex-wrap">
+                        <v-btn
+                          color="primary"
+                          variant="flat"
+                          rounded="lg"
+                          prepend-icon="mdi-cloud-upload-outline"
+                          :loading="uploadingBanner"
+                          @click="$refs.bannerInput.click()"
+                        >
+                          Upload Banner Image
+                        </v-btn>
+                        <span class="text-caption text-secondary">Supports JPG, PNG, WebP</span>
+                        <input
+                          ref="bannerInput"
+                          type="file"
+                          accept="image/*"
+                          class="d-none"
+                          @change="handleBannerFileUpload"
+                        />
+                      </div>
+                    </v-card>
+
                     <AppInput
                       v-model="editedItem.banner_image"
-                      label="Banner / Hero Image URL (Optional)"
-                      placeholder="https://example.com/images/iso-banner.jpg or /uploads/iso.jpg"
+                      label="Or Enter Banner Image URL Directly (Optional)"
+                      placeholder="https://example.com/images/iso-banner.jpg or /uploads/standards/banner-xxx.jpg"
                     />
                   </v-col>
 
@@ -297,15 +346,50 @@ import StarterKit from '@tiptap/starter-kit';
 import { useApi } from '@/composables/useApi';
 
 const api = useApi();
+const config = useRuntimeConfig();
 const standards = ref<any[]>([]);
 const dialog = ref(false);
 const modalTab = ref('basic');
 const form = ref<any>(null);
 const saving = ref(false);
+const uploadingBanner = ref(false);
+const bannerInput = ref<any>(null);
 
 const snackbar = ref(false);
 const snackbarMessage = ref('');
 const snackbarColor = ref('success');
+
+const getImageUrl = (path: string) => {
+  if (!path) return '';
+  if (path.startsWith('http')) return path;
+  return config.public.apiBase.replace('/api', '') + path;
+};
+
+const handleBannerFileUpload = async (event: any) => {
+  const file = event.target?.files?.[0];
+  if (!file) return;
+
+  uploadingBanner.value = true;
+  try {
+    const formData = new FormData();
+    formData.append('banner', file);
+    const { data } = await api.post('/admin/master-standards/upload-banner', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+    editedItem.value.banner_image = data.url;
+    snackbarMessage.value = 'Banner image uploaded successfully!';
+    snackbarColor.value = 'success';
+    snackbar.value = true;
+  } catch (error: any) {
+    console.error('Failed to upload banner:', error);
+    snackbarMessage.value = error.response?.data?.message || 'Failed to upload banner image';
+    snackbarColor.value = 'error';
+    snackbar.value = true;
+  } finally {
+    uploadingBanner.value = false;
+    if (event.target) event.target.value = '';
+  }
+};
 
 const defaultItem = {
   name: '',

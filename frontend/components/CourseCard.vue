@@ -53,11 +53,15 @@
 
         <div class="d-flex align-center justify-space-between mt-auto">
           <div>
-            <span v-if="course.price_type === 'custom' || !course.price || course.price == 0" class="text-subtitle-1 font-weight-bold text-primary">
-              Enquiry
+            <span v-if="course.price_type === 'custom'" class="text-subtitle-1 font-weight-bold text-primary">
             </span>
-            <span v-else class="text-h6 font-weight-bold text-grey-darken-4">
+            <span v-else-if="course.price_type === 'free' || (course.price !== undefined && course.price !== null && Number(course.price) === 0)" class="text-h6 font-weight-bold text-success">
+              Free
+            </span>
+            <span v-else-if="course.price && Number(course.price) > 0" class="text-h6 font-weight-bold text-grey-darken-4">
               {{ course.currency_symbol || '₹' }}{{ course.price }}
+            </span>
+            <span v-else class="text-subtitle-1 font-weight-bold text-primary">
             </span>
           </div>
           
@@ -69,7 +73,7 @@
             elevation="0"
             @click.stop="handleEnrollClick"
           >
-            {{ (course.price_type === 'custom' || !course.price || course.price == 0) ? 'Enquiry' : 'Enroll' }}
+            {{ isEnquiryCourse ? 'Enquiry' : 'Enroll' }}
           </v-btn>
         </div>
       </div>
@@ -144,8 +148,15 @@ const updateCountdown = () => {
   timeRemaining.value = start - now
 }
 
+const isEnquiryCourse = computed(() => {
+  if (props.course.price_type === 'custom') return true
+  if (props.course.price_type === 'free' || (props.course.price !== undefined && props.course.price !== null && Number(props.course.price) === 0)) return false
+  if (props.course.price && Number(props.course.price) > 0) return false
+  return !props.course.price
+})
+
 const handleEnrollClick = () => {
-  if (props.course.price_type === 'custom' || !props.course.price || parseFloat(props.course.price) === 0) {
+  if (isEnquiryCourse.value) {
     showInquiry.value = true
   } else {
     navigateTo(`/courses/${props.course.slug}`)

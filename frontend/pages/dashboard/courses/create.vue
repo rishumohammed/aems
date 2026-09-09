@@ -389,9 +389,10 @@
                   <v-card flat border rounded="xl" class="pa-6 mb-4">
                     <div class="text-subtitle-1 font-weight-bold mb-5">Course Pricing</div>
 
-                    <v-radio-group v-model="course.price_type" class="mb-5">
+                    <v-radio-group v-model="course.price_type" class="mb-5" @update:model-value="val => { if (val === 'free') course.price = 0; if (val === 'custom') course.price = null; }">
                       <v-radio label="Fixed Price" value="fixed" color="primary"></v-radio>
-                      <v-radio label="Custom / Quote" value="custom" color="primary"></v-radio>
+                      <v-radio label="Free Course" value="free" color="success"></v-radio>
+                      <v-radio label="Custom / Quote (Enquiry)" value="custom" color="primary"></v-radio>
                     </v-radio-group>
 
                     <div v-if="course.price_type === 'fixed'">
@@ -404,8 +405,12 @@
                         rounded="lg"
                       ></v-text-field>
                     </div>
+                    <v-alert v-else-if="course.price_type === 'free'" type="success" variant="tonal" rounded="lg" class="text-body-2">
+                      <v-icon start color="success">mdi-check-circle-outline</v-icon>
+                      This course will be 100% free for all students. Students can enroll instantly without any payment.
+                    </v-alert>
                     <v-alert v-else type="info" variant="tonal" rounded="lg" class="text-body-2">
-                      Students will see a "Get Quote" button. This triggers the CRM flow for your sales agents.
+                      Students will see an "Enquiry" button. This triggers the CRM flow for your sales agents.
                     </v-alert>
                   </v-card>
                 </v-col>
