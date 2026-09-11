@@ -51,6 +51,13 @@ const isCritical = computed(() => props.seconds <= 60 && props.seconds > 0);
 }
 .timer-text { font-variant-numeric: tabular-nums; }
 
+@media (max-width: 768px) {
+  .exam-timer {
+    padding: 4px 10px;
+    font-size: 13px;
+  }
+}
+
 @keyframes pulse-warning {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.7; }

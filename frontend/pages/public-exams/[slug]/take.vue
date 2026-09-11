@@ -18,18 +18,19 @@
     <v-app-bar flat color="#1A1A2E" class="text-white border-b px-4" height="64">
       <div class="d-flex align-center cursor-pointer" @click="confirmExit">
         <v-icon color="primary" class="mr-2" size="28">mdi-rhombus-split</v-icon>
-        <span class="font-weight-black tracking-tight text-body-1">Brix Certifications EXAM STUDIO</span>
+        <span class="font-weight-black tracking-tight text-body-1 d-none d-sm-inline">Brix Certifications EXAM STUDIO</span>
+        <span class="font-weight-black tracking-tight text-body-2 d-sm-none">EXAM STUDIO</span>
       </div>
 
-      <v-divider vertical inset class="mx-4 border-grey-darken-3"></v-divider>
+      <v-divider vertical inset class="mx-2 mx-md-4 border-grey-darken-3"></v-divider>
 
       <!-- Exam Name -->
-      <span class="font-weight-bold text-body-2 d-none d-sm-inline opacity-90">{{ examName }}</span>
+      <span class="font-weight-bold text-body-2 d-none d-md-inline opacity-90">{{ examName }}</span>
 
       <v-spacer></v-spacer>
 
       <!-- Full Screen Trigger -->
-      <v-btn icon color="white" class="mr-2" @click="toggleFullScreen">
+      <v-btn icon color="white" class="mr-1 mr-md-2" size="small" @click="toggleFullScreen">
         <v-icon>{{ isFullScreen ? 'mdi-fullscreen-exit' : 'mdi-fullscreen' }}</v-icon>
         <v-tooltip activator="parent" location="bottom">Toggle Fullscreen</v-tooltip>
       </v-btn>
@@ -37,11 +38,11 @@
       <!-- Timer Display -->
       <v-chip
         :color="timerColor"
-        class="font-weight-black px-4 text-white"
+        class="font-weight-black px-2 px-md-4 text-white"
         rounded="lg"
-        height="40"
+        height="36"
       >
-        <v-icon start size="18" class="pulse-icon">mdi-clock-outline</v-icon>
+        <v-icon start size="16" class="pulse-icon">mdi-clock-outline</v-icon>
         {{ formatTime(timeLeftSeconds) }}
       </v-chip>
     </v-app-bar>
@@ -54,7 +55,7 @@
           <!-- Left: Question Pane -->
           <v-col cols="12" md="8" lg="9" class="d-flex flex-column h-100 justify-space-between bg-white border-r">
             <!-- Question Content -->
-            <div class="pa-8 flex-grow-1 overflow-y-auto" v-if="questions.length > 0">
+            <div class="pa-4 pa-md-8 flex-grow-1 overflow-y-auto" v-if="questions.length > 0">
               <!-- Question Header (Number & Marks) -->
               <div class="d-flex align-center justify-space-between mb-6">
                 <h2 class="text-h6 font-weight-black text-dark">
@@ -160,54 +161,59 @@
             </div>
 
             <!-- Footer Controls -->
-            <div class="pa-6 border-t bg-grey-lighten-5 d-flex align-center justify-space-between flex-wrap gap-3">
-              <div class="d-flex gap-2">
+            <div class="pa-3 pa-md-6 border-t bg-grey-lighten-5 d-flex align-center justify-space-between flex-wrap gap-2">
+              <div class="d-flex gap-1 gap-md-2">
                 <v-btn
                   variant="outlined"
                   color="grey-darken-1"
                   rounded="lg"
-                  class="text-capitalize font-weight-bold"
-                  height="44"
+                  class="text-capitalize font-weight-bold px-2 px-md-4"
+                  height="40"
+                  size="small"
                   :disabled="currentQuestionIndex === 0"
                   @click="prevQuestion"
                 >
-                  <v-icon start>mdi-chevron-left</v-icon> Previous
+                  <v-icon start size="16">mdi-chevron-left</v-icon> <span class="d-none d-sm-inline">Previous</span><span class="d-sm-none">Prev</span>
                 </v-btn>
 
                 <v-btn
                   variant="outlined"
                   color="primary"
                   rounded="lg"
-                  class="text-capitalize font-weight-bold"
-                  height="44"
+                  class="text-capitalize font-weight-bold px-2 px-md-4"
+                  height="40"
+                  size="small"
                   @click="toggleMarkForReview"
                 >
-                  <v-icon start>{{ isMarkedForReview(currentQuestion.id) ? 'mdi-bookmark' : 'mdi-bookmark-outline' }}</v-icon>
-                  {{ isMarkedForReview(currentQuestion.id) ? 'Unmark Review' : 'Mark For Review' }}
+                  <v-icon start size="16">{{ isMarkedForReview(currentQuestion.id) ? 'mdi-bookmark' : 'mdi-bookmark-outline' }}</v-icon>
+                  <span class="d-none d-sm-inline">{{ isMarkedForReview(currentQuestion.id) ? 'Unmark Review' : 'Mark For Review' }}</span>
+                  <span class="d-sm-none">{{ isMarkedForReview(currentQuestion.id) ? 'Unmark' : 'Review' }}</span>
                 </v-btn>
               </div>
 
-              <div class="d-flex gap-2">
+              <div class="d-flex gap-1 gap-md-2">
                 <v-btn
                   color="primary"
                   rounded="lg"
-                  class="text-capitalize font-weight-bold"
-                  height="44"
+                  class="text-capitalize font-weight-bold px-3 px-md-4"
+                  height="40"
+                  size="small"
                   v-if="currentQuestionIndex < questions.length - 1"
                   @click="nextQuestion"
                 >
-                  Next <v-icon end>mdi-chevron-right</v-icon>
+                  Next <v-icon end size="16">mdi-chevron-right</v-icon>
                 </v-btn>
 
                 <v-btn
                   color="success"
                   rounded="lg"
-                  class="text-capitalize font-weight-bold text-white px-6"
-                  height="44"
+                  class="text-capitalize font-weight-bold text-white px-3 px-md-6"
+                  height="40"
+                  size="small"
                   elevation="0"
                   @click="confirmSubmitDialog = true"
                 >
-                  Submit Exam
+                  Submit
                 </v-btn>
               </div>
             </div>

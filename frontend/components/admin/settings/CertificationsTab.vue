@@ -204,7 +204,7 @@
                           rounded="lg"
                           prepend-icon="mdi-cloud-upload-outline"
                           :loading="uploadingBanner"
-                          @click="$refs.bannerInput.click()"
+                          @click="bannerInput?.click()"
                         >
                           Upload Banner Image
                         </v-btn>
@@ -353,7 +353,7 @@ const modalTab = ref('basic');
 const form = ref<any>(null);
 const saving = ref(false);
 const uploadingBanner = ref(false);
-const bannerInput = ref<any>(null);
+const bannerInput = ref<HTMLInputElement | null>(null);
 
 const snackbar = ref(false);
 const snackbarMessage = ref('');

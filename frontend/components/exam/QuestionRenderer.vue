@@ -186,4 +186,33 @@ defineEmits(['update:modelValue']);
 .answer-textarea:focus { border-color: #3b82f6; }
 .answer-textarea.short { min-height: 120px; }
 .answer-textarea.long { min-height: 240px; }
+
+@media (max-width: 768px) {
+  .q-body {
+    font-size: 15px;
+    line-height: 1.5;
+  }
+  .option-card {
+    padding: 12px 14px;
+    gap: 10px;
+    border-radius: 12px;
+  }
+  .option-letter {
+    width: 28px;
+    height: 28px;
+    font-size: 12px;
+  }
+  .option-text {
+    font-size: 14px;
+    word-break: break-word;
+  }
+  .tf-options {
+    gap: 10px;
+  }
+  .tf-card {
+    padding: 16px 12px;
+    font-size: 16px;
+    border-radius: 14px;
+  }
+}
 </style>

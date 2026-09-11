@@ -27,7 +27,7 @@
           <v-col cols="12" md="6">
             <p class="text-subtitle-2 font-weight-medium mb-2">Cover Image</p>
             <div class="image-upload-box d-flex flex-column align-center justify-center pa-6 rounded-lg position-relative"
-                 @click="($refs.fileInput as any).click()"
+                 @click="fileInput?.click()"
                  :class="{'has-image': imagePreview}">
               <input 
                 type="file" 

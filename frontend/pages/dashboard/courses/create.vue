@@ -247,7 +247,7 @@
                     flat border rounded="xl"
                     class="media-upload-card pa-4 text-center d-flex flex-column align-center justify-center cursor-pointer"
                     min-height="280"
-                    @click="$refs.fileInput.click()"
+                    @click="fileInput?.click()"
                   >
                     <template v-if="thumbnailPreview">
                       <v-img :src="thumbnailPreview" width="100%" height="220" cover class="rounded-xl mb-3"></v-img>
@@ -606,6 +606,7 @@ const saving = ref(false);
 const submitting = ref(false);
 const validBasic = ref(false);
 const formBasic = ref(null);
+const fileInput = ref(null);
 const categories = ref([]);
 const availableLanguages = ref(['English', 'Hindi', 'Spanish', 'French', 'German']);
 const createdCourseId = ref(null);

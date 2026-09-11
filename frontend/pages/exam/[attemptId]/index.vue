@@ -110,13 +110,25 @@
     <!-- Header -->
     <div class="exam-header">
       <div class="header-left">
-        <div class="exam-title">{{ attempt?.exam_title }}</div>
+        <div class="exam-title" :title="attempt?.exam_title">{{ attempt?.exam_title }}</div>
         <div class="exam-progress">{{ examStore.currentIndex + 1 }} / {{ examStore.totalQuestions }}</div>
       </div>
       <div class="header-center">
         <ExamTimer :seconds="examStore.localTimerSeconds" />
       </div>
-      <div class="header-right">
+      <div class="header-right d-flex align-center gap-2">
+        <v-btn
+          color="info"
+          variant="tonal"
+          size="small"
+          rounded="lg"
+          class="d-md-none px-2"
+          @click="showMobileNavigator = !showMobileNavigator"
+          title="Toggle Navigator"
+        >
+          <v-icon start size="16">mdi-view-grid-outline</v-icon>
+          Grid
+        </v-btn>
         <v-btn
           color="success"
           variant="flat"
@@ -125,7 +137,7 @@
           :disabled="!examStore.canSubmit || examStore.isSubmitting"
           @click="confirmSubmit = true"
         >
-          Submit Exam
+          Submit
         </v-btn>
       </div>
     </div>
@@ -133,14 +145,24 @@
     <!-- Body -->
     <div class="exam-body">
       <!-- Left: Question Grid Panel -->
-      <div class="exam-left-panel">
-        <div class="panel-header">Navigator</div>
+      <div class="exam-left-panel" :class="{ 'mobile-open': showMobileNavigator }">
+        <div class="d-flex align-center justify-space-between mb-2">
+          <div class="panel-header mb-0">Navigator</div>
+          <v-btn
+            icon="mdi-close"
+            size="x-small"
+            variant="text"
+            color="grey-lighten-1"
+            class="d-md-none"
+            @click="showMobileNavigator = false"
+          ></v-btn>
+        </div>
         <ExamQuestionGrid
           :questions="examStore.questions"
           :answers="examStore.answers"
           :flagged="examStore.flagged"
           :currentIndex="examStore.currentIndex"
-          @goto="examStore.goToQuestion"
+          @goto="(i) => { examStore.goToQuestion(i); showMobileNavigator = false; }"
         />
         <div class="panel-legend mt-4">
           <span class="legend-dot answered"></span><span>Answered</span>
@@ -164,20 +186,22 @@
 
         <!-- Bottom Navigation -->
         <div class="exam-nav">
-          <v-btn variant="tonal" :disabled="examStore.currentIndex === 0" @click="examStore.prevQuestion">
-            <v-icon left>mdi-arrow-left</v-icon> Previous
+          <v-btn variant="tonal" size="small" :disabled="examStore.currentIndex === 0" @click="examStore.prevQuestion">
+            <v-icon left>mdi-arrow-left</v-icon> <span class="d-none d-sm-inline">Previous</span><span class="d-sm-none">Prev</span>
           </v-btn>
           <v-btn
             :color="examStore.flagged.has(examStore.currentQuestion?.id) ? 'warning' : 'default'"
             variant="tonal"
+            size="small"
             @click="examStore.toggleFlag(examStore.currentQuestion?.id)"
           >
-            <v-icon left>{{ examStore.flagged.has(examStore.currentQuestion?.id) ? 'mdi-flag' : 'mdi-flag-outline' }}</v-icon>
+            <v-icon left size="16">{{ examStore.flagged.has(examStore.currentQuestion?.id) ? 'mdi-flag' : 'mdi-flag-outline' }}</v-icon>
             {{ examStore.flagged.has(examStore.currentQuestion?.id) ? 'Flagged' : 'Flag' }}
           </v-btn>
           <v-btn
             v-if="examStore.currentIndex < examStore.totalQuestions - 1"
             color="primary"
+            size="small"
             @click="examStore.nextQuestion"
           >
             Next <v-icon right>mdi-arrow-right</v-icon>
@@ -185,10 +209,11 @@
           <v-btn
             v-else
             color="success"
+            size="small"
             :disabled="!examStore.canSubmit || examStore.isSubmitting"
             @click="confirmSubmit = true"
           >
-            Submit Exam <v-icon right>mdi-check-all</v-icon>
+            Submit <v-icon right>mdi-check-all</v-icon>
           </v-btn>
         </div>
       </div>
@@ -258,6 +283,7 @@ const stage = ref<'checklist' | 'exam'>('checklist');
 const agreedToTC = ref(false);
 const starting = ref(false);
 const confirmSubmit = ref(false);
+const showMobileNavigator = ref(false);
 const autoSubmitWarning = ref(false);
 const autoSubmitCountdown = ref(10);
 const examScreenEl = ref<HTMLElement | null>(null);
@@ -588,5 +614,54 @@ onUnmounted(() => {
   border-top: 1px solid rgba(255,255,255,0.06);
   flex-shrink: 0;
   background: rgba(0,0,0,0.2);
+}
+
+@media (max-width: 768px) {
+  .exam-header {
+    padding: 8px 12px;
+    gap: 8px;
+  }
+  .exam-title {
+    font-size: 13px;
+    max-width: 120px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .exam-progress {
+    font-size: 11px;
+  }
+  .exam-body {
+    position: relative;
+    flex-direction: column;
+  }
+  .exam-left-panel {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 20;
+    width: 100%;
+    max-height: 280px;
+    background: #12122b;
+    border-right: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+  }
+  .exam-left-panel.mobile-open {
+    display: block;
+  }
+  .question-scroll {
+    padding: 16px;
+  }
+  .exam-nav {
+    padding: 10px 12px;
+    gap: 6px;
+  }
+  .exam-nav .v-btn {
+    padding: 0 10px !important;
+    font-size: 12px !important;
+  }
 }
 </style>

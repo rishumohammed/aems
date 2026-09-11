@@ -11,7 +11,7 @@
         </div>
         <div class="d-flex gap-3">
           <input type="file" ref="fileInput" accept=".csv" class="d-none" @change="handleFileUpload" />
-          <v-btn color="white" variant="outlined" rounded="xl" class="text-white font-weight-black px-6" size="large" @click="$refs.fileInput.click()">
+          <v-btn color="white" variant="outlined" rounded="xl" class="text-white font-weight-black px-6" size="large" @click="fileInput?.click()">
             <v-icon left class="mr-2">mdi-upload</v-icon> Bulk Import CSV
           </v-btn>
           <v-btn color="white" rounded="xl" class="text-primary font-weight-black px-6" size="large" @click="saveQuiz" :loading="saving">
