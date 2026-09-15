@@ -262,7 +262,6 @@
           <v-tabs v-model="infoTab" color="primary">
             <v-tab value="description">Description</v-tab>
             <v-tab value="resources">Resources</v-tab>
-            <v-tab value="qa">Q&A</v-tab>
           </v-tabs>
 
           <v-window v-model="infoTab" class="mt-6">
@@ -285,10 +284,6 @@
               <v-alert v-else border="start" variant="tonal" color="info">
                 No downloadable resources for this lesson.
               </v-alert>
-            </v-window-item>
-
-            <v-window-item value="qa">
-              <QASection :course-id="enrollment?.course_id" :lesson-id="lessonId" />
             </v-window-item>
           </v-window>
         </div>

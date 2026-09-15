@@ -1,22 +1,39 @@
 <template>
   <v-container fluid class="pa-6">
-    <div class="d-flex justify-space-between align-center mb-8">
+    <div class="d-flex justify-space-between align-center mb-8 flex-wrap gap-3">
       <div>
         <h1 class="text-h4 font-weight-bold mb-1">{{ pageTitle }}</h1>
-        <p class="text-subtitle-1 text-medium-emphasis mb-6">{{ pageSubtitle }}</p>
+        <p class="text-subtitle-1 text-medium-emphasis mb-0">{{ pageSubtitle }}</p>
       </div>
-      <AppButton v-if="userRole !== 'student'" icon="mdi-certificate-outline" @click="openIssueModal">
-        Issue Certificate
-      </AppButton>
+      <div class="d-flex gap-3">
+        <v-btn
+          v-if="userRole === 'student'"
+          color="primary"
+          rounded="lg"
+          prepend-icon="mdi-school-outline"
+          class="font-weight-bold text-capitalize"
+          @click="openAddReadinessModal"
+        >
+          I'm Ready for Exam 🎓
+        </v-btn>
+        <AppButton v-if="userRole !== 'student'" icon="mdi-certificate-outline" @click="openIssueModal">
+          Issue Certificate
+        </AppButton>
+      </div>
     </div>
 
     <IssueCertificateModal v-model="showIssueModal" :editData="editData" @issued="fetchData" />
     <ExternalCertificateModal v-model="showExternalModal" :certificate="selectedExternalCert" @saved="fetchExternalData" />
+    <ExamReadinessModal v-model="showReadinessModal" :editData="selectedReadinessReq" @submitted="fetchReadinessRequests" />
 
     <div v-if="userRole === 'student'" class="mb-6">
       <v-tabs v-model="activeTab" color="primary" class="bg-white rounded-lg border">
-        <v-tab value="internal" class="text-capitalize font-weight-bold">Platform Certificates</v-tab>
+        <v-tab value="internal" class="text-capitalize font-weight-bold">Certificates</v-tab>
         <v-tab value="external" class="text-capitalize font-weight-bold">External Certificates</v-tab>
+        <v-tab value="readiness" class="text-capitalize font-weight-bold">
+          Exam Readiness Requests
+          <v-chip v-if="pendingReadinessCount > 0" size="x-small" color="amber" class="ml-2 font-weight-bold">{{ pendingReadinessCount }}</v-chip>
+        </v-tab>
       </v-tabs>
     </div>
 
@@ -132,6 +149,57 @@
           </v-col>
         </v-row>
       </v-window-item>
+
+      <v-window-item value="readiness">
+        <div class="d-flex justify-space-between align-center mb-6">
+          <h2 class="text-h6 font-weight-bold">My Exam Readiness Requests</h2>
+        </div>
+
+        <div v-if="loadingReadiness" class="pa-12 text-center">
+          <v-progress-circular indeterminate color="primary"></v-progress-circular>
+        </div>
+        <div v-else-if="readinessRequests.length === 0" class="pa-12 text-center bg-white rounded-xl border">
+          <v-icon size="64" color="grey-lighten-2">mdi-account-school-outline</v-icon>
+          <h3 class="text-h6 mt-4">No exam requests submitted yet</h3>
+          <p class="text-secondary mb-4">When you feel prepared to write a certification exam, click "I'm Ready for Exam" at the top right to notify administration.</p>
+          <v-btn color="primary" rounded="lg" @click="openAddReadinessModal">I'm Ready for Exam</v-btn>
+        </div>
+        <div v-else class="apple-table-card">
+          <v-table density="comfortable">
+            <thead>
+              <tr>
+                <th class="text-left font-weight-bold">Course / Certification</th>
+                <th class="text-left font-weight-bold">Date Submitted</th>
+                <th class="text-left font-weight-bold">My Message</th>
+                <th class="text-left font-weight-bold">Status</th>
+                <th class="text-left font-weight-bold">Admin Remarks</th>
+                <th class="text-right font-weight-bold">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="req in readinessRequests" :key="req.id">
+                <td class="font-weight-bold text-body-2 py-3">
+                  {{ req.course_title || req.exam_title || req.certification_name || 'Certification Exam' }}
+                </td>
+                <td class="text-caption font-weight-medium">{{ formatDate(req.created_at) }}</td>
+                <td class="text-body-2 text-grey-darken-1">{{ req.notes || '—' }}</td>
+                <td>
+                  <v-chip :color="getReadinessStatusColor(req.status)" size="small" class="font-weight-bold text-capitalize" variant="flat">
+                    {{ req.status }}
+                  </v-chip>
+                </td>
+                <td class="text-body-2 text-primary font-weight-medium">{{ req.admin_notes || 'Pending review' }}</td>
+                <td class="text-right">
+                  <div class="d-flex justify-end gap-1">
+                    <AppButton size="xs" variant="g" icon="mdi-pencil" @click="editReadinessReq(req)"></AppButton>
+                    <AppButton size="xs" variant="g" icon="mdi-delete" class="text-error" @click="deleteReadinessReq(req.id)"></AppButton>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </v-table>
+        </div>
+      </v-window-item>
     </v-window>
   </v-container>
 </template>
@@ -143,6 +211,7 @@ import { useAuthStore } from '@/stores/auth';
 import { useApi } from '@/composables/useApi';
 import IssueCertificateModal from '@/components/admin/IssueCertificateModal.vue';
 import ExternalCertificateModal from '@/components/certificates/ExternalCertificateModal.vue';
+import ExamReadinessModal from '@/components/student/ExamReadinessModal.vue';
 
 definePageMeta({
   layout: 'dashboard',
@@ -163,6 +232,49 @@ const showExternalModal = ref(false);
 const selectedExternalCert = ref<any>(null);
 const externalCertificates = ref<any[]>([]);
 const loadingExternal = ref(false);
+
+const showReadinessModal = ref(false);
+const readinessRequests = ref<any[]>([]);
+const loadingReadiness = ref(false);
+const selectedReadinessReq = ref<any>(null);
+
+const openAddReadinessModal = () => {
+  selectedReadinessReq.value = null;
+  showReadinessModal.value = true;
+};
+
+const editReadinessReq = (req: any) => {
+  selectedReadinessReq.value = req;
+  showReadinessModal.value = true;
+};
+
+const deleteReadinessReq = async (id: string) => {
+  if (!confirm('Are you sure you want to delete this exam readiness request?')) return;
+  try {
+    await api.delete(`/exams/my-readiness-requests/${id}`);
+    await fetchReadinessRequests();
+  } catch (error) {
+    console.error('Failed to delete request:', error);
+    alert('Failed to delete readiness request');
+  }
+};
+
+const fetchReadinessRequests = async () => {
+  if (userRole.value !== 'student') return;
+  loadingReadiness.value = true;
+  try {
+    const res = await api.get('/exams/my-readiness-requests');
+    readinessRequests.value = res.data || res;
+  } catch (error) {
+    console.error('Failed to fetch readiness requests:', error);
+  } finally {
+    loadingReadiness.value = false;
+  }
+};
+
+const pendingReadinessCount = computed(() => {
+  return readinessRequests.value.filter((r: any) => r.status === 'pending').length;
+});
 
 const headers = [
   { title: 'Certificate', key: 'student_name' },
@@ -284,11 +396,22 @@ const shareOnWhatsApp = (cert: any) => {
   window.open(url, '_blank');
 };
 
+const getReadinessStatusColor = (status: string) => {
+  switch (status) {
+    case 'pending': return 'amber';
+    case 'approved': return 'success';
+    case 'scheduled': return 'info';
+    case 'rejected': return 'error';
+    default: return 'grey';
+  }
+};
+
 const formatDate = (date: string) => dayjs(date).format('MMM D, YYYY');
 
 onMounted(() => {
   fetchData();
   fetchExternalData();
+  fetchReadinessRequests();
 });
 </script>
 

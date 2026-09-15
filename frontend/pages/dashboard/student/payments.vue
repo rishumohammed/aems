@@ -123,7 +123,7 @@
               Awaiting Verification
             </v-chip>
             <v-btn 
-              v-else-if="item.balance_due > 0 && item.payment_status !== 'voided' && item.payment_mode !== 'offline'" 
+              v-else-if="item.balance_due > 0 && item.payment_status !== 'voided' && item.payment_mode !== 'offline' && !isOnlinePaymentDisabled" 
               color="success" 
               size="small" 
               variant="flat"
@@ -322,6 +322,18 @@ const headers = [
   { title: 'Actions', key: 'actions', sortable: false, align: 'end' as const }
 ];
 
+const isOnlinePaymentDisabled = ref(false);
+
+const fetchPublicConfig = async () => {
+  try {
+    const res = await api.get('/public/config');
+    const cfg = res.data || res;
+    if (cfg && (cfg.online_payments_enabled === 'false' || cfg.online_payments_enabled === '0')) {
+      isOnlinePaymentDisabled.value = true;
+    }
+  } catch (e) {}
+};
+
 const fetchInvoices = async () => {
   loading.value = true;
   try {
@@ -335,7 +347,10 @@ const fetchInvoices = async () => {
   }
 };
 
-onMounted(fetchInvoices);
+onMounted(() => {
+  fetchInvoices();
+  fetchPublicConfig();
+});
 
 const payNow = async (invoice: any) => {
   try {
@@ -374,8 +389,10 @@ const payNow = async (invoice: any) => {
 
     const rzp = new (window as any).Razorpay(options);
     rzp.open();
-  } catch (error) {
+  } catch (error: any) {
     console.error('Failed to initiate payment', error);
+    const msg = error.response?.data?.message || error.data?.message || error.message || 'Failed to initiate payment';
+    alert(msg);
   }
 };
 

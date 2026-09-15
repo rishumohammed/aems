@@ -1,4 +1,7 @@
 import express from 'express';
+import path from 'path';
+import fs from 'fs';
+import multer from 'multer';
 import { authenticateJWT } from '../middleware/auth.js';
 import { createNotification } from '../services/notification.service.js';
 import { pool } from '../db/connection.js';
@@ -7,6 +10,24 @@ import bcrypt from 'bcryptjs';
 import courseCompletionService from '../services/course-completion.service.js';
 
 const router = express.Router();
+
+// Multer Storage Configuration for Student Assignment Submissions
+const assignmentStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const uploadPath = 'uploads/assignments';
+    if (!fs.existsSync(uploadPath)) fs.mkdirSync(uploadPath, { recursive: true });
+    cb(null, uploadPath);
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+    cb(null, 'submission-' + uniqueSuffix + path.extname(file.originalname));
+  }
+});
+
+const assignmentUpload = multer({
+  storage: assignmentStorage,
+  limits: { fileSize: 50 * 1024 * 1024 } // 50MB
+});
 
 // Student Dashboard Stats
 router.get('/dashboard', async (req, res) => {
@@ -68,10 +89,11 @@ router.get('/dashboard', async (req, res) => {
     const resumeCompletion = Math.min(100, (skills.length * 10) + 40); // Simple mock logic
 
     const [pendingAssignments] = await pool.query(`
-      SELECT a.*, c.title as course_title, c.slug as course_slug
+      SELECT a.*, c.title as course_title, c.slug as course_slug, l.id as lesson_id
       FROM assignments a
       JOIN enrollments e ON a.course_id = e.course_id
       JOIN courses c ON a.course_id = c.id
+      LEFT JOIN course_lessons l ON a.id = l.assignment_id
       WHERE e.student_id = ? 
       AND a.id NOT IN (SELECT assignment_id FROM assignment_submissions WHERE student_id = ?)
       ORDER BY a.due_date ASC
@@ -457,12 +479,24 @@ router.get('/assignments/:id', async (req, res) => {
     const { id } = req.params;
     const userId = req.user.id;
 
-    const [assignments] = await pool.query('SELECT * FROM assignments WHERE id = ?', [id]);
+    let [assignments] = await pool.query('SELECT * FROM assignments WHERE id = ?', [id]);
+    
+    let targetAssignmentId = id;
+    if (assignments.length === 0) {
+      const [lessons] = await pool.query('SELECT assignment_id FROM course_lessons WHERE id = ? AND assignment_id IS NOT NULL', [id]);
+      if (lessons.length > 0 && lessons[0].assignment_id) {
+        targetAssignmentId = lessons[0].assignment_id;
+        [assignments] = await pool.query('SELECT * FROM assignments WHERE id = ?', [targetAssignmentId]);
+      }
+    }
+
     if (assignments.length === 0) return res.status(404).json({ message: 'Assignment not found' });
 
     const [submissions] = await pool.query(
-      'SELECT * FROM assignment_submissions WHERE assignment_id = ? AND student_id = ?',
-      [id, userId]
+      `SELECT * FROM assignment_submissions 
+       WHERE (assignment_id = ? OR assignment_id = ? OR assignment_id IN (SELECT id FROM course_lessons WHERE assignment_id = ?)) 
+       AND student_id = ?`,
+      [id, targetAssignmentId, targetAssignmentId, userId]
     );
 
     res.json({
@@ -475,39 +509,68 @@ router.get('/assignments/:id', async (req, res) => {
 });
 
 // Submit assignment
-router.post('/assignments/submit', async (req, res) => {
+router.post('/assignments/submit', assignmentUpload.single('file'), async (req, res) => {
   try {
-    const { assignment_id, submission_url } = req.body;
+    const { assignment_id } = req.body;
+    let submission_url = req.body.submission_url;
     const userId = req.user.id;
 
-    await pool.query(`
-      INSERT INTO assignment_submissions (id, assignment_id, student_id, submission_url)
-      VALUES (?, ?, ?, ?)
-      ON DUPLICATE KEY UPDATE
-        submission_url = VALUES(submission_url),
-        status = 'submitted',
-        submitted_at = CURRENT_TIMESTAMP
-    `, [uuidv4(), assignment_id, userId, submission_url]);
+    if (req.file) {
+      submission_url = `/uploads/assignments/${req.file.filename}`;
+    }
+
+    if (!assignment_id || !submission_url) {
+      return res.status(400).json({ message: 'Assignment ID and file or URL submission are required' });
+    }
+
+    let targetAssignmentId = assignment_id;
+    const [lessonMatch] = await pool.query('SELECT assignment_id FROM course_lessons WHERE id = ? AND assignment_id IS NOT NULL', [assignment_id]);
+    if (lessonMatch.length > 0 && lessonMatch[0].assignment_id) {
+      targetAssignmentId = lessonMatch[0].assignment_id;
+    }
+
+    const [existing] = await pool.query(
+      `SELECT id FROM assignment_submissions 
+       WHERE (assignment_id = ? OR assignment_id = ? OR assignment_id IN (SELECT id FROM course_lessons WHERE assignment_id = ?))
+       AND student_id = ?`,
+      [assignment_id, targetAssignmentId, targetAssignmentId, userId]
+    );
+
+    if (existing.length > 0) {
+      await pool.query(
+        `UPDATE assignment_submissions 
+         SET assignment_id = ?, submission_url = ?, status = 'submitted', submitted_at = CURRENT_TIMESTAMP 
+         WHERE id = ?`,
+        [targetAssignmentId, submission_url, existing[0].id]
+      );
+    } else {
+      await pool.query(
+        `INSERT INTO assignment_submissions (id, assignment_id, student_id, submission_url, status)
+         VALUES (?, ?, ?, ?, 'submitted')`,
+        [uuidv4(), targetAssignmentId, userId, submission_url]
+      );
+    }
 
     // Notify Tutor
     const [tutorData] = await pool.query(
-      `SELECT c.created_by, a.title FROM assignments a JOIN courses c ON a.course_id = c.id WHERE a.id = ?`,
-      [assignment_id]
+      `SELECT c.tutor_id, a.title FROM assignments a JOIN courses c ON a.course_id = c.id WHERE a.id = ?`,
+      [targetAssignmentId]
     );
     if (tutorData.length > 0) {
-      const tutorId = tutorData[0].created_by;
+      const tutorId = tutorData[0].tutor_id;
       await createNotification({
         userId: tutorId,
         type: 'info',
         title: 'New Assignment Submission',
-        message: `${req.user.name} has submitted the assignment "${tutorData[0].title}".`,
-        link: '/dashboard/tutor/courses',
+        message: `${req.user.name || 'A student'} has submitted the assignment "${tutorData[0].title}".`,
+        link: '/dashboard/tutor/assignments',
         emailNotify: false
       });
     }
 
-    res.json({ message: 'Assignment submitted successfully' });
+    res.json({ message: 'Assignment submitted successfully', submission_url });
   } catch (error) {
+    console.error('Assignment submission error:', error);
     res.status(500).json({ message: error.message });
   }
 });
@@ -647,11 +710,12 @@ router.get('/assignments', async (req, res) => {
   try {
     const userId = req.user.id;
     const [assignments] = await pool.query(`
-      SELECT a.*, c.title as course_title, c.slug as course_slug,
+      SELECT a.*, c.title as course_title, c.slug as course_slug, l.id as lesson_id,
              s.status as submission_status, s.marks_awarded, s.feedback
       FROM assignments a
       JOIN courses c ON a.course_id = c.id
       JOIN enrollments e ON c.id = e.course_id
+      LEFT JOIN course_lessons l ON a.id = l.assignment_id
       LEFT JOIN assignment_submissions s ON a.id = s.assignment_id AND s.student_id = ?
       WHERE e.student_id = ?
       ORDER BY a.due_date ASC

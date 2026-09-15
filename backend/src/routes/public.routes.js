@@ -14,7 +14,7 @@ const router = express.Router();
 router.get('/config', async (req, res) => {
   try {
     const [configs] = await pool.query(
-      'SELECT `key`, `value` FROM system_config WHERE (`group` IN ("branding", "contact", "lms") AND `is_sensitive` = 0) OR `key` IN ("homepage_hero_image", "homepage_hero_image_url", "homepage_hero_video_url", "homepage_about_image", "homepage_about_image_url", "aboutpage_who_image", "aboutpage_who_image_url", "jobportal_hero_image", "jobportal_hero_title", "jobportal_hero_subtitle", "course_show_rating", "course_show_students", "ad_popup_enabled", "ad_popup_image", "ad_popup_link", "ad_popup_button_text")'
+      'SELECT `key`, `value` FROM system_config WHERE (`group` IN ("branding", "contact", "lms") AND `is_sensitive` = 0) OR `key` IN ("homepage_hero_image", "homepage_hero_image_url", "homepage_hero_video_url", "homepage_about_image", "homepage_about_image_url", "aboutpage_who_image", "aboutpage_who_image_url", "jobportal_hero_image", "jobportal_hero_title", "jobportal_hero_subtitle", "course_show_rating", "course_show_students", "ad_popup_enabled", "ad_popup_image", "ad_popup_link", "ad_popup_button_text", "online_payments_enabled")'
     );
     const configMap = {};
     configs.forEach(c => configMap[c.key] = c.value);

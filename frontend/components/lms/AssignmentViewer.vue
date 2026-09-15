@@ -19,11 +19,6 @@
 
       <v-divider class="mb-8"></v-divider>
 
-      <div class="mb-10">
-        <h3 class="text-subtitle-1 font-weight-bold mb-4">Instructions</h3>
-        <div class="text-body-1 text-grey-darken-3 whitespace-pre-line" v-html="assignment?.description"></div>
-      </div>
-
       <v-alert v-if="submission" :type="submissionStatusColor" variant="tonal" class="rounded-xl mb-8">
         <template v-slot:title>
           <span class="font-weight-black">Submission Status: {{ submission.status.toUpperCase() }}</span>
@@ -35,7 +30,16 @@
           <span class="font-weight-bold">Feedback:</span> {{ submission.feedback }}
         </div>
         <div class="mt-4">
-          <v-btn v-if="submission.submission_url" :href="submission.submission_url" target="_blank" variant="text" size="small" prepend-icon="mdi-link" class="text-none">
+          <v-btn
+            v-if="submission.submission_url"
+            :href="fullSubmissionUrl"
+            target="_blank"
+            variant="tonal"
+            color="primary"
+            size="small"
+            prepend-icon="mdi-open-in-new"
+            class="text-none"
+          >
             View My Submission
           </v-btn>
         </div>
@@ -44,16 +48,20 @@
       <div v-if="!submission || submission.status === 'rejected'">
         <h3 class="text-subtitle-1 font-weight-bold mb-4">Submit Your Work</h3>
         <v-form @submit.prevent="submitAssignment">
-          <v-text-field
-            v-model="submissionUrl"
-            label="Submission URL (Google Drive, Github, etc.)"
-            placeholder="https://..."
+          <v-file-input
+            v-model="uploadedFile"
+            label="Upload Assignment File (PDF, ZIP, DOCX, Code, Image)"
             variant="outlined"
             rounded="lg"
-            prepend-inner-icon="mdi-link"
-            :rules="[v => !!v || 'URL is required']"
-            class="mb-4"
-          ></v-text-field>
+            prepend-inner-icon="mdi-paperclip"
+            prepend-icon=""
+            show-size
+            clearable
+            class="mb-6"
+            hint="Upload file directly (PDF, ZIP, Code, Doc, Image up to 50MB)"
+            persistent-hint
+          ></v-file-input>
+
           <v-btn
             color="primary"
             size="large"
@@ -61,7 +69,7 @@
             block
             type="submit"
             :loading="submitting"
-            :disabled="!submissionUrl"
+            :disabled="!hasValidSubmission"
           >
             Submit Assignment
           </v-btn>
@@ -83,10 +91,25 @@ const props = defineProps({
 const emit = defineEmits(['complete']);
 
 const api = useApi();
+const config = useRuntimeConfig();
 const assignment = ref(null);
 const submission = ref(null);
-const submissionUrl = ref('');
+const uploadedFile = ref(null);
 const submitting = ref(false);
+
+const hasValidSubmission = computed(() => {
+  return Array.isArray(uploadedFile.value) ? uploadedFile.value.length > 0 : !!uploadedFile.value;
+});
+
+const fullSubmissionUrl = computed(() => {
+  if (!submission.value?.submission_url) return '';
+  const url = submission.value.submission_url;
+  if (url.startsWith('http://') || url.startsWith('https://')) {
+    return url;
+  }
+  const base = config.public.apiBase.replace('/api', '');
+  return base + url;
+});
 
 const fetchData = async () => {
   try {
@@ -100,16 +123,27 @@ const fetchData = async () => {
 };
 
 const submitAssignment = async () => {
+  if (!hasValidSubmission.value) return;
   submitting.value = true;
   try {
-    await api.post('/lms/student/assignments/submit', {
-      assignment_id: props.assignmentId,
-      submission_url: submissionUrl.value
+    const formData = new FormData();
+    formData.append('assignment_id', props.assignmentId);
+
+    const file = Array.isArray(uploadedFile.value) ? uploadedFile.value[0] : uploadedFile.value;
+    if (file) {
+      formData.append('file', file);
+    }
+
+    await api.post('/lms/student/assignments/submit', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
     });
+    
+    uploadedFile.value = null;
     await fetchData();
     emit('complete');
   } catch (err) {
     console.error('Submission failed:', err);
+    alert(err.response?.data?.message || err.message || 'Failed to submit assignment');
   } finally {
     submitting.value = false;
   }

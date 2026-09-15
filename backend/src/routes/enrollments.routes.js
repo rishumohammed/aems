@@ -2,6 +2,7 @@ import express from 'express';
 import { authenticateJWT, authorizeRoles } from '../middleware/auth.js';
 import enrollmentService from '../services/enrollment.service.js';
 import paymentService from '../services/payment.service.js';
+import { ConfigService } from '../services/config.service.js';
 import { pool } from '../db/connection.js';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -12,6 +13,14 @@ router.post('/checkout', authenticateJWT, async (req, res) => {
   try {
     const { courseId, paymentOption, customAmount } = req.body;
     const studentId = req.user.id;
+
+    // Check if online payments are enabled
+    const onlinePaymentsCfg = await ConfigService.getByKey('online_payments_enabled');
+    if (onlinePaymentsCfg && (onlinePaymentsCfg.value === 'false' || onlinePaymentsCfg.value === '0')) {
+      return res.status(400).json({
+        message: 'Online payments are currently disabled. Please use offline payment options or contact administration.'
+      });
+    }
 
     // Get course details
     const [courses] = await pool.query('SELECT * FROM courses WHERE id = ?', [courseId]);

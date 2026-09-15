@@ -143,7 +143,7 @@ app.use('/api/enrollments', offlinePaymentRoutes);
 app.use('/api/lms', lmsRoutes);
 app.use('/api/admin/course-categories', adminCategoryRoutes);
 app.use('/api/admin/students', authenticateJWT, authorizeRoles('super_admin', 'crm_agent', 'tutor', 'finance_staff'), studentManagementRoutes);
-app.use('/api/lms/student', authenticateJWT, authorizeRoles('student'), studentLmsRoutes);
+app.use('/api/lms/student', authenticateJWT, authorizeRoles('student', 'super_admin', 'sub_admin', 'tutor'), studentLmsRoutes);
 app.use('/api/lms/student/placements', studentPlacementsRoutes);
 app.use('/api/lms/qa', qaRoutes);
 app.use('/api/lms/announcements', announcementRoutes);

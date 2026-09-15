@@ -204,6 +204,21 @@
 
           <!-- Payments Tab -->
           <div v-if="activeTab[0] === 'payments'" class="fade-in">
+            <div class="d-flex align-center justify-space-between mb-6 pa-5 rounded-xl border" style="background: var(--v-theme-surface, #fff);">
+              <div>
+                <div class="text-subtitle-1 font-weight-bold">Enable Online Payments</div>
+                <div class="text-caption text-secondary">Enable or disable site-wide online payments via Razorpay for courses and invoices.</div>
+              </div>
+              <v-switch
+                v-model="form.online_payments_enabled"
+                color="primary"
+                hide-details
+                class="flex-grow-0"
+              ></v-switch>
+            </div>
+
+            <v-divider class="my-6"></v-divider>
+
             <h2 class="text-h6 font-weight-bold mb-6">Payment Gateway (Razorpay)</h2>
             <div class="mb-4">
               <AppInput v-model="form.razorpay_key_id" label="Key ID" placeholder="rzp_live_..." large />
@@ -701,6 +716,7 @@ const fetchData = async () => {
     configMap.course_show_rating = configMap.course_show_rating === 'true' || configMap.course_show_rating === '1';
     configMap.course_show_students = configMap.course_show_students === 'true' || configMap.course_show_students === '1';
     configMap.ad_popup_enabled = configMap.ad_popup_enabled === 'true' || configMap.ad_popup_enabled === '1';
+    configMap.online_payments_enabled = configMap.online_payments_enabled === undefined ? true : (configMap.online_payments_enabled === 'true' || configMap.online_payments_enabled === '1');
     form.value = configMap;
   } catch (err) {
     console.error('Failed to fetch config');
@@ -820,6 +836,7 @@ const save = async () => {
     payload.course_show_rating = payload.course_show_rating ? 'true' : 'false';
     payload.course_show_students = payload.course_show_students ? 'true' : 'false';
     payload.ad_popup_enabled = payload.ad_popup_enabled ? 'true' : 'false';
+    payload.online_payments_enabled = payload.online_payments_enabled ? 'true' : 'false';
 
     await api.put('/admin/config', payload);
     snackbarMessage.value = 'Settings saved successfully. Reloading to apply changes...';

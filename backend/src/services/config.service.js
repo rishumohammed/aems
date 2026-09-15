@@ -79,7 +79,20 @@ export class ConfigService {
         if (typeof value === 'string' && value.includes('...')) {
             continue;
         }
-        await connection.query('INSERT INTO system_config (`key`, `value`, `group`) VALUES (?, ?, "branding") ON DUPLICATE KEY UPDATE `value` = ?', [key, value, value]);
+        let group = 'branding';
+        if (['razorpay_key_id', 'razorpay_key_secret', 'razorpay_webhook_secret', 'payment_allow_partial_access', 'payment_restrict_certificate', 'payment_restrict_exam', 'online_payments_enabled'].includes(key)) {
+          group = 'payments';
+        } else if (['course_languages', 'course_show_rating', 'course_show_students', 'education_levels'].includes(key)) {
+          group = 'lms';
+        } else if (['smtp_pass', 'smtp_from_name', 'smtp_from_email'].includes(key)) {
+          group = 'email';
+        } else if (['contact_email', 'contact_phone', 'contact_address'].includes(key)) {
+          group = 'contact';
+        }
+        await connection.query(
+          'INSERT INTO system_config (`key`, `value`, `group`) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE `value` = ?',
+          [key, value, group, value]
+        );
       }
       await connection.commit();
       // Invalidate cache (non-fatal)

@@ -742,6 +742,183 @@ router.get('/courses/:id/assignments', authenticateJWT, isTutorOrAdmin, async (r
   }
 });
 
+// Get all assignments across tutor's courses (or all for admin) with submission stats
+router.get('/assignments', authenticateJWT, isTutorOrAdmin, async (req, res) => {
+  try {
+    const isSuperAdmin = ['super_admin', 'sub_admin'].includes(req.user.role);
+    let query = `
+      SELECT 
+        a.*,
+        c.title as course_title,
+        c.slug as course_slug,
+        COUNT(DISTINCT s.id) as total_submissions,
+        SUM(CASE WHEN s.status = 'graded' THEN 1 ELSE 0 END) as graded_submissions,
+        SUM(CASE WHEN s.status = 'submitted' THEN 1 ELSE 0 END) as pending_submissions
+      FROM assignments a
+      JOIN courses c ON a.course_id = c.id
+      LEFT JOIN course_lessons l ON a.id = l.assignment_id
+      LEFT JOIN assignment_submissions s ON (s.assignment_id = a.id OR (l.id IS NOT NULL AND s.assignment_id = l.id))
+    `;
+    const queryParams = [];
+
+    if (!isSuperAdmin) {
+      query += ` WHERE c.tutor_id = ? AND c.deleted_at IS NULL`;
+      queryParams.push(req.user.id);
+    } else {
+      query += ` WHERE c.deleted_at IS NULL`;
+    }
+
+    query += ` GROUP BY a.id, a.course_id, a.title, a.description, a.due_date, a.max_marks, a.created_at, c.title, c.slug ORDER BY a.created_at DESC`;
+
+    const [assignments] = await pool.query(query, queryParams);
+    res.json(assignments);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Create assignment for a course
+router.post('/courses/:id/assignments', authenticateJWT, isTutorOrAdmin, async (req, res) => {
+  try {
+    const courseId = req.params.id;
+    const { title, description, due_date, max_marks } = req.body;
+
+    if (!title) {
+      return res.status(400).json({ message: 'Title is required' });
+    }
+
+    const assignmentId = uuidv4();
+    await pool.query(
+      `INSERT INTO assignments (id, course_id, title, description, due_date, max_marks)
+       VALUES (?, ?, ?, ?, ?, ?)`,
+      [assignmentId, courseId, title, description || '', due_date || null, max_marks || 100]
+    );
+
+    const [created] = await pool.query('SELECT * FROM assignments WHERE id = ?', [assignmentId]);
+    res.status(201).json(created[0]);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Update assignment
+router.put('/assignments/:id', authenticateJWT, isTutorOrAdmin, async (req, res) => {
+  try {
+    const { title, description, due_date, max_marks } = req.body;
+    await pool.query(
+      `UPDATE assignments 
+       SET title = ?, description = ?, due_date = ?, max_marks = ?
+       WHERE id = ?`,
+      [title, description || '', due_date || null, max_marks || 100, req.params.id]
+    );
+
+    const [updated] = await pool.query('SELECT * FROM assignments WHERE id = ?', [req.params.id]);
+    res.json(updated[0]);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Delete assignment
+router.delete('/assignments/:id', authenticateJWT, isTutorOrAdmin, async (req, res) => {
+  try {
+    await pool.query('DELETE FROM assignments WHERE id = ?', [req.params.id]);
+    res.json({ message: 'Assignment deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Get submissions for an assignment
+router.get('/assignments/:id/submissions', authenticateJWT, isTutorOrAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Resolve: the provided id might be a lesson_id pointing to an assignment
+    let resolvedAssignmentId = id;
+    const [lessonCheck] = await pool.query(
+      'SELECT assignment_id FROM course_lessons WHERE id = ? AND assignment_id IS NOT NULL',
+      [id]
+    );
+    if (lessonCheck.length > 0 && lessonCheck[0].assignment_id) {
+      resolvedAssignmentId = lessonCheck[0].assignment_id;
+    }
+
+    // Also collect any lesson IDs that point to this assignment (for submissions stored with lesson_id)
+    const [linkedLessons] = await pool.query(
+      'SELECT id FROM course_lessons WHERE assignment_id = ?',
+      [resolvedAssignmentId]
+    );
+    const linkedLessonIds = linkedLessons.map(l => l.id);
+    const allIds = [resolvedAssignmentId, ...linkedLessonIds];
+    const placeholders = allIds.map(() => '?').join(', ');
+
+    const [submissions] = await pool.query(
+      `SELECT 
+        s.*,
+        COALESCE(u.name, 'Student') as student_name,
+        COALESCE(u.email, 'N/A') as student_email,
+        a.title as assignment_title,
+        COALESCE(a.max_marks, 100) as max_marks
+       FROM assignment_submissions s
+       LEFT JOIN users u ON s.student_id = u.id
+       LEFT JOIN assignments a ON a.id = ?
+       WHERE s.assignment_id IN (${placeholders})
+       ORDER BY s.submitted_at DESC`,
+      [resolvedAssignmentId, ...allIds]
+    );
+
+    console.log(`[Submissions] assignment id=${id}, resolved=${resolvedAssignmentId}, linked_lessons=${JSON.stringify(linkedLessonIds)}, found=${submissions.length}`);
+    res.json(submissions);
+  } catch (error) {
+    console.error('[Submissions] Error:', error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Grade a student submission
+router.put('/assignments/submissions/:submissionId/grade', authenticateJWT, isTutorOrAdmin, async (req, res) => {
+  try {
+    const { marks_awarded, feedback, status } = req.body;
+    const submissionId = req.params.submissionId;
+
+    await pool.query(
+      `UPDATE assignment_submissions 
+       SET marks_awarded = ?, feedback = ?, status = ?
+       WHERE id = ?`,
+      [marks_awarded !== undefined ? marks_awarded : null, feedback || '', status || 'graded', submissionId]
+    );
+
+    // Fetch submission info for notification
+    const [subInfo] = await pool.query(
+      `SELECT s.student_id, a.title as assignment_title, a.max_marks
+       FROM assignment_submissions s
+       JOIN assignments a ON s.assignment_id = a.id
+       WHERE s.id = ?`,
+      [submissionId]
+    );
+
+    if (subInfo.length > 0) {
+      const studentId = subInfo[0].student_id;
+      const title = subInfo[0].assignment_title;
+      const maxMarks = subInfo[0].max_marks;
+      
+      await createNotification({
+        userId: studentId,
+        type: 'info',
+        title: 'Assignment Graded',
+        message: `Your submission for "${title}" has been graded (${marks_awarded || 0}/${maxMarks}).`,
+        link: '/dashboard/student/assignments',
+        emailNotify: false
+      });
+    }
+
+    res.json({ message: 'Submission graded successfully' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 // --- Utilities ---
 
 // Parse Video URL

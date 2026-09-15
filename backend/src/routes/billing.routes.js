@@ -1,6 +1,7 @@
 import express from 'express';
 import { authenticateJWT, authorizeRoles } from '../middleware/auth.js';
 import { pool } from '../db/connection.js';
+import { ConfigService } from '../services/config.service.js';
 import invoiceService from '../services/invoice.service.js';
 import Razorpay from 'razorpay';
 import crypto from 'crypto';
@@ -52,6 +53,11 @@ router.get('/invoices/:id/payments', authenticateJWT, authorizeRoles('student'),
 // Student: Create Razorpay Order
 router.post('/invoices/:id/pay', authenticateJWT, authorizeRoles('student'), async (req, res) => {
   try {
+    const onlinePaymentsCfg = await ConfigService.getByKey('online_payments_enabled');
+    if (onlinePaymentsCfg && (onlinePaymentsCfg.value === 'false' || onlinePaymentsCfg.value === '0')) {
+      return res.status(400).json({ message: 'Online payments are currently disabled.' });
+    }
+
     const [invoices] = await pool.query(
       'SELECT balance_due, invoice_number FROM invoices WHERE id = ? AND student_id = ?',
       [req.params.id, req.user.id]

@@ -31,9 +31,12 @@
                 You have <span class="text-amber-accent-2 font-weight-black">{{ stats.pending_assignments || 0 }}</span> tasks waiting for you.
               </p>
             </v-col>
-            <v-col cols="12" md="4" class="text-md-right">
-              <v-btn color="white" variant="flat" size="large" prepend-icon="mdi-play" class="rounded-xl px-6 px-sm-8 font-weight-black text-primary shadow-apple" to="/dashboard/courses">
+            <v-col cols="12" md="4" class="text-md-right d-flex ga-2 justify-md-end flex-wrap">
+              <v-btn color="white" variant="flat" size="large" prepend-icon="mdi-play" class="rounded-xl px-6 font-weight-black text-primary shadow-apple" to="/dashboard/courses">
                 Resume Learning
+              </v-btn>
+              <v-btn color="amber-accent-2" variant="flat" size="large" prepend-icon="mdi-school-outline" class="rounded-xl px-6 font-weight-black text-black shadow-apple" to="/dashboard/certificates">
+                Ready for Exam 🎓
               </v-btn>
             </v-col>
           </v-row>
@@ -349,7 +352,7 @@
                 </div>
                 <div class="text-caption text-grey text-truncate">{{ task.course_title }}</div>
                 <template v-slot:append>
-                  <v-btn size="small" icon="mdi-chevron-right" variant="text" :to="'/learn/' + task.course_slug + '/assignment/' + task.id"></v-btn>
+                  <v-btn size="small" icon="mdi-chevron-right" variant="text" :to="'/learn/' + task.course_slug + '/' + (task.lesson_id || task.id)"></v-btn>
                 </template>
               </v-list-item>
               <v-list-item v-if="pendingAssignments.length === 0" class="pa-6 text-center text-grey text-body-2">

@@ -5,6 +5,33 @@ import { authenticateJWT, authorizeRoles, requirePermission } from '../middlewar
 import { validateExamSession } from '../middleware/examSession.js';
 import examService from '../services/exam.service.js';
 import courseCompletionService from '../services/course-completion.service.js';
+import { createNotification } from '../services/notification.service.js';
+
+let readinessTableChecked = false;
+async function ensureReadinessTable() {
+  if (readinessTableChecked) return;
+  try {
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS exam_readiness_requests (
+        id VARCHAR(36) PRIMARY KEY,
+        student_id VARCHAR(36) NOT NULL,
+        course_id VARCHAR(36) DEFAULT NULL,
+        exam_id VARCHAR(36) DEFAULT NULL,
+        certification_name VARCHAR(255) DEFAULT NULL,
+        notes TEXT DEFAULT NULL,
+        status ENUM('pending', 'approved', 'rejected', 'scheduled') DEFAULT 'pending',
+        admin_notes TEXT DEFAULT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        INDEX idx_student (student_id),
+        INDEX idx_status (status)
+      );
+    `);
+    readinessTableChecked = true;
+  } catch (err) {
+    console.error('Failed to create exam_readiness_requests table:', err);
+  }
+}
 
 function safeParseOptions(optionsJson) {
   if (!optionsJson) return [];
@@ -55,6 +82,206 @@ const isTutorOrAdmin = (req, res, next) => {
   if (req.user && req.user.role === 'tutor') return next();
   return isAdmin(req, res, next);
 };
+
+// ────────────────────────────────────────────────────────────────────────────────
+// EXAM READINESS REQUEST ROUTES
+// ────────────────────────────────────────────────────────────────────────────────
+
+// POST /api/exams/readiness-request — student submits "I am ready to write exam"
+router.post('/readiness-request', authenticateJWT, async (req, res) => {
+  try {
+    await ensureReadinessTable();
+    const { course_id, exam_id, certification_name, notes } = req.body;
+    const studentId = req.user.id;
+
+    if (!course_id && !exam_id && !certification_name) {
+      return res.status(400).json({ message: 'Course, exam, or certification name is required' });
+    }
+
+    // Check if there is already a pending request
+    let checkQuery = 'SELECT id FROM exam_readiness_requests WHERE student_id = ? AND status = "pending"';
+    const checkParams = [studentId];
+    if (course_id) {
+      checkQuery += ' AND course_id = ?';
+      checkParams.push(course_id);
+    } else if (exam_id) {
+      checkQuery += ' AND exam_id = ?';
+      checkParams.push(exam_id);
+    } else if (certification_name) {
+      checkQuery += ' AND certification_name = ?';
+      checkParams.push(certification_name);
+    }
+
+    const [existing] = await pool.query(checkQuery, checkParams);
+    if (existing.length > 0) {
+      return res.status(400).json({ message: 'You already have a pending exam readiness request for this certification.' });
+    }
+
+    const id = uuidv4();
+    await pool.query(
+      `INSERT INTO exam_readiness_requests (id, student_id, course_id, exam_id, certification_name, notes, status)
+       VALUES (?, ?, ?, ?, ?, ?, 'pending')`,
+      [id, studentId, course_id || null, exam_id || null, certification_name || null, notes || null]
+    );
+
+    // Get item title for notification
+    let itemTitle = certification_name || 'Certification Exam';
+    if (course_id) {
+      const [courses] = await pool.query('SELECT title FROM courses WHERE id = ?', [course_id]);
+      if (courses.length > 0) itemTitle = courses[0].title;
+    }
+
+    // Notify super_admin and tutor
+    const [admins] = await pool.query('SELECT id FROM users WHERE role IN ("super_admin", "lms_user", "sub_admin", "tutor") AND status = "active"');
+    const [[studentUser]] = await pool.query('SELECT name FROM users WHERE id = ?', [studentId]);
+    const studentName = studentUser ? studentUser.name : 'Student';
+
+    for (const admin of admins) {
+      await createNotification({
+        userId: admin.id,
+        type: 'exam_readiness',
+        title: '🎓 Exam Readiness Request',
+        message: `${studentName} is ready to write the exam for "${itemTitle}".`,
+        link: '/dashboard/admin/exam-requests',
+        emailNotify: false
+      });
+    }
+
+    res.status(201).json({ id, message: 'Your request has been submitted to the administration successfully!' });
+  } catch (err) {
+    console.error('Error submitting exam readiness request:', err);
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// GET /api/exams/my-readiness-requests — student views their requests
+router.get('/my-readiness-requests', authenticateJWT, async (req, res) => {
+  try {
+    await ensureReadinessTable();
+    const [requests] = await pool.query(`
+      SELECT r.*, c.title as course_title, e.title as exam_title
+      FROM exam_readiness_requests r
+      LEFT JOIN courses c ON r.course_id = c.id
+      LEFT JOIN exams e ON r.exam_id = e.id
+      WHERE r.student_id = ?
+      ORDER BY r.created_at DESC
+    `, [req.user.id]);
+    res.json(requests);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// PUT /api/exams/my-readiness-requests/:id — student updates their request
+router.put('/my-readiness-requests/:id', authenticateJWT, async (req, res) => {
+  try {
+    await ensureReadinessTable();
+    const { course_id, notes } = req.body;
+    const [existing] = await pool.query('SELECT * FROM exam_readiness_requests WHERE id = ? AND student_id = ?', [req.params.id, req.user.id]);
+    if (existing.length === 0) return res.status(404).json({ message: 'Request not found' });
+
+    await pool.query(
+      'UPDATE exam_readiness_requests SET course_id = COALESCE(?, course_id), notes = ? WHERE id = ? AND student_id = ?',
+      [course_id || null, notes || null, req.params.id, req.user.id]
+    );
+    res.json({ message: 'Request updated successfully' });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// DELETE /api/exams/my-readiness-requests/:id — student deletes their request
+router.delete('/my-readiness-requests/:id', authenticateJWT, async (req, res) => {
+  try {
+    await ensureReadinessTable();
+    const [existing] = await pool.query('SELECT * FROM exam_readiness_requests WHERE id = ? AND student_id = ?', [req.params.id, req.user.id]);
+    if (existing.length === 0) return res.status(404).json({ message: 'Request not found' });
+
+    await pool.query('DELETE FROM exam_readiness_requests WHERE id = ? AND student_id = ?', [req.params.id, req.user.id]);
+    res.json({ message: 'Request deleted successfully' });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// GET /api/exams/admin/readiness-requests/count — pending badge count for admin
+router.get('/admin/readiness-requests/count', authenticateJWT, isTutorOrAdmin, async (req, res) => {
+  try {
+    await ensureReadinessTable();
+    const [rows] = await pool.query('SELECT COUNT(*) as count FROM exam_readiness_requests WHERE status = "pending"');
+    res.json({ count: rows[0].count });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// GET /api/exams/admin/readiness-requests — admin list all requests
+router.get('/admin/readiness-requests', authenticateJWT, isTutorOrAdmin, async (req, res) => {
+  try {
+    await ensureReadinessTable();
+    const { status } = req.query;
+    let query = `
+      SELECT r.*, u.name as student_name, u.email as student_email, u.phone as student_phone,
+             c.title as course_title, e.title as exam_title
+      FROM exam_readiness_requests r
+      JOIN users u ON r.student_id = u.id
+      LEFT JOIN courses c ON r.course_id = c.id
+      LEFT JOIN exams e ON r.exam_id = e.id
+      WHERE 1=1
+    `;
+    const params = [];
+    if (status && status !== 'all') {
+      query += ' AND r.status = ?';
+      params.push(status);
+    }
+    query += ' ORDER BY r.created_at DESC';
+
+    const [requests] = await pool.query(query, params);
+    res.json(requests);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// PUT /api/exams/admin/readiness-requests/:id — admin updates status
+router.put('/admin/readiness-requests/:id', authenticateJWT, isTutorOrAdmin, async (req, res) => {
+  try {
+    await ensureReadinessTable();
+    const { status, admin_notes } = req.body;
+    if (!['pending', 'approved', 'rejected', 'scheduled'].includes(status)) {
+      return res.status(400).json({ message: 'Invalid status' });
+    }
+
+    const [existing] = await pool.query('SELECT * FROM exam_readiness_requests WHERE id = ?', [req.params.id]);
+    if (existing.length === 0) return res.status(404).json({ message: 'Request not found' });
+    const reqItem = existing[0];
+
+    await pool.query(
+      'UPDATE exam_readiness_requests SET status = ?, admin_notes = ? WHERE id = ?',
+      [status, admin_notes || null, req.params.id]
+    );
+
+    let itemTitle = reqItem.certification_name || 'Exam';
+    if (reqItem.course_id) {
+      const [courses] = await pool.query('SELECT title FROM courses WHERE id = ?', [reqItem.course_id]);
+      if (courses.length > 0) itemTitle = courses[0].title;
+    }
+
+    const statusLabel = status === 'approved' ? 'Approved' : (status === 'scheduled' ? 'Scheduled' : 'Rejected');
+    await createNotification({
+      userId: reqItem.student_id,
+      type: 'system',
+      title: `Exam Readiness Request ${statusLabel}`,
+      message: `Your exam readiness request for "${itemTitle}" has been ${statusLabel.toLowerCase()}.${admin_notes ? ` Note: ${admin_notes}` : ''}`,
+      link: '/dashboard/certificates',
+      emailNotify: true
+    });
+
+    res.json({ message: `Request updated to ${status}` });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
 
 // ────────────────────────────────────────────────────────────────────────────────
 // STATIC ROUTES — must come before wildcard /:id

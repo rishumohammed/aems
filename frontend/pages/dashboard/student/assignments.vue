@@ -55,7 +55,7 @@
                 size="sm" 
                 :variant="a.submission_status ? 'g' : 'primary'"
                 :icon="a.submission_status ? 'mdi-eye-outline' : 'mdi-upload-outline'"
-                :to="'/learn/' + a.course_slug + '/assignment/' + a.id"
+                :to="'/learn/' + a.course_slug + '/' + (a.lesson_id || a.id)"
               >
                 {{ a.submission_status ? 'View' : 'Submit' }}
               </AppButton>

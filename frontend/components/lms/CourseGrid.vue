@@ -68,7 +68,7 @@
           <span class="text-caption font-weight-medium">{{ course.enrolled_count || 0 }}</span>
         </div>
         <div class="d-flex align-center">
-          <v-icon size="16" color="grey" class="mr-1">mdi-currency-inr</v-icon>
+          <v-icon v-if="course.price_type !== 'custom'" size="16" color="grey" class="mr-1">mdi-currency-inr</v-icon>
           <span class="text-caption font-weight-medium">{{ course.price_type === 'custom' ? 'Custom' : course.price }}</span>
         </div>
       </div>
@@ -136,7 +136,6 @@ const viewCourse = () => {
 }
 
 const getStatusColor = (course) => {
-  if (course.status === 'published' && course.tutor_role === 'super_admin') return 'deep-purple-accent-2';
   switch (course.status) {
     case 'published': return 'success';
     case 'pending_review': return 'warning';
@@ -147,9 +146,6 @@ const getStatusColor = (course) => {
 }
 
 const formatStatus = (course) => {
-  if (course.status === 'published' && course.tutor_role === 'super_admin') {
-    return 'Admin Published';
-  }
   return (course.status || '').replace('_', ' ');
 }
 </script>

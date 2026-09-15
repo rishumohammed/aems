@@ -49,11 +49,6 @@
                   <div class="text-caption text-grey">Created by</div>
                   <div class="text-body-1 font-weight-bold">{{ course.tutor_name || 'Expert Instructor' }}</div>
                 </div>
-                <v-divider vertical inset class="mx-2"></v-divider>
-                <div>
-                  <div class="text-caption text-grey">Last updated</div>
-                  <div class="text-body-1 font-weight-bold">{{ new Date(course.updated_at).toLocaleDateString() }}</div>
-                </div>
               </div>
             </v-col>
             
@@ -80,27 +75,21 @@
       <v-container class="py-12">
         <v-row>
           <v-col cols="12" md="8">
-            <!-- Tabs -->
-            <v-tabs v-model="tab" color="primary" align-tabs="start" class="mb-8 border-b">
-              <v-tab value="overview" class="text-capitalize font-weight-bold">Overview</v-tab>
-              <v-tab value="curriculum" class="text-capitalize font-weight-bold">Curriculum</v-tab>
-              <v-tab value="instructor" class="text-capitalize font-weight-bold">Instructor</v-tab>
-              <v-tab value="qa" class="text-capitalize font-weight-bold">Q&A</v-tab>
-            </v-tabs>
-
-            <v-window v-model="tab">
-              <!-- Overview -->
-              <v-window-item value="overview">
+            <!-- Course Main Sections (Stacked vertically) -->
+            <div class="d-flex flex-column">
+              <!-- Overview Section -->
+              <div class="mb-8">
                 <div class="text-h5 font-weight-bold mb-4">About this course</div>
-                <div class="text-body-1 text-grey-darken-2 mb-8" v-html="course.description || 'No description available.'"></div>
-              </v-window-item>
+                <div class="text-body-1 text-grey-darken-2" v-html="course.description || 'No description available.'"></div>
+              </div>
 
-              <!-- Curriculum -->
-              <v-window-item value="curriculum">
+              <v-divider class="my-6"></v-divider>
+
+              <!-- Curriculum Section -->
+              <div class="mb-8">
                 <div class="text-h5 font-weight-bold mb-4">Course Content</div>
                 <div class="d-flex align-center justify-space-between mb-6 text-caption text-grey">
                   <span>{{ course.sections?.length || 0 }} modules • {{ totalLessonsCount }} lessons</span>
-                  <v-btn variant="text" color="primary" density="compact" class="text-capitalize">Expand All</v-btn>
                 </div>
                 
                 <v-expansion-panels variant="accordion" class="rounded-xl border overflow-hidden">
@@ -131,44 +120,29 @@
                     </v-expansion-panel-text>
                   </v-expansion-panel>
                 </v-expansion-panels>
-              </v-window-item>
+              </div>
 
-              <!-- Instructor -->
-              <v-window-item value="instructor">
-                <div class="text-h5 font-weight-bold mb-6">About the Instructor</div>
-                <v-card flat border class="pa-6 rounded-xl">
-                    <div class="d-flex align-center gap-6">
-                        <v-avatar size="100" color="primary" variant="tonal" class="border">
-                            <span class="text-h3 font-weight-black text-primary">{{ course.tutor_name ? course.tutor_name.charAt(0).toUpperCase() : 'T' }}</span>
-                        </v-avatar>
-                        <div>
-                            <h3 class="text-h5 font-weight-bold">{{ course.tutor_name || 'Course Instructor' }}</h3>
-                            <p class="text-subtitle-2 text-primary">Instructor</p>
-                        </div>
-                    </div>
-                </v-card>
-              </v-window-item>
+              <v-divider class="my-6"></v-divider>
 
-
-
-              <!-- Q&A Tab -->
-              <v-window-item value="qa">
+              <!-- Q&A Section -->
+              <div class="mb-8">
+                <div class="text-h5 font-weight-bold mb-4">Questions & Answers</div>
                 <div v-if="!isEnrolled" class="text-center pa-12 border rounded-xl bg-grey-lighten-5">
                   <v-icon size="64" color="grey" class="mb-4">mdi-lock-outline</v-icon>
                   <h3 class="text-h6 font-weight-bold text-grey-darken-1 mb-2">Enroll to join the discussion</h3>
                   <p class="text-body-2 text-grey">You must be enrolled in this course to view and participate in the Q&A.</p>
                 </div>
                 <CourseQA v-else :course-id="course.id" />
-              </v-window-item>
-            </v-window>
+              </div>
+            </div>
           </v-col>
 
           <!-- Sidebar -->
           <v-col cols="12" md="4">
             <div class="sticky-sidebar">
               <v-card class="pa-6 rounded-xl border" elevation="0">
-                <div class="text-h4 font-weight-black mb-6">
-                  {{ course.price_type === 'custom' ? 'Custom Quote' : '₹' + course.price }}
+                <div v-if="course.price_type !== 'custom'" class="text-h4 font-weight-black mb-6">
+                  ₹{{ course.price }}
                 </div>
                 
                 <v-btn 
@@ -176,7 +150,7 @@
                   color="primary" 
                   size="x-large" 
                   rounded="lg" 
-                  class="text-capitalize font-weight-bold mb-4" 
+                  class="text-capitalize font-weight-bold mb-6" 
                   elevation="0" 
                   @click="handleEnroll"
                   :disabled="['suspended_offline', 'suspended_gateway'].includes(enrollmentStatus || '')"
@@ -188,11 +162,9 @@
                     Already Enrolled
                   </template>
                   <template v-else>
-                    {{ course.price_type === 'custom' ? 'Get a Quote' : 'Enroll Now' }}
+                    {{ course.price_type === 'custom' ? 'Ready to join' : 'Enroll Now' }}
                   </template>
                 </v-btn>
-                
-                <p class="text-center text-caption text-grey mb-6">30-Day Money-Back Guarantee</p>
                 
                 <div class="text-subtitle-1 font-weight-bold mb-4">This course includes:</div>
                 <v-list density="compact" class="pa-0">
@@ -254,7 +226,7 @@
         </v-card-title>
 
         <!-- Payment Method Tabs -->
-        <v-tabs v-model="paymentMethodTab" color="primary" grow class="border-b flex-shrink-0">
+        <v-tabs v-if="!isOnlinePaymentDisabled" v-model="paymentMethodTab" color="primary" grow class="border-b flex-shrink-0">
           <v-tab value="online">
             <v-icon start>mdi-credit-card-outline</v-icon>
             Online Payment
@@ -268,7 +240,7 @@
         <div style="overflow-y: auto; flex: 1 1 auto;">
         <v-window v-model="paymentMethodTab">
           <!-- Online Payment Tab -->
-          <v-window-item value="online">
+          <v-window-item v-if="!isOnlinePaymentDisabled" value="online">
             <v-card-text class="pa-6">
               <div class="mb-4">
                 <div class="text-subtitle-1 font-weight-bold">{{ course.title }}</div>
@@ -337,7 +309,7 @@
               </div>
             </v-card-text>
             <v-card-actions class="px-6 pb-6">
-              <v-btn block color="primary" size="large" rounded="lg" class="font-weight-bold" :disabled="!isAmountValid" @click="proceedToCheckout">
+              <v-btn block color="primary" size="large" rounded="lg" class="font-weight-bold" :disabled="!isAmountValid || isOnlinePaymentDisabled" @click="proceedToCheckout">
                 Proceed to Online Payment
               </v-btn>
             </v-card-actions>
@@ -483,7 +455,6 @@ const route = useRoute();
 const config = useRuntimeConfig();
 const apiBase = config.public.apiBase;
 
-const tab = ref('overview');
 const showInquiry = ref(false);
 const paymentOrder = ref(null);
 const paymentModalRef = ref<any>(null);
@@ -500,7 +471,7 @@ const offlineSubmitSuccess = ref(false);
 const countdownText = ref('Calculating...');
 let timerInterval: any = null;
 const offlineForm = reactive({
-  paymentMode: '',
+  paymentMode: 'bank_transfer',
   amountPaid: null as number | null,
   referenceNumber: '',
   paymentDate: new Date().toISOString().split('T')[0],
@@ -551,15 +522,26 @@ const api = useApi();
 const router = useRouter();
 
 // Reset offline payment state when dialog changes state
+const { data: publicConfig } = await useFetch<any>(`${apiBase}/public/config`);
+const isOnlinePaymentDisabled = computed(() => {
+  if (!publicConfig.value) return false;
+  return publicConfig.value.online_payments_enabled === 'false' || publicConfig.value.online_payments_enabled === '0';
+});
+
 watch(showPaymentOptions, (isOpen) => {
   if (isOpen) {
     offlineSubmitSuccess.value = false;
-    offlineForm.paymentMode = '';
+    offlineForm.paymentMode = 'bank_transfer';
     offlineForm.amountPaid = null;
     offlineForm.referenceNumber = '';
     offlineForm.paymentDate = new Date().toISOString().split('T')[0];
     offlineForm.proof = null;
     offlineForm.remarks = '';
+    if (isOnlinePaymentDisabled.value) {
+      paymentMethodTab.value = 'offline';
+    } else {
+      paymentMethodTab.value = 'online';
+    }
   }
 });
 
@@ -633,8 +615,7 @@ onBeforeUnmount(() => {
 
 const highlights = [
   { icon: 'mdi-infinity', text: 'Full lifetime access' },
-  { icon: 'mdi-cellphone-link', text: 'Access on mobile and desktop' },
-  { icon: 'mdi-certificate-outline', text: 'Certificate of completion' }
+  { icon: 'mdi-cellphone-link', text: 'Access on mobile and desktop' }
 ];
 
 useSeoMeta({

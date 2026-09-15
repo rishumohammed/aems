@@ -85,7 +85,6 @@ const userRole = computed(() => authStore.userRole);
 defineEmits(['edit', 'view', 'delete', 'toggle-featured'])
 
 const getStatusColor = (course) => {
-  if (course.status === 'published' && course.tutor_role === 'super_admin') return 'deep-purple-accent-2';
   switch (course.status) {
     case 'published': return 'success';
     case 'pending_review': return 'warning';
@@ -96,9 +95,6 @@ const getStatusColor = (course) => {
 }
 
 const formatStatus = (course) => {
-  if (course.status === 'published' && course.tutor_role === 'super_admin') {
-    return 'Admin Published';
-  }
   return (course.status || '').replace('_', ' ');
 }
 </script>

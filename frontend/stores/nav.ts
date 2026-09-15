@@ -32,6 +32,7 @@ export const useNavStore = defineStore('nav', {
       
       // ADMIN COURSES (LMS)
       { label: 'Courses', icon: 'mdi-book-open-page-variant-outline', route: '/dashboard/courses', roles: ['super_admin', 'lms_user'], section: 'LMS' },
+      { label: 'Assignments', icon: 'mdi-file-edit-outline', route: '/dashboard/tutor/assignments', roles: ['tutor', 'super_admin', 'sub_admin', 'lms_user'], section: 'LMS', badge: undefined },
       { label: 'Categories', icon: 'mdi-shape-outline', route: '/dashboard/admin/course-categories', roles: ['super_admin', 'lms_user'], section: 'LMS' },
       { label: 'Highlights', icon: 'mdi-star-circle-outline', route: '/dashboard/admin/highlights', roles: ['super_admin', 'lms_user'], section: 'LMS' },
       { label: 'Certifications', icon: 'mdi-certificate-outline', route: '/dashboard/admin/certifications', roles: ['super_admin', 'lms_user'], section: 'LMS' },
@@ -39,6 +40,7 @@ export const useNavStore = defineStore('nav', {
       
       // EXAMS
       { label: 'Exams', icon: 'mdi-file-document-edit-outline', route: '/dashboard/exams', roles: ['super_admin', 'lms_user', 'tutor', 'student'], section: 'EXAMS' },
+      { label: 'Exam Requests', icon: 'mdi-school-outline', route: '/dashboard/admin/exam-requests', roles: ['super_admin', 'lms_user', 'tutor'], section: 'EXAMS', badge: undefined },
       { label: 'Talent Hunt', icon: 'mdi-earth', route: '/dashboard/admin/public-exams', roles: ['super_admin', 'lms_user'], section: 'EXAMS' },
       { label: 'Certificates', icon: 'mdi-certificate-outline', route: '/dashboard/certificates', roles: ['super_admin', 'lms_user', 'tutor', 'student'], section: 'EXAMS' },
       { label: 'Proctoring Logs', icon: 'mdi-cctv', route: '/dashboard/admin/proctoring', roles: ['super_admin', 'lms_user', 'tutor'], section: 'EXAMS' },
@@ -264,6 +266,20 @@ export const useNavStore = defineStore('nav', {
           }
         } catch (err) {
           console.error('Failed to fetch tutor Q&A badge count:', err);
+        }
+      }
+
+      // Fetch Exam Readiness Requests badge
+      if (['super_admin', 'lms_user', 'tutor', 'sub_admin'].includes(authStore.userRole)) {
+        try {
+          const { data } = await api.get('/exams/admin/readiness-requests/count');
+          const pendingCount = data.count ?? 0;
+          const reqItem = this.navItems.find(i => i.label === 'Exam Requests');
+          if (reqItem) {
+            reqItem.badge = pendingCount > 0 ? pendingCount : undefined;
+          }
+        } catch (err) {
+          console.error('Failed to fetch exam readiness requests badge count:', err);
         }
       }
     },
