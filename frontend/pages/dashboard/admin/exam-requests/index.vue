@@ -77,32 +77,86 @@
     </v-row>
 
     <!-- Filters & Search Toolbar -->
-    <div class="mb-6 d-flex align-center justify-space-between flex-wrap gap-4">
-      <v-tabs v-model="filterStatus" color="primary" class="bg-white rounded-lg border">
-        <v-tab value="all" class="text-capitalize font-weight-bold">
-          All ({{ requests.length }})
-        </v-tab>
-        <v-tab value="pending" class="text-capitalize font-weight-bold">
-          Pending
-          <v-chip v-if="pendingCount > 0" size="x-small" color="amber" class="ml-2 font-weight-bold">{{ pendingCount }}</v-chip>
-        </v-tab>
-        <v-tab value="approved" class="text-capitalize font-weight-bold">Approved</v-tab>
-        <v-tab value="scheduled" class="text-capitalize font-weight-bold">Scheduled</v-tab>
-        <v-tab value="rejected" class="text-capitalize font-weight-bold">Rejected</v-tab>
-      </v-tabs>
+    <v-card flat class="pa-4 mb-6 rounded-xl border bg-white">
+      <div class="d-flex align-center flex-wrap gap-3">
+        <!-- Status Dropdown Select -->
+        <v-select
+          v-model="filterStatus"
+          :items="[
+            { title: `All Statuses (${requests.length})`, value: 'all' },
+            { title: `Pending Review (${pendingCount})`, value: 'pending' },
+            { title: `Approved / Ready (${approvedCount})`, value: 'approved' },
+            { title: `Scheduled (${scheduledCount})`, value: 'scheduled' },
+            { title: `Rejected`, value: 'rejected' }
+          ]"
+          label="Status"
+          variant="outlined"
+          density="compact"
+          hide-details
+          rounded="lg"
+          prepend-inner-icon="mdi-filter-variant"
+          style="width: 210px;"
+        ></v-select>
 
-      <v-text-field
-        v-model="search"
-        prepend-inner-icon="mdi-magnify"
-        placeholder="Search student, course..."
-        variant="outlined"
-        density="compact"
-        hide-details
-        class="bg-white rounded-lg"
-        style="max-width: 300px;"
-        clearable
-      ></v-text-field>
-    </div>
+        <!-- Start Date -->
+        <v-text-field
+          v-model="startDate"
+          type="date"
+          label="From"
+          variant="outlined"
+          density="compact"
+          hide-details
+          rounded="lg"
+          clearable
+          style="width: 145px;"
+        ></v-text-field>
+
+        <!-- End Date -->
+        <v-text-field
+          v-model="endDate"
+          type="date"
+          label="To"
+          variant="outlined"
+          density="compact"
+          hide-details
+          rounded="lg"
+          clearable
+          style="width: 145px;"
+        ></v-text-field>
+
+        <!-- Search input -->
+        <v-text-field
+          v-model="search"
+          prepend-inner-icon="mdi-magnify"
+          placeholder="Search student, course..."
+          variant="outlined"
+          density="compact"
+          hide-details
+          rounded="lg"
+          clearable
+          style="width: 220px;"
+        ></v-text-field>
+
+        <!-- Reset Filter Button -->
+        <v-btn
+          v-if="startDate || endDate || filterStatus !== 'all' || search"
+          variant="tonal"
+          color="error"
+          density="comfortable"
+          rounded="lg"
+          icon="mdi-filter-off"
+          title="Reset Filters"
+          @click="resetFilters"
+        ></v-btn>
+
+        <v-spacer></v-spacer>
+
+        <!-- Result Count Indicator -->
+        <div class="text-caption font-weight-medium text-grey">
+          Showing <strong>{{ filteredRequests.length }}</strong> of {{ requests.length }} requests
+        </div>
+      </div>
+    </v-card>
 
     <!-- Data Table Container -->
     <div class="apple-table-card">
@@ -272,11 +326,20 @@ const submitting = ref(false);
 const requests = ref<any[]>([]);
 const search = ref('');
 const filterStatus = ref('all');
+const startDate = ref('');
+const endDate = ref('');
 
 const showModal = ref(false);
 const selectedRequest = ref<any>(null);
 const modalStatus = ref('approved');
 const modalNotes = ref('');
+
+const resetFilters = () => {
+  startDate.value = '';
+  endDate.value = '';
+  filterStatus.value = 'all';
+  search.value = '';
+};
 
 const headers = [
   { title: 'Student', key: 'student_name' },
@@ -293,14 +356,30 @@ const scheduledCount = computed(() => requests.value.filter(r => r.status === 's
 
 const filteredRequests = computed(() => {
   return requests.value.filter(r => {
+    // Status Filter
     const matchesStatus = filterStatus.value === 'all' || r.status === filterStatus.value;
+
+    // Search Query Filter
     const q = search.value.toLowerCase().trim();
     const matchesSearch = !q ||
       (r.student_name || '').toLowerCase().includes(q) ||
       (r.student_email || '').toLowerCase().includes(q) ||
       (r.course_title || '').toLowerCase().includes(q) ||
       (r.certification_name || '').toLowerCase().includes(q);
-    return matchesStatus && matchesSearch;
+
+    // Date Range Filter
+    let matchesDate = true;
+    if (r.created_at) {
+      const itemDate = dayjs(r.created_at);
+      if (startDate.value) {
+        matchesDate = matchesDate && (itemDate.isSame(dayjs(startDate.value), 'day') || itemDate.isAfter(dayjs(startDate.value), 'day'));
+      }
+      if (endDate.value) {
+        matchesDate = matchesDate && (itemDate.isSame(dayjs(endDate.value), 'day') || itemDate.isBefore(dayjs(endDate.value), 'day'));
+      }
+    }
+
+    return matchesStatus && matchesSearch && matchesDate;
   });
 });
 

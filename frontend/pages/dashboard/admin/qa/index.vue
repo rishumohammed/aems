@@ -34,7 +34,7 @@
         <v-col cols="12" sm="6" md="3">
           <v-card flat class="border rounded-lg pa-4">
             <div class="text-caption text-grey font-weight-bold text-uppercase mb-1">Active Courses</div>
-            <div class="text-h5 font-weight-bold text-primary">{{ stats.activeCourses?.[0]?.title || '--' }}</div>
+            <div class="text-h4 font-weight-black text-primary">{{ stats.activeCoursesCount ?? stats.activeCourses?.length ?? 0 }}</div>
           </v-card>
         </v-col>
       </v-row>

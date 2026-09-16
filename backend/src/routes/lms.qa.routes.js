@@ -177,6 +177,8 @@ router.get('/admin/qa/stats', async (req, res) => {
     const [[{ pending }]] = await pool.query('SELECT COUNT(*) as pending FROM course_qa WHERE status = "open" OR status = "pending_review"');
     const [[{ resolved }]] = await pool.query('SELECT COUNT(*) as resolved FROM course_qa WHERE status = "answered" OR status = "closed"');
     
+    const [[{ activeCoursesCount }]] = await pool.query('SELECT COUNT(DISTINCT course_id) as activeCoursesCount FROM course_qa');
+
     // Most active courses
     const [activeCourses] = await pool.query(`
       SELECT c.title, COUNT(q.id) as question_count 
@@ -186,7 +188,7 @@ router.get('/admin/qa/stats', async (req, res) => {
       ORDER BY question_count DESC LIMIT 5
     `);
 
-    res.json({ total, pending, resolved, activeCourses });
+    res.json({ total, pending, resolved, activeCoursesCount, activeCourses });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
