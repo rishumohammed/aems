@@ -97,7 +97,12 @@
       <!-- KPI Stats Cards -->
       <v-row class="mb-6">
         <v-col cols="12" sm="6" md="2">
-          <v-card variant="outlined" class="rounded-xl pa-3 bg-blue-lighten-5 border-blue h-100">
+          <v-card
+            variant="outlined"
+            class="rounded-xl pa-3 bg-blue-lighten-5 border-blue h-100 cursor-pointer kpi-card"
+            :class="{ 'border-primary border-2': studentsFilter.status === 'all' && studentsFilter.examStatus === 'all' }"
+            @click="filterByKpi('all')"
+          >
             <div class="d-flex align-center justify-space-between">
               <div>
                 <div class="text-caption font-weight-bold text-primary text-uppercase">Total Enrolled</div>
@@ -111,7 +116,12 @@
         </v-col>
 
         <v-col cols="12" sm="6" md="2">
-          <v-card variant="outlined" class="rounded-xl pa-3 bg-cyan-lighten-5 border-cyan h-100">
+          <v-card
+            variant="outlined"
+            class="rounded-xl pa-3 bg-cyan-lighten-5 border-cyan h-100 cursor-pointer kpi-card"
+            :class="{ 'border-primary border-2': studentsFilter.status === 'joined_this_month' }"
+            @click="filterByKpi('joined')"
+          >
             <div class="d-flex align-center justify-space-between">
               <div>
                 <div class="text-caption font-weight-bold text-cyan-darken-3 text-uppercase">Joined Period</div>
@@ -125,7 +135,12 @@
         </v-col>
 
         <v-col cols="12" sm="6" md="2">
-          <v-card variant="outlined" class="rounded-xl pa-3 bg-amber-lighten-5 border-amber h-100">
+          <v-card
+            variant="outlined"
+            class="rounded-xl pa-3 bg-amber-lighten-5 border-amber h-100 cursor-pointer kpi-card"
+            :class="{ 'border-primary border-2': studentsFilter.status === 'ongoing' }"
+            @click="filterByKpi('ongoing')"
+          >
             <div class="d-flex align-center justify-space-between">
               <div>
                 <div class="text-caption font-weight-bold text-amber-darken-3 text-uppercase">Ongoing</div>
@@ -139,7 +154,12 @@
         </v-col>
 
         <v-col cols="12" sm="6" md="2">
-          <v-card variant="outlined" class="rounded-xl pa-3 bg-emerald-lighten-5 border-emerald h-100">
+          <v-card
+            variant="outlined"
+            class="rounded-xl pa-3 bg-emerald-lighten-5 border-emerald h-100 cursor-pointer kpi-card"
+            :class="{ 'border-primary border-2': studentsFilter.status === 'completed_this_month' }"
+            @click="filterByKpi('completed')"
+          >
             <div class="d-flex align-center justify-space-between">
               <div>
                 <div class="text-caption font-weight-bold text-success text-uppercase">Completed</div>
@@ -153,7 +173,12 @@
         </v-col>
 
         <v-col cols="12" sm="6" md="2">
-          <v-card variant="outlined" class="rounded-xl pa-3 bg-teal-lighten-5 border-teal h-100">
+          <v-card
+            variant="outlined"
+            class="rounded-xl pa-3 bg-teal-lighten-5 border-teal h-100 cursor-pointer kpi-card"
+            :class="{ 'border-primary border-2': studentsFilter.examStatus === 'passed' }"
+            @click="filterByKpi('passed')"
+          >
             <div class="d-flex align-center justify-space-between">
               <div>
                 <div class="text-caption font-weight-bold text-teal-darken-3 text-uppercase">Passed Exams</div>
@@ -1115,6 +1140,26 @@ const onPresetChange = (preset: string) => {
   fetchActiveReport();
 };
 
+const filterByKpi = (type: string) => {
+  if (type === 'all') {
+    studentsFilter.status = 'all';
+    studentsFilter.examStatus = 'all';
+  } else if (type === 'joined') {
+    studentsFilter.status = 'joined_this_month';
+    studentsFilter.examStatus = 'all';
+  } else if (type === 'ongoing') {
+    studentsFilter.status = 'ongoing';
+    studentsFilter.examStatus = 'all';
+  } else if (type === 'completed') {
+    studentsFilter.status = 'completed_this_month';
+    studentsFilter.examStatus = 'all';
+  } else if (type === 'passed') {
+    studentsFilter.status = 'all';
+    studentsFilter.examStatus = 'passed';
+  }
+  fetchStudentsReport();
+};
+
 // Fetchers
 const fetchFiltersMeta = async () => {
   try {
@@ -1398,6 +1443,17 @@ onMounted(() => {
 .gap-2 { gap: 8px; }
 .gap-3 { gap: 12px; }
 .gap-4 { gap: 16px; }
+
+.cursor-pointer { cursor: pointer; }
+.border-2 { border-width: 2px !important; }
+
+.kpi-card {
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+.kpi-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
 
 .border-blue { border-color: rgba(33, 150, 243, 0.4) !important; }
 .border-cyan { border-color: rgba(0, 188, 212, 0.4) !important; }

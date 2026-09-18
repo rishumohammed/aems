@@ -4,6 +4,33 @@ import { authenticateJWT, authorizeRoles } from '../middleware/auth.js';
 
 const router = express.Router();
 
+// Ensure exam_readiness_requests table exists
+let readinessTableChecked = false;
+async function ensureReadinessTable() {
+  if (readinessTableChecked) return;
+  try {
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS exam_readiness_requests (
+        id VARCHAR(36) PRIMARY KEY,
+        student_id VARCHAR(36) NOT NULL,
+        course_id VARCHAR(36) DEFAULT NULL,
+        exam_id VARCHAR(36) DEFAULT NULL,
+        certification_name VARCHAR(255) DEFAULT NULL,
+        notes TEXT DEFAULT NULL,
+        status VARCHAR(50) DEFAULT 'pending',
+        admin_notes TEXT DEFAULT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        INDEX idx_student (student_id),
+        INDEX idx_status (status)
+      );
+    `);
+    readinessTableChecked = true;
+  } catch (err) {
+    console.error('Failed to create/check exam_readiness_requests table in reports:', err);
+  }
+}
+
 // Allow administrative, academic, crm, and placement staff to access reports
 const isAuthorized = authorizeRoles('super_admin', 'sub_admin', 'lms_user', 'crm_agent', 'placement_coordinator', 'tutor');
 
@@ -46,6 +73,7 @@ router.get('/filters-meta', authenticateJWT, isAuthorized, async (req, res) => {
 // ─────────────────────────────────────────────────────────────────────────────
 router.get('/students-courses', authenticateJWT, isAuthorized, async (req, res) => {
   try {
+    await ensureReadinessTable();
     const { startDate, endDate, courseId, status, search } = req.query;
     const { start, end } = getDateRange(startDate, endDate);
 
@@ -75,15 +103,20 @@ router.get('/students-courses', authenticateJWT, isAuthorized, async (req, res) 
     );
     const ongoingCount = ongoingRow[0]?.count || 0;
 
-    // Passed exams in period (attempts or approved passed requests)
-    const [passedExamsRow] = await pool.query(
-      `SELECT COUNT(DISTINCT ea.student_id) as count 
-       FROM exam_attempts ea 
-       WHERE (ea.passed = 1 OR ea.passed = TRUE) 
-       AND DATE(COALESCE(ea.submitted_at, ea.started_at)) BETWEEN ? AND ?`,
-      [start, end]
-    );
-    const passedExamsInPeriod = passedExamsRow[0]?.count || 0;
+    // Passed exams in period strictly from exam_readiness_requests
+    let passedExamsInPeriod = 0;
+    try {
+      const [passedExamsRow] = await pool.query(
+        `SELECT COUNT(DISTINCT r.student_id) as count 
+         FROM exam_readiness_requests r 
+         WHERE r.status IN ('passed', 'exam_passed') 
+         AND DATE(COALESCE(r.updated_at, r.created_at)) BETWEEN ? AND ?`,
+        [start, end]
+      );
+      passedExamsInPeriod = passedExamsRow[0]?.count || 0;
+    } catch (e) {
+      console.warn('Could not query exam_readiness_requests for passed count:', e.message);
+    }
 
     // 2. Course-wise Breakdown
     const [courseBreakdown] = await pool.query(`
@@ -125,25 +158,19 @@ router.get('/students-courses', authenticateJWT, isAuthorized, async (req, res) 
         (
           SELECT r.status 
           FROM exam_readiness_requests r 
-          WHERE (r.course_id = e.course_id OR (r.course_id IS NULL AND r.student_id = e.student_id)) 
-            AND r.student_id = e.student_id 
-          ORDER BY r.created_at DESC 
+          WHERE r.student_id = e.student_id 
+            AND (r.course_id = e.course_id OR r.course_id IS NULL)
+          ORDER BY (r.course_id = e.course_id) DESC, r.created_at DESC 
           LIMIT 1
         ) as exam_request_status,
         (
           SELECT r.admin_notes
           FROM exam_readiness_requests r 
-          WHERE (r.course_id = e.course_id OR (r.course_id IS NULL AND r.student_id = e.student_id)) 
-            AND r.student_id = e.student_id 
-          ORDER BY r.created_at DESC 
+          WHERE r.student_id = e.student_id 
+            AND (r.course_id = e.course_id OR r.course_id IS NULL)
+          ORDER BY (r.course_id = e.course_id) DESC, r.created_at DESC 
           LIMIT 1
         ) as exam_request_notes,
-        (
-          SELECT COUNT(*) > 0 
-          FROM exam_attempts ea 
-          JOIN exams ex ON ea.exam_id = ex.id 
-          WHERE ex.course_id = e.course_id AND ea.student_id = e.student_id AND (ea.passed = 1 OR ea.passed = TRUE)
-        ) as has_passed_attempt,
         (
           SELECT cert_number 
           FROM certificates cert 
@@ -181,10 +208,10 @@ router.get('/students-courses', authenticateJWT, isAuthorized, async (req, res) 
 
     const [rawStudentsList] = await pool.query(listQuery, listParams);
 
-    // Map calculated exam_status based on readiness requests and attempts
+    // Map calculated exam_status based strictly on readiness requests (NOT course quiz/exam attempts)
     let studentsList = rawStudentsList.map(s => {
       let finalExamStatus = 'not_requested';
-      if (s.has_passed_attempt || s.exam_request_status === 'passed' || s.exam_request_status === 'exam_passed' || s.cert_number) {
+      if (s.exam_request_status === 'passed' || s.exam_request_status === 'exam_passed') {
         finalExamStatus = 'passed';
       } else if (s.exam_request_status === 'need_to_attend_again' || s.exam_request_status === 'reattend') {
         finalExamStatus = 'need_to_attend_again';
@@ -367,6 +394,7 @@ router.get('/crm', authenticateJWT, isAuthorized, async (req, res) => {
 // ─────────────────────────────────────────────────────────────────────────────
 router.get('/exams', authenticateJWT, isAuthorized, async (req, res) => {
   try {
+    await ensureReadinessTable();
     const { startDate, endDate, examId, search } = req.query;
     const { start, end } = getDateRange(startDate, endDate);
 
