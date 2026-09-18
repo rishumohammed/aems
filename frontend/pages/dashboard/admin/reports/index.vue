@@ -236,7 +236,28 @@
             density="compact"
             hide-details
             rounded="lg"
-            style="width: 200px;"
+            style="width: 190px;"
+            @update:model-value="fetchStudentsReport"
+          ></v-select>
+
+          <v-select
+            v-model="studentsFilter.examStatus"
+            :items="[
+              { title: 'All Exam Statuses', value: 'all' },
+              { title: 'Exam Passed', value: 'passed' },
+              { title: 'Need to Attend Once Again', value: 'need_to_attend_again' },
+              { title: 'Scheduled', value: 'scheduled' },
+              { title: 'Approved / Ready', value: 'approved' },
+              { title: 'Request Pending', value: 'pending' },
+              { title: 'Rejected', value: 'rejected' },
+              { title: 'Not Requested', value: 'not_requested' }
+            ]"
+            label="Exam Status"
+            variant="outlined"
+            density="compact"
+            hide-details
+            rounded="lg"
+            style="width: 210px;"
             @update:model-value="fetchStudentsReport"
           ></v-select>
 
@@ -249,7 +270,7 @@
             hide-details
             rounded="lg"
             clearable
-            style="width: 240px;"
+            style="width: 220px;"
             @input="debounceFetchStudents"
           ></v-text-field>
 
@@ -315,15 +336,15 @@
             </v-chip>
           </template>
 
-          <template v-slot:item.exam_passed="{ item }">
+          <template v-slot:item.exam_status="{ item }">
             <v-chip
-              :color="item.exam_passed ? 'teal' : 'grey-lighten-2'"
+              :color="getExamStatusColor(item.exam_status)"
               size="small"
               class="font-weight-bold"
-              :variant="item.exam_passed ? 'flat' : 'outlined'"
+              variant="flat"
             >
-              <v-icon start size="14">{{ item.exam_passed ? 'mdi-check-decagram' : 'mdi-clock-outline' }}</v-icon>
-              {{ item.exam_passed ? 'Passed' : 'Pending' }}
+              <v-icon start size="14">{{ getExamStatusIcon(item.exam_status) }}</v-icon>
+              {{ getExamStatusLabel(item.exam_status) }}
             </v-chip>
           </template>
 
@@ -1026,7 +1047,7 @@ const filterOptions = reactive({
 });
 
 // Domain Filter States
-const studentsFilter = reactive({ courseId: 'all', status: 'all', search: '' });
+const studentsFilter = reactive({ courseId: 'all', status: 'all', examStatus: 'all', search: '' });
 const crmFilter = reactive({ status: 'all', source: 'all', agentId: 'all', search: '' });
 const examsFilter = reactive({ examId: 'all', search: '' });
 const jobsFilter = reactive({ categoryId: 'all', status: 'all', search: '' });
@@ -1044,7 +1065,7 @@ const studentHeaders = [
   { title: 'Enrolled Date', key: 'enrolled_at' },
   { title: 'Progress', key: 'completion_percentage' },
   { title: 'Status', key: 'progress_status' },
-  { title: 'Exam Status', key: 'exam_passed' },
+  { title: 'Exam Status', key: 'exam_status' },
   { title: 'Certificate', key: 'cert_number' }
 ];
 
@@ -1117,6 +1138,7 @@ const fetchStudentsReport = async () => {
         endDate: endDate.value,
         courseId: studentsFilter.courseId,
         status: studentsFilter.status,
+        examStatus: studentsFilter.examStatus,
         search: studentsFilter.search
       }
     });
@@ -1215,6 +1237,43 @@ const debounceFetchJobs = () => {
 };
 
 // Color Helpers
+const getExamStatusLabel = (st: string) => {
+  switch (st) {
+    case 'passed': return 'Exam Passed';
+    case 'need_to_attend_again': return 'Need to Attend Once Again';
+    case 'scheduled': return 'Scheduled';
+    case 'approved': return 'Approved / Ready';
+    case 'pending': return 'Request Pending';
+    case 'rejected': return 'Rejected';
+    case 'not_requested': return 'Not Requested';
+    default: return st || 'Not Requested';
+  }
+};
+
+const getExamStatusColor = (st: string) => {
+  switch (st) {
+    case 'passed': return 'teal';
+    case 'need_to_attend_again': return 'deep-orange';
+    case 'scheduled': return 'info';
+    case 'approved': return 'success';
+    case 'pending': return 'amber';
+    case 'rejected': return 'error';
+    default: return 'grey-lighten-2';
+  }
+};
+
+const getExamStatusIcon = (st: string) => {
+  switch (st) {
+    case 'passed': return 'mdi-check-decagram';
+    case 'need_to_attend_again': return 'mdi-refresh-circle';
+    case 'scheduled': return 'mdi-calendar-check';
+    case 'approved': return 'mdi-check-circle-outline';
+    case 'pending': return 'mdi-clock-alert-outline';
+    case 'rejected': return 'mdi-close-circle-outline';
+    default: return 'mdi-minus-circle-outline';
+  }
+};
+
 const getCrmStatusColor = (st: string) => {
   switch (st) {
     case 'converted': return 'success';
@@ -1258,7 +1317,7 @@ const exportCurrentReport = () => {
         'Completion Date': formatDate(s.completed_at),
         'Progress %': `${s.completion_percentage}%`,
         'Status': s.progress_status,
-        'Exam Passed': s.exam_passed ? 'Yes' : 'No',
+        'Exam Status': getExamStatusLabel(s.exam_status),
         'Certificate Number': s.cert_number || 'N/A'
       }));
     } else if (activeTab.value === 'crm') {

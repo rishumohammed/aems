@@ -75,7 +75,7 @@ router.get('/students-courses', authenticateJWT, isAuthorized, async (req, res) 
     );
     const ongoingCount = ongoingRow[0]?.count || 0;
 
-    // Passed exams in period
+    // Passed exams in period (attempts or approved passed requests)
     const [passedExamsRow] = await pool.query(
       `SELECT COUNT(DISTINCT ea.student_id) as count 
        FROM exam_attempts ea 
@@ -103,6 +103,7 @@ router.get('/students-courses', authenticateJWT, isAuthorized, async (req, res) 
     `, [start, end]);
 
     // 3. Detailed Students Progression List
+    const { examStatus } = req.query;
     let listQuery = `
       SELECT 
         e.id as enrollment_id,
@@ -122,11 +123,27 @@ router.get('/students-courses', authenticateJWT, isAuthorized, async (req, res) 
           ELSE 'enrolled'
         END as progress_status,
         (
+          SELECT r.status 
+          FROM exam_readiness_requests r 
+          WHERE (r.course_id = e.course_id OR (r.course_id IS NULL AND r.student_id = e.student_id)) 
+            AND r.student_id = e.student_id 
+          ORDER BY r.created_at DESC 
+          LIMIT 1
+        ) as exam_request_status,
+        (
+          SELECT r.admin_notes
+          FROM exam_readiness_requests r 
+          WHERE (r.course_id = e.course_id OR (r.course_id IS NULL AND r.student_id = e.student_id)) 
+            AND r.student_id = e.student_id 
+          ORDER BY r.created_at DESC 
+          LIMIT 1
+        ) as exam_request_notes,
+        (
           SELECT COUNT(*) > 0 
           FROM exam_attempts ea 
           JOIN exams ex ON ea.exam_id = ex.id 
-          WHERE ex.course_id = e.course_id AND ea.student_id = e.student_id AND ea.passed = 1
-        ) as exam_passed,
+          WHERE ex.course_id = e.course_id AND ea.student_id = e.student_id AND (ea.passed = 1 OR ea.passed = TRUE)
+        ) as has_passed_attempt,
         (
           SELECT cert_number 
           FROM certificates cert 
@@ -162,7 +179,35 @@ router.get('/students-courses', authenticateJWT, isAuthorized, async (req, res) 
 
     listQuery += ' ORDER BY e.enrolled_at DESC LIMIT 500';
 
-    const [studentsList] = await pool.query(listQuery, listParams);
+    const [rawStudentsList] = await pool.query(listQuery, listParams);
+
+    // Map calculated exam_status based on readiness requests and attempts
+    let studentsList = rawStudentsList.map(s => {
+      let finalExamStatus = 'not_requested';
+      if (s.has_passed_attempt || s.exam_request_status === 'passed' || s.exam_request_status === 'exam_passed' || s.cert_number) {
+        finalExamStatus = 'passed';
+      } else if (s.exam_request_status === 'need_to_attend_again' || s.exam_request_status === 'reattend') {
+        finalExamStatus = 'need_to_attend_again';
+      } else if (s.exam_request_status === 'scheduled') {
+        finalExamStatus = 'scheduled';
+      } else if (s.exam_request_status === 'approved') {
+        finalExamStatus = 'approved';
+      } else if (s.exam_request_status === 'pending') {
+        finalExamStatus = 'pending';
+      } else if (s.exam_request_status === 'rejected') {
+        finalExamStatus = 'rejected';
+      }
+
+      return {
+        ...s,
+        exam_status: finalExamStatus,
+        exam_passed: finalExamStatus === 'passed'
+      };
+    });
+
+    if (examStatus && examStatus !== 'all') {
+      studentsList = studentsList.filter(s => s.exam_status === examStatus);
+    }
 
     res.json({
       summary: {
