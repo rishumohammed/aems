@@ -1,5 +1,5 @@
 <template>
-  <v-card flat class="pa-6 pa-md-10 rounded-xl bg-white shadow-sm border" style="background: #fff !important;">
+  <v-card flat class="pa-6 pa-md-10 rounded-xl bg-white shadow-sm border">
     <h3 class="text-h5 font-weight-bold mb-6 tracking-tight">Send us a Message</h3>
     
     <v-form @submit.prevent="submitForm">
@@ -173,7 +173,7 @@ const submitForm = async () => {
 }
 
 .native-select:focus {
-  border-color: #221E72;
+  border-color: var(--brand, #1B1B3A);
   border-width: 2px;
 }
 

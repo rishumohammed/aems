@@ -255,13 +255,14 @@ async function loadProfileData() {
 
       // Education
       if (p.education_level) form.value.qualification = p.education_level;
+      if (p.college_name && !form.value.institution) form.value.institution = p.college_name;
       if (p.education_json) {
         try {
           const eduArray = typeof p.education_json === 'string' ? JSON.parse(p.education_json) : p.education_json;
           if (Array.isArray(eduArray) && eduArray.length > 0) {
             const latestEdu = eduArray[0];
             form.value.degree = latestEdu.degree || '';
-            form.value.institution = latestEdu.institution || '';
+            if (latestEdu.institution) form.value.institution = latestEdu.institution;
             form.value.year_of_passing = latestEdu.year || '';
             form.value.grade = latestEdu.grade || '';
             form.value.field_of_study = latestEdu.field || '';

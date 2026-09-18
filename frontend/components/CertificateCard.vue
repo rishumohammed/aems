@@ -14,10 +14,10 @@
         <v-avatar color="primary" size="40" class="mr-3 rounded-lg" variant="tonal">
           <v-icon color="primary" size="24">mdi-seal</v-icon>
         </v-avatar>
-        <span class="text-h5 font-weight-black tracking-tight" style="color: var(--primary);">Brix Certifications</span>
+        <span class="text-h5 font-weight-black tracking-tight text-primary">Brix Certifications</span>
       </div>
       
-      <div class="text-h6 font-weight-bold text-grey-darken-1 mb-2 tracking-widest uppercase" style="letter-spacing: 0.15em !important;">Certificate of Completion</div>
+      <div class="text-h6 font-weight-bold text-grey-darken-1 mb-2 tracking-widest uppercase">Certificate of Completion</div>
       <v-divider class="mx-auto mb-8" width="60" thickness="3" color="primary"></v-divider>
       
       <div class="text-body-1 text-grey-darken-1 mb-2">This is to certify that</div>

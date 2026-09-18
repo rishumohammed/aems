@@ -241,6 +241,34 @@
           <div class="text-h6 font-weight-bold mb-6">Education Details</div>
           
           <v-form @submit.prevent="saveProfile" :disabled="saving">
+            <v-card variant="flat" border class="pa-4 rounded-xl bg-grey-lighten-5 mb-6">
+              <div class="text-subtitle-1 font-weight-bold mb-3">Primary Education Details</div>
+              <v-row dense>
+                <v-col cols="12" md="6">
+                  <v-text-field
+                    v-model="form.education_level"
+                    label="Education Level"
+                    variant="outlined"
+                    rounded="lg"
+                    density="comfortable"
+                    placeholder="e.g. Plus Two, Bachelor's, Master's"
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="12" md="6">
+                  <v-text-field
+                    v-model="form.college_name"
+                    label="College / Institution Name"
+                    variant="outlined"
+                    rounded="lg"
+                    density="comfortable"
+                    placeholder="Enter your college or institution name"
+                    prepend-inner-icon="mdi-school-outline"
+                  ></v-text-field>
+                </v-col>
+              </v-row>
+            </v-card>
+
+            <div class="text-subtitle-1 font-weight-bold mb-3">Detailed Academic History</div>
             <div v-for="(edu, index) in form.education_json" :key="index" class="mb-6 pa-4 border rounded-xl bg-grey-lighten-5 position-relative">
               <v-btn icon="mdi-delete" color="error" variant="text" size="small" class="position-absolute" style="top: 12px; right: 12px" @click="removeEducation(index)"></v-btn>
               <v-row dense>
@@ -544,6 +572,8 @@ const form = ref({
   preferred_job_categories: [] as string[],
   current_status: 'fresher',
   experience_years: 0,
+  education_level: '',
+  college_name: '',
   education_json: [] as any[],
   experience_json: [] as any[],
   language_proficiency: [] as string[],
@@ -616,6 +646,8 @@ const loadProfile = async () => {
       preferred_job_categories: data.profile?.preferred_job_categories ? (typeof data.profile.preferred_job_categories === 'string' ? JSON.parse(data.profile.preferred_job_categories) : data.profile.preferred_job_categories) : [],
       current_status: data.profile?.current_status || 'fresher',
       experience_years: data.profile?.experience_years || 0,
+      education_level: data.profile?.education_level || '',
+      college_name: data.profile?.college_name || '',
       education_json: data.profile?.education_json ? (typeof data.profile.education_json === 'string' ? JSON.parse(data.profile.education_json) : data.profile.education_json) : [],
       experience_json: data.profile?.experience_json ? (typeof data.profile.experience_json === 'string' ? JSON.parse(data.profile.experience_json) : data.profile.experience_json) : [],
       language_proficiency: data.profile?.language_proficiency ? (typeof data.profile.language_proficiency === 'string' ? JSON.parse(data.profile.language_proficiency) : data.profile.language_proficiency) : [],

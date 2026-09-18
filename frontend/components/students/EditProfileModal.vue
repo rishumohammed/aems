@@ -46,6 +46,19 @@
 
         <!-- Education Tab -->
         <v-window-item value="education">
+          <v-card variant="flat" border class="pa-4 rounded-lg bg-grey-lighten-5 mb-4">
+            <div class="text-subtitle-2 font-weight-bold mb-3">Primary Education Details</div>
+            <v-row dense>
+              <v-col cols="12" md="6">
+                <v-text-field v-model="form.education_level" label="Education Level" variant="outlined" density="comfortable" placeholder="e.g. Plus Two, Bachelor's, Master's"></v-text-field>
+              </v-col>
+              <v-col cols="12" md="6">
+                <v-text-field v-model="form.college_name" label="College / Institution Name" variant="outlined" density="comfortable" placeholder="Enter college or institution name" prepend-inner-icon="mdi-school-outline"></v-text-field>
+              </v-col>
+            </v-row>
+          </v-card>
+
+          <div class="text-subtitle-2 font-weight-bold mb-2">Detailed Academic History</div>
           <div v-for="(edu, index) in form.education_json" :key="index" class="mb-6 pa-4 border rounded-lg bg-grey-lighten-5 relative">
             <v-btn icon="mdi-delete" color="error" variant="text" size="small" class="position-absolute" style="top: 8px; right: 8px" @click="removeEducation(index)"></v-btn>
             <v-row dense>
@@ -142,6 +155,8 @@ const form = ref({
   linkedin_url: '',
   current_status: 'fresher',
   experience_years: 0,
+  education_level: '',
+  college_name: '',
   skills: [],
   education_json: [],
   experience_json: []
@@ -151,6 +166,8 @@ watch(() => props.student, (newVal) => {
   if (newVal) {
     form.value = {
       ...newVal,
+      education_level: newVal.education_level || '',
+      college_name: newVal.college_name || '',
       date_of_birth: newVal.date_of_birth ? newVal.date_of_birth.split('T')[0] : '',
       skills: typeof newVal.skills === 'string' ? JSON.parse(newVal.skills) : (newVal.skills || []),
       education_json: typeof newVal.education_json === 'string' ? JSON.parse(newVal.education_json) : (newVal.education_json || []),

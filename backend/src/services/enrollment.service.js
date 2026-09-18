@@ -73,8 +73,8 @@ class EnrollmentService {
             }
             readableStudentId = `${prefix}${String(nextNum).padStart(3, '0')}`;
             await connection.query(
-              'INSERT INTO student_profiles (user_id, student_id, converted_by, lead_source) VALUES (?, ?, ?, ?)',
-              [studentId, readableStudentId, convertedBy || null, leadSource || null]
+              'INSERT INTO student_profiles (user_id, student_id, converted_by, lead_source, education_level, college_name) VALUES (?, ?, ?, ?, ?, ?)',
+              [studentId, readableStudentId, convertedBy || null, leadSource || null, studentData.education_level || null, studentData.college_name || studentData.college || null]
             );
           }
         } else {
@@ -109,8 +109,8 @@ class EnrollmentService {
 
           // Create student profile
           await connection.query(
-            'INSERT INTO student_profiles (user_id, student_id, converted_by, lead_source) VALUES (?, ?, ?, ?)',
-            [studentId, readableStudentId, convertedBy || null, leadSource || null]
+            'INSERT INTO student_profiles (user_id, student_id, converted_by, lead_source, education_level, college_name) VALUES (?, ?, ?, ?, ?, ?)',
+            [studentId, readableStudentId, convertedBy || null, leadSource || null, studentData.education_level || null, studentData.college_name || studentData.college || null]
           );
         }
       } else {

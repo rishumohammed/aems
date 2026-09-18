@@ -71,9 +71,15 @@ class ExamService {
       }
     }
 
-    // Count attempts
+    // Auto-expire stale sessions for this student & exam
+    await pool.query(
+      "UPDATE exam_attempts SET status = 'graded', score = 0, passed = 0 WHERE student_id = ? AND exam_id = ? AND status IN ('scheduled', 'in_progress') AND session_expires_at IS NOT NULL AND session_expires_at < NOW()",
+      [studentId, examId]
+    );
+
+    // Count all used attempts (completed or active)
     const [attempts] = await pool.query(
-      "SELECT COUNT(*) as count FROM exam_attempts WHERE student_id = ? AND exam_id = ? AND status IN ('submitted','graded','pending_manual_review')",
+      "SELECT COUNT(*) as count FROM exam_attempts WHERE student_id = ? AND exam_id = ? AND status IN ('submitted','graded','pending_manual_review','in_progress','scheduled')",
       [studentId, examId]
     );
     if (attempts[0].count >= exam.max_attempts) {

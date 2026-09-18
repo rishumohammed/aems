@@ -116,8 +116,9 @@ router.put('/:id/profile', async (req, res) => {
       INSERT INTO student_profiles (
         user_id, date_of_birth, gender, address, linkedin_url, 
         experience_years, current_status, last_company, last_role, 
-        last_role_duration, skills, education_json, experience_json
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        last_role_duration, skills, education_json, experience_json,
+        education_level, college_name
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       ON DUPLICATE KEY UPDATE
         date_of_birth = VALUES(date_of_birth),
         gender = VALUES(gender),
@@ -130,12 +131,15 @@ router.put('/:id/profile', async (req, res) => {
         last_role_duration = VALUES(last_role_duration),
         skills = VALUES(skills),
         education_json = VALUES(education_json),
-        experience_json = VALUES(experience_json)
+        experience_json = VALUES(experience_json),
+        education_level = VALUES(education_level),
+        college_name = VALUES(college_name)
     `, [
       id, data.date_of_birth, data.gender, data.address, data.linkedin_url,
       data.experience_years, data.current_status, data.last_company, data.last_role,
       data.last_role_duration, JSON.stringify(data.skills || []), 
-      JSON.stringify(data.education_json || []), JSON.stringify(data.experience_json || [])
+      JSON.stringify(data.education_json || []), JSON.stringify(data.experience_json || []),
+      data.education_level || null, data.college_name || null
     ]);
 
     await connection.commit();

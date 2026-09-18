@@ -1,8 +1,8 @@
 <template>
   <div class="category-strip section-compact">
     <v-container>
-      <div class="d-flex align-center justify-space-between" style="margin-bottom: var(--sp-8)">
-        <h2 class="section-title" style="margin-bottom:0">Explore Categories</h2>
+      <div class="d-flex align-center justify-space-between mb-8">
+        <h2 class="section-title mb-0">Explore Categories</h2>
         <v-btn variant="text" color="primary" class="text-capitalize font-weight-bold" to="/courses">
           View All <v-icon right>mdi-chevron-right</v-icon>
         </v-btn>

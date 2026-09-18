@@ -205,6 +205,29 @@
             </v-card>
           </v-col>
         </v-row>
+        <v-row v-else-if="student.education_level || student.college_name">
+          <v-col cols="12" md="6">
+            <v-card elevation="1" class="rounded-xl pa-4 bg-surface border">
+              <div class="d-flex justify-space-between align-start mb-2">
+                <div>
+                  <div class="text-subtitle-1 font-weight-bold">{{ student.education_level || 'General Education' }}</div>
+                  <div class="text-body-2 text-primary font-weight-medium">{{ student.college_name || 'Institution not specified' }}</div>
+                </div>
+                <v-chip size="x-small" color="primary" variant="flat">Registered Profile</v-chip>
+              </div>
+              <div class="d-flex gap-4 mt-2">
+                <div>
+                  <div class="text-caption text-grey">Education Level</div>
+                  <div class="text-body-2 font-weight-bold">{{ student.education_level || 'N/A' }}</div>
+                </div>
+                <div v-if="student.college_name">
+                  <div class="text-caption text-grey">College / Institution</div>
+                  <div class="text-body-2 font-weight-bold">{{ student.college_name }}</div>
+                </div>
+              </div>
+            </v-card>
+          </v-col>
+        </v-row>
         <v-alert v-else border="start" variant="tonal" color="info">
           No education history recorded for this student.
         </v-alert>
@@ -311,6 +334,8 @@ const copyResetPassword = async () => {
 const contactItems = computed(() => [
   { label: 'Email', value: props.student.email, icon: 'mdi-email-outline' },
   { label: 'Phone', value: props.student.phone || 'N/A', icon: 'mdi-phone-outline' },
+  { label: 'Education Level', value: props.student.education_level || 'N/A', icon: 'mdi-school-outline' },
+  { label: 'College / Institution', value: props.student.college_name || 'N/A', icon: 'mdi-domain' },
   { label: 'Date of Birth', value: formatDate(props.student.date_of_birth), icon: 'mdi-calendar-cake' },
   { label: 'Gender', value: props.student.gender || 'Not specified', icon: 'mdi-account-outline' },
   { label: 'Address', value: props.student.address || 'N/A', icon: 'mdi-map-marker-outline' },

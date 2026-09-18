@@ -321,11 +321,18 @@ router.get('/', authenticateJWT, isTutorOrAdmin, async (req, res) => {
 router.get('/eligible', authenticateJWT, isStudent, async (req, res) => {
   try {
     const studentId = req.user.id;
+
+    // Auto-expire any stale sessions for this student
+    await pool.query(
+      "UPDATE exam_attempts SET status = 'graded', score = 0, passed = 0 WHERE student_id = ? AND status IN ('scheduled', 'in_progress') AND session_expires_at IS NOT NULL AND session_expires_at < NOW()",
+      [studentId]
+    );
+
     const [exams] = await pool.query(`
       SELECT e.*, c.title as course_title, c.slug as course_slug,
         (SELECT COUNT(*) FROM exam_attempts ea2
          WHERE ea2.student_id = ? AND ea2.exam_id = e.id 
-         AND ea2.status IN ('submitted','graded','pending_manual_review')) as attempts_used,
+         AND ea2.status IN ('submitted','graded','pending_manual_review','in_progress','scheduled')) as attempts_used,
         (SELECT ea3.id FROM exam_attempts ea3
          WHERE ea3.student_id = ? AND ea3.exam_id = e.id AND ea3.status IN ('submitted','graded') 
          ORDER BY ea3.submitted_at DESC LIMIT 1) as last_attempt_id,
@@ -378,7 +385,7 @@ router.get('/attempts', authenticateJWT, isTutorOrAdmin, async (req, res) => {
 router.get('/attempts/:id', authenticateJWT, async (req, res) => {
   try {
     const [attempts] = await pool.query(`
-      SELECT ea.*, e.title as exam_title, e.duration_minutes, e.pass_percentage,
+      SELECT ea.*, e.title as exam_title, e.duration_minutes, e.pass_percentage, e.enable_certificate,
              e.proctoring_enabled, e.instructions, e.min_submit_pct, e.randomize_questions,
              e.proctoring_config,
              c.title as course_title
@@ -417,8 +424,17 @@ router.post('/attempts/:id/start', authenticateJWT, isStudent, async (req, res) 
       return res.status(400).json({ message: 'Exam already submitted' });
     }
 
-    // If already in_progress, return existing session
-    if (attempt.status === 'in_progress' && new Date(attempt.session_expires_at) > new Date()) {
+    // Check if session has expired
+    if (attempt.session_expires_at && new Date(attempt.session_expires_at) <= new Date()) {
+      await pool.query(
+        "UPDATE exam_attempts SET status = 'graded', score = 0, passed = 0 WHERE id = ?",
+        [attempt.id]
+      );
+      return res.status(400).json({ message: 'Attempt time has expired' });
+    }
+
+    // If already in_progress and NOT expired, return existing session
+    if (attempt.status === 'in_progress') {
       const [questions] = await pool.query(
         'SELECT id, question_text, type, options_json, marks, order_index FROM exam_questions WHERE exam_id = ? ORDER BY order_index',
         [attempt.exam_id]
@@ -497,7 +513,7 @@ router.post('/attempts/:id/submit', authenticateJWT, isStudent, async (req, res)
     const studentId = req.user.id;
 
     const [attempts] = await pool.query(
-      "SELECT ea.*, e.pass_percentage, e.show_result_detail, e.course_id FROM exam_attempts ea JOIN exams e ON ea.exam_id = e.id WHERE ea.id = ? AND ea.student_id = ? AND ea.status = 'in_progress'",
+      "SELECT ea.*, e.pass_percentage, e.show_result_detail, e.course_id, e.enable_certificate FROM exam_attempts ea JOIN exams e ON ea.exam_id = e.id WHERE ea.id = ? AND ea.student_id = ? AND ea.status = 'in_progress'",
       [req.params.id, studentId]
     );
     if (attempts.length === 0) return res.status(400).json({ message: 'Attempt not found or not in progress' });
@@ -522,7 +538,7 @@ router.post('/attempts/:id/submit', authenticateJWT, isStudent, async (req, res)
 
     let certResult = null;
     let course_completed = false;
-    if (passed && !pendingManualReview) {
+    if (passed && !pendingManualReview && attempt.enable_certificate !== false) {
       certResult = await examService.issueCertificate(req.params.id);
       
       const [enrollments] = await connection.query(
@@ -555,7 +571,7 @@ router.get('/attempts/:id/results', authenticateJWT, async (req, res) => {
   try {
     const [attempts] = await pool.query(`
       SELECT ea.*, 
-             e.title as exam_title, e.pass_percentage, e.duration_minutes, e.show_result_detail, e.max_attempts, e.show_results,
+             e.title as exam_title, e.pass_percentage, e.duration_minutes, e.show_result_detail, e.max_attempts, e.show_results, e.enable_certificate,
              c.title as course_title, c.slug as course_slug,
              u.name as student_name,
              cert.cert_number, cert.id as cert_id,
@@ -696,7 +712,7 @@ router.post('/', authenticateJWT, isTutorOrAdmin, async (req, res) => {
       course_id, title, duration_minutes, pass_percentage, max_attempts,
       proctoring_enabled, randomize_questions, randomize_options,
       instructions, min_submit_pct, requires_scheduling, show_result_detail, show_results, status,
-      proctoring_config
+      proctoring_config, enable_certificate
     } = req.body;
 
     if (course_id) {
@@ -719,14 +735,14 @@ router.post('/', authenticateJWT, isTutorOrAdmin, async (req, res) => {
       INSERT INTO exams 
         (id, course_id, title, duration_minutes, pass_percentage, max_attempts,
          proctoring_enabled, randomize_questions, randomize_options, instructions,
-         min_submit_pct, requires_scheduling, show_result_detail, show_results, status, proctoring_config, created_by)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+         min_submit_pct, requires_scheduling, show_result_detail, show_results, status, proctoring_config, enable_certificate, created_by)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `, [
       id, course_id || null, title,
       duration_minutes || 60, pass_percentage || 60, max_attempts || 2,
       proctoring_enabled || false, randomize_questions || false, randomize_options || false,
       instructions || null, min_submit_pct || 50, requires_scheduling || false,
-      show_result_detail !== false, show_results !== false, status || 'draft', configStr, req.user.id
+      show_result_detail !== false, show_results !== false, status || 'draft', configStr, enable_certificate !== false, req.user.id
     ]);
     res.status(201).json({ id, message: 'Exam created' });
   } catch (err) {
@@ -740,7 +756,7 @@ router.put('/:id', authenticateJWT, isTutorOrAdmin, async (req, res) => {
     const fields = [
       'title','course_id','duration_minutes','pass_percentage','max_attempts','proctoring_enabled',
       'randomize_questions','randomize_options','instructions','min_submit_pct',
-      'requires_scheduling','show_result_detail','show_results','status', 'proctoring_config'
+      'requires_scheduling','show_result_detail','show_results','status', 'proctoring_config', 'enable_certificate'
     ];
     const updates = fields.filter(f => req.body[f] !== undefined);
     if (updates.length === 0) return res.json({ message: 'Nothing to update' });
@@ -928,6 +944,12 @@ router.post('/:id/book', authenticateJWT, isStudent, async (req, res) => {
   try {
     const { slot_id } = req.body;
     const studentId = req.user.id;
+
+    // Auto-expire stale sessions for this student & exam
+    await pool.query(
+      "UPDATE exam_attempts SET status = 'graded', score = 0, passed = 0 WHERE student_id = ? AND exam_id = ? AND status IN ('scheduled', 'in_progress') AND session_expires_at IS NOT NULL AND session_expires_at <= NOW()",
+      [studentId, req.params.id]
+    );
 
     const { exam } = await examService.checkEligibility(studentId, req.params.id);
 

@@ -49,6 +49,9 @@
                     <v-col cols="12">
                       <v-select v-model="student.education_level" :items="educationLevels" label="Education Level" variant="outlined" rounded="lg"></v-select>
                     </v-col>
+                    <v-col cols="12">
+                      <v-text-field v-model="student.college_name" label="College / Institution Name" placeholder="Enter your college or institution name" variant="outlined" rounded="lg" prepend-inner-icon="mdi-school-outline"></v-text-field>
+                    </v-col>
                     <v-col cols="12" md="6">
                       <v-select
                         v-model="student.gender"
@@ -231,6 +234,7 @@ const student = reactive({
   password: '',
   confirmPassword: '',
   education_level: '',
+  college_name: '',
   gender: '',
   date_of_birth: ''
 });

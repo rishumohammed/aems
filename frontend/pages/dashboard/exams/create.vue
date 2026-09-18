@@ -49,7 +49,7 @@
             <v-switch v-model="form.proctoring_enabled" label="Enable Proctoring" color="warning" density="compact" hide-details class="mb-2" />
             
             <v-expand-transition>
-              <div v-if="form.proctoring_enabled" class="pl-4 border-l-2 border-warning mb-4" style="border-left: 2px solid orange;">
+              <div v-if="form.proctoring_enabled" class="pl-4 border-l-2 border-warning mb-4">
                 <v-checkbox v-model="form.proctoring_config.face_detection" label="Enable Face Detection" color="warning" density="compact" hide-details />
                 <v-checkbox v-model="form.proctoring_config.capture_on_violation" label="Capture Screenshot On Violation" color="warning" density="compact" hide-details />
                 <v-checkbox v-model="form.proctoring_config.face_missing_alert" label="Face Missing Alert" color="warning" density="compact" hide-details />
@@ -72,6 +72,7 @@
             </v-expand-transition>
 
             <v-switch v-model="form.requires_scheduling" label="Require Slot Booking" color="info" density="compact" hide-details class="mb-2" />
+            <v-switch v-model="form.enable_certificate" label="Enable Certificate on Passing" color="primary" density="compact" hide-details class="mb-2" />
             <v-switch v-model="form.show_results" label="Show Results to Students" color="success" density="compact" hide-details class="mb-2" />
             <v-switch v-model="form.show_result_detail" label="Show Question Review on Results" color="success" density="compact" hide-details />
 
@@ -141,6 +142,7 @@ const form = ref({
     enable_voice_alert: true
   },
   requires_scheduling: false,
+  enable_certificate: true,
   show_results: true,
   show_result_detail: true,
   status: 'draft',
@@ -234,6 +236,7 @@ onMounted(async () => {
 
     form.value = {
       ...data,
+      enable_certificate: data.enable_certificate !== undefined ? !!data.enable_certificate : true,
       proctoring_config: parsedConfig,
       questions: data.questions || [],
     };

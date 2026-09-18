@@ -599,7 +599,7 @@ router.put('/profile', async (req, res) => {
       name, phone, date_of_birth, gender, address, 
       linkedin_url, github_url, portfolio_url, instagram_url, twitter_url, youtube_url, other_urls,
       skills, preferred_job_categories, current_status, experience_years, education_json, experience_json,
-      language_proficiency, joining_status
+      language_proficiency, joining_status, education_level, college_name
     } = req.body;
     
     await connection.beginTransaction();
@@ -615,9 +615,10 @@ router.put('/profile', async (req, res) => {
       INSERT INTO student_profiles (
         user_id, date_of_birth, gender, address, skills,
         linkedin_url, github_url, portfolio_url, instagram_url, twitter_url, youtube_url, other_urls, preferred_job_categories,
-        current_status, experience_years, education_json, experience_json, language_proficiency, joining_status
+        current_status, experience_years, education_json, experience_json, language_proficiency, joining_status,
+        education_level, college_name
       )
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       ON DUPLICATE KEY UPDATE
         date_of_birth = VALUES(date_of_birth),
         gender = VALUES(gender),
@@ -636,13 +637,16 @@ router.put('/profile', async (req, res) => {
         education_json = VALUES(education_json),
         experience_json = VALUES(experience_json),
         language_proficiency = VALUES(language_proficiency),
-        joining_status = VALUES(joining_status)
+        joining_status = VALUES(joining_status),
+        education_level = VALUES(education_level),
+        college_name = VALUES(college_name)
     `, [
       userId, date_of_birth, gender, address, JSON.stringify(skills || []),
       linkedin_url, github_url, portfolio_url, instagram_url, twitter_url, youtube_url, JSON.stringify(other_urls || []),
       JSON.stringify(preferred_job_categories || []),
       current_status || 'fresher', experience_years || 0, JSON.stringify(education_json || []), JSON.stringify(experience_json || []),
-      JSON.stringify(language_proficiency || []), joining_status || null
+      JSON.stringify(language_proficiency || []), joining_status || null,
+      education_level || null, college_name || null
     ]);
     
     await connection.commit();

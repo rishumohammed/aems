@@ -78,10 +78,10 @@
           <v-col cols="12" md="6" class="pl-md-12">
             <div class="eyebrow-label mb-4">Who We Are</div>
             <h2 class="section-title mb-5">Passionate Experts in Food Technology</h2>
-            <p class="text-body-1 text-grey-darken-1 mb-4" style="line-height:1.85">
+            <p class="text-body-1 text-grey-darken-1 mb-4 leading-relaxed">
               <strong>Welcome to Brix Certifications</strong> — where we provide high-quality food technology training and consultancy services to help businesses and professionals meet the highest standards in food safety and quality.
             </p>
-            <p class="text-body-1 text-grey-darken-1 mb-6" style="line-height:1.85">
+            <p class="text-body-1 text-grey-darken-1 mb-6 leading-relaxed">
               Brix Certifications brings together experienced auditors, food scientists, and regulatory professionals passionate about ensuring the integrity of food products from farm to table.
             </p>
             <!-- 4 quick bullets -->
@@ -104,7 +104,7 @@
     </section>
 
     <!-- ── Mission & Vision ───────────────────────────────────── -->
-    <section class="section-default" style="background:#f8f9fc;">
+    <section class="section-default bg-grey-lighten-5">
       <v-container>
         <div class="section-header section-header--center mb-12">
           <div class="eyebrow-label mb-3">Purpose</div>
@@ -161,7 +161,7 @@
     </section>
 
     <!-- ── Trust Pillars ──────────────────────────────────────── -->
-    <section class="section-default" style="background:#f8f9fc;">
+    <section class="section-default bg-grey-lighten-5">
       <v-container>
         <div class="section-header section-header--center mb-12">
           <div class="eyebrow-label mb-3">Why Choose Us</div>
@@ -185,11 +185,11 @@
       <v-container>
         <div class="trust-inner">
           <div class="trust-left">
-            <div class="eyebrow-label mb-3" style="color:rgba(255,255,255,0.6)">Get Started</div>
+            <div class="eyebrow-label mb-3 opacity-70 text-white">Get Started</div>
             <h2 class="trust-headline">Join Our Learning Community</h2>
             <p class="trust-sub">Whether you're a student, professional, or organisation — Brix Certifications has the expertise to help you succeed and stay globally compliant.</p>
             <div class="d-flex gap-3 flex-wrap mt-6">
-              <v-btn color="white" rounded="lg" class="text-none font-weight-bold" style="color:var(--primary, #211d71)" size="large" to="/register">
+              <v-btn color="white" rounded="lg" class="text-none font-weight-bold text-primary" size="large" to="/register">
                 Get Started Today <v-icon end>mdi-arrow-right</v-icon>
               </v-btn>
               <v-btn variant="outlined" color="white" rounded="lg" class="text-none font-weight-bold" size="large" to="/courses">

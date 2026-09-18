@@ -40,16 +40,6 @@
         </template>
       </v-tooltip>
 
-      <!-- Category Badge -->
-      <v-chip
-        v-if="course.category_name"
-        size="x-small"
-        color="white"
-        variant="flat"
-        class="position-absolute bottom-0 left-0 ma-2 text-primary font-weight-bold"
-      >
-        {{ course.category_name }}
-      </v-chip>
     </div>
 
     <v-card-text class="pa-4 flex-grow-1 d-flex flex-column">
@@ -62,16 +52,7 @@
         {{ course.title }}
       </h3>
 
-      <div class="d-flex align-center gap-4 mt-auto">
-        <div class="d-flex align-center">
-          <v-icon size="16" color="grey" class="mr-1">mdi-account-group</v-icon>
-          <span class="text-caption font-weight-medium">{{ course.enrolled_count || 0 }}</span>
-        </div>
-        <div class="d-flex align-center">
-          <v-icon v-if="course.price_type !== 'custom'" size="16" color="grey" class="mr-1">mdi-currency-inr</v-icon>
-          <span class="text-caption font-weight-medium">{{ course.price_type === 'custom' ? 'Custom' : course.price }}</span>
-        </div>
-      </div>
+
     </v-card-text>
 
     <v-divider></v-divider>

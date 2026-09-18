@@ -48,14 +48,32 @@ onMounted(async () => {
         (theme.global.current.value.colors as any).secondary = data.brand_secondary_color;
         document.documentElement.style.setProperty('--v-theme-secondary', data.brand_secondary_color);
       }
+      const baseUrl = config.public.apiBase.replace('/api', '');
+      const metaTitle = data.institute_name || 'Brix Certifications';
+      const metaDesc = data.tagline ? `${data.tagline} — ${metaTitle}` : `${metaTitle} — Education, Skills, Certification & Careers`;
+      const metaImage = data.app_logo ? `${baseUrl}${data.app_logo}` : '';
+
+      useHead({
+        title: metaTitle,
+        titleTemplate: (titleChunk) => {
+          return titleChunk && titleChunk !== metaTitle ? `${titleChunk} | ${metaTitle}` : metaTitle;
+        },
+        meta: [
+          { name: 'description', content: metaDesc },
+          { property: 'og:title', content: metaTitle },
+          { property: 'og:description', content: metaDesc },
+          { property: 'og:site_name', content: metaTitle },
+          ...(metaImage ? [
+            { property: 'og:image', content: metaImage },
+            { name: 'twitter:image', content: metaImage }
+          ] : []),
+          { name: 'twitter:title', content: metaTitle },
+          { name: 'twitter:description', content: metaDesc }
+        ]
+      });
+
       if (data.institute_name) {
         instituteName.value = data.institute_name;
-        useHead({
-          title: data.institute_name,
-          titleTemplate: (titleChunk) => {
-            return titleChunk && titleChunk !== data.institute_name ? `${titleChunk} | ${data.institute_name}` : data.institute_name;
-          }
-        });
       }
       if (data.tagline) {
         instituteTagline.value = data.tagline;
@@ -65,7 +83,6 @@ onMounted(async () => {
       }
       if (data.app_favicon) {
         useState('appFavicon').value = data.app_favicon;
-        const baseUrl = config.public.apiBase.replace('/api', '');
         useHead({
           link: [
             { rel: 'icon', type: 'image/x-icon', href: `${baseUrl}${data.app_favicon}` }

@@ -51,7 +51,7 @@
               <p class="text-grey-darken-1 max-w-400 mb-2 mx-auto">Your score has been recorded and is pending review.</p>
             </div>
 
-            <div class="cta-row d-flex flex-column align-center" v-if="result.passed && !canGrade">
+            <div class="cta-row d-flex flex-column align-center" v-if="result.passed && !canGrade && result.enable_certificate !== false && result.enable_certificate !== 0 && result.enable_certificate !== '0'">
               <v-chip color="success" size="large" prepend-icon="mdi-certificate" class="font-weight-bold px-6 py-4 text-body-1 mb-4">
                 Certificate Earned!
               </v-chip>
