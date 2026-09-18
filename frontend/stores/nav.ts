@@ -81,6 +81,9 @@ export const useNavStore = defineStore('nav', {
       { label: 'Notice Board', icon: 'mdi-bullhorn-outline', route: '/dashboard/admin/notice-board', roles: ['super_admin'], section: 'ANNOUNCEMENTS' },
       { label: 'News', icon: 'mdi-newspaper-variant-outline', route: '/dashboard/admin/news', roles: ['super_admin', 'content_manager'], section: 'ANNOUNCEMENTS' },
 
+      // REPORTS
+      { label: 'Reports', icon: 'mdi-chart-box-outline', route: '/dashboard/admin/reports', roles: ['super_admin', 'sub_admin', 'lms_user', 'crm_agent', 'placement_coordinator', 'tutor'], section: 'REPORTS' },
+
       // SETTINGS
       { label: 'System Users', icon: 'mdi-account-group', route: '/dashboard/admin/settings/system-users', roles: ['super_admin'], section: 'SETTINGS' },
       { label: 'Settings', icon: 'mdi-cog-outline', route: '/dashboard/profile', roles: ['super_admin', 'sub_admin', 'tutor', 'student', 'employer', 'crm_agent', 'placement_coordinator', 'finance_staff', 'lms_user', 'support_staff'], section: 'SETTINGS' },

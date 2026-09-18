@@ -58,6 +58,7 @@ import adminSystemUsersRoutes from './routes/admin.system-users.routes.js';
 import adminMasterStandardsRoutes from './routes/admin.master-standards.routes.js';
 import highlightsRoutes from './routes/highlights.routes.js';
 import noticeBoardRoutes from './routes/notice-board.routes.js';
+import reportsRoutes from './routes/reports.routes.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -168,6 +169,7 @@ app.use('/api/admin/master-standards', adminMasterStandardsRoutes);
 app.use('/api/interviews', interviewsRoutes);
 app.use('/api/highlights', highlightsRoutes);
 app.use('/api/notice-board', noticeBoardRoutes);
+app.use('/api/reports', reportsRoutes);
 
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'OK', timestamp: new Date().toISOString() });
