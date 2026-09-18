@@ -22,54 +22,80 @@
 
     <!-- Stats Cards -->
     <v-row class="mb-6">
-      <v-col cols="12" sm="6" md="3">
-        <v-card variant="outlined" class="rounded-xl pa-4 bg-amber-lighten-5 border-amber">
+      <v-col cols="12" sm="6" md="2">
+        <v-card variant="outlined" class="rounded-xl pa-3 bg-amber-lighten-5 border-amber h-100">
           <div class="d-flex align-center justify-space-between">
             <div>
-              <div class="text-caption font-weight-bold text-amber-darken-3 text-uppercase">Pending Review</div>
+              <div class="text-caption font-weight-bold text-amber-darken-3 text-uppercase">Pending</div>
               <div class="text-h4 font-weight-black text-amber-darken-4 mt-1">{{ pendingCount }}</div>
             </div>
-            <v-avatar color="amber" size="44" rounded="lg">
-              <v-icon color="white" size="24">mdi-clock-alert-outline</v-icon>
+            <v-avatar color="amber" size="38" rounded="lg">
+              <v-icon color="white" size="20">mdi-clock-alert-outline</v-icon>
             </v-avatar>
           </div>
         </v-card>
       </v-col>
-      <v-col cols="12" sm="6" md="3">
-        <v-card variant="outlined" class="rounded-xl pa-4 bg-emerald-lighten-5 border-emerald">
+      <v-col cols="12" sm="6" md="2">
+        <v-card variant="outlined" class="rounded-xl pa-3 bg-emerald-lighten-5 border-emerald h-100">
           <div class="d-flex align-center justify-space-between">
             <div>
-              <div class="text-caption font-weight-bold text-success text-uppercase">Approved / Ready</div>
+              <div class="text-caption font-weight-bold text-success text-uppercase">Approved</div>
               <div class="text-h4 font-weight-black text-success mt-1">{{ approvedCount }}</div>
             </div>
-            <v-avatar color="success" size="44" rounded="lg">
-              <v-icon color="white" size="24">mdi-check-decagram-outline</v-icon>
+            <v-avatar color="success" size="38" rounded="lg">
+              <v-icon color="white" size="20">mdi-check-decagram-outline</v-icon>
             </v-avatar>
           </div>
         </v-card>
       </v-col>
-      <v-col cols="12" sm="6" md="3">
-        <v-card variant="outlined" class="rounded-xl pa-4 bg-blue-lighten-5 border-blue">
+      <v-col cols="12" sm="6" md="2">
+        <v-card variant="outlined" class="rounded-xl pa-3 bg-blue-lighten-5 border-blue h-100">
           <div class="d-flex align-center justify-space-between">
             <div>
               <div class="text-caption font-weight-bold text-info text-uppercase">Scheduled</div>
               <div class="text-h4 font-weight-black text-info mt-1">{{ scheduledCount }}</div>
             </div>
-            <v-avatar color="info" size="44" rounded="lg">
-              <v-icon color="white" size="24">mdi-calendar-check-outline</v-icon>
+            <v-avatar color="info" size="38" rounded="lg">
+              <v-icon color="white" size="20">mdi-calendar-check-outline</v-icon>
             </v-avatar>
           </div>
         </v-card>
       </v-col>
-      <v-col cols="12" sm="6" md="3">
-        <v-card variant="outlined" class="rounded-xl pa-4 bg-grey-lighten-4">
+      <v-col cols="12" sm="6" md="2">
+        <v-card variant="outlined" class="rounded-xl pa-3 bg-teal-lighten-5 border-teal h-100">
           <div class="d-flex align-center justify-space-between">
             <div>
-              <div class="text-caption font-weight-bold text-secondary text-uppercase">Total Requests</div>
+              <div class="text-caption font-weight-bold text-teal-darken-3 text-uppercase">Passed</div>
+              <div class="text-h4 font-weight-black text-teal-darken-4 mt-1">{{ passedCount }}</div>
+            </div>
+            <v-avatar color="teal" size="38" rounded="lg">
+              <v-icon color="white" size="20">mdi-certificate-outline</v-icon>
+            </v-avatar>
+          </div>
+        </v-card>
+      </v-col>
+      <v-col cols="12" sm="6" md="2">
+        <v-card variant="outlined" class="rounded-xl pa-3 bg-deep-orange-lighten-5 border-deep-orange h-100">
+          <div class="d-flex align-center justify-space-between">
+            <div>
+              <div class="text-caption font-weight-bold text-deep-orange-darken-3 text-uppercase">Re-attend</div>
+              <div class="text-h4 font-weight-black text-deep-orange-darken-4 mt-1">{{ needReattendCount }}</div>
+            </div>
+            <v-avatar color="deep-orange" size="38" rounded="lg">
+              <v-icon color="white" size="20">mdi-refresh-circle</v-icon>
+            </v-avatar>
+          </div>
+        </v-card>
+      </v-col>
+      <v-col cols="12" sm="6" md="2">
+        <v-card variant="outlined" class="rounded-xl pa-3 bg-grey-lighten-4 h-100">
+          <div class="d-flex align-center justify-space-between">
+            <div>
+              <div class="text-caption font-weight-bold text-secondary text-uppercase">Total</div>
               <div class="text-h4 font-weight-black mt-1">{{ requests.length }}</div>
             </div>
-            <v-avatar color="grey-darken-1" size="44" rounded="lg">
-              <v-icon color="white" size="24">mdi-format-list-bulleted</v-icon>
+            <v-avatar color="grey-darken-1" size="38" rounded="lg">
+              <v-icon color="white" size="20">mdi-format-list-bulleted</v-icon>
             </v-avatar>
           </div>
         </v-card>
@@ -87,7 +113,9 @@
             { title: `Pending Review (${pendingCount})`, value: 'pending' },
             { title: `Approved / Ready (${approvedCount})`, value: 'approved' },
             { title: `Scheduled (${scheduledCount})`, value: 'scheduled' },
-            { title: `Rejected`, value: 'rejected' }
+            { title: `Exam Passed (${passedCount})`, value: 'passed' },
+            { title: `Need to Attend Once Again (${needReattendCount})`, value: 'need_to_attend_again' },
+            { title: `Rejected (${rejectedCount})`, value: 'rejected' }
           ]"
           label="Status"
           variant="outlined"
@@ -95,7 +123,7 @@
           hide-details
           rounded="lg"
           prepend-inner-icon="mdi-filter-variant"
-          style="width: 210px;"
+          style="width: 250px;"
         ></v-select>
 
         <!-- Start Date -->
@@ -211,10 +239,10 @@
           <v-chip
             :color="getStatusColor(item.status)"
             size="small"
-            class="text-capitalize font-weight-bold"
+            class="font-weight-bold"
             variant="flat"
           >
-            {{ item.status }}
+            {{ getStatusLabel(item.status) }}
           </v-chip>
         </template>
 
@@ -266,6 +294,8 @@
               :items="[
                 { title: 'Approve (Student Ready)', value: 'approved' },
                 { title: 'Schedule Exam', value: 'scheduled' },
+                { title: 'Exam Passed', value: 'passed' },
+                { title: 'Need to Attend Once Again', value: 'need_to_attend_again' },
                 { title: 'Reject Request', value: 'rejected' },
                 { title: 'Keep Pending', value: 'pending' }
               ]"
@@ -353,11 +383,17 @@ const headers = [
 const pendingCount = computed(() => requests.value.filter(r => r.status === 'pending').length);
 const approvedCount = computed(() => requests.value.filter(r => r.status === 'approved').length);
 const scheduledCount = computed(() => requests.value.filter(r => r.status === 'scheduled').length);
+const passedCount = computed(() => requests.value.filter(r => r.status === 'passed' || r.status === 'exam_passed').length);
+const needReattendCount = computed(() => requests.value.filter(r => r.status === 'need_to_attend_again' || r.status === 'reattend').length);
+const rejectedCount = computed(() => requests.value.filter(r => r.status === 'rejected').length);
 
 const filteredRequests = computed(() => {
   return requests.value.filter(r => {
     // Status Filter
-    const matchesStatus = filterStatus.value === 'all' || r.status === filterStatus.value;
+    const matchesStatus = filterStatus.value === 'all' ||
+      r.status === filterStatus.value ||
+      (filterStatus.value === 'passed' && r.status === 'exam_passed') ||
+      (filterStatus.value === 'need_to_attend_again' && r.status === 'reattend');
 
     // Search Query Filter
     const q = search.value.toLowerCase().trim();
@@ -421,11 +457,29 @@ const saveRequest = async () => {
   }
 };
 
+const getStatusLabel = (status: string) => {
+  switch (status) {
+    case 'pending': return 'Pending';
+    case 'approved': return 'Approved / Ready';
+    case 'scheduled': return 'Scheduled';
+    case 'passed':
+    case 'exam_passed': return 'Exam Passed';
+    case 'need_to_attend_again':
+    case 'reattend': return 'Need to Attend Once Again';
+    case 'rejected': return 'Rejected';
+    default: return status || 'Unknown';
+  }
+};
+
 const getStatusColor = (status: string) => {
   switch (status) {
     case 'pending': return 'amber';
     case 'approved': return 'success';
     case 'scheduled': return 'info';
+    case 'passed':
+    case 'exam_passed': return 'teal';
+    case 'need_to_attend_again':
+    case 'reattend': return 'deep-orange';
     case 'rejected': return 'error';
     default: return 'grey';
   }
@@ -443,6 +497,8 @@ onMounted(fetchRequests);
 .border-amber { border-color: rgba(255, 193, 7, 0.4) !important; }
 .border-emerald { border-color: rgba(76, 175, 80, 0.4) !important; }
 .border-blue { border-color: rgba(33, 150, 243, 0.4) !important; }
+.border-teal { border-color: rgba(0, 150, 136, 0.4) !important; }
+.border-deep-orange { border-color: rgba(255, 87, 34, 0.4) !important; }
 
 .apple-table-card {
   background: white;

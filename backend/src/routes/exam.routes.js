@@ -19,7 +19,7 @@ async function ensureReadinessTable() {
         exam_id VARCHAR(36) DEFAULT NULL,
         certification_name VARCHAR(255) DEFAULT NULL,
         notes TEXT DEFAULT NULL,
-        status ENUM('pending', 'approved', 'rejected', 'scheduled') DEFAULT 'pending',
+        status VARCHAR(50) DEFAULT 'pending',
         admin_notes TEXT DEFAULT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -27,9 +27,10 @@ async function ensureReadinessTable() {
         INDEX idx_status (status)
       );
     `);
+    await pool.query(`ALTER TABLE exam_readiness_requests MODIFY COLUMN status VARCHAR(50) DEFAULT 'pending'`).catch(() => {});
     readinessTableChecked = true;
   } catch (err) {
-    console.error('Failed to create exam_readiness_requests table:', err);
+    console.error('Failed to create/update exam_readiness_requests table:', err);
   }
 }
 
@@ -248,7 +249,8 @@ router.put('/admin/readiness-requests/:id', authenticateJWT, isTutorOrAdmin, asy
   try {
     await ensureReadinessTable();
     const { status, admin_notes } = req.body;
-    if (!['pending', 'approved', 'rejected', 'scheduled'].includes(status)) {
+    const allowedStatuses = ['pending', 'approved', 'rejected', 'scheduled', 'passed', 'exam_passed', 'need_to_attend_again', 'reattend'];
+    if (!allowedStatuses.includes(status)) {
       return res.status(400).json({ message: 'Invalid status' });
     }
 
@@ -267,12 +269,31 @@ router.put('/admin/readiness-requests/:id', authenticateJWT, isTutorOrAdmin, asy
       if (courses.length > 0) itemTitle = courses[0].title;
     }
 
-    const statusLabel = status === 'approved' ? 'Approved' : (status === 'scheduled' ? 'Scheduled' : 'Rejected');
+    let statusLabel = 'Updated';
+    let notifMessage = `Your exam readiness request for "${itemTitle}" has been updated to ${status}.${admin_notes ? ` Note: ${admin_notes}` : ''}`;
+
+    if (status === 'approved') {
+      statusLabel = 'Approved';
+      notifMessage = `Your exam readiness request for "${itemTitle}" has been approved.${admin_notes ? ` Note: ${admin_notes}` : ''}`;
+    } else if (status === 'scheduled') {
+      statusLabel = 'Scheduled';
+      notifMessage = `Your exam for "${itemTitle}" has been scheduled.${admin_notes ? ` Note: ${admin_notes}` : ''}`;
+    } else if (status === 'passed' || status === 'exam_passed') {
+      statusLabel = 'Exam Passed';
+      notifMessage = `Congratulations! You have passed the exam for "${itemTitle}".${admin_notes ? ` Note: ${admin_notes}` : ''}`;
+    } else if (status === 'need_to_attend_again' || status === 'reattend') {
+      statusLabel = 'Need to Attend Once Again';
+      notifMessage = `Your exam evaluation indicates that you need to attend the exam for "${itemTitle}" once again.${admin_notes ? ` Note: ${admin_notes}` : ''}`;
+    } else if (status === 'rejected') {
+      statusLabel = 'Rejected';
+      notifMessage = `Your exam readiness request for "${itemTitle}" has been rejected.${admin_notes ? ` Note: ${admin_notes}` : ''}`;
+    }
+
     await createNotification({
       userId: reqItem.student_id,
       type: 'system',
-      title: `Exam Readiness Request ${statusLabel}`,
-      message: `Your exam readiness request for "${itemTitle}" has been ${statusLabel.toLowerCase()}.${admin_notes ? ` Note: ${admin_notes}` : ''}`,
+      title: `Exam Request: ${statusLabel}`,
+      message: notifMessage,
       link: '/dashboard/certificates',
       emailNotify: true
     });

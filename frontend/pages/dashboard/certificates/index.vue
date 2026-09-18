@@ -184,8 +184,8 @@
                 <td class="text-caption font-weight-medium">{{ formatDate(req.created_at) }}</td>
                 <td class="text-body-2 text-grey-darken-1">{{ req.notes || '—' }}</td>
                 <td>
-                  <v-chip :color="getReadinessStatusColor(req.status)" size="small" class="font-weight-bold text-capitalize" variant="flat">
-                    {{ req.status }}
+                  <v-chip :color="getReadinessStatusColor(req.status)" size="small" class="font-weight-bold" variant="flat">
+                    {{ getReadinessStatusLabel(req.status) }}
                   </v-chip>
                 </td>
                 <td class="text-body-2 text-primary font-weight-medium">{{ req.admin_notes || 'Pending review' }}</td>
@@ -396,11 +396,29 @@ const shareOnWhatsApp = (cert: any) => {
   window.open(url, '_blank');
 };
 
+const getReadinessStatusLabel = (status: string) => {
+  switch (status) {
+    case 'pending': return 'Pending';
+    case 'approved': return 'Approved';
+    case 'scheduled': return 'Scheduled';
+    case 'passed':
+    case 'exam_passed': return 'Exam Passed';
+    case 'need_to_attend_again':
+    case 'reattend': return 'Need to Attend Once Again';
+    case 'rejected': return 'Rejected';
+    default: return status || 'Unknown';
+  }
+};
+
 const getReadinessStatusColor = (status: string) => {
   switch (status) {
     case 'pending': return 'amber';
     case 'approved': return 'success';
     case 'scheduled': return 'info';
+    case 'passed':
+    case 'exam_passed': return 'teal';
+    case 'need_to_attend_again':
+    case 'reattend': return 'deep-orange';
     case 'rejected': return 'error';
     default: return 'grey';
   }
