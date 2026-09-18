@@ -129,8 +129,8 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// 3. Student Apply (with Resume Upload)
-router.post('/:id/apply', authenticateJWT, authorizeRoles('student'), upload.single('resume'), async (req, res) => {
+// 3. Apply (with Resume Upload)
+router.post('/:id/apply', authenticateJWT, upload.single('resume'), async (req, res) => {
   const { 
     first_name, last_name, dob, email, phone, gender, city, linkedin,
     qualification, field_of_study, institution, year_of_passing, grade,
@@ -205,8 +205,8 @@ router.post('/:id/apply', authenticateJWT, authorizeRoles('student'), upload.sin
   }
 });
 
-// 4. Check if Student Applied
-router.get('/:id/check-application', authenticateJWT, authorizeRoles('student'), async (req, res) => {
+// 4. Check if User Applied
+router.get('/:id/check-application', authenticateJWT, async (req, res) => {
   try {
     const [existing] = await pool.query("SELECT id FROM job_applications WHERE job_id = ? AND student_id = ?", [req.params.id, req.user.id]);
     res.json({ hasApplied: existing.length > 0 });
