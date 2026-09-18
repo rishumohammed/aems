@@ -11,21 +11,17 @@
 
       <!-- Quick Export & Date Range Presets -->
       <div class="d-flex align-center flex-wrap gap-2">
-        <v-btn-toggle
+        <SegmentControl
           v-model="datePreset"
-          mandatory
-          density="comfortable"
-          rounded="lg"
-          color="primary"
-          variant="outlined"
+          :options="[
+            { label: 'This Month', value: 'this_month' },
+            { label: 'Last Month', value: 'last_month' },
+            { label: 'Quarter', value: 'this_quarter' },
+            { label: 'Year', value: 'this_year' },
+            { label: 'Custom', value: 'custom' }
+          ]"
           @update:model-value="onPresetChange"
-        >
-          <v-btn value="this_month" size="small" class="text-capitalize font-weight-medium">This Month</v-btn>
-          <v-btn value="last_month" size="small" class="text-capitalize font-weight-medium">Last Month</v-btn>
-          <v-btn value="this_quarter" size="small" class="text-capitalize font-weight-medium">Quarter</v-btn>
-          <v-btn value="this_year" size="small" class="text-capitalize font-weight-medium">Year</v-btn>
-          <v-btn value="custom" size="small" class="text-capitalize font-weight-medium">Custom</v-btn>
-        </v-btn-toggle>
+        />
 
         <!-- Custom Date Pickers -->
         <v-text-field
