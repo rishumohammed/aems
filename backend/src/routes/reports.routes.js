@@ -51,10 +51,10 @@ function getDateRange(startDate, endDate) {
 // ─────────────────────────────────────────────────────────────────────────────
 router.get('/filters-meta', authenticateJWT, isAuthorized, async (req, res) => {
   try {
-    const [courses] = await pool.query('SELECT id, title FROM courses ORDER BY title ASC');
+    const [courses] = await pool.query('SELECT id, title FROM courses WHERE deleted_at IS NULL AND status != "archived" ORDER BY title ASC');
     const [categories] = await pool.query('SELECT id, name FROM job_categories WHERE is_active = 1 ORDER BY name ASC');
-    const [agents] = await pool.query('SELECT id, name, email FROM users WHERE role IN ("crm_agent", "super_admin", "sub_admin") AND status = "active" ORDER BY name ASC');
-    const [exams] = await pool.query('SELECT id, title, course_id FROM exams ORDER BY title ASC');
+    const [agents] = await pool.query('SELECT id, name, email FROM users WHERE role IN ("crm_agent", "super_admin", "sub_admin") AND status = "active" AND deleted_at IS NULL ORDER BY name ASC');
+    const [exams] = await pool.query('SELECT id, title, course_id FROM exams WHERE deleted_at IS NULL AND status != "archived" ORDER BY title ASC');
 
     res.json({
       courses,
@@ -130,6 +130,7 @@ router.get('/students-courses', authenticateJWT, isAuthorized, async (req, res) 
         ROUND(AVG(COALESCE(e.completion_percentage, 0)), 1) as avg_progress_pct
       FROM courses c
       LEFT JOIN enrollments e ON c.id = e.course_id
+      WHERE c.deleted_at IS NULL AND c.status != 'archived'
       GROUP BY c.id, c.title
       HAVING total_enrolled > 0
       ORDER BY total_enrolled DESC
@@ -211,7 +212,9 @@ router.get('/students-courses', authenticateJWT, isAuthorized, async (req, res) 
     // Map calculated exam_status based strictly on readiness requests (NOT course quiz/exam attempts)
     let studentsList = rawStudentsList.map(s => {
       let finalExamStatus = 'not_requested';
-      if (s.exam_request_status === 'passed' || s.exam_request_status === 'exam_passed') {
+      if (s.exam_request_status === 'certificate_received' || s.exam_request_status === 'cert_received') {
+        finalExamStatus = 'certificate_received';
+      } else if (s.exam_request_status === 'passed' || s.exam_request_status === 'exam_passed') {
         finalExamStatus = 'passed';
       } else if (s.exam_request_status === 'need_to_attend_again' || s.exam_request_status === 'reattend') {
         finalExamStatus = 'need_to_attend_again';
@@ -228,7 +231,7 @@ router.get('/students-courses', authenticateJWT, isAuthorized, async (req, res) 
       return {
         ...s,
         exam_status: finalExamStatus,
-        exam_passed: finalExamStatus === 'passed'
+        exam_passed: finalExamStatus === 'passed' || finalExamStatus === 'certificate_received'
       };
     });
 

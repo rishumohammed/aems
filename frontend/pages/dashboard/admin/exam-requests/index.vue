@@ -114,6 +114,7 @@
             { title: `Approved / Ready (${approvedCount})`, value: 'approved' },
             { title: `Scheduled (${scheduledCount})`, value: 'scheduled' },
             { title: `Exam Passed (${passedCount})`, value: 'passed' },
+            { title: `Certificate Received (${certReceivedCount})`, value: 'certificate_received' },
             { title: `Need to Attend Once Again (${needReattendCount})`, value: 'need_to_attend_again' },
             { title: `Rejected (${rejectedCount})`, value: 'rejected' }
           ]"
@@ -295,6 +296,7 @@
                 { title: 'Approve (Student Ready)', value: 'approved' },
                 { title: 'Schedule Exam', value: 'scheduled' },
                 { title: 'Exam Passed', value: 'passed' },
+                { title: 'Certificate Received', value: 'certificate_received' },
                 { title: 'Need to Attend Once Again', value: 'need_to_attend_again' },
                 { title: 'Reject Request', value: 'rejected' },
                 { title: 'Keep Pending', value: 'pending' }
@@ -384,6 +386,7 @@ const pendingCount = computed(() => requests.value.filter(r => r.status === 'pen
 const approvedCount = computed(() => requests.value.filter(r => r.status === 'approved').length);
 const scheduledCount = computed(() => requests.value.filter(r => r.status === 'scheduled').length);
 const passedCount = computed(() => requests.value.filter(r => r.status === 'passed' || r.status === 'exam_passed').length);
+const certReceivedCount = computed(() => requests.value.filter(r => r.status === 'certificate_received' || r.status === 'cert_received').length);
 const needReattendCount = computed(() => requests.value.filter(r => r.status === 'need_to_attend_again' || r.status === 'reattend').length);
 const rejectedCount = computed(() => requests.value.filter(r => r.status === 'rejected').length);
 
@@ -393,6 +396,7 @@ const filteredRequests = computed(() => {
     const matchesStatus = filterStatus.value === 'all' ||
       r.status === filterStatus.value ||
       (filterStatus.value === 'passed' && r.status === 'exam_passed') ||
+      (filterStatus.value === 'certificate_received' && (r.status === 'certificate_received' || r.status === 'cert_received')) ||
       (filterStatus.value === 'need_to_attend_again' && r.status === 'reattend');
 
     // Search Query Filter
@@ -464,6 +468,8 @@ const getStatusLabel = (status: string) => {
     case 'scheduled': return 'Scheduled';
     case 'passed':
     case 'exam_passed': return 'Exam Passed';
+    case 'certificate_received':
+    case 'cert_received': return 'Certificate Received';
     case 'need_to_attend_again':
     case 'reattend': return 'Need to Attend Once Again';
     case 'rejected': return 'Rejected';
@@ -478,6 +484,8 @@ const getStatusColor = (status: string) => {
     case 'scheduled': return 'info';
     case 'passed':
     case 'exam_passed': return 'teal';
+    case 'certificate_received':
+    case 'cert_received': return 'indigo';
     case 'need_to_attend_again':
     case 'reattend': return 'deep-orange';
     case 'rejected': return 'error';

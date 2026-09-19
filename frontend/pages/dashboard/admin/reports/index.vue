@@ -206,32 +206,6 @@
         </v-col>
       </v-row>
 
-      <!-- Course-wise Progress Summary Cards -->
-      <v-card flat class="rounded-xl border bg-white pa-4 mb-6">
-        <div class="text-subtitle-1 font-weight-bold mb-3 d-flex align-center">
-          <v-icon start size="20" color="primary">mdi-chart-box-outline</v-icon>
-          Course-wise Progression Summary
-        </div>
-        <v-row>
-          <v-col v-for="c in (studentsData?.courseBreakdown || []).slice(0, 6)" :key="c.course_id" cols="12" sm="6" md="4">
-            <div class="pa-3 rounded-lg border bg-grey-lighten-5">
-              <div class="font-weight-bold text-subtitle-2 text-truncate" :title="c.course_title">{{ c.course_title }}</div>
-              <div class="d-flex justify-space-between text-caption text-secondary mt-2 mb-1">
-                <span>Enrolled: <strong>{{ c.total_enrolled }}</strong></span>
-                <span>Ongoing: <strong>{{ c.ongoing_count }}</strong></span>
-                <span class="text-success">Completed: <strong>{{ c.completed_count }}</strong></span>
-              </div>
-              <v-progress-linear
-                :model-value="c.avg_progress_pct"
-                color="primary"
-                height="6"
-                rounded
-              ></v-progress-linear>
-              <div class="text-right text-caption text-grey mt-1">Avg Progress: {{ c.avg_progress_pct }}%</div>
-            </div>
-          </v-col>
-        </v-row>
-      </v-card>
 
       <!-- Filter Bar -->
       <v-card flat class="pa-4 mb-6 rounded-xl border bg-white">
@@ -270,6 +244,7 @@
             :items="[
               { title: 'All Exam Statuses', value: 'all' },
               { title: 'Exam Passed', value: 'passed' },
+              { title: 'Certificate Received', value: 'certificate_received' },
               { title: 'Need to Attend Once Again', value: 'need_to_attend_again' },
               { title: 'Scheduled', value: 'scheduled' },
               { title: 'Approved / Ready', value: 'approved' },
@@ -1285,6 +1260,7 @@ const debounceFetchJobs = () => {
 const getExamStatusLabel = (st: string) => {
   switch (st) {
     case 'passed': return 'Exam Passed';
+    case 'certificate_received': return 'Certificate Received';
     case 'need_to_attend_again': return 'Need to Attend Once Again';
     case 'scheduled': return 'Scheduled';
     case 'approved': return 'Approved / Ready';
@@ -1298,6 +1274,7 @@ const getExamStatusLabel = (st: string) => {
 const getExamStatusColor = (st: string) => {
   switch (st) {
     case 'passed': return 'teal';
+    case 'certificate_received': return 'indigo';
     case 'need_to_attend_again': return 'deep-orange';
     case 'scheduled': return 'info';
     case 'approved': return 'success';
@@ -1310,6 +1287,7 @@ const getExamStatusColor = (st: string) => {
 const getExamStatusIcon = (st: string) => {
   switch (st) {
     case 'passed': return 'mdi-check-decagram';
+    case 'certificate_received': return 'mdi-certificate';
     case 'need_to_attend_again': return 'mdi-refresh-circle';
     case 'scheduled': return 'mdi-calendar-check';
     case 'approved': return 'mdi-check-circle-outline';
