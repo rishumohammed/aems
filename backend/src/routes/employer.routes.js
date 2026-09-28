@@ -10,11 +10,11 @@ const router = express.Router();
 
 // 1. Employer Registration (Public)
 router.post('/register', async (req, res) => {
-  const { 
+  const {
     company_name, contact_name, email, phone, website, industry, description, password,
     employer_role, company_size, address, logo_url, linkedin_url
   } = req.body;
-  
+
   try {
     const [existing] = await pool.query('SELECT id FROM users WHERE email = ?', [email]);
     if (existing.length > 0) return res.status(400).json({ message: 'Email already exists' });
@@ -35,15 +35,15 @@ router.post('/register', async (req, res) => {
        (user_id, employer_role, company_name, company_size, industry, address, logo_url, about_company, website, linkedin_url) 
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
-        userId, 
-        employer_role || 'employer', 
-        company_name, 
-        company_size || null, 
-        industry || null, 
-        address || null, 
-        logo_url || null, 
-        description || null, 
-        website || null, 
+        userId,
+        employer_role || 'employer',
+        company_name,
+        company_size || null,
+        industry || null,
+        address || null,
+        logo_url || null,
+        description || null,
+        website || null,
         linkedin_url || null
       ]
     );
@@ -60,18 +60,18 @@ router.post('/register', async (req, res) => {
 const isEmployer = authorizeRoles('employer');
 
 router.post('/jobs', authenticateJWT, isEmployer, async (req, res) => {
-  const { 
-    title, category_id, location, is_remote, type, salary_range, description, 
+  const {
+    title, category_id, location, is_remote, type, salary_range, description,
     required_skills, nice_to_have_skills, experience_level, number_of_openings, deadline, apply_url,
     action, gender_preference, qualification_req, language_req, specialization_req, joining_status_req
   } = req.body;
-  
+
   try {
     // Check if user is verified (approved)
     const [profiles] = await pool.query("SELECT company_name, approval_status FROM employer_profiles WHERE user_id = ?", [req.user.id]);
     if (!profiles.length || profiles[0].approval_status !== 'approved') {
-      const message = profiles[0]?.approval_status === 'pending_approval' 
-        ? 'Your account is pending verification by an admin.' 
+      const message = profiles[0]?.approval_status === 'pending_approval'
+        ? 'Your account is pending verification by an admin.'
         : 'Your account is not approved for job posting. Please contact support.';
       return res.status(403).json({ message });
     }
@@ -79,8 +79,8 @@ router.post('/jobs', authenticateJWT, isEmployer, async (req, res) => {
     const company = profiles[0].company_name || 'Unknown Company';
 
     const jobId = uuidv4();
-    const requirements = JSON.stringify({ 
-      required: required_skills || [], 
+    const requirements = JSON.stringify({
+      required: required_skills || [],
       nice_to_have: nice_to_have_skills || [],
       experience_level: experience_level || '',
       number_of_openings: number_of_openings || 1
@@ -102,23 +102,23 @@ router.post('/jobs', authenticateJWT, isEmployer, async (req, res) => {
 
 // 3. Edit Job (Draft, Pending, or Rejected)
 router.put('/jobs/:id', authenticateJWT, isEmployer, async (req, res) => {
-  const { 
-    title, category_id, location, is_remote, type, salary_range, description, 
+  const {
+    title, category_id, location, is_remote, type, salary_range, description,
     required_skills, nice_to_have_skills, experience_level, number_of_openings, deadline, apply_url,
     action, gender_preference, qualification_req, language_req, specialization_req, joining_status_req
   } = req.body;
   try {
-    const requirements = JSON.stringify({ 
-      required: required_skills || [], 
+    const requirements = JSON.stringify({
+      required: required_skills || [],
       nice_to_have: nice_to_have_skills || [],
       experience_level: experience_level || '',
       number_of_openings: number_of_openings || 1
     });
-    
+
     // Allow edit if status is draft, pending_approval, or rejected
     const [existingJobs] = await pool.query('SELECT status FROM jobs WHERE id = ? AND posted_by = ?', [req.params.id, req.user.id]);
     if (existingJobs.length === 0) return res.status(404).json({ message: 'Job not found' });
-    
+
     const currentStatus = existingJobs[0].status;
     if (['approved', 'closed'].includes(currentStatus)) {
       return res.status(403).json({ message: 'Cannot edit approved or closed jobs' });
@@ -201,8 +201,8 @@ router.get('/profile', authenticateJWT, isEmployer, async (req, res) => {
 
 // Update Employer Profile
 router.put('/profile', authenticateJWT, isEmployer, async (req, res) => {
-  const { 
-    company_name, company_size, industry, address, logo_url, about_company, website, 
+  const {
+    company_name, company_size, industry, address, logo_url, about_company, website,
     linkedin_url, social_links_json, hiring_locations_json, benefits_json, phone
   } = req.body;
 
@@ -274,6 +274,11 @@ router.get('/stats', authenticateJWT, isEmployer, async (req, res) => {
       interviewsScheduled,
       hiresMade
     });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 // ────────────────────────────────────────────────────────────────────────────────
 // CANDIDATE AUTO-MATCHING & SOURCING
 // ────────────────────────────────────────────────────────────────────────────────
