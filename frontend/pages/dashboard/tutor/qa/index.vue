@@ -1,46 +1,43 @@
 <template>
   <v-container fluid class="pa-6">
     <!-- Header -->
-    <div class="pa-8 pb-4">
-      <div class="d-flex align-center justify-space-between mb-2">
-        <div>
-          <h1 class="text-h4 font-weight-bold mb-1">Course Q&A</h1>
-          <p class="text-subtitle-1 text-medium-emphasis mb-6">Manage and answer student questions across your courses.</p>
-        </div>
+    <div class="d-flex align-center justify-space-between mb-6">
+      <div>
+        <h1 class="text-h4 font-weight-bold mb-1">Course Q&A</h1>
+        <p class="text-secondary">Manage and answer student questions across your courses.</p>
       </div>
     </div>
 
-    <v-container fluid class="pa-8">
-      <!-- Stats Row -->
-      <v-row class="mb-6">
+    <!-- Stats Row -->
+    <v-row class="mb-6">
+      <v-col cols="12" sm="6" md="3">
+        <v-card elevation="0" rounded="xl" border class="pa-4">
+          <div class="text-caption text-secondary font-weight-bold text-uppercase mb-1">Total Questions</div>
+          <div class="text-h4 font-weight-black">{{ stats.total || 0 }}</div>
+        </v-card>
+      </v-col>
         <v-col cols="12" sm="6" md="3">
-          <v-card flat class="border rounded-lg pa-4">
-            <div class="text-caption text-grey font-weight-bold text-uppercase mb-1">Total Questions</div>
-            <div class="text-h4 font-weight-black">{{ stats.total || 0 }}</div>
-          </v-card>
-        </v-col>
-        <v-col cols="12" sm="6" md="3">
-          <v-card flat class="border rounded-lg pa-4">
-            <div class="text-caption text-grey font-weight-bold text-uppercase mb-1">Unanswered</div>
+          <v-card elevation="0" rounded="xl" border class="pa-4">
+            <div class="text-caption text-secondary font-weight-bold text-uppercase mb-1">Unanswered</div>
             <div class="text-h4 font-weight-black text-error">{{ stats.unanswered || 0 }}</div>
           </v-card>
         </v-col>
         <v-col cols="12" sm="6" md="3">
-          <v-card flat class="border rounded-lg pa-4">
-            <div class="text-caption text-grey font-weight-bold text-uppercase mb-1">Answered</div>
+          <v-card elevation="0" rounded="xl" border class="pa-4">
+            <div class="text-caption text-secondary font-weight-bold text-uppercase mb-1">Answered</div>
             <div class="text-h4 font-weight-black text-success">{{ stats.answered || 0 }}</div>
           </v-card>
         </v-col>
         <v-col cols="12" sm="6" md="3">
-          <v-card flat class="border rounded-lg pa-4">
-            <div class="text-caption text-grey font-weight-bold text-uppercase mb-1">Avg Response</div>
+          <v-card elevation="0" rounded="xl" border class="pa-4">
+            <div class="text-caption text-secondary font-weight-bold text-uppercase mb-1">Avg Response</div>
             <div class="text-h4 font-weight-black">{{ stats.avgResponseTime || '--' }}</div>
           </v-card>
         </v-col>
       </v-row>
 
       <!-- Tabs for Filtering -->
-      <v-card flat rounded="xl" class="border-0 shadow-soft overflow-hidden">
+      <v-card elevation="0" rounded="xl" border class="overflow-hidden">
         <div class="pa-6 border-b d-flex align-center justify-space-between">
           <v-tabs v-model="statusTab" color="primary" density="comfortable">
             <v-tab value="" class="text-capitalize font-weight-bold">All</v-tab>
@@ -129,7 +126,6 @@
           <v-skeleton-loader type="table-thead, table-row-divider@4"></v-skeleton-loader>
         </div>
       </v-card>
-    </v-container>
   </v-container>
 </template>
 

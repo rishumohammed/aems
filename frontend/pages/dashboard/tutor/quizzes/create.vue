@@ -1,30 +1,27 @@
 <template>
   <v-container fluid class="pa-6">
-    <!-- Header with Breadcrumbs -->
-    <div class="header-section pa-8 pb-15 mb-n10">
-      <div class="d-flex align-center justify-space-between mb-2">
-        <div>
-          <div class="text-caption text-white opacity-80 mb-1 d-flex align-center">
-            <v-icon size="14" class="mr-1">mdi-home</v-icon>
-            Dashboard / Quizzes / <span class="font-weight-black ml-1">New Quiz</span>
-          </div>
-          <h1 class="text-h4 font-weight-bold mb-1">Create Assessment</h1>
-          <p class="text-subtitle-1 text-medium-emphasis mb-6">Design your quiz and add interactive questions.</p>
+    <!-- Header -->
+    <div class="d-flex align-center justify-space-between mb-6">
+      <div>
+        <div class="text-caption text-secondary mb-1 d-flex align-center">
+          <v-icon size="14" class="mr-1">mdi-home</v-icon>
+          Dashboard / Quizzes / <span class="font-weight-bold ml-1 text-primary">New Quiz</span>
         </div>
-        <div class="d-flex gap-3">
-          <v-btn variant="text" color="white" class="font-weight-bold" to="/dashboard/tutor/quizzes">Discard</v-btn>
-          <v-btn color="white" rounded="xl" class="text-primary font-weight-black px-6 shadow-glow" size="large" @click="saveQuiz" :loading="saving">
-            Publish Quiz
-          </v-btn>
-        </div>
+        <h1 class="text-h4 font-weight-bold mb-1">Create Assessment</h1>
+        <p class="text-secondary">Design your quiz and add interactive questions.</p>
+      </div>
+      <div class="d-flex gap-3">
+        <v-btn variant="text" class="font-weight-bold" to="/dashboard/tutor/quizzes">Discard</v-btn>
+        <v-btn color="primary" rounded="lg" class="font-weight-bold px-6" @click="saveQuiz" :loading="saving">
+          Publish Quiz
+        </v-btn>
       </div>
     </div>
 
-    <v-container fluid class="pa-8">
-      <v-row>
-        <!-- Quiz Settings -->
-        <v-col cols="12" lg="4">
-          <v-card flat rounded="xl" class="pa-6 border-0 shadow-soft mb-6">
+    <v-row>
+      <!-- Quiz Settings -->
+      <v-col cols="12" lg="4">
+        <v-card elevation="0" rounded="xl" border class="pa-6 mb-6">
             <h3 class="text-h6 font-weight-black mb-6 d-flex align-center">
               <v-icon color="primary" class="mr-2">mdi-cog-outline</v-icon>
               Quiz Configuration
@@ -131,7 +128,6 @@
           </div>
         </v-col>
       </v-row>
-    </v-container>
   </v-container>
 </template>
 

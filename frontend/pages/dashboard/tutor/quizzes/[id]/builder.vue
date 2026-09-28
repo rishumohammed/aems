@@ -1,41 +1,38 @@
 <template>
   <v-container fluid class="pa-6">
-    <div class="header-section pa-8 pb-15 mb-n10">
-      <div class="d-flex align-center justify-space-between mb-2">
-        <div class="d-flex align-center">
-          <v-btn icon="mdi-arrow-left" variant="tonal" color="white" class="mr-4" to="/dashboard/tutor/quizzes"></v-btn>
-          <div>
-            <h1 class="text-h4 font-weight-bold mb-1">Question Builder</h1>
-            <p class="text-subtitle-1 text-medium-emphasis mb-6" v-if="quiz">{{ quiz.title }} • {{ quiz.course_title }}</p>
-          </div>
+    <div class="d-flex align-center justify-space-between mb-6">
+      <div class="d-flex align-center">
+        <v-btn icon="mdi-arrow-left" variant="text" class="mr-3" to="/dashboard/tutor/quizzes"></v-btn>
+        <div>
+          <h1 class="text-h4 font-weight-bold mb-1">Question Builder</h1>
+          <p class="text-secondary" v-if="quiz">{{ quiz.title }} • {{ quiz.course_title }}</p>
         </div>
-        <div class="d-flex gap-3">
-          <input type="file" ref="fileInput" accept=".csv" class="d-none" @change="handleFileUpload" />
-          <v-btn color="white" variant="outlined" rounded="xl" class="text-white font-weight-black px-6" size="large" @click="fileInput?.click()">
-            <v-icon left class="mr-2">mdi-upload</v-icon> Bulk Import CSV
-          </v-btn>
-          <v-btn color="white" rounded="xl" class="text-primary font-weight-black px-6" size="large" @click="saveQuiz" :loading="saving">
-            Save Changes
-          </v-btn>
-        </div>
+      </div>
+      <div class="d-flex gap-3">
+        <input type="file" ref="fileInput" accept=".csv" class="d-none" @change="handleFileUpload" />
+        <v-btn variant="outlined" rounded="lg" class="font-weight-bold px-4" @click="fileInput?.click()">
+          <v-icon left class="mr-2">mdi-upload</v-icon> Bulk Import CSV
+        </v-btn>
+        <v-btn color="primary" rounded="lg" class="font-weight-bold px-6" @click="saveQuiz" :loading="saving">
+          Save Changes
+        </v-btn>
       </div>
     </div>
 
-    <v-container fluid class="pa-8">
-      <v-row v-if="loading" justify="center" class="mt-12">
-        <v-col cols="12" class="text-center">
-          <v-progress-circular indeterminate color="primary" size="64"></v-progress-circular>
-          <p class="mt-4 text-grey">Loading quiz data...</p>
-        </v-col>
-      </v-row>
+    <v-row v-if="loading" justify="center" class="mt-12">
+      <v-col cols="12" class="text-center">
+        <v-progress-circular indeterminate color="primary" size="64"></v-progress-circular>
+        <p class="mt-4 text-grey">Loading quiz data...</p>
+      </v-col>
+    </v-row>
 
-      <v-row v-else>
-        <v-col cols="12" md="8">
-          <QuizQuestionBuilder v-model="questions" />
-        </v-col>
+    <v-row v-else>
+      <v-col cols="12" md="8">
+        <QuizQuestionBuilder v-model="questions" />
+      </v-col>
 
-        <v-col cols="12" md="4">
-          <v-card flat rounded="xl" class="pa-6 shadow-soft border-0 sticky-card">
+      <v-col cols="12" md="4">
+        <v-card elevation="0" rounded="xl" border class="pa-6 sticky-card">
             <h3 class="text-h6 font-weight-black mb-4">Quiz Settings</h3>
             
             <v-text-field
@@ -103,7 +100,6 @@
           </v-card>
         </v-col>
       </v-row>
-    </v-container>
 
     <!-- Success Snackbar -->
     <v-snackbar v-model="successSnack" color="success" rounded="pill" location="bottom right" elevation="24">

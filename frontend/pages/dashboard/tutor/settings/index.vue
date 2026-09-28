@@ -1,29 +1,26 @@
 <template>
   <v-container fluid class="pa-6">
     <!-- Header -->
-    <v-card class="pa-8 pb-15 mb-n10 border-b rounded-0" elevation="0" color="white">
-      <div class="d-flex align-center justify-space-between mb-2">
-        <div>
-          <h1 class="text-h4 font-weight-bold mb-1">Instructor Settings</h1>
-          <p class="text-subtitle-1 text-medium-emphasis mb-6">Manage your profile, expertise, and teaching preferences.</p>
-        </div>
-        <v-btn color="primary" variant="flat" rounded="lg" class="font-weight-bold px-6" size="large" :loading="loading" @click="saveSettings">
-          Save Changes
-        </v-btn>
+    <div class="d-flex align-center justify-space-between mb-6">
+      <div>
+        <h1 class="text-h4 font-weight-bold mb-1">Instructor Settings</h1>
+        <p class="text-secondary">Manage your profile, expertise, and teaching preferences.</p>
       </div>
-    </v-card>
+      <v-btn color="primary" variant="flat" rounded="lg" class="font-weight-bold px-6" :loading="loading" @click="saveSettings">
+        Save Changes
+      </v-btn>
+    </div>
 
-    <v-container fluid class="pa-8">
-      <v-row>
-        <!-- Profile Card -->
-        <v-col cols="12" md="4">
-          <v-card flat rounded="xl" class="pa-6 border-0 shadow-soft text-center h-100">
-            <div class="position-relative d-inline-block mb-6">
-              <v-avatar size="120" class="av-ring elevation-10">
-                <v-img :src="`https://ui-avatars.com/api/?name=${authStore.user?.name}&background=007AFF&color=fff&size=120`"></v-img>
-              </v-avatar>
-              <v-btn icon="mdi-camera" size="small" color="primary" class="position-absolute bottom-0 right-0 border-2 border-white"></v-btn>
-            </div>
+    <v-row>
+      <!-- Profile Card -->
+      <v-col cols="12" md="4">
+        <v-card elevation="0" rounded="xl" border class="pa-6 text-center h-100">
+          <div class="position-relative d-inline-block mb-6">
+            <v-avatar size="120" class="av-ring">
+              <v-img :src="`https://ui-avatars.com/api/?name=${authStore.user?.name}&background=007AFF&color=fff&size=120`"></v-img>
+            </v-avatar>
+            <v-btn icon="mdi-camera" size="small" color="primary" class="position-absolute bottom-0 right-0"></v-btn>
+          </div>
             
             <h2 class="text-h5 font-weight-black mb-1">{{ authStore.user?.name }}</h2>
             <div class="text-caption text-uppercase font-weight-bold text-primary mb-6">Verified Instructor</div>
@@ -147,7 +144,6 @@
           </v-card>
         </v-col>
       </v-row>
-    </v-container>
   </v-container>
 </template>
 

@@ -3,6 +3,8 @@ import bcrypt from 'bcryptjs';
 import { v4 as uuidv4 } from 'uuid';
 import { pool } from '../db/connection.js';
 import { authenticateJWT, authorizeRoles } from '../middleware/auth.js';
+import { getJobMatchedCandidates } from '../services/jobMatching.service.js';
+import { createNotification } from '../services/notification.service.js';
 
 const router = express.Router();
 
@@ -272,8 +274,84 @@ router.get('/stats', authenticateJWT, isEmployer, async (req, res) => {
       interviewsScheduled,
       hiresMade
     });
+// ────────────────────────────────────────────────────────────────────────────────
+// CANDIDATE AUTO-MATCHING & SOURCING
+// ────────────────────────────────────────────────────────────────────────────────
+
+// Fetch matching students from talent pool for a specific job
+router.get('/jobs/:id/matched-candidates', authenticateJWT, isEmployer, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { minScore = 0, limit = 100 } = req.query;
+
+    // Verify employer owns this job
+    const [jobs] = await pool.query('SELECT id, posted_by FROM jobs WHERE id = ?', [id]);
+    if (!jobs.length) return res.status(404).json({ message: 'Job not found' });
+    if (jobs[0].posted_by !== req.user.id) {
+      return res.status(403).json({ message: 'Unauthorized to view candidates for this job' });
+    }
+
+    const data = await getJobMatchedCandidates(id, {
+      minScore: parseInt(minScore, 10) || 0,
+      limit: parseInt(limit, 10) || 100
+    });
+
+    res.json(data);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error('Error in matched-candidates:', error);
+    res.status(500).json({ message: error.message || 'Failed to fetch matched candidates' });
+  }
+});
+
+// Direct candidate invitation from employer to student
+router.post('/jobs/:id/invite-candidate', authenticateJWT, isEmployer, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { student_id, message } = req.body;
+
+    if (!student_id) {
+      return res.status(400).json({ message: 'student_id is required' });
+    }
+
+    // Verify job
+    const [jobs] = await pool.query(`
+      SELECT j.id, j.title, j.company, ep.company_name, u.name as poster_name
+      FROM jobs j
+      LEFT JOIN employer_profiles ep ON ep.user_id = j.posted_by
+      LEFT JOIN users u ON u.id = j.posted_by
+      WHERE j.id = ? AND j.posted_by = ?
+    `, [id, req.user.id]);
+
+    if (!jobs.length) {
+      return res.status(404).json({ message: 'Job not found or unauthorized' });
+    }
+    const job = jobs[0];
+    const companyDisplayName = job.company_name || job.company || 'Our Company';
+
+    // Verify student
+    const [students] = await pool.query('SELECT id, name, email FROM users WHERE id = ? AND role = "student"', [student_id]);
+    if (!students.length) {
+      return res.status(404).json({ message: 'Student not found' });
+    }
+    const student = students[0];
+
+    const inviteTitle = `🎯 Job Invitation: ${job.title} at ${companyDisplayName}`;
+    const inviteMessage = message || `Hello ${student.name}, based on your matching profile and skills, ${companyDisplayName} has invited you to apply for the position of "${job.title}".`;
+
+    // Send notification + email
+    await createNotification({
+      userId: student.id,
+      type: 'job_invitation',
+      title: inviteTitle,
+      message: inviteMessage,
+      link: `/jobs/${job.id}`,
+      emailNotify: true
+    });
+
+    res.json({ message: 'Invitation successfully sent to candidate!', student_name: student.name });
+  } catch (error) {
+    console.error('Error inviting candidate:', error);
+    res.status(500).json({ message: error.message || 'Failed to send invitation' });
   }
 });
 

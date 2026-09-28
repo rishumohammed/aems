@@ -5,17 +5,17 @@
       <div class="d-flex align-center justify-space-between mb-8">
         <div>
           <h1 class="text-h4 font-weight-bold mb-1">Course Approvals</h1>
-          <p class="text-blue-grey-300">Review and approve courses submitted by tutors.</p>
+          <p class="text-secondary">Review and approve courses submitted by tutors.</p>
         </div>
         <v-btn icon="mdi-refresh" variant="tonal" color="primary" @click="loadPendingCourses" :loading="loading"></v-btn>
       </div>
 
-      <v-card rounded="xl" border class="shadow-card overflow-hidden">
+      <v-card rounded="xl" border elevation="0" class="shadow-card overflow-hidden">
         <v-data-table
           :headers="headers"
           :items="courses"
           :loading="loading"
-          class="bg-transparent text-grey-darken-4 custom-table"
+          class="bg-transparent"
         >
           <!-- Tutor Column -->
           <template v-slot:item.tutor_name="{ item }">
@@ -33,7 +33,7 @@
           <!-- Course Details Column -->
           <template v-slot:item.title="{ item }">
             <div class="font-weight-bold">{{ item.title }}</div>
-            <div class="text-caption text-blue-grey-300 d-flex align-center gap-2 mt-1">
+            <div class="text-caption text-secondary d-flex align-center gap-2 mt-1">
               <v-icon size="x-small">mdi-tag</v-icon> {{ item.category_name || 'Uncategorized' }}
               <span class="mx-1">•</span>
               <v-icon size="x-small">mdi-book-outline</v-icon> {{ item.section_count || 0 }} Chapters
@@ -59,7 +59,7 @@
           </template>
 
           <template v-slot:no-data>
-            <div class="pa-10 text-center text-blue-grey-300">
+            <div class="pa-10 text-center text-secondary">
               <v-icon size="64" class="mb-4 opacity-50">mdi-check-all</v-icon>
               <h3 class="text-h6 font-weight-bold">All caught up!</h3>
               <p>No courses pending approval at the moment.</p>
@@ -76,7 +76,7 @@
           <v-btn icon="mdi-arrow-left" variant="tonal" size="small" @click="viewingCourse = null"></v-btn>
           <div>
             <h1 class="text-h4 font-weight-bold mb-1">Course Review</h1>
-            <p class="text-blue-grey-300">Review all details before approving or rejecting this course.</p>
+            <p class="text-secondary">Review all details before approving or rejecting this course.</p>
           </div>
         </div>
         <div class="d-flex gap-3">

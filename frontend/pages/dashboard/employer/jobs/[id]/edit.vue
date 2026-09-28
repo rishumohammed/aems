@@ -396,7 +396,7 @@ const submitJob = async (action: 'draft' | 'submit') => {
   
 }
 .tiptap-wrapper {
-  border-color: rgba(255,255,255,0.2) !important;
+  border-color: rgba(0, 0, 0, 0.12) !important;
   overflow: hidden;
 }
 .min-h-200 {

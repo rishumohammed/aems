@@ -1,32 +1,30 @@
 <template>
   <v-container fluid class="pa-6">
-    <div class="header-section pa-8 pb-15 mb-n10">
-      <div class="d-flex align-center justify-space-between mb-2">
-        <div class="d-flex align-center">
-          <v-btn icon="mdi-arrow-left" variant="text" color="white" class="mr-4" @click="$router.back()"></v-btn>
-          <div>
-            <h1 class="text-h4 font-weight-bold mb-1">Question Thread</h1>
-            <p class="text-subtitle-1 text-medium-emphasis mb-6">{{ question?.course_title || 'Loading...' }}</p>
-          </div>
+    <div class="d-flex align-center justify-space-between mb-6">
+      <div class="d-flex align-center">
+        <v-btn icon="mdi-arrow-left" variant="text" class="mr-3" @click="$router.back()"></v-btn>
+        <div>
+          <h1 class="text-h4 font-weight-bold mb-1">Question Thread</h1>
+          <p class="text-secondary">{{ question?.course_title || 'Loading...' }}</p>
         </div>
-        <div v-if="question">
-          <v-chip
-            :color="getStatusColor(question.status)"
-            size="large"
-            class="font-weight-black text-uppercase shadow-glow"
-          >
-            {{ question.status }}
-          </v-chip>
-        </div>
+      </div>
+      <div v-if="question">
+        <v-chip
+          :color="getStatusColor(question.status)"
+          size="large"
+          class="font-weight-bold text-uppercase"
+          variant="tonal"
+        >
+          {{ question.status }}
+        </v-chip>
       </div>
     </div>
 
-    <v-container fluid class="pa-8">
-      <v-row v-if="!loading && question">
-        <!-- Main Thread -->
-        <v-col cols="12" md="8">
-          <!-- Question -->
-          <v-card flat rounded="xl" class="border shadow-soft mb-6 pa-6">
+    <v-row v-if="!loading && question">
+      <!-- Main Thread -->
+      <v-col cols="12" md="8">
+        <!-- Question -->
+        <v-card elevation="0" rounded="xl" border class="mb-6 pa-6">
             <div class="d-flex align-start">
               <v-avatar color="primary" class="mr-4" size="48">
                 <span class="text-h6 text-white">{{ question.student_name.charAt(0) }}</span>
@@ -144,7 +142,6 @@
       <div v-else class="pa-12 text-center">
         <h3 class="text-h5 font-weight-bold text-grey-darken-1">Question not found</h3>
       </div>
-    </v-container>
   </v-container>
 </template>
 

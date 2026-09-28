@@ -1,21 +1,18 @@
 <template>
   <v-container fluid class="pa-6">
     <!-- Header Section -->
-    <v-card class="pa-10 pb-16 mb-n12 rounded-b-xl border-b" elevation="0" color="white">
-      <div class="d-flex align-center justify-space-between mb-2 position-relative">
-        <div>
-          <h1 class="text-h3 font-weight-black mb-2">Tutor Dashboard</h1>
-          <p class="text-h6 text-secondary font-weight-medium">Manage your academy, interact with students, and track your growth.</p>
-        </div>
-        <v-btn color="primary" rounded="lg" variant="flat" class="font-weight-bold px-8" size="large" to="/dashboard/courses/create" prepend-icon="mdi-plus">
-          New Course
-        </v-btn>
+    <div class="d-flex align-center justify-space-between mb-8">
+      <div>
+        <h1 class="text-h4 font-weight-bold mb-1">Tutor Dashboard</h1>
+        <p class="text-secondary">Manage your academy, interact with students, and track your growth.</p>
       </div>
-    </v-card>
+      <v-btn color="primary" rounded="lg" variant="flat" class="font-weight-bold px-6" size="large" to="/dashboard/courses/create" prepend-icon="mdi-plus">
+        New Course
+      </v-btn>
+    </div>
 
-    <v-container fluid class="pa-8">
-      <!-- Stats Row -->
-      <v-row class="mb-8">
+    <!-- Stats Row -->
+    <v-row class="mb-8">
         <v-col v-for="stat in stats" :key="stat.title" cols="12" sm="6" md="3" class="d-flex flex-column">
           <KpiCard
             :title="stat.title"
@@ -113,7 +110,6 @@
           </v-card>
         </v-col>
       </v-row>
-    </v-container>
   </v-container>
 </template>
 

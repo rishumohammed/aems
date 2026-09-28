@@ -5,7 +5,7 @@
         <v-btn icon="mdi-arrow-left" variant="text" class="mr-4" @click="goBack"></v-btn>
         <div>
           <h1 class="text-h4 font-weight-bold mb-1">Applicant Profile</h1>
-          <p class="text-blue-grey-300">Detailed ATS view for candidate assessment</p>
+          <p class="text-secondary">Detailed ATS view for candidate assessment</p>
         </div>
       </div>
     </div>

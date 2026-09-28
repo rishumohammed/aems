@@ -3,17 +3,17 @@
     <div class="d-flex align-center justify-space-between mb-8">
       <div>
         <h1 class="text-h4 font-weight-bold mb-1">Tutors</h1>
-        <p class="text-blue-grey-300">Manage all registered tutors, their courses, and performance.</p>
+        <p class="text-secondary">Manage all registered tutors, their courses, and performance.</p>
       </div>
       <v-btn icon="mdi-refresh" variant="tonal" color="primary" @click="loadTutors" :loading="loading"></v-btn>
     </div>
 
-    <v-card rounded="xl" border class="shadow-card overflow-hidden">
+    <v-card rounded="xl" border elevation="0" class="shadow-card overflow-hidden">
       <v-data-table
         :headers="headers"
         :items="tutors"
         :loading="loading"
-        class="bg-transparent text-grey-darken-4 custom-table"
+        class="bg-transparent"
       >
         <!-- Profile Column -->
         <template v-slot:item.profile="{ item }">
@@ -24,14 +24,14 @@
             </v-avatar>
             <div>
               <div class="font-weight-bold text-body-1">{{ item.name }}</div>
-              <div class="text-caption text-grey">{{ item.email }}</div>
+              <div class="text-caption text-secondary">{{ item.email }}</div>
             </div>
           </div>
-</template>
+        </template>
 
         <!-- Specialization -->
         <template v-slot:item.specialization="{ item }">
-          <span class="text-blue-grey-600 font-weight-medium">{{ item.specialization || 'Not specified' }}</span>
+          <span class="text-secondary font-weight-medium">{{ item.specialization || 'Not specified' }}</span>
         </template>
 
         <!-- Status -->
@@ -44,7 +44,7 @@
 
         <!-- Joined Date -->
         <template v-slot:item.created_at="{ item }">
-          <div class="text-caption font-weight-medium text-grey-darken-1">
+          <div class="text-caption font-weight-medium text-secondary">
             {{ new Date(item.created_at).toLocaleDateString() }}
           </div>
         </template>
@@ -55,9 +55,9 @@
         </template>
 
         <template v-slot:no-data>
-          <div class="pa-10 text-center text-blue-grey-300">
-            <v-icon size="64" class="mb-4 opacity-50">mdi-account-tie</v-icon>
-            <h3 class="text-h6 font-weight-bold">No tutors found</h3>
+          <div class="pa-10 text-center">
+            <v-icon size="48" color="grey-lighten-1" class="mb-3">mdi-account-tie</v-icon>
+            <h3 class="text-subtitle-1 font-weight-bold text-secondary">No tutors found</h3>
           </div>
         </template>
       </v-data-table>

@@ -1,39 +1,35 @@
 <template>
   <v-container fluid class="pa-6">
     <!-- Header -->
-    <v-card class="pa-8 pb-15 mb-n10 border-b rounded-0" elevation="0" color="white">
-      <div class="d-flex align-center justify-space-between mb-2">
-        <div>
-          <h1 class="text-h4 font-weight-bold mb-1">Quiz Management</h1>
-          <p class="text-subtitle-1 text-medium-emphasis mb-6">Create and manage assessments for your students.</p>
-        </div>
-        <v-btn color="primary" variant="flat" rounded="lg" class="font-weight-bold px-6" size="large" @click="showCreateDialog = true" prepend-icon="mdi-plus">
-          Create New Quiz
-        </v-btn>
+    <div class="d-flex align-center justify-space-between mb-6">
+      <div>
+        <h1 class="text-h4 font-weight-bold mb-1">Quiz Management</h1>
+        <p class="text-secondary">Create and manage assessments for your students.</p>
       </div>
-    </v-card>
+      <v-btn color="primary" variant="flat" rounded="lg" class="font-weight-bold px-6" @click="showCreateDialog = true" prepend-icon="mdi-plus">
+        Create New Quiz
+      </v-btn>
+    </div>
 
-    <v-container fluid class="pa-8">
-      <!-- Stats Summary -->
-      <v-row class="mb-8">
-        <v-col v-for="stat in stats" :key="stat.title" cols="12" sm="6" md="3">
-          <v-card flat class="stat-card rounded-xl pa-6 border-0 overflow-hidden" elevation="4">
-            <div class="d-flex align-center justify-space-between">
-              <div>
-                <div class="text-caption text-uppercase font-weight-black text-grey-darken-1 mb-1">{{ stat.title }}</div>
-                <div class="text-h3 font-weight-black mb-1 tracking-tight">{{ stat.value }}</div>
-              </div>
-              <v-avatar :color="stat.color" size="56" rounded="lg" class="elevation-10">
-                <v-icon color="white" size="28">{{ stat.icon }}</v-icon>
-              </v-avatar>
+    <!-- Stats Summary -->
+    <v-row class="mb-6">
+      <v-col v-for="stat in stats" :key="stat.title" cols="12" sm="6" md="3">
+        <v-card elevation="0" rounded="xl" border class="stat-card pa-6 overflow-hidden">
+          <div class="d-flex align-center justify-space-between">
+            <div>
+              <div class="text-caption text-uppercase font-weight-bold text-secondary mb-1">{{ stat.title }}</div>
+              <div class="text-h3 font-weight-black mb-1 tracking-tight">{{ stat.value }}</div>
             </div>
-            <div class="card-bg-circle" :class="'bg-' + stat.color"></div>
-          </v-card>
-        </v-col>
-      </v-row>
+            <v-avatar :color="stat.color" size="48" rounded="lg" variant="tonal">
+              <v-icon :color="stat.color" size="24">{{ stat.icon }}</v-icon>
+            </v-avatar>
+          </div>
+        </v-card>
+      </v-col>
+    </v-row>
 
-      <!-- Quizzes Table -->
-      <v-card flat rounded="xl" class="border-0 shadow-soft overflow-hidden">
+    <!-- Quizzes Table -->
+    <v-card elevation="0" rounded="xl" border class="overflow-hidden">
         <div class="pa-6 border-b d-flex align-center justify-space-between">
           <h2 class="text-h5 font-weight-black">All Quizzes</h2>
           <div class="d-flex gap-4">
@@ -96,7 +92,6 @@
           </template>
         </v-data-table>
       </v-card>
-    </v-container>
 
     <!-- Create Quiz Dialog (Simplified for now) -->
     <v-dialog v-model="showCreateDialog" max-width="600">

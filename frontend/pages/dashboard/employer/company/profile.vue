@@ -3,7 +3,7 @@
     <div class="d-flex align-center justify-space-between mb-8">
       <div>
         <h1 class="text-h4 font-weight-bold mb-1">Company Profile</h1>
-        <p class="text-blue-grey-300">Manage your company's public branding and details.</p>
+        <p class="text-secondary">Manage your company's public branding and details.</p>
       </div>
       <v-btn
         color="primary"
@@ -18,13 +18,13 @@
       </v-btn>
     </div>
 
-    <v-card color="white" border rounded="xl" class="pa-6 mb-8 shadow-card">
+    <v-card color="white" border rounded="xl" elevation="0" class="pa-6 mb-8 shadow-card">
       <v-form ref="form">
         <h3 class="text-h6 font-weight-bold text-grey-darken-4 mb-4">Basic Details</h3>
         
         <v-row>
           <v-col cols="12" md="3" class="text-center">
-            <v-avatar size="150" color="grey-darken-3" class="mb-4">
+            <v-avatar size="150" color="grey-lighten-4" class="mb-4">
               <v-img v-if="formData.logo_url" :src="formData.logo_url" cover></v-img>
               <v-icon v-else size="64" color="grey">mdi-domain</v-icon>
             </v-avatar>

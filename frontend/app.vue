@@ -31,8 +31,8 @@ onMounted(async () => {
     if (data) {
       if (data.brand_primary_color) {
         // Update Vuetify Theme
-        if (theme.themes.value?.appleLight) {
-          theme.themes.value.appleLight.colors.primary = data.brand_primary_color;
+        if (theme.themes.value?.brand) {
+          theme.themes.value.brand.colors.primary = data.brand_primary_color;
         }
         (theme.global.current.value.colors as any).primary = data.brand_primary_color;
         
@@ -42,8 +42,8 @@ onMounted(async () => {
         document.documentElement.style.setProperty('--v-theme-primary', data.brand_primary_color);
       }
       if (data.brand_secondary_color) {
-        if (theme.themes.value?.appleLight) {
-          theme.themes.value.appleLight.colors.secondary = data.brand_secondary_color;
+        if (theme.themes.value?.brand) {
+          theme.themes.value.brand.colors.secondary = data.brand_secondary_color;
         }
         (theme.global.current.value.colors as any).secondary = data.brand_secondary_color;
         document.documentElement.style.setProperty('--v-theme-secondary', data.brand_secondary_color);

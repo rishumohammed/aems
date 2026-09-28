@@ -1,27 +1,23 @@
 <template>
   <v-container fluid class="pa-6">
-    <!-- Header -->
-    <v-card class="pa-8 pb-15 mb-n10 border-b rounded-0" elevation="0" color="white">
-      <div class="d-flex align-center justify-space-between mb-2">
-        <div>
-          <h1 class="text-h4 font-weight-bold mb-1">My Courses</h1>
-          <p class="text-subtitle-1 text-medium-emphasis mb-6">Manage and organize your learning curriculum.</p>
-        </div>
-        <v-btn color="primary" variant="flat" rounded="lg" class="font-weight-bold px-6" size="large" to="/dashboard/courses/create" prepend-icon="mdi-plus">
-          Create New Course
-        </v-btn>
+    <div class="d-flex align-center justify-space-between mb-6">
+      <div>
+        <h1 class="text-h4 font-weight-bold mb-1">My Courses</h1>
+        <p class="text-secondary">Manage and organize your learning curriculum.</p>
       </div>
-    </v-card>
+      <v-btn color="primary" variant="flat" rounded="lg" class="font-weight-bold px-6" to="/dashboard/courses/create" prepend-icon="mdi-plus">
+        Create New Course
+      </v-btn>
+    </div>
 
-    <v-container fluid class="pa-8">
-      <!-- Tabs for Filtering -->
-      <v-card flat rounded="xl" class="border-0 shadow-soft overflow-hidden">
-        <div class="pa-6 border-b d-flex align-center justify-space-between">
-          <v-tabs v-model="courseTab" color="primary" density="comfortable">
-            <v-tab value="all" class="text-capitalize font-weight-bold">All Courses</v-tab>
-            <v-tab value="published" class="text-capitalize font-weight-bold">Published</v-tab>
-            <v-tab value="draft" class="text-capitalize font-weight-bold">Drafts</v-tab>
-          </v-tabs>
+    <!-- Tabs for Filtering -->
+    <v-card elevation="0" rounded="xl" border class="overflow-hidden">
+      <div class="pa-6 border-b d-flex align-center justify-space-between">
+        <v-tabs v-model="courseTab" color="primary" density="comfortable">
+          <v-tab value="all" class="text-capitalize font-weight-bold">All Courses</v-tab>
+          <v-tab value="published" class="text-capitalize font-weight-bold">Published</v-tab>
+          <v-tab value="draft" class="text-capitalize font-weight-bold">Drafts</v-tab>
+        </v-tabs>
           
           <v-text-field
             v-model="search"
@@ -130,7 +126,6 @@
           <v-skeleton-loader type="table-thead, table-row-divider@4"></v-skeleton-loader>
         </div>
       </v-card>
-    </v-container>
   </v-container>
 </template>
 

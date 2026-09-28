@@ -3,6 +3,8 @@ import { v4 as uuidv4 } from 'uuid';
 import { pool } from '../db/connection.js';
 import { authenticateJWT, authorizeRoles, requirePermission } from '../middleware/auth.js';
 import emailService from '../services/email.service.js';
+import { createNotification } from '../services/notification.service.js';
+import { calculateJobMatch, getJobMatchedCandidates } from '../services/jobMatching.service.js';
 
 const router = express.Router();
 const hasAccess = requirePermission('jobs');
@@ -299,13 +301,22 @@ router.put('/jobs/:id', authenticateJWT, hasAccess, async (req, res) => {
 });
 
 // ────────────────────────────────────────────────────────────────────────────────
-// APPLICANTS PER JOB
+// APPLICANTS PER JOB & CANDIDATE MATCHING
 // ────────────────────────────────────────────────────────────────────────────────
 router.get('/jobs/:id/applicants', authenticateJWT, hasAccess, async (req, res) => {
   try {
-    // Basic job details
-    const [jobs] = await pool.query('SELECT title, company, location FROM jobs WHERE id = ?', [req.params.id]);
+    const { match_status } = req.query;
+
+    // Basic job details including requirements
+    const [jobs] = await pool.query(`
+      SELECT id, title, company, location, requirements_json, qualification_req, experience_level, 
+             specialization_req, gender_preference, language_req, joining_status_req 
+      FROM jobs WHERE id = ?
+    `, [req.params.id]);
     
+    if (jobs.length === 0) return res.status(404).json({ message: 'Job not found' });
+    const job = jobs[0];
+
     // Applicants with student info
     const [applicants] = await pool.query(`
       SELECT ja.*, 
@@ -325,9 +336,123 @@ router.get('/jobs/:id/applicants', authenticateJWT, hasAccess, async (req, res) 
       ORDER BY ja.applied_at DESC
     `, [req.params.id]);
 
-    res.json({ job: jobs[0], applicants });
+    // Compute match score and breakdown for each applicant
+    const scoredApplicants = applicants.map(app => {
+      const match = calculateJobMatch({
+        requirements_json: job.requirements_json,
+        qualification_req: job.qualification_req,
+        experience_level: job.experience_level,
+        specialization_req: job.specialization_req,
+        gender_preference: job.gender_preference,
+        language_req: job.language_req,
+        joining_status_req: job.joining_status_req
+      }, {
+        skills: app.skills_json,
+        experience_years: app.experience_years,
+        qualification: app.qualification,
+        field_of_study: app.field_of_study,
+        gender: app.applicant_gender,
+        language_proficiency: app.language_proficiency,
+        joining_status: app.joining_status,
+        certs_active: app.certs_active,
+        courses_completed: app.courses_completed
+      });
+
+      return {
+        ...app,
+        matchScore: match.matchScore,
+        isMatch: match.isMatch,
+        criteriaBreakdown: match.criteriaBreakdown,
+        matchedSkills: match.matchedSkills,
+        missingSkills: match.missingSkills
+      };
+    });
+
+    let result = scoredApplicants;
+    if (match_status === 'matched') {
+      result = scoredApplicants.filter(a => a.isMatch);
+    } else if (match_status === 'unmatched') {
+      result = scoredApplicants.filter(a => !a.isMatch);
+    }
+
+    result.sort((a, b) => b.matchScore - a.matchScore || new Date(b.applied_at).getTime() - new Date(a.applied_at).getTime());
+
+    res.json({ job, applicants: result });
   } catch (error) {
     res.status(500).json({ message: error.message });
+  }
+});
+
+// Fetch matching students from talent pool for a specific job (Admin)
+router.get('/jobs/:id/matched-candidates', authenticateJWT, hasAccess, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { minScore = 0, limit = 100 } = req.query;
+
+    const [jobs] = await pool.query('SELECT id FROM jobs WHERE id = ?', [id]);
+    if (!jobs.length) return res.status(404).json({ message: 'Job not found' });
+
+    const data = await getJobMatchedCandidates(id, {
+      minScore: parseInt(minScore, 10) || 0,
+      limit: parseInt(limit, 10) || 100
+    });
+
+    res.json(data);
+  } catch (error) {
+    console.error('Error in admin matched-candidates:', error);
+    res.status(500).json({ message: error.message || 'Failed to fetch matched candidates' });
+  }
+});
+
+// Direct candidate invitation from admin to student
+router.post('/jobs/:id/invite-candidate', authenticateJWT, hasAccess, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { student_id, message } = req.body;
+
+    if (!student_id) {
+      return res.status(400).json({ message: 'student_id is required' });
+    }
+
+    // Verify job
+    const [jobs] = await pool.query(`
+      SELECT j.id, j.title, j.company, ep.company_name, u.name as poster_name
+      FROM jobs j
+      LEFT JOIN employer_profiles ep ON ep.user_id = j.posted_by
+      LEFT JOIN users u ON u.id = j.posted_by
+      WHERE j.id = ?
+    `, [id]);
+
+    if (!jobs.length) {
+      return res.status(404).json({ message: 'Job not found' });
+    }
+    const job = jobs[0];
+    const companyDisplayName = job.company_name || job.company || 'Brix Ecosystem Partner';
+
+    // Verify student
+    const [students] = await pool.query('SELECT id, name, email FROM users WHERE id = ? AND role = "student"', [student_id]);
+    if (!students.length) {
+      return res.status(404).json({ message: 'Student not found' });
+    }
+    const student = students[0];
+
+    const inviteTitle = `🎯 Job Invitation: ${job.title} at ${companyDisplayName}`;
+    const inviteMessage = message || `Hello ${student.name}, based on your matching profile and skills, you have been invited to apply for "${job.title}".`;
+
+    // Send notification + email
+    await createNotification({
+      userId: student.id,
+      type: 'job_invitation',
+      title: inviteTitle,
+      message: inviteMessage,
+      link: `/jobs/${job.id}`,
+      emailNotify: true
+    });
+
+    res.json({ message: 'Invitation successfully sent to candidate!', student_name: student.name });
+  } catch (error) {
+    console.error('Error inviting candidate (Admin):', error);
+    res.status(500).json({ message: error.message || 'Failed to send invitation' });
   }
 });
 

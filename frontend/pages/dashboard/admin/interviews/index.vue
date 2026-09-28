@@ -3,17 +3,17 @@
     <div class="d-flex align-center justify-space-between mb-8">
       <div>
         <h1 class="text-h4 font-weight-bold mb-1">Interviews</h1>
-        <p class="text-blue-grey-300">Monitor all scheduled and completed interviews across the platform.</p>
+        <p class="text-secondary">Monitor all scheduled and completed interviews across the platform.</p>
       </div>
       <v-btn icon="mdi-refresh" variant="tonal" color="primary" @click="fetchInterviews" :loading="loading"></v-btn>
     </div>
 
-    <v-card rounded="xl" border class="shadow-card overflow-hidden">
+    <v-card rounded="xl" border elevation="0" class="shadow-card overflow-hidden">
       <v-data-table
         :headers="headers"
         :items="interviews"
         :loading="loading"
-        class="bg-transparent text-grey-darken-4 custom-table"
+        class="bg-transparent"
       >
         <!-- Applicant -->
         <template v-slot:item.applicant="{ item }">
@@ -23,15 +23,15 @@
             </v-avatar>
             <div>
               <div class="font-weight-bold text-body-1">{{ item.applicant_name }}</div>
-              <div class="text-caption text-grey">{{ item.applicant_email }}</div>
+              <div class="text-caption text-secondary">{{ item.applicant_email }}</div>
             </div>
           </div>
-</template>
+        </template>
 
         <!-- Job Details -->
         <template v-slot:item.job="{ item }">
           <div class="font-weight-bold">{{ item.job_title }}</div>
-          <div class="text-caption text-blue-grey-300 d-flex align-center gap-1 mt-1">
+          <div class="text-caption text-secondary d-flex align-center gap-1 mt-1">
             <v-icon size="x-small">mdi-domain</v-icon> {{ item.job_company }}
           </div>
         </template>
@@ -39,13 +39,13 @@
         <!-- Round -->
         <template v-slot:item.round="{ item }">
           <span class="font-weight-medium">{{ item.round_name || 'Interview' }}</span>
-          <div class="text-caption text-grey">{{ item.type || 'Online' }}</div>
+          <div class="text-caption text-secondary">{{ item.type || 'Online' }}</div>
         </template>
 
         <!-- Time & Location -->
         <template v-slot:item.time="{ item }">
           <div class="font-weight-medium">{{ new Date(item.scheduled_at).toLocaleDateString() }}</div>
-          <div class="text-caption text-grey">
+          <div class="text-caption text-secondary">
             {{ new Date(item.scheduled_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }}
           </div>
         </template>
@@ -68,9 +68,9 @@
         </template>
 
         <template v-slot:no-data>
-          <div class="pa-10 text-center text-blue-grey-300">
-            <v-icon size="64" class="mb-4 opacity-50">mdi-calendar-blank</v-icon>
-            <h3 class="text-h6 font-weight-bold">No interviews found.</h3>
+          <div class="pa-10 text-center">
+            <v-icon size="48" color="grey-lighten-1" class="mb-3">mdi-calendar-blank</v-icon>
+            <h3 class="text-subtitle-1 font-weight-bold text-secondary">No interviews found.</h3>
           </div>
         </template>
       </v-data-table>

@@ -3,25 +3,25 @@
     <div class="d-flex align-center justify-space-between mb-8">
       <div>
         <h1 class="text-h4 font-weight-bold mb-1">Interviews</h1>
-        <p class="text-blue-grey-300">Manage your scheduled interviews with candidates.</p>
+        <p class="text-secondary">Manage your scheduled interviews with candidates.</p>
       </div>
     </div>
 
-    <v-card color="white" rounded="xl" border class="shadow-card">
+    <v-card color="white" rounded="xl" border elevation="0">
       <v-data-table
         :headers="headers"
         :items="interviews"
         :loading="loading"
-        class="bg-transparent text-grey-darken-4 custom-table"
+        class="bg-transparent"
       >
         <template v-slot:item.candidate="{ item }">
-          <div class="font-weight-bold text-h6">{{ item.applicant_name || 'Anonymous' }}</div>
-          <div class="text-caption text-blue-grey-300">{{ item.applicant_email }}</div>
-</template>
+          <div class="font-weight-bold text-subtitle-1">{{ item.applicant_name || 'Anonymous' }}</div>
+          <div class="text-caption text-secondary">{{ item.applicant_email }}</div>
+        </template>
 
         <template v-slot:item.job="{ item }">
           <div class="font-weight-bold">{{ item.job_title }}</div>
-          <div class="text-caption text-blue-grey-300">{{ item.round_name || 'Interview' }}</div>
+          <div class="text-caption text-secondary">{{ item.round_name || 'Interview' }}</div>
         </template>
 
         <template v-slot:item.scheduled_at="{ item }">
@@ -79,9 +79,9 @@
         </template>
         
         <template v-slot:no-data>
-          <div class="pa-8 text-center text-blue-grey-300">
+          <div class="pa-8 text-center text-secondary">
             <v-icon size="64" class="mb-4 opacity-50">mdi-calendar-blank</v-icon>
-            <h3>No interviews scheduled.</h3>
+            <h3 class="text-subtitle-1 font-weight-medium">No interviews scheduled.</h3>
           </div>
         </template>
       </v-data-table>
@@ -282,28 +282,3 @@ const getStatusColor = (status: string) => {
   }
 };
 </script>
-
-<style scoped>
-.shadow-card {
-  border: 1px solid var(--border);
-  
-}
-::v-deep(.custom-table) {
-  background: transparent !important;
-}
-::v-deep(.custom-table th) {
-  background: rgba(255,255,255,0.03) !important;
-  color: #94a3b8 !important;
-  font-weight: 800;
-  text-transform: uppercase;
-  font-size: 0.7rem;
-  letter-spacing: 0.1em;
-  border-bottom: 1px solid rgba(255,255,255,0.08) !important;
-  padding: 16px !important;
-}
-::v-deep(.custom-table td) {
-  border-bottom: 1px solid rgba(255,255,255,0.05) !important;
-  padding-top: 16px !important;
-  padding-bottom: 16px !important;
-}
-</style>

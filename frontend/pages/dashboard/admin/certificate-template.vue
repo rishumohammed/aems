@@ -4,15 +4,15 @@
       <v-btn icon="mdi-arrow-left" variant="text" @click="$router.back()"></v-btn>
       <div>
         <h1 class="text-h4 font-weight-bold mb-1">Certificate Template Editor</h1>
-        <p class="text-blue-grey-300">Customize the design of automatically generated certificates</p>
+        <p class="text-secondary">Customize the design of automatically generated certificates</p>
       </div>
     </div>
 
     <v-row>
       <!-- Config Form -->
       <v-col cols="12" md="4">
-        <v-card color="#1a1a2e" rounded="xl" border class="pa-6">
-          <h3 class="text-h6 font-weight-bold text-white mb-6">Template Settings</h3>
+        <v-card elevation="0" rounded="xl" border class="pa-6">
+          <h3 class="text-h6 font-weight-bold mb-6">Template Settings</h3>
           
           <v-text-field
             v-model="config.institution_name"
@@ -39,7 +39,7 @@
           ></v-text-field>
 
           <div class="mb-6">
-            <label class="text-caption text-blue-grey-300 mb-2 d-block">Brand Color</label>
+            <label class="text-caption text-secondary mb-2 d-block">Brand Color</label>
             <div class="d-flex align-center gap-4">
               <input type="color" v-model="config.brand_color" class="color-picker" />
               <v-text-field
@@ -67,8 +67,8 @@
 
       <!-- Live Preview -->
       <v-col cols="12" md="8">
-        <v-card color="#1a1a2e" rounded="xl" border class="pa-6 fill-height bg-grey-darken-4">
-          <h3 class="text-h6 font-weight-bold text-white mb-6 d-flex align-center justify-space-between">
+        <v-card elevation="0" rounded="xl" border class="pa-6 fill-height">
+          <h3 class="text-h6 font-weight-bold mb-6 d-flex align-center justify-space-between">
             Live Preview
             <v-chip size="small" color="primary" variant="tonal">A4 Landscape</v-chip>
           </h3>
@@ -137,13 +137,14 @@ const saveConfig = async () => {
   padding: 0;
 }
 .color-picker::-webkit-color-swatch {
-  border: 2px solid rgba(255,255,255,0.1);
+  border: 1px solid rgba(0,0,0,0.12);
   border-radius: 8px;
 }
 .preview-container {
   width: 100%;
   overflow: auto;
-  background: #000;
+  background: #f1f5f9;
+  border: 1px solid rgba(0,0,0,0.06);
   border-radius: 12px;
   padding: 24px;
 }

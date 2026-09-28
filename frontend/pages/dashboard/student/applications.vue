@@ -1,11 +1,10 @@
 <template>
-  <v-container fluid class="pa-2 pa-sm-4 pa-md-6">
-    <v-container class="py-4 py-sm-8">
-      <!-- Header -->
-      <header class="mb-6 mb-sm-10">
-        <h1 class="text-h5 text-sm-h4 font-weight-bold mb-1">My Job Applications</h1>
-        <p class="text-subtitle-1 text-medium-emphasis mb-6">Track the status of your career opportunities.</p>
-      </header>
+  <v-container fluid class="pa-6">
+    <!-- Header -->
+    <div class="mb-6">
+      <h1 class="text-h4 font-weight-bold mb-1">My Job Applications</h1>
+      <p class="text-secondary">Track the status of your career opportunities.</p>
+    </div>
 
       <v-row v-if="loading">
         <v-col v-for="i in 3" :key="i" cols="12">
@@ -48,7 +47,6 @@
         <p class="text-body-2 text-grey mb-6">You haven't applied to any jobs yet. Start exploring now!</p>
         <v-btn color="primary" rounded="pill" class="px-8" to="/dashboard/jobs">Browse Jobs</v-btn>
       </div>
-    </v-container>
   </v-container>
 </template>
 

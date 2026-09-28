@@ -1,66 +1,64 @@
 <template>
-  <v-container fluid class="pa-2 pa-sm-4 pa-md-6">
-    <v-container class="pt-2 pt-sm-4 pb-8">
-      
-      <div v-if="loading" class="pa-6">
-        <v-skeleton-loader type="image" class="rounded-xl mb-6" height="200"></v-skeleton-loader>
-        <v-row class="mb-10">
-          <v-col v-for="i in 5" :key="i" cols="12" sm="4" md="2">
-            <v-skeleton-loader type="list-item-avatar-two-line" class="rounded-xl"></v-skeleton-loader>
-          </v-col>
-        </v-row>
-        <v-row>
+  <v-container fluid class="pa-6">
+    <div v-if="loading" class="pa-6">
+      <v-skeleton-loader type="image" class="rounded-xl mb-6" height="200"></v-skeleton-loader>
+      <v-row class="mb-8">
+        <v-col v-for="i in 6" :key="i" cols="12" sm="4" md="2">
+          <v-skeleton-loader type="list-item-avatar-two-line" class="rounded-xl"></v-skeleton-loader>
+        </v-col>
+      </v-row>
+      <v-row>
+        <v-col cols="12" md="8">
+          <v-skeleton-loader type="card, card" class="rounded-xl"></v-skeleton-loader>
+        </v-col>
+        <v-col cols="12" md="4">
+          <v-skeleton-loader type="card" height="400" class="rounded-xl"></v-skeleton-loader>
+        </v-col>
+      </v-row>
+    </div>
+
+    <template v-else>
+      <!-- Top Section: Welcome -->
+      <header class="mb-6 mb-sm-8 welcome-header pa-5 pa-sm-8 rounded-xl text-white overflow-hidden position-relative">
+        <v-row align="center" class="position-relative" style="z-index: 2">
           <v-col cols="12" md="8">
-            <v-skeleton-loader type="card, card" class="rounded-xl"></v-skeleton-loader>
+            <h1 class="text-h5 text-sm-h4 text-md-h3 font-weight-black mb-2 tracking-tight">
+              Welcome back, {{ authStore.user?.name?.split(' ')[0] || 'Learner' }}! 👋
+            </h1>
+            <p class="text-body-1 text-sm-h6 opacity-90 font-weight-medium">
+              You have <span class="text-amber-accent-2 font-weight-black">{{ stats.pending_assignments || 0 }}</span> tasks waiting for you.
+            </p>
           </v-col>
-          <v-col cols="12" md="4">
-            <v-skeleton-loader type="card" height="400" class="rounded-xl"></v-skeleton-loader>
-          </v-col>
-        </v-row>
-      </div>
-
-      <template v-else>
-        <!-- Top Section: Welcome -->
-        <header class="mb-6 mb-sm-8 welcome-header pa-5 pa-sm-8 rounded-xl text-white elevation-4 overflow-hidden position-relative">
-          <v-row align="center" class="position-relative" style="z-index: 2">
-            <v-col cols="12" md="8">
-              <h1 class="text-h5 text-sm-h4 text-md-h3 font-weight-black mb-2 tracking-tight">
-                Welcome back, {{ authStore.user?.name?.split(' ')[0] || 'Learner' }}! 👋
-              </h1>
-              <p class="text-body-1 text-sm-h6 opacity-90 font-weight-medium">
-                You have <span class="text-amber-accent-2 font-weight-black">{{ stats.pending_assignments || 0 }}</span> tasks waiting for you.
-              </p>
-            </v-col>
-            <v-col cols="12" md="4" class="text-md-right d-flex ga-2 justify-md-end flex-wrap">
-              <v-btn color="white" variant="flat" size="large" prepend-icon="mdi-play" class="rounded-xl px-6 font-weight-black text-primary shadow-apple" to="/dashboard/courses">
-                Resume Learning
-              </v-btn>
-              <v-btn color="amber-accent-2" variant="flat" size="large" prepend-icon="mdi-school-outline" class="rounded-xl px-6 font-weight-black text-black shadow-apple" to="/dashboard/certificates">
-                Ready for Exam 🎓
-              </v-btn>
-            </v-col>
-          </v-row>
-          <!-- Decorative Elements -->
-          <div class="header-decoration-1"></div>
-          <div class="header-decoration-2"></div>
-        </header>
-
-        <!-- Stats Grid -->
-        <v-row class="mb-10">
-          <v-col v-for="stat in statCards" :key="stat.label" cols="12" sm="6" md="4" lg="2">
-            <v-card class="stat-card rounded-xl border-0" elevation="2">
-              <v-card-text class="d-flex align-center pa-4">
-                <v-avatar :color="stat.color + '-lighten-5'" size="48" rounded="lg" class="mr-4">
-                  <v-icon :color="stat.color" :icon="stat.icon" size="24"></v-icon>
-                </v-avatar>
-                <div>
-                  <div class="text-h5 font-weight-black">{{ stat.value }}</div>
-                  <div class="text-caption font-weight-medium text-grey">{{ stat.label }}</div>
-                </div>
-              </v-card-text>
-            </v-card>
+          <v-col cols="12" md="4" class="text-md-right d-flex ga-2 justify-md-end flex-wrap">
+            <v-btn color="white" variant="flat" size="large" prepend-icon="mdi-play" class="rounded-xl px-6 font-weight-black text-primary shadow-apple" to="/dashboard/courses">
+              Resume Learning
+            </v-btn>
+            <v-btn color="amber-accent-2" variant="flat" size="large" prepend-icon="mdi-school-outline" class="rounded-xl px-6 font-weight-black text-black shadow-apple" to="/dashboard/certificates">
+              Ready for Exam 🎓
+            </v-btn>
           </v-col>
         </v-row>
+        <!-- Decorative Elements -->
+        <div class="header-decoration-1"></div>
+        <div class="header-decoration-2"></div>
+      </header>
+
+      <!-- Stats Grid -->
+      <v-row class="mb-8">
+        <v-col v-for="stat in statCards" :key="stat.label" cols="12" sm="6" md="4" lg="2">
+          <v-card class="stat-card rounded-xl" elevation="0" border>
+            <v-card-text class="d-flex align-center pa-4">
+              <v-avatar :color="stat.color + '-lighten-5'" size="44" rounded="lg" class="mr-3">
+                <v-icon :color="stat.color" :icon="stat.icon" size="22"></v-icon>
+              </v-avatar>
+              <div>
+                <div class="text-h6 font-weight-black">{{ stat.value }}</div>
+                <div class="text-caption font-weight-medium text-secondary">{{ stat.label }}</div>
+              </div>
+            </v-card-text>
+          </v-card>
+        </v-col>
+      </v-row>
 
         <v-row>
         <!-- Left Content (Main) -->
@@ -392,7 +390,6 @@
         </v-col>
       </v-row>
       </template>
-    </v-container>
   </v-container>
 </template>
 
@@ -583,23 +580,6 @@ definePageMeta({
   width: 100%;
 }
  
-.job-widget {
-  background: linear-gradient(135deg, #1e1e2f 0%, #1a1a2e 100%) !important;
-  position: relative;
-  overflow: hidden;
-}
-
-.job-widget::after {
-  content: '';
-  position: absolute;
-  top: -20%;
-  right: -10%;
-  width: 150px;
-  height: 150px;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 50%;
-}
-
 .date-box {
   min-width: 50px;
 }

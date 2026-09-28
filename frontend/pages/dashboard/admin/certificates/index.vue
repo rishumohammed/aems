@@ -3,7 +3,7 @@
     <div class="d-flex align-center justify-space-between mb-6">
       <div>
         <h1 class="text-h4 font-weight-bold mb-1">Certificate Management</h1>
-        <p class="text-blue-grey-300">View, revoke, and re-issue student certificates</p>
+        <p class="text-secondary">View, revoke, and re-issue student certificates</p>
       </div>
       <div class="d-flex gap-2">
         <v-btn v-if="authStore.userRole === 'super_admin'" color="success" variant="flat" rounded="lg" prepend-icon="mdi-plus" @click="openModal()">
@@ -17,14 +17,13 @@
 
     <IssueCertificateModal v-model="showIssueModal" :editData="editData" @issued="loadCerts" />
 
-    <v-card color="#1a1a2e" rounded="xl" border>
+    <v-card elevation="0" rounded="xl" border>
       <v-card-title class="pa-4 d-flex align-center">
         <v-text-field
           v-model="search"
           prepend-inner-icon="mdi-magnify"
           placeholder="Search by student, course, or cert ID..."
-          variant="solo-filled"
-          bg-color="rgba(255,255,255,0.05)"
+          variant="outlined"
           hide-details
           density="compact"
           class="max-w-400 mr-4"
@@ -45,7 +44,6 @@
         :items="filteredCerts"
         :search="search"
         :loading="loading"
-        class="bg-transparent text-white custom-table"
       >
         <template v-slot:item.cert_number="{ item }">
           <span class="font-weight-bold text-primary">{{ item.cert_number }}</span>
@@ -54,9 +52,9 @@
         <template v-slot:item.student_name="{ item }">
           <div>
             <div class="font-weight-bold">{{ item.student_name }}</div>
-            <div class="text-caption text-blue-grey-300">{{ item.email }}</div>
+            <div class="text-caption text-secondary">{{ item.email }}</div>
           </div>
-</template>
+        </template>
         
         <template v-slot:item.issued_at="{ item }">
           {{ new Date(item.issued_at).toLocaleDateString() }}
@@ -221,18 +219,4 @@ const confirmDelete = async (item: any) => {
 <style scoped>
 .max-w-400 { max-width: 400px; }
 .max-w-200 { max-width: 200px; }
-::v-deep(.custom-table) {
-  background: transparent !important;
-}
-::v-deep(.custom-table th) {
-  background: rgba(0,0,0,0.2) !important;
-  color: #94a3b8 !important;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  border-bottom: 1px solid rgba(255,255,255,0.05) !important;
-}
-::v-deep(.custom-table td) {
-  border-bottom: 1px solid rgba(255,255,255,0.05) !important;
-}
 </style>

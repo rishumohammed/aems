@@ -3,7 +3,7 @@
     <div class="d-flex align-center justify-space-between mb-8">
       <div>
         <h1 class="text-h4 font-weight-bold mb-1">Job Management</h1>
-        <p class="text-blue-grey-300">Manage all your job postings across the platform.</p>
+        <p class="text-secondary">Manage all your job postings across the platform.</p>
       </div>
       <v-btn
         color="primary"
@@ -17,16 +17,14 @@
       </v-btn>
     </div>
 
-    <v-card color="white" rounded="xl" border class="shadow-card">
-      <div class="d-flex align-center pa-4 border-b border-opacity-10">
+    <v-card color="white" rounded="xl" border elevation="0">
+      <div class="d-flex align-center pa-4 border-b">
         <v-text-field
           v-model="search"
           prepend-inner-icon="mdi-magnify"
           placeholder="Search jobs..."
-          variant="solo-filled"
-          flat
+          variant="outlined"
           hide-details
-          bg-color="rgba(255,255,255,0.05)"
           class="mr-4 max-w-300"
           density="compact"
         ></v-text-field>
@@ -37,15 +35,15 @@
         :items="jobs"
         :loading="loading"
         :search="search"
-        class="bg-transparent text-grey-darken-4 custom-table"
+        class="bg-transparent"
       >
         <template v-slot:item.title="{ item }">
-          <div class="font-weight-bold text-h6">{{ item.title }}</div>
-          <div class="text-caption text-blue-grey-300 d-flex align-center gap-2 mt-1">
+          <div class="font-weight-bold text-subtitle-1">{{ item.title }}</div>
+          <div class="text-caption text-secondary d-flex align-center gap-2 mt-1">
             <v-icon size="small">mdi-map-marker-outline</v-icon> {{ item.is_remote ? 'Remote' : item.location }}
             <v-icon size="small" class="ml-2">mdi-clock-outline</v-icon> {{ item.type.replace('_', ' ') }}
           </div>
-</template>
+        </template>
 
         <template v-slot:item.status="{ item }">
           <v-chip 
@@ -66,12 +64,22 @@
         </template>
 
         <template v-slot:item.created_at="{ item }">
-          {{ new Date(item.created_at).toLocaleDateString() }}
+          <span class="text-secondary font-weight-medium">{{ new Date(item.created_at).toLocaleDateString() }}</span>
         </template>
 
         <template v-slot:item.actions="{ item }">
-          <div class="d-flex justify-end gap-1">
-            <v-btn icon="mdi-eye-outline" variant="text" size="small" color="info" :to="`/dashboard/employer/applications?job=${item.id}`" title="View Applications"></v-btn>
+          <div class="d-flex justify-end align-center gap-1">
+            <v-btn 
+              size="small" 
+              variant="tonal" 
+              color="primary" 
+              class="font-weight-bold text-none mr-1" 
+              prepend-icon="mdi-account-search" 
+              :to="`/dashboard/employer/jobs/${item.id}/candidates`"
+            >
+              Matched Talent
+            </v-btn>
+            <v-btn icon="mdi-account-multiple-outline" variant="text" size="small" color="info" :to="`/dashboard/employer/applications?job=${item.id}`" title="View Applicants"></v-btn>
             <v-btn v-if="item.status === 'draft' || item.status === 'rejected' || item.status === 'pending_approval'" icon="mdi-pencil-outline" variant="text" size="small" color="grey-darken-1" :to="`/dashboard/employer/jobs/${item.id}/edit`" title="Edit Job"></v-btn>
             <v-btn v-if="item.status === 'draft' || item.status === 'rejected'" icon="mdi-send-check-outline" variant="text" size="small" color="success" @click="submitForApproval(item.id)" title="Submit for Approval"></v-btn>
             <v-btn v-if="item.status === 'approved'" icon="mdi-close-circle-outline" variant="text" size="small" color="error" @click="updateJobStatus(item.id, 'closed')" title="Close Job"></v-btn>
@@ -79,9 +87,10 @@
         </template>
         
         <template v-slot:no-data>
-          <div class="pa-8 text-center text-blue-grey-300">
-            <v-icon size="64" class="mb-4 opacity-50">mdi-briefcase-remove-outline</v-icon>
-            <h3>No jobs found.</h3>
+          <div class="pa-10 text-center">
+            <v-icon size="48" color="grey-lighten-1" class="mb-3">mdi-briefcase-off-outline</v-icon>
+            <h3 class="text-subtitle-1 font-weight-bold text-secondary mb-2">No jobs found.</h3>
+            <v-btn color="primary" variant="tonal" size="small" class="font-weight-bold text-none" to="/dashboard/employer/jobs/create">Post your first job</v-btn>
           </div>
         </template>
       </v-data-table>
@@ -161,29 +170,7 @@ const getStatusColor = (status: string) => {
 </script>
 
 <style scoped>
-.shadow-card {
-  border: 1px solid var(--border);
-  
-}
 .max-w-300 {
   max-width: 300px;
-}
-::v-deep(.custom-table) {
-  background: transparent !important;
-}
-::v-deep(.custom-table th) {
-  background: rgba(255,255,255,0.03) !important;
-  color: #94a3b8 !important;
-  font-weight: 800;
-  text-transform: uppercase;
-  font-size: 0.7rem;
-  letter-spacing: 0.1em;
-  border-bottom: 1px solid rgba(255,255,255,0.08) !important;
-  padding: 16px !important;
-}
-::v-deep(.custom-table td) {
-  border-bottom: 1px solid rgba(255,255,255,0.05) !important;
-  padding-top: 16px !important;
-  padding-bottom: 16px !important;
 }
 </style>

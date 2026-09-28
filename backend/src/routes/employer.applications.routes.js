@@ -4,6 +4,7 @@ import { authenticateJWT, authorizeRoles } from '../middleware/auth.js';
 import { v4 as uuidv4 } from 'uuid';
 import emailService from '../services/email.service.js';
 import { createNotification } from '../services/notification.service.js';
+import { calculateJobMatch } from '../services/jobMatching.service.js';
 
 const router = express.Router();
 const isEmployer = authorizeRoles('employer');
@@ -11,15 +12,25 @@ const isEmployer = authorizeRoles('employer');
 // Get all applications for employer's jobs
 router.get('/', authenticateJWT, isEmployer, async (req, res) => {
   try {
-    const { gender, qualification, joining_status } = req.query;
-    let query = `SELECT ja.*, j.title as job_title, u.name as user_name, u.email as user_email, u.phone as user_phone,
-              (SELECT COUNT(*) FROM job_interviews WHERE application_id = ja.id) as interview_count
+    const { gender, qualification, joining_status, job_id, match_status } = req.query;
+    let query = `
+      SELECT ja.*, 
+             j.title as job_title, j.requirements_json, j.qualification_req, j.experience_level, 
+             j.specialization_req, j.gender_preference, j.language_req, j.joining_status_req,
+             u.name as user_name, u.email as user_email, u.phone as user_phone,
+             (SELECT COUNT(*) FROM certificates c WHERE c.student_id = ja.student_id AND c.status = 'active') as certs_active,
+             (SELECT COUNT(*) FROM enrollments e WHERE e.student_id = ja.student_id AND e.status = 'completed') as courses_completed,
+             (SELECT COUNT(*) FROM job_interviews WHERE application_id = ja.id) as interview_count
        FROM job_applications ja
        JOIN jobs j ON ja.job_id = j.id
        JOIN users u ON ja.student_id = u.id
        WHERE j.posted_by = ?`;
     const params = [req.user.id];
 
+    if (job_id) {
+      query += ` AND ja.job_id = ?`;
+      params.push(job_id);
+    }
     if (gender) {
       query += ` AND ja.applicant_gender = ?`;
       params.push(gender);
@@ -36,7 +47,50 @@ router.get('/', authenticateJWT, isEmployer, async (req, res) => {
     query += ` ORDER BY ja.applied_at DESC`;
 
     const [applications] = await pool.query(query, params);
-    res.json(applications);
+
+    // Compute match score and breakdown for each application
+    const scoredApplications = applications.map(app => {
+      const match = calculateJobMatch({
+        requirements_json: app.requirements_json,
+        qualification_req: app.qualification_req,
+        experience_level: app.experience_level,
+        specialization_req: app.specialization_req,
+        gender_preference: app.gender_preference,
+        language_req: app.language_req,
+        joining_status_req: app.joining_status_req
+      }, {
+        skills: app.skills_json,
+        experience_years: app.experience_years,
+        qualification: app.qualification,
+        field_of_study: app.field_of_study,
+        gender: app.applicant_gender,
+        language_proficiency: app.language_proficiency,
+        joining_status: app.joining_status,
+        certs_active: app.certs_active,
+        courses_completed: app.courses_completed
+      });
+
+      return {
+        ...app,
+        matchScore: match.matchScore,
+        isMatch: match.isMatch,
+        criteriaBreakdown: match.criteriaBreakdown,
+        matchedSkills: match.matchedSkills,
+        missingSkills: match.missingSkills
+      };
+    });
+
+    let result = scoredApplications;
+    if (match_status === 'matched') {
+      result = scoredApplications.filter(a => a.isMatch);
+    } else if (match_status === 'unmatched') {
+      result = scoredApplications.filter(a => !a.isMatch);
+    }
+
+    // Default sort: highest match score first, then newest
+    result.sort((a, b) => b.matchScore - a.matchScore || new Date(b.applied_at).getTime() - new Date(a.applied_at).getTime());
+
+    res.json(result);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

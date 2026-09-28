@@ -3,17 +3,17 @@
     <div class="d-flex align-center justify-space-between mb-8">
       <div>
         <h1 class="text-h4 font-weight-bold mb-1">Job Approvals</h1>
-        <p class="text-blue-grey-300">Review and approve employer job postings.</p>
+        <p class="text-secondary">Review and approve employer job postings.</p>
       </div>
       <v-btn icon="mdi-refresh" variant="tonal" color="primary" @click="loadPendingJobs" :loading="loading"></v-btn>
     </div>
 
-    <v-card rounded="xl" border class="shadow-card overflow-hidden">
+    <v-card rounded="xl" border elevation="0" class="shadow-card overflow-hidden">
       <v-data-table
         :headers="headers"
         :items="jobs"
         :loading="loading"
-        class="bg-transparent text-grey-darken-4 custom-table"
+        class="bg-transparent"
       >
         <!-- Employer Column -->
         <template v-slot:item.employer="{ item }">
@@ -23,10 +23,10 @@
             </v-avatar>
             <div>
               <div class="font-weight-bold text-body-1">{{ item.company || item.company_name || 'Unknown Company' }}</div>
-              <div class="text-caption text-grey">{{ item.employer_email }}</div>
+              <div class="text-caption text-secondary">{{ item.employer_email }}</div>
             </div>
           </div>
-</template>
+        </template>
 
         <!-- Job Details Column -->
         <template v-slot:item.title="{ item }">
@@ -88,10 +88,10 @@
         </template>
 
         <template v-slot:no-data>
-          <div class="pa-10 text-center text-blue-grey-300">
-            <v-icon size="64" class="mb-4 opacity-50">mdi-check-all</v-icon>
-            <h3 class="text-h6 font-weight-bold">All caught up!</h3>
-            <p>No jobs pending approval at the moment.</p>
+          <div class="pa-10 text-center">
+            <v-icon size="48" color="grey-lighten-1" class="mb-3">mdi-check-all</v-icon>
+            <h3 class="text-subtitle-1 font-weight-bold text-secondary mb-1">All caught up!</h3>
+            <p class="text-caption text-secondary">No jobs pending approval at the moment.</p>
           </div>
         </template>
       </v-data-table>
