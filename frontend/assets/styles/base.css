@@ -73,6 +73,12 @@ input, textarea, select {
 
 /* Utility classes */
 .text-label { color: var(--g4); font-size: 12px; }
+.text-secondary,
+.v-application .text-secondary,
+.text-muted,
+.v-application .text-muted {
+  color: var(--g5, #6B7280) !important;
+}
 .text-tertiary { color: var(--g5); }
 .font-mono { font-family: var(--mono); }
 .rounded-apple { border-radius: var(--r16); }

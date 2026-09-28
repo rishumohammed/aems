@@ -191,15 +191,37 @@ body {
   box-shadow: 0 20px 60px rgba(86,36,208,0.30) !important;
 }
 
-/* ── Typography helpers ────────────────────────────────── */
+/* ── Typography helpers & Global Neutral Text Fix ──────────────── */
 .tracking-tight  { letter-spacing: -0.04em !important; }
 .tracking-normal { letter-spacing: -0.01em !important; }
 .leading-tight   { line-height: 1.1 !important; }
 .leading-relaxed { line-height: 1.7 !important; }
-.text-secondary-color { color: var(--g5) !important; }
-.text-tertiary-color  { color: var(--g4) !important; }
+
+/* Ensure secondary text is clean neutral slate gray across all panels, preventing theme blue/indigo bleeding */
+.text-secondary,
+.text-secondary-color,
+.v-application .text-secondary,
+.text-muted,
+.v-application .text-muted,
+p.text-secondary,
+span.text-secondary,
+div.text-secondary,
+.text-caption.text-secondary,
+.text-body-1.text-secondary,
+.text-body-2.text-secondary,
+.text-subtitle-1.text-secondary,
+.text-subtitle-2.text-secondary {
+  color: var(--color-text-secondary, #6A6F73) !important;
+}
+
+.text-tertiary,
+.text-tertiary-color,
+.v-application .text-tertiary {
+  color: var(--g4, #9CA3AF) !important;
+}
 
 /* Fix scrolling black screen issue by hiding navigation drawer scrims globally */
 .v-navigation-drawer__scrim {
   display: none !important;
 }
+

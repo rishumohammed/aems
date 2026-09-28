@@ -74,7 +74,7 @@ export default defineNuxtConfig({
             dark: false,
             colors: {
               primary: '#1B1B3A',
-              secondary: '#6B6B76',
+              secondary: '#6B7280',
               accent: '#F4791F',
               background: '#FAFAF9',
               surface: '#FFFFFF',
@@ -88,7 +88,7 @@ export default defineNuxtConfig({
             dark: false,
             colors: {
               primary: '#007AFF',    /* Apple System Blue */
-              secondary: '#86868B',  /* Soft Gray */
+              secondary: '#6B7280',  /* Crisp Neutral Slate Gray */
               accent: '#5E5CE6',     /* Indigo */
               background: '#F5F5F7', /* Classic Apple Light Gray */
               surface: '#FFFFFF',

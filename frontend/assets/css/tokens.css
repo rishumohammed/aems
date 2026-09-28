@@ -62,3 +62,11 @@ body, .v-application {
 .v-navigation-drawer .v-list-item:not(.v-list-item--active):hover {
   background-color: var(--panel) !important;
 }
+
+.text-secondary,
+.v-application .text-secondary,
+.text-muted,
+.v-application .text-muted {
+  color: var(--muted, #6B7280) !important;
+}
+
