@@ -209,14 +209,28 @@
         </template>
         
         <template v-slot:no-data>
-          <div class="pa-10 text-center text-secondary">
-            <v-icon size="64" class="mb-4 opacity-40">mdi-account-search-outline</v-icon>
+          <div class="pa-12 text-center text-secondary">
+            <v-icon size="64" color="grey-lighten-1" class="mb-4">mdi-clipboard-text-search-outline</v-icon>
             <h3 class="text-subtitle-1 font-weight-bold text-grey-darken-3 mb-1">
-              {{ matchTab === 'matched' ? 'No criteria-matched applicants found.' : 'No applications found.' }}
+              {{ applications.length === 0 ? 'No applications received yet' : (matchTab === 'matched' ? 'No criteria-matched applicants found.' : 'No matching applications found.') }}
             </h3>
-            <p class="text-caption text-secondary">
-              {{ matchTab === 'matched' ? 'Switch to "All Applications" to review other candidates, or source students from the talent pool.' : 'Try adjusting your filters.' }}
+            <p class="text-caption text-secondary max-w-500 mx-auto mb-4">
+              {{ applications.length === 0 
+                ? 'Students who apply to your job postings will appear here categorized by criteria match. In the meantime, you can explore pre-matched candidates from our talent pool and invite them to apply.' 
+                : 'Try adjusting your filters or switch tabs to review all applicants.' 
+              }}
             </p>
+            <v-btn
+              v-if="applications.length === 0"
+              color="primary"
+              variant="flat"
+              rounded="lg"
+              prepend-icon="mdi-briefcase-search-outline"
+              to="/dashboard/employer/jobs"
+              class="font-weight-bold text-none"
+            >
+              Go to Manage Jobs &amp; Source Candidates
+            </v-btn>
           </div>
         </template>
       </v-data-table>
