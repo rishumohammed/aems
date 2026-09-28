@@ -562,4 +562,49 @@ router.get('/forms/:id', FormController.getConfig);
 // --- Leads ---
 router.post('/leads', LeadController.submitLead);
 
+// --- Master Metadata (Languages, Qualifications, Notice Periods) ---
+router.get('/master-metadata', async (req, res) => {
+  try {
+    const [languages] = await pool.query('SELECT id, name, code FROM master_languages WHERE is_active = 1 ORDER BY sort_order ASC, name ASC');
+    const [qualifications] = await pool.query('SELECT id, name, level_rank FROM master_qualifications WHERE is_active = 1 ORDER BY sort_order ASC, level_rank ASC');
+    const [noticePeriods] = await pool.query('SELECT id, name FROM master_notice_periods WHERE is_active = 1 ORDER BY sort_order ASC, name ASC');
+
+    res.json({
+      languages,
+      qualifications,
+      noticePeriods
+    });
+  } catch (error) {
+    console.error('Master metadata fetch error:', error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
+router.get('/languages', async (req, res) => {
+  try {
+    const [rows] = await pool.query('SELECT id, name, code FROM master_languages WHERE is_active = 1 ORDER BY sort_order ASC, name ASC');
+    res.json(rows);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+router.get('/qualifications', async (req, res) => {
+  try {
+    const [rows] = await pool.query('SELECT id, name, level_rank FROM master_qualifications WHERE is_active = 1 ORDER BY sort_order ASC, level_rank ASC');
+    res.json(rows);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+router.get('/notice-periods', async (req, res) => {
+  try {
+    const [rows] = await pool.query('SELECT id, name FROM master_notice_periods WHERE is_active = 1 ORDER BY sort_order ASC, name ASC');
+    res.json(rows);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 export default router;

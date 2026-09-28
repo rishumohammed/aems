@@ -327,10 +327,29 @@
                 <v-combobox v-model="form.skills" label="Key Skills" multiple chips variant="outlined" rounded="lg" density="comfortable" hint="Press enter to add skill" persistent-hint></v-combobox>
               </v-col>
               <v-col cols="12" md="6">
-                <v-combobox v-model="form.language_proficiency" label="Language Proficiency" multiple chips variant="outlined" rounded="lg" density="comfortable" hint="Press enter to add languages (e.g. English, Spanish)" persistent-hint></v-combobox>
+                <v-combobox 
+                  v-model="form.language_proficiency" 
+                  :items="languageOptions"
+                  label="Language Proficiency" 
+                  multiple 
+                  chips 
+                  variant="outlined" 
+                  rounded="lg" 
+                  density="comfortable" 
+                  hint="Select or type languages you know" 
+                  persistent-hint
+                ></v-combobox>
               </v-col>
               <v-col cols="12" md="6">
-                <v-select v-model="form.joining_status" :items="['Immediate', '15 Days', '30 Days', '60 Days', '90 Days']" label="Joining Status (Notice Period)" variant="outlined" rounded="lg" density="comfortable" clearable></v-select>
+                <v-select 
+                  v-model="form.joining_status" 
+                  :items="noticePeriodOptions" 
+                  label="Joining Status (Notice Period)" 
+                  variant="outlined" 
+                  rounded="lg" 
+                  density="comfortable" 
+                  clearable
+                ></v-select>
               </v-col>
             </v-row>
 
@@ -534,6 +553,7 @@
 import { ref, computed, onMounted } from 'vue';
 import { useApi } from '../../../composables/useApi';
 import { useAuthStore } from '../../../stores/auth';
+import { useMasterData } from '../../../composables/useMasterData';
 
 // @ts-ignore
 definePageMeta({
@@ -544,6 +564,7 @@ definePageMeta({
 
 const api = useApi();
 const authStore = useAuthStore();
+const { languageOptions, qualificationOptions, noticePeriodOptions, fetchMasterData } = useMasterData();
 const activeTab = ref('personal');
 
 const saving = ref(false);
@@ -676,6 +697,8 @@ const loadProfile = async () => {
   } catch (error) {
     console.error('Failed to load job categories:', error);
   }
+
+  fetchMasterData();
 };
 
 const saveProfile = async () => {

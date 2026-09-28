@@ -256,7 +256,7 @@
             <v-select
               v-model="formData.qualification_req"
               label="Minimum Qualification"
-              :items="['High School', 'Diploma', 'Bachelors', 'Masters', 'PhD']"
+              :items="qualificationOptions"
               variant="outlined"
               color="primary"
               clearable
@@ -284,7 +284,7 @@
             <v-select
               v-model="formData.language_req"
               label="Required Languages"
-              :items="['English', 'Hindi', 'Malayalam', 'Tamil', 'Kannada', 'Telugu', 'Arabic', 'Spanish', 'French', 'German']"
+              :items="languageOptions"
               multiple
               chips
               variant="outlined"
@@ -307,7 +307,7 @@
             <v-select
               v-model="formData.joining_status_req"
               label="Expected Joining Status"
-              :items="['Immediate', '15 Days', '30 Days', '60 Days', '90 Days']"
+              :items="noticePeriodOptions"
               variant="outlined"
               color="primary"
               clearable
@@ -380,6 +380,7 @@ import { shallowRef, ref, onMounted, onBeforeUnmount } from 'vue';
 import { Editor, EditorContent } from '@tiptap/vue-3';
 import StarterKit from '@tiptap/starter-kit';
 import { useApi } from '@/composables/useApi';
+import { useMasterData } from '@/composables/useMasterData';
 import { useRouter, useRoute } from '#imports';
 
 definePageMeta({
@@ -391,6 +392,7 @@ definePageMeta({
 const api = useApi();
 const router = useRouter();
 const route = useRoute();
+const { languageOptions, qualificationOptions, noticePeriodOptions, fetchMasterData } = useMasterData();
 
 const jobId = route.params.id as string;
 const form = ref<any>(null);
@@ -434,6 +436,7 @@ const formData = ref({
 const editor = shallowRef<Editor | undefined>(undefined);
 
 onMounted(async () => {
+  fetchMasterData();
   editor.value = new Editor({
     extensions: [StarterKit],
     content: '<p>Loading...</p>',

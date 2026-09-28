@@ -81,7 +81,7 @@
                 <div class="text-subtitle-2 font-weight-bold mb-3">Qualification</div>
                 <v-select
                   v-model="selectedQualification"
-                  :items="['High School', 'Diploma', 'Bachelors', 'Masters', 'PhD']"
+                  :items="qualificationOptions"
                   variant="outlined"
                   density="compact"
                   hide-details
@@ -94,7 +94,7 @@
                 <div class="text-subtitle-2 font-weight-bold mb-3">Languages</div>
                 <v-select
                   v-model="selectedLanguages"
-                  :items="['English', 'Spanish', 'French', 'German', 'Mandarin', 'Hindi', 'Arabic']"
+                  :items="languageOptions"
                   multiple
                   chips
                   variant="outlined"
@@ -122,7 +122,7 @@
                 <div class="text-subtitle-2 font-weight-bold mb-3">Joining Status</div>
                 <v-select
                   v-model="selectedJoiningStatus"
-                  :items="['Immediate', '15 Days', '30 Days', '60 Days', '90 Days']"
+                  :items="noticePeriodOptions"
                   variant="outlined"
                   density="compact"
                   hide-details
@@ -187,7 +187,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
+import { useMasterData } from '@/composables/useMasterData';
 
 definePageMeta({
   layout: 'public'
@@ -196,6 +197,11 @@ definePageMeta({
 const config = useRuntimeConfig();
 const apiBase = config.public.apiBase;
 const baseUrl = apiBase.replace('/api', '');
+
+const { languageOptions, qualificationOptions, noticePeriodOptions, fetchMasterData } = useMasterData();
+onMounted(() => {
+  fetchMasterData();
+});
 
 const heroTitle = useState('jobportal_hero_title', () => 'Job Portal');
 const heroSubtitle = useState('jobportal_hero_subtitle', () => 'Discover your next career move with our top hiring partners.');

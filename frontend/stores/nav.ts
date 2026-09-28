@@ -52,6 +52,7 @@ export const useNavStore = defineStore('nav', {
       { label: 'Manage Jobs', icon: 'mdi-briefcase-edit-outline', route: '/dashboard/admin/jobs', roles: ['super_admin', 'placement_coordinator'], section: 'JOBS' },
       { label: 'Job Approvals', icon: 'mdi-briefcase-check', route: '/dashboard/admin/job-approvals', roles: ['super_admin', 'placement_coordinator'], section: 'JOBS', badge: undefined },
       { label: 'Job Categories', icon: 'mdi-shape-outline', route: '/dashboard/admin/job-categories', roles: ['super_admin', 'placement_coordinator'], section: 'JOBS' },
+      { label: 'Master Data', icon: 'mdi-database-cog-outline', route: '/dashboard/admin/master-data', roles: ['super_admin', 'placement_coordinator'], section: 'JOBS' },
       { label: 'Manage Jobs', icon: 'mdi-briefcase-edit-outline', route: '/dashboard/employer/jobs', roles: ['employer'], section: 'JOBS' },
       { label: 'Applications', icon: 'mdi-briefcase-check-outline', route: '/dashboard/student/applications', roles: ['student'], section: 'JOBS' },
       { label: 'Candidates', icon: 'mdi-account-search', route: '/dashboard/employer/applications', roles: ['employer'], section: 'JOBS' },

@@ -111,26 +111,26 @@ router.get('/job-approvals', authenticateJWT, hasAccess, async (req, res) => {
 });
 
 router.post('/jobs', authenticateJWT, hasAccess, async (req, res) => {
-  const { 
-    title, company, category_id, location, is_remote, type, salary_range, description, 
-    required_skills, nice_to_have_skills, experience_level, number_of_openings, deadline, apply_url, 
-    hide_company_name, gender_preference, qualification_req, language_req, specialization_req, joining_status_req 
+  const {
+    title, company, category_id, location, is_remote, type, salary_range, description,
+    required_skills, nice_to_have_skills, experience_level, number_of_openings, deadline, apply_url,
+    hide_company_name, gender_preference, qualification_req, language_req, specialization_req, joining_status_req
   } = req.body;
 
   try {
     const jobId = uuidv4();
-    const requirements = JSON.stringify({ 
-      required: required_skills || [], 
+    const requirements = JSON.stringify({
+      required: required_skills || [],
       nice_to_have: nice_to_have_skills || [],
       experience_level: experience_level || '',
       number_of_openings: number_of_openings || 1
     });
-    
+
     const status = req.user.role === 'super_admin' ? 'approved' : 'pending_approval';
     const isCompanyHidden = hide_company_name ? 1 : 0;
     const defaultCompany = req.user?.name || 'Brix Certifications';
     const companyName = isCompanyHidden ? 'Confidential Organization' : (company?.trim() || defaultCompany);
-    
+
     await pool.query(
       `INSERT INTO jobs (
         id, title, company, category, location, is_remote, type, salary_range, description, 
@@ -138,20 +138,20 @@ router.post('/jobs', authenticateJWT, hasAccess, async (req, res) => {
         gender_preference, qualification_req, language_req, specialization_req, joining_status_req
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
-        jobId, 
-        title, 
-        companyName, 
-        category_id, 
-        location || '', 
-        is_remote ? 1 : 0, 
-        type || 'full_time', 
-        salary_range || 'Not Disclosed', 
-        description || '', 
-        requirements, 
-        deadline || null, 
-        apply_url || null, 
-        req.user.id, 
-        status, 
+        jobId,
+        title,
+        companyName,
+        category_id,
+        location || '',
+        is_remote ? 1 : 0,
+        type || 'full_time',
+        salary_range || 'Not Disclosed',
+        description || '',
+        requirements,
+        deadline || null,
+        apply_url || null,
+        req.user.id,
+        status,
         isCompanyHidden,
         gender_preference || 'any',
         qualification_req || null,
@@ -171,7 +171,7 @@ router.post('/jobs', authenticateJWT, hasAccess, async (req, res) => {
 router.put('/jobs/:id/approve', authenticateJWT, hasAccess, async (req, res) => {
   try {
     await pool.query("UPDATE jobs SET status = 'approved', approved_by = ?, approved_at = NOW() WHERE id = ?", [req.user.id, req.params.id]);
-    
+
     // Optionally fetch employer email and notify
     const [jobs] = await pool.query('SELECT j.title, u.email, u.name FROM jobs j JOIN users u ON j.posted_by = u.id WHERE j.id = ?', [req.params.id]);
     if (jobs.length > 0 && jobs[0].email) {
@@ -192,7 +192,7 @@ router.put('/jobs/:id/reject', authenticateJWT, hasAccess, async (req, res) => {
   const { reason } = req.body;
   try {
     await pool.query("UPDATE jobs SET status = 'rejected', rejection_reason = ? WHERE id = ?", [reason || 'No reason provided', req.params.id]);
-    
+
     // Notify employer
     const [jobs] = await pool.query('SELECT j.title, u.email, u.name FROM jobs j JOIN users u ON j.posted_by = u.id WHERE j.id = ?', [req.params.id]);
     if (jobs.length > 0 && jobs[0].email) {
@@ -229,16 +229,16 @@ router.get('/jobs/:id', authenticateJWT, hasAccess, async (req, res) => {
 
 // Update job details (Admin)
 router.put('/jobs/:id', authenticateJWT, hasAccess, async (req, res) => {
-  const { 
-    title, company, category_id, location, is_remote, type, salary_range, description, 
+  const {
+    title, company, category_id, location, is_remote, type, salary_range, description,
     required_skills, nice_to_have_skills, experience_level, number_of_openings, deadline, apply_url,
     status, gender_preference, qualification_req, language_req, specialization_req, joining_status_req,
     hide_company_name
   } = req.body;
 
   try {
-    const requirements = JSON.stringify({ 
-      required: required_skills || [], 
+    const requirements = JSON.stringify({
+      required: required_skills || [],
       nice_to_have: nice_to_have_skills || [],
       experience_level: experience_level || '',
       number_of_openings: number_of_openings || 1
@@ -272,23 +272,23 @@ router.put('/jobs/:id', authenticateJWT, hasAccess, async (req, res) => {
         hide_company_name = ?
        WHERE id = ?`,
       [
-        title, 
-        companyName, 
-        category_id, 
-        location, 
-        is_remote ? 1 : 0, 
-        type, 
-        salary_range, 
-        description, 
-        requirements, 
-        deadline || null, 
-        apply_url, 
-        status || 'approved', 
-        gender_preference || 'any', 
-        qualification_req || null, 
-        language_req ? (typeof language_req === 'string' ? language_req : JSON.stringify(language_req)) : null, 
-        specialization_req || null, 
-        joining_status_req || null, 
+        title,
+        companyName,
+        category_id,
+        location,
+        is_remote ? 1 : 0,
+        type,
+        salary_range,
+        description,
+        requirements,
+        deadline || null,
+        apply_url,
+        status || 'approved',
+        gender_preference || 'any',
+        qualification_req || null,
+        language_req ? (typeof language_req === 'string' ? language_req : JSON.stringify(language_req)) : null,
+        specialization_req || null,
+        joining_status_req || null,
         isCompanyHidden,
         req.params.id
       ]
@@ -313,7 +313,7 @@ router.get('/jobs/:id/applicants', authenticateJWT, hasAccess, async (req, res) 
              specialization_req, gender_preference, language_req, joining_status_req 
       FROM jobs WHERE id = ?
     `, [req.params.id]);
-    
+
     if (jobs.length === 0) return res.status(404).json({ message: 'Job not found' });
     const job = jobs[0];
 

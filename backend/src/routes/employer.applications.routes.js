@@ -111,7 +111,7 @@ router.get('/:id', authenticateJWT, isEmployer, async (req, res) => {
     );
 
     if (application.length === 0) return res.status(404).json({ message: 'Application not found' });
-    
+
     // Fetch course certificates (if any)
     const [certs] = await pool.query(
       `SELECT c.cert_number, co.title as course_title, c.issued_at
@@ -148,8 +148,8 @@ router.get('/:id', authenticateJWT, isEmployer, async (req, res) => {
       [req.params.id]
     );
 
-    res.json({ 
-      ...application[0], 
+    res.json({
+      ...application[0],
       certificates: certs,
       enrollments: enrollments,
       exams: exams,

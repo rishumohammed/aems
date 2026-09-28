@@ -175,7 +175,7 @@
             <v-select
               v-model="formData.qualification_req"
               label="Minimum Qualification"
-              :items="['High School', 'Diploma', 'Bachelors', 'Masters', 'PhD']"
+              :items="qualificationOptions"
               variant="outlined"
               color="primary"
               clearable
@@ -185,7 +185,7 @@
             <v-select
               v-model="formData.language_req"
               label="Required Languages"
-              :items="['English', 'Spanish', 'French', 'German', 'Mandarin', 'Hindi', 'Arabic']"
+              :items="languageOptions"
               multiple
               chips
               variant="outlined"
@@ -206,7 +206,7 @@
             <v-select
               v-model="formData.joining_status_req"
               label="Expected Joining Status"
-              :items="['Immediate', '15 Days', '30 Days', '60 Days', '90 Days']"
+              :items="noticePeriodOptions"
               variant="outlined"
               color="primary"
               clearable
@@ -261,6 +261,7 @@ import { Editor, EditorContent } from '@tiptap/vue-3';
 import StarterKit from '@tiptap/starter-kit';
 import { useApi } from '@/composables/useApi';
 import { useAuthStore } from '@/stores/auth';
+import { useMasterData } from '@/composables/useMasterData';
 import { useRouter } from '#imports';
 
 definePageMeta({ layout: 'dashboard', middleware: ['auth', 'role'], role: ['employer', 'super_admin', 'tutor'] });
@@ -269,6 +270,7 @@ const api = useApi();
 const authStore = useAuthStore();
 const router = useRouter();
 const route = useRoute();
+const { languageOptions, qualificationOptions, noticePeriodOptions, fetchMasterData } = useMasterData();
 const form = ref<any>(null);
 const loading = ref(false);
 const categories = ref<any[]>([]);
@@ -315,6 +317,8 @@ onMounted(async () => {
   } catch (error) {
     categories.value = [{ id: '1', name: 'Web Development' }];
   }
+
+  fetchMasterData();
 
   // Fetch job
   try {
