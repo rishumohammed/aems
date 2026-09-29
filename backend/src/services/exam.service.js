@@ -77,6 +77,15 @@ class ExamService {
       [studentId, examId]
     );
 
+    // Check if student has already passed this exam
+    const [passedAttempts] = await pool.query(
+      "SELECT id FROM exam_attempts WHERE student_id = ? AND exam_id = ? AND status = 'graded' AND passed = 1",
+      [studentId, examId]
+    );
+    if (passedAttempts.length > 0) {
+      throw new Error('You have already passed this exam');
+    }
+
     // Count all used attempts (completed or active)
     const [attempts] = await pool.query(
       "SELECT COUNT(*) as count FROM exam_attempts WHERE student_id = ? AND exam_id = ? AND status IN ('submitted','graded','pending_manual_review','in_progress','scheduled')",

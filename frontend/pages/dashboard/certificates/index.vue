@@ -28,7 +28,6 @@
 
     <div v-if="userRole === 'student'" class="mb-6">
       <v-tabs v-model="activeTab" color="primary" class="bg-white rounded-lg border">
-        <v-tab value="internal" class="text-capitalize font-weight-bold">Certificates</v-tab>
         <v-tab value="external" class="text-capitalize font-weight-bold">External Certificates</v-tab>
         <v-tab value="readiness" class="text-capitalize font-weight-bold">
           Exam Readiness Requests
@@ -38,7 +37,7 @@
     </div>
 
     <v-window v-model="activeTab" class="bg-transparent" style="overflow: visible;">
-      <v-window-item value="internal">
+      <v-window-item value="internal" v-if="userRole !== 'student'">
         <div class="apple-table-card">
           <div v-if="loading" class="pa-12 text-center">
             <v-progress-circular indeterminate color="primary"></v-progress-circular>
@@ -205,7 +204,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
 import dayjs from 'dayjs';
 import { useAuthStore } from '@/stores/auth';
 import { useApi } from '@/composables/useApi';
@@ -227,7 +226,16 @@ const editData = ref<any>(null);
 const certificates = ref<any[]>([]);
 const userRole = computed(() => authStore.userRole);
 
-const activeTab = ref('internal');
+const activeTab = ref(authStore.userRole === 'student' ? 'external' : 'internal');
+
+watch(userRole, (newRole) => {
+  if (newRole === 'student' && activeTab.value === 'internal') {
+    activeTab.value = 'external';
+  } else if (newRole !== 'student') {
+    activeTab.value = 'internal';
+  }
+});
+
 const showExternalModal = ref(false);
 const selectedExternalCert = ref<any>(null);
 const externalCertificates = ref<any[]>([]);
@@ -285,16 +293,17 @@ const headers = [
 ];
 
 const pageTitle = computed(() => userRole.value === 'student' ? 'My Certificates' : 'Issued Certificates');
-const pageSubtitle = computed(() => userRole.value === 'student' ? 'View and download your earned certifications.' : 'Manage and verify all certificates issued by the system.');
+const pageSubtitle = computed(() => userRole.value === 'student' ? 'Manage your external certifications and exam readiness requests.' : 'Manage and verify all certificates issued by the system.');
 const emptyStateText = computed(() => userRole.value === 'student' 
   ? 'Complete a course and pass the exam to earn your certificate.' 
   : 'No certificates have been issued in the system yet.'
 );
 
 const fetchData = async () => {
+  if (userRole.value === 'student') return;
   loading.value = true;
   try {
-    const endpoint = userRole.value === 'student' ? '/certs/my-certificates' : '/certs/admin';
+    const endpoint = '/certs/admin';
     const res = await api.get(endpoint);
     certificates.value = res.data || res;
   } catch (error) {
@@ -427,9 +436,12 @@ const getReadinessStatusColor = (status: string) => {
 const formatDate = (date: string) => dayjs(date).format('MMM D, YYYY');
 
 onMounted(() => {
-  fetchData();
-  fetchExternalData();
-  fetchReadinessRequests();
+  if (userRole.value !== 'student') {
+    fetchData();
+  } else {
+    fetchExternalData();
+    fetchReadinessRequests();
+  }
 });
 </script>
 

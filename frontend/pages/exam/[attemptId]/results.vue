@@ -63,6 +63,18 @@
 
           <div class="d-flex justify-center gap-3 flex-wrap">
             <v-btn 
+              v-if="canRetry"
+              color="warning" 
+              rounded="xl" 
+              size="large" 
+              prepend-icon="mdi-refresh"
+              :loading="retrying"
+              @click="retryExam" 
+              class="mt-2 px-8 font-weight-bold"
+            >
+              Retry Exam ({{ (result?.max_attempts || 1) - (result?.attempts_used || 0) }} left)
+            </v-btn>
+            <v-btn 
               v-if="!canGrade"
               color="primary" rounded="xl" size="large" @click="router.push('/dashboard/exams')" class="mt-2 px-8"
             >
@@ -188,8 +200,10 @@ interface AttemptResult {
   total_marks: number;
   pass_percentage: number;
   pending_manual_review: boolean;
+  status?: string;
+  enable_certificate?: boolean | number | string;
   cert_id?: string | number;
-  show_results?: boolean | number;
+  show_results?: boolean | number | string;
   show_result_detail: boolean;
   question_breakdown?: QuestionBreakdown[];
   attempts_used?: number;

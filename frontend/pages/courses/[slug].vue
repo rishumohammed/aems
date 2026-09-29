@@ -121,19 +121,6 @@
                   </v-expansion-panel>
                 </v-expansion-panels>
               </div>
-
-              <v-divider class="my-6"></v-divider>
-
-              <!-- Q&A Section -->
-              <div class="mb-8">
-                <div class="text-h5 font-weight-bold mb-4">Questions & Answers</div>
-                <div v-if="!isEnrolled" class="text-center pa-12 border rounded-xl bg-grey-lighten-5">
-                  <v-icon size="64" color="grey" class="mb-4">mdi-lock-outline</v-icon>
-                  <h3 class="text-h6 font-weight-bold text-grey-darken-1 mb-2">Enroll to join the discussion</h3>
-                  <p class="text-body-2 text-grey">You must be enrolled in this course to view and participate in the Q&A.</p>
-                </div>
-                <CourseQA v-else :course-id="course.id" />
-              </div>
             </div>
           </v-col>
 
