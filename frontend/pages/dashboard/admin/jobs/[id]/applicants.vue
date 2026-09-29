@@ -16,16 +16,13 @@
       </div>
       
       <div class="d-flex align-center gap-2">
-        <AppButton variant="blue" icon="mdi-account-search" @click="openTalentPoolDrawer">
-          ✨ Matching Talent Pool
-        </AppButton>
         <AppButton variant="g" icon="mdi-download" @click="exportCSV">
           Export CSV
         </AppButton>
       </div>
     </div>
 
-    <!-- Match Segmentation Bar -->
+    <!-- Match Segmentation Bar (Matching Talent as First Item & Default) -->
     <div class="d-flex flex-wrap align-center justify-space-between gap-3 mb-4 bg-white pa-3 rounded-lg border">
       <v-btn-toggle
         v-model="matchTab"
@@ -35,6 +32,10 @@
         variant="outlined"
         density="compact"
       >
+        <v-btn value="talent" class="text-none font-weight-bold px-3">
+          <v-icon start color="primary" size="16">mdi-sparkles</v-icon>
+          Matching Talent ({{ talentPool.length }})
+        </v-btn>
         <v-btn value="matched" class="text-none font-weight-bold px-3">
           <v-icon start color="success" size="16">mdi-star-check</v-icon>
           Criteria Matched ({{ matchedCount }})
@@ -48,19 +49,169 @@
       </v-btn-toggle>
 
       <div class="d-flex align-center gap-2">
-        <span class="text-caption text-secondary font-weight-bold">Status:</span>
-        <v-select
-          v-model="statusFilter"
-          :items="['All', 'applied', 'viewed', 'shortlisted', 'selected', 'rejected']"
-          density="compact"
-          variant="outlined"
-          hide-details
-          style="min-width: 140px;"
-        ></v-select>
+        <template v-if="matchTab === 'talent'">
+          <v-text-field
+            v-model="talentSearch"
+            prepend-inner-icon="mdi-magnify"
+            placeholder="Search matching talent..."
+            density="compact"
+            variant="outlined"
+            hide-details
+            clearable
+            style="min-width: 250px;"
+          ></v-text-field>
+        </template>
+        <template v-else>
+          <span class="text-caption text-secondary font-weight-bold">Status:</span>
+          <v-select
+            v-model="statusFilter"
+            :items="['All', 'applied', 'viewed', 'shortlisted', 'selected', 'rejected']"
+            density="compact"
+            variant="outlined"
+            hide-details
+            style="min-width: 140px;"
+          ></v-select>
+        </template>
       </div>
     </div>
 
-    <div class="apple-table-card">
+    <!-- 1. Matching Talent Pool View (Default & First Filter) -->
+    <div v-if="matchTab === 'talent'" class="apple-table-card">
+      <div v-if="talentLoading" class="text-center pa-12">
+        <v-progress-circular indeterminate color="primary" size="48"></v-progress-circular>
+        <div class="mt-3 text-caption text-secondary">Matching talent pool candidates with job criteria...</div>
+      </div>
+
+      <div v-else-if="filteredTalentPool.length === 0" class="pa-12 text-center text-secondary">
+        <v-icon size="56" class="mb-2 opacity-50">mdi-account-off-outline</v-icon>
+        <div class="font-weight-bold text-subtitle-1">No matching students found in the talent pool.</div>
+        <div class="text-caption text-secondary mt-1">Try adjusting the search query or criteria.</div>
+      </div>
+
+      <v-data-table
+        v-else
+        :headers="talentHeaders"
+        :items="filteredTalentPool"
+        class="apple-data-table"
+        :items-per-page="10"
+      >
+        <!-- Candidate Identity (Clickable to view Student Details) -->
+        <template v-slot:item.name="{ item }">
+          <div 
+            class="d-flex align-center py-2 cursor-pointer candidate-click-area"
+            @click="openCandidateDetails(item)"
+            title="Click to view student details"
+          >
+            <v-avatar color="primary" size="38" class="mr-3 font-weight-bold text-caption text-white">
+              <v-img v-if="item.avatar_url" :src="item.avatar_url"></v-img>
+              <span v-else>{{ item.name?.charAt(0) || 'U' }}</span>
+            </v-avatar>
+            <div>
+              <div class="font-weight-bold text-subtitle-2 text-grey-darken-4 candidate-name d-flex align-center">
+                {{ item.name }}
+                <v-icon size="14" class="ml-1 text-primary candidate-name-icon">mdi-open-in-new</v-icon>
+              </div>
+              <div class="text-caption text-secondary">
+                {{ item.email }} <span v-if="item.phone">• {{ item.phone }}</span>
+              </div>
+              <div v-if="item.college_name" class="text-caption text-grey-darken-1">
+                <v-icon size="12">mdi-school-outline</v-icon> {{ item.college_name }}
+              </div>
+            </div>
+          </div>
+        </template>
+
+        <!-- Match Score Badge -->
+        <template v-slot:item.matchScore="{ item }">
+          <div class="py-2">
+            <CandidateMatchBadge
+              :score="item.matchScore"
+              :is-match="item.isMatch"
+              :criteria-breakdown="item.criteriaBreakdown"
+              :matched-skills="item.matchedSkills"
+              :missing-skills="item.missingSkills"
+              size="md"
+            />
+          </div>
+        </template>
+
+        <!-- Brix Credentials -->
+        <template v-slot:item.brix_credentials="{ item }">
+          <div class="d-flex flex-column gap-1 align-start justify-center">
+            <Badge :color="(item.certs_active || 0) > 0 ? 'green' : 'gray'">
+              {{ item.certs_active || 0 }} Verified Certs
+            </Badge>
+            <Badge color="gray">{{ item.courses_completed || 0 }} Courses</Badge>
+          </div>
+        </template>
+
+        <!-- Profile & Exp -->
+        <template v-slot:item.profile="{ item }">
+          <div class="role-text">{{ item.education_level || item.qualification || 'Student' }}</div>
+          <div class="exp-text">
+            {{ item.experience_years || 0 }} Yrs Exp
+            <span v-if="item.current_status">• {{ item.current_status }}</span>
+          </div>
+        </template>
+
+        <!-- Matched Skills -->
+        <template v-slot:item.skills="{ item }">
+          <div class="d-flex flex-wrap gap-1 py-1" style="max-width: 240px;">
+            <v-chip
+              v-for="skill in (item.matchedSkills || []).slice(0, 3)"
+              :key="skill"
+              size="x-small"
+              color="success"
+              variant="flat"
+            >
+              ✓ {{ skill }}
+            </v-chip>
+            <span v-if="(item.matchedSkills || []).length > 3" class="text-caption text-secondary align-self-center">
+              +{{ item.matchedSkills.length - 3 }} more
+            </span>
+          </div>
+        </template>
+
+        <!-- Actions -->
+        <template v-slot:item.actions="{ item }">
+          <div class="d-flex justify-end align-center gap-2">
+            <div v-if="item.has_applied || item.isApplied">
+              <Badge color="blue">Applied</Badge>
+            </div>
+            <AppButton
+              v-else
+              size="sm"
+              variant="blue"
+              icon="mdi-send"
+              @click="inviteCandidate(item)"
+            >
+              Invite
+            </AppButton>
+            
+            <v-btn
+              icon="mdi-account-details-outline"
+              variant="text"
+              size="small"
+              color="primary"
+              @click="openCandidateDetails(item)"
+              title="View Student Details"
+            ></v-btn>
+            <v-btn
+              v-if="item.student_id || item.id"
+              icon="mdi-account-arrow-right-outline"
+              variant="text"
+              size="small"
+              color="grey-darken-1"
+              @click="navigateToStudentProfile(item.student_id || item.id)"
+              title="Open Full Student Profile"
+            ></v-btn>
+          </div>
+        </template>
+      </v-data-table>
+    </div>
+
+    <!-- 2. Applicants Table (Criteria Matched / All / Unmatched) -->
+    <div v-else class="apple-table-card">
       <v-data-table
         :headers="headers"
         :items="filteredApplicants"
@@ -257,127 +408,6 @@
         </div>
       </template>
     </AppModal>
-
-    <!-- Talent Pool Sourcing Modal -->
-    <v-dialog v-model="talentPoolDialog" max-width="900" scrollable>
-      <v-card color="white" rounded="xl" border class="pa-6">
-        <div class="d-flex align-center justify-space-between mb-4">
-          <div>
-            <div class="d-flex align-center gap-2">
-              <h2 class="text-h5 font-weight-bold text-grey-darken-4 mb-0">Matching Talent Pool</h2>
-              <Badge color="green">Candidate Sourcing</Badge>
-            </div>
-            <div class="text-caption text-secondary">
-              Registered platform students matching criteria for <strong>{{ job?.title }}</strong>
-            </div>
-          </div>
-          <v-btn icon="mdi-close" variant="text" @click="talentPoolDialog = false"></v-btn>
-        </div>
-
-        <v-divider class="mb-4 border-opacity-10"></v-divider>
-
-        <div class="mb-4 d-flex gap-4 align-center">
-          <v-text-field
-            v-model="talentSearch"
-            prepend-inner-icon="mdi-magnify"
-            placeholder="Search matching talent..."
-            variant="outlined"
-            density="compact"
-            hide-details
-            class="flex-grow-1"
-          ></v-text-field>
-        </div>
-
-        <v-card-text style="max-height: 500px;" class="pa-0">
-          <div v-if="talentLoading" class="text-center pa-8">
-            <v-progress-circular indeterminate color="primary"></v-progress-circular>
-            <div class="mt-2 text-caption text-secondary">Calculating match scores...</div>
-          </div>
-
-          <div v-else-if="filteredTalentPool.length === 0" class="pa-8 text-center text-secondary">
-            <v-icon size="48" class="mb-2 opacity-50">mdi-account-off-outline</v-icon>
-            <div>No matching students found in the talent pool.</div>
-          </div>
-
-          <div v-else class="d-flex flex-column gap-3">
-            <div
-              v-for="candidate in filteredTalentPool"
-              :key="candidate.student_id || candidate.id"
-              class="pa-4 rounded-xl border d-flex flex-wrap align-center justify-space-between gap-3 candidate-card-hover"
-            >
-              <!-- Clickable Candidate Identity Area -->
-              <div 
-                class="d-flex align-center gap-3 candidate-click-area"
-                @click="openCandidateDetails(candidate)"
-                role="button"
-                tabindex="0"
-                title="Click to view student details"
-              >
-                <v-avatar color="primary" size="42" class="font-weight-bold text-caption candidate-avatar">
-                  <v-img v-if="candidate.avatar_url" :src="candidate.avatar_url"></v-img>
-                  <span v-else>{{ candidate.name?.charAt(0) || 'U' }}</span>
-                </v-avatar>
-                <div>
-                  <div class="font-weight-bold text-subtitle-2 text-grey-darken-4 candidate-name d-flex align-center">
-                    {{ candidate.name }}
-                    <v-icon size="14" class="ml-1 text-primary candidate-name-icon">mdi-open-in-new</v-icon>
-                  </div>
-                  <div class="text-caption text-secondary">
-                    {{ candidate.education_level || candidate.qualification || 'Student' }}
-                    <span v-if="candidate.college_name"> • {{ candidate.college_name }}</span>
-                    <span v-if="candidate.experience_years"> • {{ candidate.experience_years }} Yrs Exp</span>
-                  </div>
-                  <div class="d-flex flex-wrap gap-1 mt-1">
-                    <v-chip
-                      v-for="skill in (candidate.matchedSkills || []).slice(0, 3)"
-                      :key="skill"
-                      size="x-small"
-                      color="success"
-                      variant="flat"
-                    >
-                      ✓ {{ skill }}
-                    </v-chip>
-                  </div>
-                </div>
-              </div>
-
-              <div class="d-flex align-center gap-2">
-                <CandidateMatchBadge
-                  :score="candidate.matchScore"
-                  :is-match="candidate.isMatch"
-                  :criteria-breakdown="candidate.criteriaBreakdown"
-                  :matched-skills="candidate.matchedSkills"
-                  :missing-skills="candidate.missingSkills"
-                  size="md"
-                />
-
-                <div v-if="candidate.has_applied || candidate.isApplied">
-                  <Badge color="blue">Applied</Badge>
-                </div>
-                <AppButton
-                  v-else
-                  size="sm"
-                  variant="blue"
-                  icon="mdi-send"
-                  @click="inviteCandidate(candidate)"
-                >
-                  Invite
-                </AppButton>
-
-                <v-btn
-                  icon="mdi-account-details-outline"
-                  variant="text"
-                  size="small"
-                  color="primary"
-                  @click="openCandidateDetails(candidate)"
-                  title="View Student Details"
-                ></v-btn>
-              </div>
-            </div>
-          </div>
-        </v-card-text>
-      </v-card>
-    </v-dialog>
 
     <!-- Candidate / Student Details Modal -->
     <v-dialog v-model="candidateDialog" max-width="750" scrollable>
@@ -585,13 +615,12 @@ const jobId = route.params.id as string;
 const job = ref<any>(null);
 const applicants = ref<any[]>([]);
 const loading = ref(false);
-const matchTab = ref<'matched' | 'all' | 'unmatched'>('matched');
+const matchTab = ref<'talent' | 'matched' | 'all' | 'unmatched'>('talent');
 const statusFilter = ref('All');
 
 const detailsDialog = ref(false);
 const selectedApp = ref<any>(null);
 
-const talentPoolDialog = ref(false);
 const talentLoading = ref(false);
 const talentPool = ref<any[]>([]);
 const talentSearch = ref('');
@@ -609,8 +638,17 @@ const headers: any[] = [
   { title: 'Actions', key: 'actions', sortable: false, align: 'end' }
 ];
 
+const talentHeaders: any[] = [
+  { title: 'Matching Candidate', key: 'name', sortable: true },
+  { title: 'Job Match', key: 'matchScore', sortable: true },
+  { title: 'Brix Credentials', key: 'brix_credentials', sortable: false },
+  { title: 'Education & Exp', key: 'profile', sortable: true },
+  { title: 'Matched Skills', key: 'skills', sortable: false },
+  { title: 'Actions', key: 'actions', sortable: false, align: 'end' }
+];
+
 onMounted(async () => {
-  await loadApplicants();
+  await Promise.all([loadApplicants(), loadTalentPool()]);
 });
 
 const loadApplicants = async () => {
@@ -623,6 +661,18 @@ const loadApplicants = async () => {
     console.error('Failed to load applicants', error);
   } finally {
     loading.value = false;
+  }
+};
+
+const loadTalentPool = async () => {
+  talentLoading.value = true;
+  try {
+    const { data } = await api.get(`/admin/jobs/${jobId}/matched-candidates`);
+    talentPool.value = data?.candidates || [];
+  } catch (error) {
+    console.error('Failed to load talent pool', error);
+  } finally {
+    talentLoading.value = false;
   }
 };
 
@@ -649,19 +699,6 @@ const filteredApplicants = computed(() => {
 
   return list;
 });
-
-const openTalentPoolDrawer = async () => {
-  talentPoolDialog.value = true;
-  talentLoading.value = true;
-  try {
-    const { data } = await api.get(`/admin/jobs/${jobId}/matched-candidates`);
-    talentPool.value = data?.candidates || [];
-  } catch (error) {
-    console.error('Failed to load talent pool', error);
-  } finally {
-    talentLoading.value = false;
-  }
-};
 
 const filteredTalentPool = computed(() => {
   if (!talentSearch.value.trim()) return talentPool.value;
