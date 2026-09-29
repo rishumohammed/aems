@@ -156,14 +156,19 @@
       >
         <!-- Candidate info -->
         <template v-slot:item.candidate="{ item }">
-          <div class="d-flex align-center py-2">
+          <div 
+            class="d-flex align-center py-2 cursor-pointer candidate-link" 
+            @click="openCandidateDetails(item)"
+            title="Click to view candidate details"
+          >
             <v-avatar color="primary" class="mr-3 text-uppercase font-weight-bold" size="40">
               <v-img v-if="item.avatar_url" :src="item.avatar_url"></v-img>
               <span v-else>{{ item.name ? item.name.charAt(0) : 'U' }}</span>
             </v-avatar>
             <div>
-              <div class="font-weight-bold text-subtitle-1 text-grey-darken-4">
+              <div class="font-weight-bold text-subtitle-1 text-grey-darken-4 candidate-name-hover d-flex align-center">
                 {{ item.name }}
+                <v-icon size="14" class="ml-1 text-primary candidate-hover-icon">mdi-open-in-new</v-icon>
               </div>
               <div class="text-caption text-secondary">
                 {{ item.email }} <span v-if="item.phone">• {{ item.phone }}</span>
@@ -476,7 +481,7 @@ const snackbar = ref(false);
 const snackbarText = ref('');
 const snackbarColor = ref('success');
 
-const headers = [
+const headers: any[] = [
   { title: 'Candidate', key: 'candidate', sortable: true },
   { title: 'Match Score', key: 'match', sortable: true },
   { title: 'Profile & Exp', key: 'profile', sortable: false },
@@ -492,9 +497,9 @@ onMounted(async () => {
 const fetchMatchedCandidates = async () => {
   loading.value = true;
   try {
-    const res = await api.get(`/employers/jobs/${jobId}/matched-candidates`);
-    job.value = res.data?.job || res.job;
-    candidates.value = res.data?.candidates || res.candidates || [];
+    const { data } = await api.get(`/employers/jobs/${jobId}/matched-candidates`);
+    job.value = data?.job;
+    candidates.value = data?.candidates || [];
   } catch (error: any) {
     console.error('Failed to load matched candidates', error);
     snackbarText.value = error.response?.data?.message || 'Failed to load matched candidates';
@@ -590,5 +595,27 @@ const sendInvitation = async () => {
 <style scoped>
 .max-w-280 {
   max-width: 280px;
+}
+.candidate-link {
+  cursor: pointer;
+  border-radius: 6px;
+  transition: opacity 0.2s ease;
+}
+.candidate-link:hover {
+  opacity: 0.85;
+}
+.candidate-name-hover {
+  transition: color 0.2s ease;
+}
+.candidate-link:hover .candidate-name-hover {
+  color: #1976d2 !important;
+  text-decoration: underline;
+}
+.candidate-hover-icon {
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+.candidate-link:hover .candidate-hover-icon {
+  opacity: 1;
 }
 </style>

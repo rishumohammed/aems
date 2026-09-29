@@ -351,6 +351,7 @@ export async function getJobMatchedCandidates(jobId, options = {}) {
   // 2. Fetch all active students with their profiles, certifications, and application status for this job
   const [students] = await pool.query(`
     SELECT 
+      u.id as id,
       u.id as student_id,
       u.name,
       u.email,
@@ -362,6 +363,7 @@ export async function getJobMatchedCandidates(jobId, options = {}) {
       sp.education_level,
       sp.college_name,
       sp.education_json,
+      sp.experience_json,
       sp.experience_years,
       sp.current_status,
       sp.last_company,
@@ -370,6 +372,7 @@ export async function getJobMatchedCandidates(jobId, options = {}) {
       sp.language_proficiency,
       sp.joining_status,
       sp.linkedin_url,
+      sp.resume_url,
       -- Platform Certifications
       (SELECT COUNT(*) FROM certificates c WHERE c.student_id = u.id AND c.status = 'active') as certs_active,
       (
@@ -380,6 +383,12 @@ export async function getJobMatchedCandidates(jobId, options = {}) {
       ) as active_cert_names,
       -- Completed Courses
       (SELECT COUNT(*) FROM enrollments e WHERE e.student_id = u.id AND e.status = 'completed') as courses_completed,
+      (
+        SELECT GROUP_CONCAT(co.title SEPARATOR '||')
+        FROM enrollments e
+        JOIN courses co ON e.course_id = co.id
+        WHERE e.student_id = u.id AND e.status = 'completed'
+      ) as completed_course_names,
       -- Application status if already applied
       ja.id as application_id,
       ja.status as application_status,
@@ -396,11 +405,13 @@ export async function getJobMatchedCandidates(jobId, options = {}) {
     const match = calculateJobMatch(job, student);
     return {
       ...student,
+      id: student.student_id,
       matchScore: match.matchScore,
       isMatch: match.isMatch,
       criteriaBreakdown: match.criteriaBreakdown,
       matchedSkills: match.matchedSkills,
       missingSkills: match.missingSkills,
+      has_applied: Boolean(student.application_id),
       isApplied: Boolean(student.application_id)
     };
   });

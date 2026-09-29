@@ -69,7 +69,11 @@
       >
         <!-- Applicant Name & Avatar -->
         <template v-slot:item.applicant_name="{ item }">
-          <div class="d-flex align-center py-2">
+          <div 
+            class="d-flex align-center py-2 cursor-pointer applicant-row-name"
+            @click="viewApplication(item)"
+            title="Click to view applicant details"
+          >
             <v-avatar color="primary" size="34" class="mr-3 font-weight-bold text-caption">
               <v-img v-if="item.avatar_url" :src="item.avatar_url"></v-img>
               <span v-else>{{ (item.applicant_name || item.fallback_name || 'U').charAt(0) }}</span>
@@ -135,8 +139,9 @@
 
         <!-- Actions -->
         <template v-slot:item.actions="{ item }">
-          <div class="d-flex justify-end">
-            <v-btn icon="mdi-file-document-outline" variant="text" size="small" color="grey-darken-1" @click="viewApplication(item)" title="View Application Details"></v-btn>
+          <div class="d-flex justify-end align-center gap-1">
+            <v-btn icon="mdi-file-document-outline" variant="text" size="small" color="primary" @click="viewApplication(item)" title="View Application Details"></v-btn>
+            <v-btn v-if="item.student_id" icon="mdi-account-arrow-right-outline" variant="text" size="small" color="grey-darken-1" @click="navigateToStudentProfile(item.student_id)" title="Open Student Profile"></v-btn>
           </div>
         </template>
 
@@ -176,6 +181,7 @@
         <div class="mb-4">
           <h4 class="font-weight-bold mb-1" style="color: var(--g6);">Personal & Contact</h4>
           <p style="color: var(--g7); font-weight: 500; font-size: 14px; line-height: 1.6;">
+            <strong>Name:</strong> {{ selectedApp.applicant_name || selectedApp.fallback_name || 'N/A' }} <br>
             <strong>Email:</strong> {{ selectedApp.applicant_email || selectedApp.fallback_email }} <br>
             <strong>Phone:</strong> {{ selectedApp.applicant_phone || 'N/A' }} <br>
             <strong>Location:</strong> {{ selectedApp.city || 'N/A' }} <br>
@@ -234,7 +240,21 @@
         </AppButton>
       </div>
       <template #footer>
-        <AppButton variant="g" @click="detailsDialog = false">Close</AppButton>
+        <div class="d-flex justify-space-between align-center w-100">
+          <v-btn
+            v-if="selectedApp?.student_id"
+            variant="outlined"
+            color="primary"
+            prepend-icon="mdi-account-arrow-right-outline"
+            size="small"
+            class="font-weight-bold"
+            @click="navigateToStudentProfile(selectedApp.student_id)"
+          >
+            Open Student Full Profile
+          </v-btn>
+          <div v-else></div>
+          <AppButton variant="g" @click="detailsDialog = false">Close</AppButton>
+        </div>
       </template>
     </AppModal>
 
@@ -282,16 +302,25 @@
           <div v-else class="d-flex flex-column gap-3">
             <div
               v-for="candidate in filteredTalentPool"
-              :key="candidate.id"
-              class="pa-4 rounded-xl border d-flex flex-wrap align-center justify-space-between gap-3"
+              :key="candidate.student_id || candidate.id"
+              class="pa-4 rounded-xl border d-flex flex-wrap align-center justify-space-between gap-3 candidate-card-hover"
             >
-              <div class="d-flex align-center gap-3">
-                <v-avatar color="primary" size="42" class="font-weight-bold text-caption">
-                  {{ candidate.name?.charAt(0) || 'U' }}
+              <!-- Clickable Candidate Identity Area -->
+              <div 
+                class="d-flex align-center gap-3 candidate-click-area"
+                @click="openCandidateDetails(candidate)"
+                role="button"
+                tabindex="0"
+                title="Click to view student details"
+              >
+                <v-avatar color="primary" size="42" class="font-weight-bold text-caption candidate-avatar">
+                  <v-img v-if="candidate.avatar_url" :src="candidate.avatar_url"></v-img>
+                  <span v-else>{{ candidate.name?.charAt(0) || 'U' }}</span>
                 </v-avatar>
                 <div>
-                  <div class="font-weight-bold text-subtitle-2 text-grey-darken-4">
+                  <div class="font-weight-bold text-subtitle-2 text-grey-darken-4 candidate-name d-flex align-center">
                     {{ candidate.name }}
+                    <v-icon size="14" class="ml-1 text-primary candidate-name-icon">mdi-open-in-new</v-icon>
                   </div>
                   <div class="text-caption text-secondary">
                     {{ candidate.education_level || candidate.qualification || 'Student' }}
@@ -312,7 +341,7 @@
                 </div>
               </div>
 
-              <div class="d-flex align-center gap-3">
+              <div class="d-flex align-center gap-2">
                 <CandidateMatchBadge
                   :score="candidate.matchScore"
                   :is-match="candidate.isMatch"
@@ -322,7 +351,7 @@
                   size="md"
                 />
 
-                <div v-if="candidate.has_applied">
+                <div v-if="candidate.has_applied || candidate.isApplied">
                   <Badge color="blue">Applied</Badge>
                 </div>
                 <AppButton
@@ -334,10 +363,208 @@
                 >
                   Invite
                 </AppButton>
+
+                <v-btn
+                  icon="mdi-account-details-outline"
+                  variant="text"
+                  size="small"
+                  color="primary"
+                  @click="openCandidateDetails(candidate)"
+                  title="View Student Details"
+                ></v-btn>
               </div>
             </div>
           </div>
         </v-card-text>
+      </v-card>
+    </v-dialog>
+
+    <!-- Candidate / Student Details Modal -->
+    <v-dialog v-model="candidateDialog" max-width="750" scrollable>
+      <v-card v-if="selectedCandidate" color="white" rounded="xl" border class="pa-6">
+        <div class="d-flex align-center justify-space-between mb-4">
+          <div class="d-flex align-center gap-3">
+            <v-avatar color="primary" size="52" class="font-weight-bold text-h6 text-white">
+              <v-img v-if="selectedCandidate.avatar_url" :src="selectedCandidate.avatar_url"></v-img>
+              <span v-else>{{ selectedCandidate.name?.charAt(0) || 'U' }}</span>
+            </v-avatar>
+            <div>
+              <div class="d-flex align-center gap-2">
+                <h2 class="text-h5 font-weight-bold text-grey-darken-4 mb-0">
+                  {{ selectedCandidate.name }}
+                </h2>
+                <Badge :color="selectedCandidate.current_status === 'employed' ? 'green' : 'blue'">
+                  {{ selectedCandidate.current_status ? (selectedCandidate.current_status.charAt(0).toUpperCase() + selectedCandidate.current_status.slice(1)) : 'Student' }}
+                </Badge>
+              </div>
+              <div class="text-secondary text-caption mt-1">
+                {{ selectedCandidate.email }} <span v-if="selectedCandidate.phone">• {{ selectedCandidate.phone }}</span>
+              </div>
+            </div>
+          </div>
+          <v-btn icon="mdi-close" variant="text" @click="candidateDialog = false"></v-btn>
+        </div>
+
+        <v-divider class="mb-4 border-opacity-10"></v-divider>
+
+        <v-card-text style="max-height: 550px;" class="pa-0">
+          <!-- Match Breakdown Header -->
+          <div class="mb-4 pa-4 bg-grey-lighten-4 rounded-xl border d-flex flex-wrap align-center justify-space-between gap-3">
+            <div>
+              <div class="text-caption font-weight-bold text-secondary text-uppercase">Criteria Match Score</div>
+              <div class="text-subtitle-2 font-weight-bold text-grey-darken-4">Target Job: {{ job?.title }}</div>
+            </div>
+            <CandidateMatchBadge
+              :score="selectedCandidate.matchScore"
+              :is-match="selectedCandidate.isMatch"
+              :criteria-breakdown="selectedCandidate.criteriaBreakdown"
+              :matched-skills="selectedCandidate.matchedSkills"
+              :missing-skills="selectedCandidate.missingSkills"
+              size="md"
+            />
+          </div>
+
+          <v-row class="mb-2">
+            <!-- Left Column: Personal & Education -->
+            <v-col cols="12" sm="6">
+              <div class="pa-4 rounded-xl border bg-white mb-4">
+                <h4 class="text-subtitle-2 font-weight-bold text-grey-darken-4 mb-3 d-flex align-center gap-2">
+                  <v-icon size="18" color="primary">mdi-account-outline</v-icon> Personal & Contact
+                </h4>
+                <div class="text-body-2 text-grey-darken-3 mb-2">
+                  <span class="text-secondary">Email:</span> <br><strong>{{ selectedCandidate.email }}</strong>
+                </div>
+                <div class="text-body-2 text-grey-darken-3 mb-2">
+                  <span class="text-secondary">Phone:</span> <strong>{{ selectedCandidate.phone || 'N/A' }}</strong>
+                </div>
+                <div class="text-body-2 text-grey-darken-3 mb-2" v-if="selectedCandidate.gender">
+                  <span class="text-secondary">Gender:</span> <strong>{{ selectedCandidate.gender }}</strong>
+                </div>
+                <div class="text-body-2 text-grey-darken-3 mb-2" v-if="selectedCandidate.joining_status">
+                  <span class="text-secondary">Joining Status:</span> <strong>{{ selectedCandidate.joining_status }}</strong>
+                </div>
+                <div class="text-body-2 text-grey-darken-3 mb-2" v-if="selectedCandidate.language_proficiency">
+                  <span class="text-secondary">Languages:</span> <strong>{{ selectedCandidate.language_proficiency }}</strong>
+                </div>
+                <div v-if="selectedCandidate.linkedin_url || selectedCandidate.linkedin" class="mt-2">
+                  <a :href="selectedCandidate.linkedin_url || selectedCandidate.linkedin" target="_blank" class="text-primary text-decoration-none font-weight-medium text-caption d-inline-flex align-center gap-1">
+                    <v-icon size="14">mdi-linkedin</v-icon> LinkedIn Profile
+                  </a>
+                </div>
+              </div>
+
+              <div class="pa-4 rounded-xl border bg-white">
+                <h4 class="text-subtitle-2 font-weight-bold text-grey-darken-4 mb-3 d-flex align-center gap-2">
+                  <v-icon size="18" color="primary">mdi-school-outline</v-icon> Education
+                </h4>
+                <div class="text-body-2 text-grey-darken-3 mb-2">
+                  <span class="text-secondary">Level:</span> <strong>{{ selectedCandidate.education_level || selectedCandidate.qualification || 'N/A' }}</strong>
+                </div>
+                <div class="text-body-2 text-grey-darken-3 mb-2" v-if="selectedCandidate.college_name || selectedCandidate.institution">
+                  <span class="text-secondary">College / Institution:</span> <br>
+                  <strong>{{ selectedCandidate.college_name || selectedCandidate.institution }}</strong>
+                </div>
+              </div>
+            </v-col>
+
+            <!-- Right Column: Experience, Skills & Certs -->
+            <v-col cols="12" sm="6">
+              <div class="pa-4 rounded-xl border bg-white mb-4">
+                <h4 class="text-subtitle-2 font-weight-bold text-grey-darken-4 mb-3 d-flex align-center gap-2">
+                  <v-icon size="18" color="primary">mdi-briefcase-outline</v-icon> Experience
+                </h4>
+                <div class="text-body-2 text-grey-darken-3 mb-2">
+                  <span class="text-secondary">Total Experience:</span> <strong>{{ selectedCandidate.experience_years || 0 }} Years</strong>
+                </div>
+                <div class="text-body-2 text-grey-darken-3 mb-2" v-if="selectedCandidate.last_role">
+                  <span class="text-secondary">Last Role:</span> <strong>{{ selectedCandidate.last_role }}</strong>
+                </div>
+                <div class="text-body-2 text-grey-darken-3 mb-2" v-if="selectedCandidate.last_company">
+                  <span class="text-secondary">Last Company:</span> <strong>{{ selectedCandidate.last_company }}</strong>
+                </div>
+              </div>
+
+              <div class="pa-4 rounded-xl border bg-white">
+                <h4 class="text-subtitle-2 font-weight-bold text-grey-darken-4 mb-3 d-flex align-center gap-2">
+                  <v-icon size="18" color="primary">mdi-certificate-outline</v-icon> Brix Platform Credentials
+                </h4>
+                <div class="d-flex gap-2 mb-3">
+                  <Badge :color="(selectedCandidate.certs_active || 0) > 0 ? 'green' : 'gray'">
+                    {{ selectedCandidate.certs_active || 0 }} Verified Certs
+                  </Badge>
+                  <Badge color="gray">
+                    {{ selectedCandidate.courses_completed || 0 }} Courses Completed
+                  </Badge>
+                </div>
+                <div v-if="selectedCandidate.active_cert_names" class="text-caption text-secondary">
+                  <strong>Certifications:</strong> {{ selectedCandidate.active_cert_names.split('||').join(', ') }}
+                </div>
+                <div v-if="selectedCandidate.completed_course_names" class="text-caption text-secondary mt-1">
+                  <strong>Completed Courses:</strong> {{ selectedCandidate.completed_course_names.split('||').join(', ') }}
+                </div>
+              </div>
+            </v-col>
+          </v-row>
+
+          <!-- Skills Section -->
+          <div class="pa-4 rounded-xl border bg-white mb-4">
+            <h4 class="text-subtitle-2 font-weight-bold text-grey-darken-4 mb-2 d-flex align-center gap-2">
+              <v-icon size="18" color="primary">mdi-tag-outline</v-icon> Skills & Competencies
+            </h4>
+            <div class="d-flex flex-wrap gap-2">
+              <v-chip
+                v-for="skill in getSkills(selectedCandidate.skills)"
+                :key="skill"
+                size="small"
+                :color="selectedCandidate.matchedSkills?.includes(skill) ? 'success' : 'primary'"
+                :variant="selectedCandidate.matchedSkills?.includes(skill) ? 'flat' : 'tonal'"
+              >
+                {{ selectedCandidate.matchedSkills?.includes(skill) ? '✓ ' : '' }}{{ skill }}
+              </v-chip>
+              <div v-if="!getSkills(selectedCandidate.skills).length" class="text-caption text-secondary">
+                No skills listed on student profile.
+              </div>
+            </div>
+          </div>
+
+          <!-- Resume Section if available -->
+          <div v-if="selectedCandidate.resume_url" class="pa-4 rounded-xl border bg-white mb-2">
+            <div class="d-flex align-center justify-space-between">
+              <div>
+                <h4 class="text-subtitle-2 font-weight-bold text-grey-darken-4 mb-0">Attached Resume</h4>
+                <div class="text-caption text-secondary">Student profile resume document</div>
+              </div>
+              <AppButton size="sm" variant="g" icon="mdi-download" @click="downloadResume(selectedCandidate.resume_url)">
+                Download Resume
+              </AppButton>
+            </div>
+          </div>
+        </v-card-text>
+
+        <div class="d-flex flex-wrap align-center justify-space-between gap-3 border-t pt-4 mt-2">
+          <v-btn
+            variant="outlined"
+            color="primary"
+            prepend-icon="mdi-account-arrow-right-outline"
+            class="font-weight-bold"
+            @click="navigateToStudentProfile(selectedCandidate.student_id || selectedCandidate.id)"
+          >
+            Open Full Student Profile
+          </v-btn>
+
+          <div class="d-flex align-center gap-2">
+            <v-btn variant="tonal" color="grey" @click="candidateDialog = false">Close</v-btn>
+            <AppButton
+              v-if="!selectedCandidate.has_applied && !selectedCandidate.isApplied"
+              size="md"
+              variant="blue"
+              icon="mdi-send"
+              @click="inviteCandidate(selectedCandidate)"
+            >
+              Invite Candidate
+            </AppButton>
+          </div>
+        </div>
       </v-card>
     </v-dialog>
   </v-container>
@@ -368,6 +595,9 @@ const talentPoolDialog = ref(false);
 const talentLoading = ref(false);
 const talentPool = ref<any[]>([]);
 const talentSearch = ref('');
+
+const candidateDialog = ref(false);
+const selectedCandidate = ref<any>(null);
 
 const headers: any[] = [
   { title: 'Applicant', key: 'applicant_name', sortable: true },
@@ -424,8 +654,8 @@ const openTalentPoolDrawer = async () => {
   talentPoolDialog.value = true;
   talentLoading.value = true;
   try {
-    const res = await api.get(`/admin/jobs/${jobId}/matched-candidates`);
-    talentPool.value = res.data?.candidates || res.candidates || [];
+    const { data } = await api.get(`/admin/jobs/${jobId}/matched-candidates`);
+    talentPool.value = data?.candidates || [];
   } catch (error) {
     console.error('Failed to load talent pool', error);
   } finally {
@@ -444,11 +674,21 @@ const filteredTalentPool = computed(() => {
   );
 });
 
+const openCandidateDetails = (candidate: any) => {
+  selectedCandidate.value = candidate;
+  candidateDialog.value = true;
+};
+
+const navigateToStudentProfile = (studentId: string) => {
+  if (!studentId) return;
+  window.open(`/dashboard/students/${studentId}`, '_blank');
+};
+
 const inviteCandidate = async (candidate: any) => {
   if (!confirm(`Invite ${candidate.name} to apply for this job?`)) return;
   try {
     await api.post(`/admin/jobs/${jobId}/invite-candidate`, {
-      student_id: candidate.id
+      student_id: candidate.student_id || candidate.id
     });
     alert(`Invitation sent to ${candidate.name}!`);
   } catch (error: any) {
@@ -549,6 +789,17 @@ function getSkills(skillsStr: any): string[] {
   color: var(--g4);
 }
 
+.applicant-row-name {
+  cursor: pointer;
+  border-radius: 4px;
+  transition: opacity 0.2s ease;
+}
+
+.applicant-row-name:hover .applicant-name {
+  color: #1976d2 !important;
+  text-decoration: underline;
+}
+
 .role-text {
   font-weight: 600;
   color: var(--g6);
@@ -561,5 +812,42 @@ function getSkills(skillsStr: any): string[] {
 
 .status-select {
   min-width: 140px;
+}
+
+.candidate-click-area {
+  cursor: pointer;
+  border-radius: 8px;
+  transition: opacity 0.2s ease;
+}
+
+.candidate-click-area:hover {
+  opacity: 0.85;
+}
+
+.candidate-name {
+  transition: color 0.2s ease;
+}
+
+.candidate-click-area:hover .candidate-name {
+  color: #1976d2 !important;
+  text-decoration: underline;
+}
+
+.candidate-name-icon {
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.candidate-click-area:hover .candidate-name-icon {
+  opacity: 1;
+}
+
+.candidate-card-hover {
+  transition: all 0.2s ease;
+}
+
+.candidate-card-hover:hover {
+  background-color: #f8fafc;
+  border-color: #cbd5e1 !important;
 }
 </style>
