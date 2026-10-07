@@ -36,22 +36,22 @@
         :loading="loading"
       >
         <template #item.invoice_number="{ item }">
-          <div class="font-weight-bold">{{ item.invoice_number }}</div>
+          <div class="font-weight-bold">{{ item.invoice_number || '—' }}</div>
           <div class="text-caption text-secondary">{{ formatDate(item.created_at) }}</div>
-</template>
+        </template>
 
         <template #item.student_name="{ item }">
-          <div class="font-weight-bold">{{ item.student_name }}</div>
+          <div class="font-weight-bold">{{ item.student_name || 'Unknown Student' }}</div>
           <div class="text-caption text-secondary">{{ item.course_title || 'N/A' }}</div>
         </template>
 
         <template #item.amount="{ item }">
-          <div class="font-weight-bold">₹{{ item.amount.toLocaleString() }}</div>
+          <div class="font-weight-bold">₹{{ Number(item.amount || 0).toLocaleString() }}</div>
         </template>
 
         <template #item.balance_due="{ item }">
-          <div :class="['font-weight-bold', item.balance_due > 0 ? 'text-red' : 'text-green']">
-            ₹{{ item.balance_due.toLocaleString() }}
+          <div :class="['font-weight-bold', Number(item.balance_due || item.balance_amount || 0) > 0 ? 'text-red' : 'text-green']">
+            ₹{{ Number(item.balance_due || item.balance_amount || 0).toLocaleString() }}
           </div>
         </template>
 
@@ -64,7 +64,7 @@
 
         <template #item.payment_mode="{ item }">
           <div class="text-capitalize text-caption font-weight-medium text-grey-darken-1">
-            {{ item.payment_mode || 'Online' }}
+            {{ item.payment_mode || item.latest_payment_mode || 'Online' }}
           </div>
         </template>
 
@@ -73,7 +73,7 @@
             <AppButton variant="g" size="xs" icon="mdi-file-pdf-box" @click="viewPDF(item)" :loading="generatingPdf === item.id" title="Download PDF" />
             <AppButton variant="g" size="xs" icon="mdi-history" @click="viewPayments(item)" title="Payment History" />
             <AppButton 
-              v-if="item.balance_due > 0 && item.payment_status !== 'voided'" 
+              v-if="Number(item.balance_due || item.balance_amount || 0) > 0 && item.payment_status !== 'voided'" 
               variant="g" 
               size="xs" 
               icon="mdi-cash-plus" 
@@ -414,10 +414,33 @@ const updateInvoiceDetails = async () => {
 };
 
 const filteredInvoices = computed(() => {
+  if (!invoices.value || !Array.isArray(invoices.value)) return [];
+  const q = (search.value || '').trim().toLowerCase();
+  if (!q) return invoices.value;
+
   return invoices.value.filter(i => {
-    const matchesSearch = i.student_name.toLowerCase().includes(search.value.toLowerCase()) || 
-                          i.invoice_number.toLowerCase().includes(search.value.toLowerCase());
-    return matchesSearch;
+    if (!i) return false;
+    const studentName = String(i.student_name || '').toLowerCase();
+    const invoiceNumber = String(i.invoice_number || '').toLowerCase();
+    const courseTitle = String(i.course_title || '').toLowerCase();
+    const paymentStatus = String(i.payment_status || '').toLowerCase();
+    const paymentMode = String(i.payment_mode || i.latest_payment_mode || '').toLowerCase();
+    const paymentRef = String(i.payment_reference || '').toLowerCase();
+    const amount = String(i.amount ?? '');
+    const balance = String(i.balance_due ?? i.balance_amount ?? '');
+    const dateFormatted = i.created_at ? formatDate(i.created_at).toLowerCase() : '';
+
+    return (
+      studentName.includes(q) ||
+      invoiceNumber.includes(q) ||
+      courseTitle.includes(q) ||
+      paymentStatus.includes(q) ||
+      paymentMode.includes(q) ||
+      paymentRef.includes(q) ||
+      amount.includes(q) ||
+      balance.includes(q) ||
+      dateFormatted.includes(q)
+    );
   });
 });
 
@@ -482,7 +505,7 @@ const viewPayments = async (invoice: any) => {
   historyDialog.value = true;
   loadingHistory.value = true;
   try {
-    const res = await api.get(`/admin/finance/invoices/${invoice.id}/payments`);
+    const res: any = await api.get(`/admin/finance/invoices/${invoice.id}/payments`);
     paymentsHistory.value = res.data || res;
   } catch (error) {
     console.error('Failed to fetch payments history', error);
@@ -491,8 +514,11 @@ const viewPayments = async (invoice: any) => {
   }
 };
 
-const formatHistoryDate = (dateStr: string) => {
-  return new Date(dateStr).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+const formatHistoryDate = (dateStr: string | null) => {
+  if (!dateStr) return '';
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return '';
+  return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 };
 
 const viewPDF = async (invoice: any) => {
@@ -509,7 +535,7 @@ const viewPDF = async (invoice: any) => {
   } else {
     try {
       generatingPdf.value = invoice.id;
-      const res = await api.post(`/admin/finance/invoices/${invoice.id}/generate-pdf`);
+      const res: any = await api.post(`/admin/finance/invoices/${invoice.id}/generate-pdf`);
       invoice.pdf_path = res.data?.pdf_path || res.pdf_path;
       if (invoice.pdf_path) {
         openPdf(invoice.pdf_path);
@@ -535,8 +561,11 @@ const getStatusColor = (status: string) => {
   }
 };
 
-const formatDate = (dateStr: string) => {
-  return new Date(dateStr).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+const formatDate = (dateStr: string | null) => {
+  if (!dateStr) return '';
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return '';
+  return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
 };
 </script>
 

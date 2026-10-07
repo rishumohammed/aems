@@ -31,6 +31,56 @@ class EnrollmentService {
   }
 
   /**
+   * Helper to generate a sequential Student ID: STU-YYYY-NNN
+   */
+  async generateNextStudentId(connection = pool) {
+    const currentYear = new Date().getFullYear();
+    const prefix = `STU-${currentYear}-`;
+    const [rows] = await connection.query(
+      `SELECT student_id FROM student_profiles 
+       WHERE student_id LIKE ? 
+       ORDER BY CAST(SUBSTRING_INDEX(student_id, '-', -1) AS UNSIGNED) DESC LIMIT 1`,
+      [`${prefix}%`]
+    );
+    let nextNum = 1;
+    if (rows.length > 0 && rows[0].student_id) {
+      const lastId = rows[0].student_id;
+      const parts = lastId.split('-');
+      if (parts.length >= 3) {
+        const lastNum = parseInt(parts[parts.length - 1], 10);
+        if (!isNaN(lastNum)) {
+          nextNum = lastNum + 1;
+        }
+      }
+    }
+    return `${prefix}${String(nextNum).padStart(3, '0')}`;
+  }
+
+  /**
+   * Ensure student has a readable Student ID assigned (called upon successful course enrollment)
+   */
+  async ensureStudentId(connection = pool, studentId, studentData = {}, convertedBy = null, leadSource = null) {
+    const [profile] = await connection.query('SELECT student_id FROM student_profiles WHERE user_id = ?', [studentId]);
+    if (profile.length > 0 && profile[0].student_id) {
+      return profile[0].student_id;
+    }
+
+    const readableStudentId = await this.generateNextStudentId(connection);
+    if (profile.length > 0) {
+      await connection.query(
+        'UPDATE student_profiles SET student_id = ? WHERE user_id = ?',
+        [readableStudentId, studentId]
+      );
+    } else {
+      await connection.query(
+        'INSERT INTO student_profiles (user_id, student_id, converted_by, lead_source, education_level, college_name) VALUES (?, ?, ?, ?, ?, ?)',
+        [studentId, readableStudentId, convertedBy || null, leadSource || 'direct', studentData.education_level || null, studentData.college_name || studentData.college || null]
+      );
+    }
+    return readableStudentId;
+  }
+
+  /**
    * Core enrollment logic shared by CRM, Self-Enroll, and Manual Enroll
    */
   async enrollStudent({ leadId, studentData, courseId, pricing, payment, convertedBy, leadSource }) {
@@ -42,41 +92,13 @@ class EnrollmentService {
       let tempPassword = null;
       let readableStudentId = null;
 
-      // 1. Create or Identify User
+      // 1. Create or Identify User & Ensure Student ID on active enrollment
       if (!studentId) {
         // Check if user already exists by email
         const [existing] = await connection.query('SELECT id FROM users WHERE email = ?', [studentData.email]);
         if (existing.length > 0) {
           studentId = existing[0].id;
-          // Get existing student_id if profile exists
-          const [profile] = await connection.query('SELECT student_id FROM student_profiles WHERE user_id = ?', [studentId]);
-          if (profile.length > 0) {
-            readableStudentId = profile[0].student_id;
-          } else {
-            // Profile doesn't exist, create it (shouldn't happen but just in case)
-            const currentYear = new Date().getFullYear();
-            const prefix = `STU-${currentYear}-`;
-            const [rows] = await connection.query(
-              'SELECT student_id FROM student_profiles WHERE student_id LIKE ? ORDER BY student_id DESC LIMIT 1',
-              [`${prefix}%`]
-            );
-            let nextNum = 1;
-            if (rows.length > 0 && rows[0].student_id) {
-              const lastId = rows[0].student_id;
-              const parts = lastId.split('-');
-              if (parts.length === 3) {
-                const lastNum = parseInt(parts[2], 10);
-                if (!isNaN(lastNum)) {
-                  nextNum = lastNum + 1;
-                }
-              }
-            }
-            readableStudentId = `${prefix}${String(nextNum).padStart(3, '0')}`;
-            await connection.query(
-              'INSERT INTO student_profiles (user_id, student_id, converted_by, lead_source, education_level, college_name) VALUES (?, ?, ?, ?, ?, ?)',
-              [studentId, readableStudentId, convertedBy || null, leadSource || null, studentData.education_level || null, studentData.college_name || studentData.college || null]
-            );
-          }
+          readableStudentId = await this.ensureStudentId(connection, studentId, studentData, convertedBy, leadSource);
         } else {
           studentId = uuidv4();
           tempPassword = this.generateTempPassword();
@@ -87,25 +109,7 @@ class EnrollmentService {
             [studentId, studentData.name || null, studentData.email || null, hashedPassword, tempPassword, studentData.phone || null]
           );
 
-          // Generate sequential Student ID: STU-YYYY-NNN
-          const currentYear = new Date().getFullYear();
-          const prefix = `STU-${currentYear}-`;
-          const [rows] = await connection.query(
-            'SELECT student_id FROM student_profiles WHERE student_id LIKE ? ORDER BY student_id DESC LIMIT 1',
-            [`${prefix}%`]
-          );
-          let nextNum = 1;
-          if (rows.length > 0 && rows[0].student_id) {
-            const lastId = rows[0].student_id;
-            const parts = lastId.split('-');
-            if (parts.length === 3) {
-              const lastNum = parseInt(parts[2], 10);
-              if (!isNaN(lastNum)) {
-                nextNum = lastNum + 1;
-              }
-            }
-          }
-          readableStudentId = `${prefix}${String(nextNum).padStart(3, '0')}`;
+          readableStudentId = await this.generateNextStudentId(connection);
 
           // Create student profile
           await connection.query(
@@ -114,10 +118,7 @@ class EnrollmentService {
           );
         }
       } else {
-        const [profile] = await connection.query('SELECT student_id FROM student_profiles WHERE user_id = ?', [studentId]);
-        if (profile.length > 0) {
-          readableStudentId = profile[0].student_id;
-        }
+        readableStudentId = await this.ensureStudentId(connection, studentId, studentData, convertedBy, leadSource || 'direct');
       }
 
       // 2. Check for existing enrollment

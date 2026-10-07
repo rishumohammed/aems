@@ -339,6 +339,10 @@ router.put('/offline-payments/:id/approve', authenticateJWT, hasAccess, async (r
       [payment.student_id, payment.course_id]
     );
 
+    // Ensure student ID is generated upon active enrollment
+    const enrollmentService = (await import('../services/enrollment.service.js')).default;
+    await enrollmentService.ensureStudentId(connection, payment.student_id, {}, null, 'offline_payment');
+
     await connection.commit();
 
     // 4. Notify student

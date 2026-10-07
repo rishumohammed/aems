@@ -581,9 +581,23 @@ router.get('/profile', async (req, res) => {
     const userId = req.user.id;
     const [users] = await pool.query('SELECT name, email, phone, notification_settings FROM users WHERE id = ?', [userId]);
     const [profiles] = await pool.query('SELECT * FROM student_profiles WHERE user_id = ?', [userId]);
+    const profile = profiles[0] || {};
+
+    if (!profile.student_id) {
+      const [activeEnrollments] = await pool.query(
+        'SELECT id FROM enrollments WHERE student_id = ? AND status IN ("active", "completed") LIMIT 1',
+        [userId]
+      );
+      if (activeEnrollments.length > 0) {
+        const enrollmentService = (await import('../services/enrollment.service.js')).default;
+        const newStudentId = await enrollmentService.ensureStudentId(pool, userId);
+        profile.student_id = newStudentId;
+      }
+    }
+
     res.json({
       ...users[0],
-      profile: profiles[0] || {}
+      profile
     });
   } catch (error) {
     res.status(500).json({ message: error.message });

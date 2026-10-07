@@ -39,9 +39,20 @@ const hashToken = (token) => crypto.createHash('sha256').update(token).digest('h
 
 router.post('/register/student', async (req, res) => {
   const { name, email, password, phone, education_level, college_name, gender, date_of_birth } = req.body;
+  if (!name || !email || !password) {
+    return res.status(400).json({ message: 'Name, email, and password are required.' });
+  }
+
+  const normalizedEmail = email.trim().toLowerCase();
   const connection = await pool.getConnection();
 
   try {
+    const [existing] = await connection.query('SELECT id FROM users WHERE LOWER(email) = ?', [normalizedEmail]);
+    if (existing.length > 0) {
+      connection.release();
+      return res.status(400).json({ message: 'An account with this email address already exists. Please log in or use another email.' });
+    }
+
     await connection.beginTransaction();
 
     const id = uuidv4();
@@ -50,7 +61,7 @@ router.post('/register/student', async (req, res) => {
     // 1. Create User
     await connection.query(
       'INSERT INTO users (id, name, email, password_hash, phone, role, status) VALUES (?, ?, ?, ?, ?, "student", "active")',
-      [id, name, email, hashedPassword, phone]
+      [id, name.trim(), normalizedEmail, hashedPassword, phone || null]
     );
 
     // 2. Create Profiles
@@ -76,7 +87,7 @@ router.post('/register/student', async (req, res) => {
           userId: admin.id,
           type: 'info',
           title: 'New Student Registration',
-          message: `${name} (${email}) has just registered as a student.`,
+          message: `${name} (${normalizedEmail}) has just registered as a student.`,
           link: '/dashboard/admin/students',
           emailNotify: false
         });
@@ -88,7 +99,10 @@ router.post('/register/student', async (req, res) => {
     res.status(201).json({ message: 'Registration successful. Welcome to the platform!' });
   } catch (error) {
     await connection.rollback();
-    res.status(500).json({ message: error.message });
+    if (error.code === 'ER_DUP_ENTRY') {
+      return res.status(400).json({ message: 'An account with this email address already exists. Please log in or use another email.' });
+    }
+    res.status(500).json({ message: error.message || 'Registration failed. Please try again later.' });
   } finally {
     connection.release();
   }
@@ -101,9 +115,20 @@ router.post('/register/tutor', async (req, res) => {
     linkedin_url, portfolio_url
   } = req.body;
   
+  if (!name || !email || !password) {
+    return res.status(400).json({ message: 'Name, email, and password are required.' });
+  }
+
+  const normalizedEmail = email.trim().toLowerCase();
   const connection = await pool.getConnection();
 
   try {
+    const [existing] = await connection.query('SELECT id FROM users WHERE LOWER(email) = ?', [normalizedEmail]);
+    if (existing.length > 0) {
+      connection.release();
+      return res.status(400).json({ message: 'An account with this email address already exists. Please log in or use another email.' });
+    }
+
     await connection.beginTransaction();
 
     const id = uuidv4();
@@ -112,7 +137,7 @@ router.post('/register/tutor', async (req, res) => {
     // 1. Create User (Status: pending_review — awaiting admin approval)
     await connection.query(
       'INSERT INTO users (id, name, email, password_hash, phone, role, status) VALUES (?, ?, ?, ?, ?, "tutor", "pending_review")',
-      [id, name, email, hashedPassword, phone]
+      [id, name.trim(), normalizedEmail, hashedPassword, phone || null]
     );
 
     // 2. Create Profiles
@@ -120,7 +145,7 @@ router.post('/register/tutor', async (req, res) => {
     await connection.query(
       `INSERT INTO tutor_profiles (user_id, qualification, specialization, teaching_experience, skills_expertise, linkedin_url, portfolio_url) 
        VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      [id, qualification, specialization, experience, skills, linkedin_url, portfolio_url]
+      [id, qualification || null, specialization || null, experience || null, skills || null, linkedin_url || null, portfolio_url || null]
     );
 
     // 3. Log Action
@@ -150,7 +175,7 @@ router.post('/register/tutor', async (req, res) => {
           userId: admin.id,
           type: 'system',
           title: 'New Tutor Application',
-          message: `${name} (${email}) has submitted a tutor application and is awaiting your review.`,
+          message: `${name} (${normalizedEmail}) has submitted a tutor application and is awaiting your review.`,
           link: '/dashboard/admin/tutor-approvals',
           emailNotify: false
         });
@@ -162,7 +187,10 @@ router.post('/register/tutor', async (req, res) => {
     res.status(201).json({ message: 'Registration submitted successfully. Your profile is under admin review.' });
   } catch (error) {
     await connection.rollback();
-    res.status(500).json({ message: error.message });
+    if (error.code === 'ER_DUP_ENTRY') {
+      return res.status(400).json({ message: 'An account with this email address already exists. Please log in or use another email.' });
+    }
+    res.status(500).json({ message: error.message || 'Registration failed. Please try again later.' });
   } finally {
     connection.release();
   }

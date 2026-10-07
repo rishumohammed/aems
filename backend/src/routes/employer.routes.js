@@ -15,9 +15,11 @@ router.post('/register', async (req, res) => {
     employer_role, company_size, address, logo_url, linkedin_url
   } = req.body;
 
+  const normalizedEmail = email ? email.trim().toLowerCase() : '';
+
   try {
-    const [existing] = await pool.query('SELECT id FROM users WHERE email = ?', [email]);
-    if (existing.length > 0) return res.status(400).json({ message: 'Email already exists' });
+    const [existing] = await pool.query('SELECT id FROM users WHERE LOWER(email) = ?', [normalizedEmail]);
+    if (existing.length > 0) return res.status(400).json({ message: 'An account with this email address already exists. Please log in or use another email.' });
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const userId = uuidv4();
@@ -26,7 +28,7 @@ router.post('/register', async (req, res) => {
     await pool.query(
       `INSERT INTO users (id, name, email, phone, password_hash, role, status) 
        VALUES (?, ?, ?, ?, ?, 'employer', 'active')`,
-      [userId, contact_name || company_name, email, phone, hashedPassword]
+      [userId, contact_name || company_name, normalizedEmail, phone || null, hashedPassword]
     );
 
     // Create employer profile
@@ -50,7 +52,10 @@ router.post('/register', async (req, res) => {
 
     res.status(201).json({ message: 'Registration successful. Awaiting admin verification.' });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    if (error.code === 'ER_DUP_ENTRY') {
+      return res.status(400).json({ message: 'An account with this email address already exists. Please log in or use another email.' });
+    }
+    res.status(500).json({ message: error.message || 'Registration failed. Please try again later.' });
   }
 });
 

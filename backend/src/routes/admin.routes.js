@@ -44,7 +44,18 @@ router.get('/users', async (req, res) => {
 // Create User
 router.post('/users', async (req, res) => {
   const { name, email, role, send_welcome, course_ids } = req.body;
+  if (!name || !email || !role) {
+    return res.status(400).json({ message: 'Name, email, and role are required.' });
+  }
+
+  const normalizedEmail = email.trim().toLowerCase();
+
   try {
+    const [existing] = await pool.query('SELECT id FROM users WHERE LOWER(email) = ?', [normalizedEmail]);
+    if (existing.length > 0) {
+      return res.status(400).json({ message: 'A user with this email address already exists.' });
+    }
+
     const id = uuidv4();
     const charsLowerCase = "abcdefghijklmnopqrstuvwxyz";
     const charsUpperCase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -69,7 +80,7 @@ router.post('/users', async (req, res) => {
 
     await pool.query(
       'INSERT INTO users (id, name, email, role, password_hash, temp_password, force_password_change, status) VALUES (?, ?, ?, ?, ?, ?, 1, "active")',
-      [id, name, email, role, hashedPassword, defaultPassword]
+      [id, name.trim(), normalizedEmail, role, hashedPassword, defaultPassword]
     );
 
     // Initial profile
@@ -97,7 +108,7 @@ router.post('/users', async (req, res) => {
         const [courses] = await pool.query('SELECT id, price FROM courses WHERE id IN (?)', [course_ids]);
         for (const course of courses) {
           await enrollmentService.enrollStudent({
-            studentData: { id, email, name, phone: null },
+            studentData: { id, email: normalizedEmail, name: name.trim(), phone: null },
             courseId: course.id,
             pricing: { amount: parseFloat(course.price) || 0 },
             payment: {
@@ -116,9 +127,12 @@ router.post('/users', async (req, res) => {
       }
     }
 
-    res.status(201).json({ id, name, email, role, temp_password: defaultPassword, message: 'User created successfully' });
+    res.status(201).json({ id, name, email: normalizedEmail, role, temp_password: defaultPassword, message: 'User created successfully' });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    if (error.code === 'ER_DUP_ENTRY') {
+      return res.status(400).json({ message: 'A user with this email address already exists.' });
+    }
+    res.status(500).json({ message: error.message || 'Failed to create user.' });
   }
 });
 

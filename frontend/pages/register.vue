@@ -27,6 +27,31 @@
             </v-tabs>
 
             <v-window v-model="roleTab" class="pa-8 bg-white">
+              <v-alert
+                v-if="errorMessage"
+                type="error"
+                variant="tonal"
+                rounded="lg"
+                class="mb-6 text-body-2"
+                closable
+                @click:close="errorMessage = ''"
+              >
+                <div class="d-flex align-center justify-space-between flex-wrap ga-2">
+                  <span>{{ errorMessage }}</span>
+                  <v-btn
+                    v-if="errorMessage.toLowerCase().includes('already exists') || errorMessage.toLowerCase().includes('log in')"
+                    to="/login"
+                    variant="flat"
+                    color="error"
+                    size="small"
+                    rounded="pill"
+                    class="text-none font-weight-bold"
+                  >
+                    Go to Log In
+                  </v-btn>
+                </div>
+              </v-alert>
+
               <!-- Student Registration -->
               <v-window-item value="student">
                 <v-form ref="studentForm" @submit.prevent="handleStudentRegister">
@@ -221,11 +246,16 @@ const appLogo = useState('appLogo');
 const api = useApi();
 const roleTab = ref('student');
 const loading = ref(false);
+const errorMessage = ref('');
 const successDialog = ref(false);
 const successDialogTitle = ref('Registration Received!');
 const successMessage = ref('');
 const showPassword = ref(false);
 const showConfirmPassword = ref(false);
+
+watch(roleTab, () => {
+  errorMessage.value = '';
+});
 
 const student = reactive({
   name: '',
@@ -287,6 +317,7 @@ const predefinedSkills = [
 ];
 
 const handleStudentRegister = async () => {
+  errorMessage.value = '';
   loading.value = true;
   try {
     const { data } = await api.post('/auth/register/student', student);
@@ -294,13 +325,14 @@ const handleStudentRegister = async () => {
     successMessage.value = data.message;
     successDialog.value = true;
   } catch (err) {
-    alert(err.response?.data?.message || 'Registration failed');
+    errorMessage.value = err.response?.data?.message || 'Registration failed. Please check your details and try again.';
   } finally {
     loading.value = false;
   }
 };
 
 const handleTutorRegister = async () => {
+  errorMessage.value = '';
   loading.value = true;
   try {
     const { data } = await api.post('/auth/register/tutor', tutor);
@@ -308,13 +340,14 @@ const handleTutorRegister = async () => {
     successMessage.value = data.message;
     successDialog.value = true;
   } catch (err) {
-    alert(err.response?.data?.message || 'Registration failed');
+    errorMessage.value = err.response?.data?.message || 'Registration failed. Please check your details and try again.';
   } finally {
     loading.value = false;
   }
 };
 
 const handleEmployerRegister = async () => {
+  errorMessage.value = '';
   loading.value = true;
   try {
     const { data } = await api.post('/employers/register', employer);
@@ -322,7 +355,7 @@ const handleEmployerRegister = async () => {
     successMessage.value = data?.message || "Thank you for registering. Our team will verify your account shortly. You will receive an email once your account is active.";
     successDialog.value = true;
   } catch (err) {
-    alert(err.response?.data?.message || 'Registration failed');
+    errorMessage.value = err.response?.data?.message || 'Registration failed. Please check your details and try again.';
   } finally {
     loading.value = false;
   }

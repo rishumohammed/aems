@@ -89,7 +89,20 @@ router.get('/:id/profile', async (req, res) => {
       return res.status(404).json({ message: 'Student not found' });
     }
 
-    res.json(rows[0]);
+    const student = rows[0];
+    if (!student.student_id) {
+      const [activeEnrollments] = await pool.query(
+        'SELECT id FROM enrollments WHERE student_id = ? AND status IN ("active", "completed") LIMIT 1',
+        [id]
+      );
+      if (activeEnrollments.length > 0) {
+        const enrollmentService = (await import('../services/enrollment.service.js')).default;
+        const newStudentId = await enrollmentService.ensureStudentId(pool, id);
+        student.student_id = newStudentId;
+      }
+    }
+
+    res.json(student);
   } catch (error) {
     console.error('Error fetching student profile:', error);
     res.status(500).json({ message: 'Internal server error' });
