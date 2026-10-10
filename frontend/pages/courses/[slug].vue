@@ -121,6 +121,36 @@
                   </v-expansion-panel>
                 </v-expansion-panels>
               </div>
+
+              <!-- Study Materials Section -->
+              <div v-if="course.study_materials_preview?.length" class="mb-8">
+                <div class="d-flex align-center justify-space-between mb-4">
+                  <div class="text-h5 font-weight-bold">Study Materials & Resources</div>
+                  <v-chip color="primary" variant="tonal" size="small" class="font-weight-bold">
+                    {{ course.study_materials_preview.length }} Included Files
+                  </v-chip>
+                </div>
+                <v-card flat border rounded="xl" class="pa-4 bg-grey-lighten-5">
+                  <v-row dense>
+                    <v-col v-for="mat in course.study_materials_preview" :key="mat.id" cols="12" sm="6">
+                      <v-card flat border rounded="lg" class="pa-3 bg-white h-100 d-flex align-center">
+                        <v-avatar color="primary-lighten-5" rounded="lg" size="44" class="mr-3">
+                          <v-icon color="primary" size="24">{{ getMaterialIcon(mat.file_type || mat.file_name) }}</v-icon>
+                        </v-avatar>
+                        <div class="flex-grow-1 overflow-hidden">
+                          <div class="font-weight-bold text-body-2 text-truncate">{{ mat.title }}</div>
+                          <div class="text-caption text-grey text-truncate">{{ mat.file_name || mat.description || 'Downloadable resource' }}</div>
+                        </div>
+                        <v-icon size="18" color="grey-lighten-1" class="ml-2">mdi-lock-outline</v-icon>
+                      </v-card>
+                    </v-col>
+                  </v-row>
+                  <div class="text-caption text-grey text-center mt-3">
+                    <v-icon size="14" color="grey" class="mr-1">mdi-information-outline</v-icon>
+                    Full access to all study materials and downloads is unlocked upon course enrollment.
+                  </div>
+                </v-card>
+              </div>
             </div>
           </v-col>
 
@@ -600,10 +630,30 @@ onBeforeUnmount(() => {
   if (timerInterval) clearInterval(timerInterval);
 });
 
-const highlights = [
-  { icon: 'mdi-infinity', text: 'Full lifetime access' },
-  { icon: 'mdi-cellphone-link', text: 'Access on mobile and desktop' }
-];
+const getMaterialIcon = (typeOrName: string = '') => {
+  const str = (typeOrName || '').toLowerCase();
+  if (str.includes('pdf')) return 'mdi-file-pdf-box';
+  if (str.includes('word') || str.includes('doc')) return 'mdi-file-word-box';
+  if (str.includes('sheet') || str.includes('excel') || str.includes('xls') || str.includes('csv')) return 'mdi-file-excel-box';
+  if (str.includes('presentation') || str.includes('powerpoint') || str.includes('ppt')) return 'mdi-file-powerpoint-box';
+  if (str.includes('zip') || str.includes('rar') || str.includes('7z') || str.includes('tar') || str.includes('gz')) return 'mdi-folder-zip-outline';
+  if (str.includes('image') || str.includes('png') || str.includes('jpg') || str.includes('jpeg')) return 'mdi-file-image-outline';
+  return 'mdi-file-document-outline';
+};
+
+const highlights = computed(() => {
+  const items = [
+    { icon: 'mdi-infinity', text: 'Full lifetime access' },
+    { icon: 'mdi-cellphone-link', text: 'Access on mobile and desktop' }
+  ];
+  if (course.value?.study_materials_count && course.value.study_materials_count > 0) {
+    items.push({ icon: 'mdi-file-pdf-box', text: `${course.value.study_materials_count} PDF Study Materials & Lecture Notes Included` });
+  }
+  if (course.value?.enable_certificate !== false && course.value?.enable_certificate !== 0) {
+    items.push({ icon: 'mdi-certificate-outline', text: 'Certificate of completion included' });
+  }
+  return items;
+});
 
 useSeoMeta({
   title: () => `${course.value?.title || 'Course Details'}`,

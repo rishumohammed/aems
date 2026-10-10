@@ -51,7 +51,7 @@
                   </v-btn>
                   
                   <v-btn
-                    v-if="course.status === 'completed' && course.has_exam && !course.passed_exam"
+                    v-if="course.status === 'completed' && (course.has_exam === 1 || course.has_exam === true || course.has_exam === '1') && !(course.passed_exam === 1 || course.passed_exam === true)"
                     block
                     color="warning"
                     variant="tonal"
@@ -90,22 +90,40 @@ const activeTab = ref('all');
 const fetchData = async () => {
   loading.value = true;
   try {
-    const { data } = await api.get('/lms/student/my-courses');
-    courses.value = data || [];
+    const res = await api.get('/lms/student/my-courses');
+    const data = res.data || res;
+    if (Array.isArray(data) && data.length > 0) {
+      courses.value = data;
+    } else {
+      // Fallback: fetch dashboard to retrieve enrollments
+      const resDash = await api.get('/lms/student/dashboard');
+      const d = resDash.data || resDash;
+      courses.value = d.enrollments || (Array.isArray(data) ? data : []);
+    }
   } catch (error) {
     console.error('Failed to fetch enrolled courses:', error);
+    try {
+      const resDash = await api.get('/lms/student/dashboard');
+      const d = resDash.data || resDash;
+      courses.value = d.enrollments || [];
+    } catch (e) {
+      courses.value = [];
+    }
   } finally {
     loading.value = false;
   }
 };
 
 const filteredCourses = computed(() => {
+  if (!Array.isArray(courses.value)) return [];
   if (activeTab.value === 'all') return courses.value;
   return courses.value.filter(c => c.status === activeTab.value);
 });
 
 const navigateToCourse = (course) => {
-  navigateTo(`/learn/${course.slug}`);
+  if (!course) return;
+  const target = course.slug || course.course_id || course.id;
+  navigateTo(`/learn/${target}`);
 };
 
 onMounted(fetchData);

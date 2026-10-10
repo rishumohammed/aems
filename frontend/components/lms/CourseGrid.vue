@@ -43,16 +43,25 @@
     </div>
 
     <v-card-text class="pa-4 flex-grow-1 d-flex flex-column">
-      <div class="d-flex align-center justify-end mb-1 text-caption text-grey">
-        <v-icon size="14" class="mr-1">mdi-star</v-icon>
-        <span class="font-weight-bold">4.8</span>
+      <div class="d-flex align-center justify-space-between mb-1 text-caption text-grey">
+        <v-chip
+          size="x-small"
+          :color="course.enable_certificate === false || course.enable_certificate === 0 ? 'grey-darken-1' : 'teal-darken-2'"
+          variant="tonal"
+          class="font-weight-medium"
+        >
+          <v-icon start size="12">{{ course.enable_certificate === false || course.enable_certificate === 0 ? 'mdi-certificate-off-outline' : 'mdi-certificate-outline' }}</v-icon>
+          {{ course.enable_certificate === false || course.enable_certificate === 0 ? 'No Certificate' : 'Certificate' }}
+        </v-chip>
+        <div class="d-flex align-center">
+          <v-icon size="14" class="mr-1">mdi-star</v-icon>
+          <span class="font-weight-bold">4.8</span>
+        </div>
       </div>
 
       <h3 class="course-grid-title font-weight-bold mb-2 line-clamp-2">
         {{ course.title }}
       </h3>
-
-
     </v-card-text>
 
     <v-divider></v-divider>

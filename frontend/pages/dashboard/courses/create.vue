@@ -215,11 +215,33 @@
                       class="mb-4"
                     ></v-select>
 
+                    <div class="mb-4 pa-3 border rounded-lg bg-grey-lighten-5">
+                      <div class="text-subtitle-2 font-weight-bold mb-1 d-flex align-center">
+                        <v-icon size="18" color="primary" class="mr-1">mdi-certificate-outline</v-icon>
+                        Course Certification
+                      </div>
+                      <v-radio-group v-model="course.enable_certificate" density="compact" hide-details class="mt-1">
+                        <v-radio :value="true" color="primary">
+                          <template v-slot:label>
+                            <span class="text-body-2 font-weight-medium">With Certificate <span class="text-caption text-grey">(Issues certificate on completion)</span></span>
+                          </template>
+                        </v-radio>
+                        <v-radio :value="false" color="grey-darken-2">
+                          <template v-slot:label>
+                            <span class="text-body-2 font-weight-medium">Without Certificate <span class="text-caption text-grey">(No certificate awarded)</span></span>
+                          </template>
+                        </v-radio>
+                      </v-radio-group>
+                    </div>
+
                     <v-card flat rounded="xl" color="primary" class="pa-4 text-white" v-if="course.title">
                       <div class="text-caption opacity-70 mb-1">Preview</div>
                       <div class="font-weight-black text-subtitle-1 mb-1">{{ course.title }}</div>
                       <v-chip size="x-small" color="white" class="text-primary font-weight-bold mr-1">{{ course.level }}</v-chip>
-                      <v-chip size="x-small" color="white" class="text-primary font-weight-bold">{{ course.language }}</v-chip>
+                      <v-chip size="x-small" color="white" class="text-primary font-weight-bold mr-1">{{ course.language }}</v-chip>
+                      <v-chip size="x-small" :color="course.enable_certificate ? 'success' : 'grey-lighten-2'" :class="course.enable_certificate ? 'text-white' : 'text-grey-darken-3'" class="font-weight-bold">
+                        {{ course.enable_certificate ? 'With Cert' : 'No Cert' }}
+                      </v-chip>
                     </v-card>
                   </v-col>
                 </v-row>
@@ -435,6 +457,14 @@
                         <template v-slot:title class="text-capitalize">{{ course.level }}</template>
                         <template v-slot:subtitle>Level</template>
                       </v-list-item>
+                      <v-list-item prepend-icon="mdi-certificate-outline" class="border-b">
+                        <template v-slot:title>
+                          <span :class="course.enable_certificate ? 'text-success font-weight-bold' : 'text-grey-darken-1'">
+                            {{ course.enable_certificate ? 'With Certificate' : 'Without Certificate' }}
+                          </span>
+                        </template>
+                        <template v-slot:subtitle>Certification</template>
+                      </v-list-item>
                       <v-divider></v-divider>
 
                       <v-list-item prepend-icon="mdi-package-variant-closed" class="border-b">
@@ -634,6 +664,7 @@ const course = reactive({
   start_date: null,
   level: 'beginner',
   language: 'English',
+  enable_certificate: true,
   price_type: 'fixed',
   price: 0,
   intro_video_url: '',
@@ -777,6 +808,7 @@ const saveBasicAndContinue = async () => {
     }
     formData.append('level', course.level);
     formData.append('language', course.language);
+    formData.append('enable_certificate', String(course.enable_certificate));
     formData.append('price_type', course.price_type);
     formData.append('price', course.price || 0);
 
@@ -850,6 +882,7 @@ const savePricingAsDraft = async () => {
     const formData = new FormData();
     formData.append('price_type', course.price_type);
     formData.append('price', course.price || 0);
+    formData.append('enable_certificate', String(course.enable_certificate));
     await api.put(`/lms/courses/${createdCourseId.value}`, formData);
     completedSteps.value.add('pricing');
     navigateTo('/dashboard/courses');
@@ -874,10 +907,11 @@ const submitForReview = async () => {
   submitting.value = true;
 
   try {
-    // 1. Save pricing
+    // 1. Save pricing & settings
     const formData = new FormData();
     formData.append('price_type', course.price_type);
     formData.append('price', course.price || 0);
+    formData.append('enable_certificate', String(course.enable_certificate));
     await api.put(`/lms/courses/${createdCourseId.value}`, formData);
 
     // 2. Submit for review or publish — backend validates DB counts

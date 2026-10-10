@@ -534,7 +534,7 @@ router.post('/attempts/:id/submit', authenticateJWT, isStudent, async (req, res)
     const studentId = req.user.id;
 
     const [attempts] = await pool.query(
-      "SELECT ea.*, e.pass_percentage, e.show_result_detail, e.course_id, e.enable_certificate FROM exam_attempts ea JOIN exams e ON ea.exam_id = e.id WHERE ea.id = ? AND ea.student_id = ? AND ea.status = 'in_progress'",
+      "SELECT ea.*, e.pass_percentage, e.show_result_detail, e.course_id, e.enable_certificate as exam_enable_cert, c.enable_certificate as course_enable_cert FROM exam_attempts ea JOIN exams e ON ea.exam_id = e.id LEFT JOIN courses c ON e.course_id = c.id WHERE ea.id = ? AND ea.student_id = ? AND ea.status = 'in_progress'",
       [req.params.id, studentId]
     );
     if (attempts.length === 0) return res.status(400).json({ message: 'Attempt not found or not in progress' });
@@ -559,8 +559,11 @@ router.post('/attempts/:id/submit', authenticateJWT, isStudent, async (req, res)
 
     let certResult = null;
     let course_completed = false;
-    if (passed && !pendingManualReview && attempt.enable_certificate !== false) {
-      certResult = await examService.issueCertificate(req.params.id);
+    const isCertEnabled = attempt.exam_enable_cert !== false && attempt.exam_enable_cert !== 0 && attempt.course_enable_cert !== false && attempt.course_enable_cert !== 0;
+    if (passed && !pendingManualReview) {
+      if (isCertEnabled) {
+        certResult = await examService.issueCertificate(req.params.id);
+      }
       
       const [enrollments] = await connection.query(
         'SELECT id FROM enrollments WHERE student_id = ? AND course_id = ?',
@@ -592,8 +595,8 @@ router.get('/attempts/:id/results', authenticateJWT, async (req, res) => {
   try {
     const [attempts] = await pool.query(`
       SELECT ea.*, 
-             e.title as exam_title, e.pass_percentage, e.duration_minutes, e.show_result_detail, e.max_attempts, e.show_results, e.enable_certificate,
-             c.title as course_title, c.slug as course_slug,
+             e.title as exam_title, e.pass_percentage, e.duration_minutes, e.show_result_detail, e.max_attempts, e.show_results, e.enable_certificate as exam_enable_cert,
+             c.title as course_title, c.slug as course_slug, c.enable_certificate as course_enable_cert,
              u.name as student_name,
              cert.cert_number, cert.id as cert_id,
              (SELECT COUNT(*) FROM exam_attempts WHERE student_id = ea.student_id AND exam_id = ea.exam_id AND status IN ('submitted','graded','pending_manual_review')) as attempts_used
@@ -612,6 +615,8 @@ router.get('/attempts/:id/results', authenticateJWT, async (req, res) => {
       return res.status(403).json({ message: 'Forbidden' });
     }
 
+    const certEnabled = attempt.exam_enable_cert !== false && attempt.exam_enable_cert !== 0 && attempt.course_enable_cert !== false && attempt.course_enable_cert !== 0;
+
     let questionBreakdown = [];
     const isTeacher = req.user && ['super_admin', 'sub_admin', 'tutor'].includes(req.user.role);
     if ((attempt.show_result_detail || isTeacher) && ['graded', 'pending_manual_review'].includes(attempt.status)) {
@@ -629,7 +634,7 @@ router.get('/attempts/:id/results', authenticateJWT, async (req, res) => {
       }));
     }
 
-    res.json({ ...attempt, question_breakdown: questionBreakdown });
+    res.json({ ...attempt, enable_certificate: certEnabled, question_breakdown: questionBreakdown });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -655,10 +660,10 @@ router.post('/attempts/:id/grade', authenticateJWT, isTutorOrAdmin, async (req, 
 
     if (Number(ungraded) === 0) {
       const [attemptData] = await connection.query(
-        'SELECT ea.total_marks, e.pass_percentage FROM exam_attempts ea JOIN exams e ON ea.exam_id = e.id WHERE ea.id = ?',
+        'SELECT ea.total_marks, e.pass_percentage, e.enable_certificate as exam_enable_cert, c.enable_certificate as course_enable_cert FROM exam_attempts ea JOIN exams e ON ea.exam_id = e.id LEFT JOIN courses c ON e.course_id = c.id WHERE ea.id = ?',
         [req.params.id]
       );
-      const { total_marks, pass_percentage } = attemptData[0];
+      const { total_marks, pass_percentage, exam_enable_cert, course_enable_cert } = attemptData[0];
       const scorePercent = total_marks > 0 ? Math.round((total_scored / total_marks) * 100) : 0;
       const passed = scorePercent >= pass_percentage;
 
@@ -668,7 +673,10 @@ router.post('/attempts/:id/grade', authenticateJWT, isTutorOrAdmin, async (req, 
       );
       await connection.commit();
       if (passed) {
-        await examService.issueCertificate(req.params.id);
+        const isCertEnabled = exam_enable_cert !== false && exam_enable_cert !== 0 && course_enable_cert !== false && course_enable_cert !== 0;
+        if (isCertEnabled) {
+          await examService.issueCertificate(req.params.id);
+        }
         const [attempts] = await connection.query('SELECT student_id, exam_id FROM exam_attempts WHERE id = ?', [req.params.id]);
         if (attempts.length > 0) {
            const [exams] = await connection.query('SELECT course_id FROM exams WHERE id = ?', [attempts[0].exam_id]);

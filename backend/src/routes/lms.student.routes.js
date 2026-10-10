@@ -35,15 +35,15 @@ router.get('/dashboard', async (req, res) => {
     const userId = req.user.id;
 
     const [enrollments] = await pool.query(`
-      SELECT e.*, c.title, c.thumbnail_url, c.slug,
+      SELECT e.*, c.title, c.thumbnail_url, c.slug, c.enable_certificate,
              u.name as instructor_name,
              (SELECT payment_status FROM invoices i WHERE i.student_id = e.student_id AND i.course_id = e.course_id ORDER BY created_at DESC LIMIT 1) as payment_status,
              (SELECT COUNT(*) FROM course_lessons cl 
               JOIN course_sections cs ON cl.section_id = cs.id 
               WHERE cs.course_id = c.id) as total_lessons,
              (SELECT COUNT(*) FROM lesson_progress lp WHERE lp.enrollment_id = e.id AND lp.completed = TRUE) as completed_lessons,
-             EXISTS(SELECT 1 FROM exams ex WHERE ex.course_id = c.id) as has_exam,
-             EXISTS(SELECT 1 FROM exam_attempts ea JOIN exams ex ON ea.exam_id = ex.id WHERE ex.course_id = c.id AND ea.student_id = e.student_id AND ea.passed = TRUE) as passed_exam
+             EXISTS(SELECT 1 FROM exams ex WHERE ex.course_id = c.id AND ex.status = 'published') as has_exam,
+             EXISTS(SELECT 1 FROM exam_attempts ea JOIN exams ex ON ea.exam_id = ex.id WHERE ex.course_id = c.id AND ex.status = 'published' AND ea.student_id = e.student_id AND ea.passed = TRUE) as passed_exam
       FROM enrollments e
       JOIN courses c ON e.course_id = c.id
       LEFT JOIN users u ON c.tutor_id = u.id
@@ -124,10 +124,17 @@ router.get('/courses/:courseId/curriculum', async (req, res) => {
     const { courseId } = req.params;
     const userId = req.user.id;
 
+    // Resolve courseId whether UUID or slug was passed
+    let resolvedCourseId = courseId;
+    const [courseCheck] = await pool.query('SELECT id FROM courses WHERE id = ? OR slug = ?', [courseId, courseId]);
+    if (courseCheck.length > 0) {
+      resolvedCourseId = courseCheck[0].id;
+    }
+
     // Check enrollment
     const [enrollmentRecord] = await pool.query(
       'SELECT id FROM enrollments WHERE student_id = ? AND course_id = ?',
-      [userId, courseId]
+      [userId, resolvedCourseId]
     );
 
     const isEnrolled = enrollmentRecord.length > 0;
@@ -138,7 +145,7 @@ router.get('/courses/:courseId/curriculum', async (req, res) => {
     if (isEnrolled) {
       const [invoices] = await pool.query(
         'SELECT payment_status FROM invoices WHERE student_id = ? AND course_id = ?',
-        [userId, courseId]
+        [userId, resolvedCourseId]
       );
       if (invoices.length > 0) {
         const paymentStatus = invoices[0].payment_status;
@@ -158,7 +165,7 @@ router.get('/courses/:courseId/curriculum', async (req, res) => {
       SELECT * FROM course_sections 
       WHERE course_id = ? 
       ORDER BY order_index ASC
-    `, [courseId]);
+    `, [resolvedCourseId]);
 
     const sectionIds = sections.map(s => s.id);
     if (sectionIds.length === 0) return res.json([]);
@@ -442,8 +449,8 @@ router.get('/my-courses', async (req, res) => {
               JOIN course_sections cs ON cl.section_id = cs.id 
               WHERE cs.course_id = c.id) as total_lessons,
              (SELECT COUNT(*) FROM lesson_progress lp WHERE lp.enrollment_id = e.id AND lp.completed = TRUE) as completed_lessons,
-             EXISTS(SELECT 1 FROM exams ex WHERE ex.course_id = c.id) as has_exam,
-             EXISTS(SELECT 1 FROM exam_attempts ea JOIN exams ex ON ea.exam_id = ex.id WHERE ex.course_id = c.id AND ea.student_id = e.student_id AND ea.passed = TRUE) as passed_exam
+             EXISTS(SELECT 1 FROM exams ex WHERE ex.course_id = c.id AND ex.status = 'published') as has_exam,
+             EXISTS(SELECT 1 FROM exam_attempts ea JOIN exams ex ON ea.exam_id = ex.id WHERE ex.course_id = c.id AND ex.status = 'published' AND ea.student_id = e.student_id AND ea.passed = TRUE) as passed_exam
       FROM enrollments e
       JOIN courses c ON e.course_id = c.id
       LEFT JOIN users u ON c.tutor_id = u.id
@@ -824,6 +831,152 @@ router.delete('/social-status/:platform', async (req, res) => {
     res.json({ message: 'Follow status removed completely' });
   } catch (error) {
     res.status(500).json({ message: error.message });
+  }
+});
+
+// Get study materials for enrolled course
+router.get('/courses/:courseId/materials', async (req, res) => {
+  try {
+    const { courseId } = req.params;
+
+    let resolvedCourseId = courseId;
+    const [courseCheck] = await pool.query('SELECT id FROM courses WHERE id = ? OR slug = ?', [courseId, courseId]);
+    if (courseCheck.length > 0) {
+      resolvedCourseId = courseCheck[0].id;
+    }
+
+    // 1. Direct course study materials
+    const [directMaterials] = await pool.query(`
+      SELECT 
+        id,
+        course_id,
+        title,
+        description,
+        file_url,
+        file_name,
+        file_size,
+        file_type,
+        order_index,
+        created_at,
+        'direct' as source_type
+      FROM course_study_materials
+      WHERE course_id = ? OR course_id = ?
+      ORDER BY order_index ASC, created_at DESC
+    `, [resolvedCourseId, courseId]);
+
+    // 2. Lesson resources attached to curriculum
+    const [lessonResources] = await pool.query(`
+      SELECT 
+        l.id,
+        s.course_id,
+        l.title,
+        l.notes as description,
+        l.resource_url as file_url,
+        SUBSTRING_INDEX(l.resource_url, '/', -1) as file_name,
+        'Resource File' as file_size,
+        l.order_index,
+        NULL as created_at,
+        'lesson_resource' as source_type
+      FROM course_lessons l
+      JOIN course_sections s ON l.section_id = s.id
+      WHERE (s.course_id = ? OR s.course_id = ?) AND (l.type = 'resource' OR (l.resource_url IS NOT NULL AND l.resource_url != ''))
+      ORDER BY l.order_index ASC
+    `, [resolvedCourseId, courseId]);
+
+    const mappedLessonResources = lessonResources.map(lr => {
+      const ext = (lr.file_url || '').split('.').pop().toLowerCase();
+      return {
+        ...lr,
+        file_type: ext || 'document'
+      };
+    });
+
+    res.json([...directMaterials, ...mappedLessonResources]);
+  } catch (error) {
+    console.error('Error fetching student course study materials:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// GET /api/lms/student/courses/:courseId/materials/:materialId/view
+// Secure inline PDF viewing for enrolled students with anti-download headers
+router.get('/courses/:courseId/materials/:materialId/view', authenticateJWT, async (req, res) => {
+  try {
+    const { courseId, materialId } = req.params;
+
+    // Resolve courseId
+    let resolvedCourseId = courseId;
+    const [courseCheck] = await pool.query('SELECT id FROM courses WHERE id = ? OR slug = ?', [courseId, courseId]);
+    if (courseCheck.length > 0) {
+      resolvedCourseId = courseCheck[0].id;
+    }
+
+    // Check student enrollment if user is a student
+    if (req.user.role === 'student') {
+      const [enrollCheck] = await pool.query(
+        'SELECT id, status FROM enrollments WHERE student_id = ? AND course_id = ?',
+        [req.user.id, resolvedCourseId]
+      );
+      if (enrollCheck.length === 0) {
+        return res.status(403).json({ message: 'Access denied: You must be enrolled in this course to view study materials.' });
+      }
+      if (['suspended_offline', 'suspended_gateway', 'cancelled'].includes(enrollCheck[0].status)) {
+        return res.status(403).json({ message: 'Access denied: Your enrollment is pending payment verification.' });
+      }
+    }
+
+    // Look up file URL
+    let relativeUrl = null;
+    let fileName = 'study-material.pdf';
+
+    const [matRows] = await pool.query(
+      'SELECT file_url, file_name, title FROM course_study_materials WHERE id = ? AND (course_id = ? OR course_id = ?)',
+      [materialId, resolvedCourseId, courseId]
+    );
+
+    if (matRows.length > 0) {
+      relativeUrl = matRows[0].file_url;
+      fileName = matRows[0].file_name || `${matRows[0].title}.pdf`;
+    } else {
+      const [lesRows] = await pool.query(
+        'SELECT resource_url as file_url, title FROM course_lessons WHERE id = ?',
+        [materialId]
+      );
+      if (lesRows.length > 0) {
+        relativeUrl = lesRows[0].file_url;
+        fileName = `${lesRows[0].title}.pdf`;
+      }
+    }
+
+    if (!relativeUrl) {
+      return res.status(404).json({ message: 'Study material not found' });
+    }
+
+    // Clean relative path (remove leading slash if present)
+    const cleanPath = relativeUrl.startsWith('/') ? relativeUrl.slice(1) : relativeUrl;
+    const filePath = path.resolve(process.cwd(), cleanPath);
+
+    if (!fs.existsSync(filePath)) {
+      return res.status(404).json({ message: 'Physical file not found on server' });
+    }
+
+    // Send protected inline PDF headers
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `inline; filename="${encodeURIComponent(fileName)}"`);
+    res.setHeader('Cache-Control', 'private, no-cache, no-store, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+
+    const stream = fs.createReadStream(filePath);
+    stream.on('error', (err) => {
+      console.error('File stream error:', err);
+      if (!res.headersSent) res.status(500).json({ message: 'Failed to read file' });
+    });
+    stream.pipe(res);
+  } catch (error) {
+    console.error('Error viewing study material:', error);
+    res.status(500).json({ message: 'Internal server error' });
   }
 });
 

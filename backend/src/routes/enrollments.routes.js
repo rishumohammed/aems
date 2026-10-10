@@ -218,4 +218,28 @@ router.post('/manual', authenticateJWT, authorizeRoles('super_admin', 'crm_agent
   }
 });
 
+// Update enrollment status
+router.put('/:id', authenticateJWT, authorizeRoles('super_admin', 'crm_agent', 'finance_staff'), async (req, res) => {
+  try {
+    const { status } = req.body;
+    const { id } = req.params;
+    await pool.query('UPDATE enrollments SET status = ? WHERE id = ?', [status, id]);
+    res.json({ message: 'Enrollment status updated' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Delete enrollment
+router.delete('/:id', authenticateJWT, authorizeRoles('super_admin', 'crm_agent'), async (req, res) => {
+  try {
+    const { id } = req.params;
+    await pool.query('DELETE FROM lesson_progress WHERE enrollment_id = ?', [id]);
+    await pool.query('DELETE FROM enrollments WHERE id = ?', [id]);
+    res.json({ message: 'Enrollment deleted' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 export default router;

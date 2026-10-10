@@ -207,13 +207,22 @@ router.post('/claim', authenticateJWT, async (req, res) => {
       return res.status(404).json({ message: 'Enrollment not found for this course' });
     }
 
+    // 1.1 Verify course offers certificates
+    const [courses] = await pool.query('SELECT title, enable_certificate FROM courses WHERE id = ?', [courseId]);
+    if (courses.length === 0) {
+      return res.status(404).json({ message: 'Course not found' });
+    }
+    if (courses[0].enable_certificate === 0 || courses[0].enable_certificate === false) {
+      return res.status(400).json({ message: 'Certificates are not offered for this course.' });
+    }
+
     const enrollment = enrollments[0];
     if (enrollment.completion_percentage < 100) {
       return res.status(400).json({ message: 'Course is not fully completed yet' });
     }
 
-    // 1.5. Verify student passed the exam for this course (if an exam exists)
-    const [exams] = await pool.query('SELECT id FROM exams WHERE course_id = ?', [courseId]);
+    // 1.5. Verify student passed the exam for this course (if a published exam exists)
+    const [exams] = await pool.query("SELECT id FROM exams WHERE course_id = ? AND status = 'published'", [courseId]);
     if (exams.length > 0) {
       const examId = exams[0].id;
       const [attempts] = await pool.query('SELECT id FROM exam_attempts WHERE exam_id = ? AND student_id = ? AND passed = 1', [examId, studentId]);

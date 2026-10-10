@@ -53,53 +53,29 @@
           />
         </div>
 
-        <!-- Resource / Downloadable File Viewer -->
+        <!-- Resource / Protected PDF Viewer -->
         <div v-else-if="currentLesson?.type === 'resource'" class="resource-viewer">
-          <v-card v-if="currentLesson.resource_url?.toLowerCase().endsWith('.pdf')" class="rounded-xl overflow-hidden" elevation="2" border>
-            <v-toolbar color="grey-lighten-4" flat border>
-              <v-icon class="mr-2" color="red">mdi-file-pdf-box</v-icon>
-              <v-toolbar-title class="text-subtitle-2 font-weight-bold">{{ currentLesson.title }}</v-toolbar-title>
-              <v-spacer></v-spacer>
-              <v-btn icon="mdi-open-in-new" :href="resourceFullUrl" target="_blank" variant="text"></v-btn>
-            </v-toolbar>
-            <iframe
-              :src="`https://docs.google.com/viewer?url=${encodeURIComponent(resourceFullUrl)}&embedded=true`"
-              width="100%"
-              height="600px"
-              style="border: none;"
-            ></iframe>
-          </v-card>
-
-          <!-- Non-PDF or general resource files -->
-          <v-card v-else class="rounded-xl pa-8 pa-md-12 bg-white text-center border-0 elevation-2" border>
-            <v-avatar color="success-lighten-5" size="80" class="mb-6">
-              <v-icon color="success" size="40">{{ getFileIcon(currentLesson.resource_url) }}</v-icon>
+          <v-card class="rounded-xl pa-8 pa-md-12 bg-white text-center border-0 elevation-2" border>
+            <v-avatar color="red-lighten-5" size="80" class="mb-6">
+              <v-icon color="red-darken-2" size="40">mdi-file-pdf-box</v-icon>
             </v-avatar>
-            <h2 class="text-h5 font-weight-black mb-2">{{ currentLesson.title || 'Downloadable Resource' }}</h2>
-            <p class="text-body-1 text-grey mb-8">
-              This lesson contains a downloadable resource file. Click the button below to download the attachment.
+            <h2 class="text-h5 font-weight-black mb-2">{{ currentLesson.title || 'Protected Study Material' }}</h2>
+            <p class="text-body-1 text-grey mb-8 max-width-600 mx-auto">
+              This lesson contains protected study material. You can read the full document online with our secure, watermarked in-browser reader.
             </p>
             
-            <div v-if="currentLesson.resource_url" class="d-inline-block">
+            <div class="d-inline-block">
               <v-btn
-                color="success"
+                color="primary"
                 size="large"
                 rounded="xl"
-                prepend-icon="mdi-download"
-                class="px-8 font-weight-bold elevation-4 shadow-apple text-white"
-                :href="resourceFullUrl"
-                target="_blank"
+                prepend-icon="mdi-book-open-page-variant"
+                class="px-8 font-weight-bold elevation-4 text-white"
+                @click="openMatPreview(currentLesson)"
               >
-                Download Resource
+                Read Protected PDF
               </v-btn>
-              <div class="text-caption text-grey mt-4 font-weight-medium">
-                File: {{ getFileName(currentLesson.resource_url) }}
-              </div>
             </div>
-            
-            <v-alert v-else type="warning" variant="tonal" class="rounded-xl max-width-500 mx-auto">
-              No file has been uploaded for this resource yet. Please contact your instructor.
-            </v-alert>
           </v-card>
         </div>
 
@@ -261,7 +237,13 @@
 
           <v-tabs v-model="infoTab" color="primary">
             <v-tab value="description">Description</v-tab>
-            <v-tab value="resources">Resources</v-tab>
+            <v-tab value="materials">
+              <v-icon start size="18">mdi-folder-download-outline</v-icon>
+              Study Materials
+              <v-chip v-if="studyMaterials.length > 0" size="x-small" color="primary" class="ml-1 font-weight-bold" variant="tonal">
+                {{ studyMaterials.length }}
+              </v-chip>
+            </v-tab>
           </v-tabs>
 
           <v-window v-model="infoTab" class="mt-6">
@@ -270,20 +252,58 @@
                 <div class="text-body-1" v-html="currentLesson?.content_html || currentLesson?.notes || currentLesson?.description || 'No description provided.'"></div>
               </v-card>
             </v-window-item>
-            <v-window-item value="resources">
-              <v-list v-if="resources.length > 0" variant="outlined" class="rounded-xl border pa-0">
-                <v-list-item v-for="res in resources" :key="res.id" :title="res.name" :subtitle="res.size">
-                  <template v-slot:prepend>
-                    <v-icon color="primary">mdi-file-download-outline</v-icon>
-                  </template>
-                  <template v-slot:append>
-                    <v-btn icon="mdi-download" variant="text" color="primary"></v-btn>
-                  </template>
-                </v-list-item>
-              </v-list>
-              <v-alert v-else border="start" variant="tonal" color="info">
-                No downloadable resources for this lesson.
-              </v-alert>
+            <v-window-item value="materials">
+              <!-- Materials Cards Grid -->
+              <v-row v-if="studyMaterials.length > 0">
+                <v-col v-for="mat in studyMaterials" :key="mat.id" cols="12" sm="6" lg="4">
+                  <v-card flat border rounded="xl" class="pa-4 h-100 d-flex flex-column bg-white elevation-1">
+                    <div class="d-flex align-start gap-3 mb-3">
+                      <v-avatar :color="getMatColor(mat.file_type || mat.file_name)" size="44" rounded="lg">
+                        <v-icon color="white" size="24">{{ getMatIcon(mat.file_type || mat.file_name) }}</v-icon>
+                      </v-avatar>
+                      <div class="flex-grow-1 overflow-hidden">
+                        <div class="font-weight-bold text-body-1 text-truncate" :title="mat.title">{{ mat.title }}</div>
+                        <div class="d-flex align-center gap-2 mt-1">
+                          <v-chip size="x-small" variant="tonal" :color="getMatColor(mat.file_type || mat.file_name)" class="font-weight-bold">
+                            {{ formatMatType(mat.file_type || mat.file_name) }}
+                          </v-chip>
+                          <span class="text-caption text-grey" v-if="mat.file_size">
+                            {{ formatMatSize(mat.file_size) }}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="text-body-2 text-grey-darken-1 flex-grow-1 mb-4" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;" v-if="mat.description">
+                      {{ mat.description }}
+                    </div>
+                    <div class="text-caption text-grey flex-grow-1 mb-4 text-truncate" v-else>
+                      {{ mat.file_name || 'Downloadable attachment' }}
+                    </div>
+
+                    <div class="d-flex align-center justify-end gap-2 pt-3 border-t">
+                      <v-btn
+                        size="small"
+                        variant="flat"
+                        color="primary"
+                        rounded="lg"
+                        prepend-icon="mdi-book-open-page-variant"
+                        @click="openMatPreview(mat)"
+                      >
+                        Read Material
+                      </v-btn>
+                    </div>
+                  </v-card>
+                </v-col>
+              </v-row>
+
+              <v-card v-else flat border rounded="xl" class="pa-10 text-center bg-white">
+                <v-icon size="48" color="grey-lighten-2" class="mb-3">mdi-folder-open-outline</v-icon>
+                <div class="text-h6 font-weight-bold text-grey-darken-2">No Study Materials Found</div>
+                <div class="text-body-2 text-grey mt-1">
+                  {{ materialSearch ? 'No materials match your search filter.' : 'Your instructor has not uploaded any study materials for this course yet.' }}
+                </div>
+              </v-card>
             </v-window-item>
           </v-window>
         </div>
@@ -295,10 +315,13 @@
       <CourseSidebar
         :curriculum="curriculum"
         :current-lesson-id="lessonId"
+        :course-id="enrollment?.course_id || courseSlug"
+        :study-materials="studyMaterials"
         :completion-percentage="enrollment?.completion_percentage || 0"
-        :has-exam="!!enrollment?.has_exam"
-        :passed-exam="!!enrollment?.passed_exam"
+        :has-exam="enrollment?.has_exam === 1 || enrollment?.has_exam === true || enrollment?.has_exam === '1'"
+        :passed-exam="enrollment?.passed_exam === 1 || enrollment?.passed_exam === true || enrollment?.passed_exam === '1'"
         :claiming-certificate="claimingCertificate"
+        :enable-certificate="enrollment?.enable_certificate !== false && enrollment?.enable_certificate !== 0 && enrollment?.enable_certificate !== '0'"
         @select="navigateToLesson"
         @claim-certificate="showCompletionModal = true"
       />
@@ -309,15 +332,25 @@
       <CourseSidebar
         :curriculum="curriculum"
         :current-lesson-id="lessonId"
+        :course-id="enrollment?.course_id || courseSlug"
+        :study-materials="studyMaterials"
         :completion-percentage="enrollment?.completion_percentage || 0"
-        :has-exam="!!enrollment?.has_exam"
-        :passed-exam="!!enrollment?.passed_exam"
+        :has-exam="enrollment?.has_exam === 1 || enrollment?.has_exam === true || enrollment?.has_exam === '1'"
+        :passed-exam="enrollment?.passed_exam === 1 || enrollment?.passed_exam === true || enrollment?.passed_exam === '1'"
         :claiming-certificate="claimingCertificate"
+        :enable-certificate="enrollment?.enable_certificate !== false && enrollment?.enable_certificate !== 0 && enrollment?.enable_certificate !== '0'"
         @select="navigateToLesson"
         @claim-certificate="showCompletionModal = true"
       />
     </v-navigation-drawer>
     </div>
+
+    <!-- Protected In-Browser PDF Viewer with Dynamic Watermarking -->
+    <ProtectedPdfViewer
+      v-model="protectedViewer.show"
+      :course-id="enrollment?.course_id || courseSlug"
+      :material="protectedViewer.material"
+    />
 
     <!-- Completion Modal -->
     <v-dialog v-model="showCompletionModal" max-width="650" persistent z-index="9999">
@@ -336,6 +369,7 @@
 </template>
 
 <script setup>
+import ProtectedPdfViewer from '@/components/lms/ProtectedPdfViewer.vue';
 import VideoPlayer from '@/components/lms/VideoPlayer.vue';
 import CourseSidebar from '@/components/lms/CourseSidebar.vue';
 import QASection from '@/components/lms/QASection.vue';
@@ -360,7 +394,8 @@ const infoTab = ref('description');
 const curriculum = ref([]);
 const enrollment = ref(null);
 const currentLesson = ref(null);
-const resources = ref([]); // Mock resources
+const studyMaterials = ref([]);
+const protectedViewer = reactive({ show: false, material: null });
 const markingComplete = ref(false);
 const claimingCertificate = ref(false);
 const showCompletionModal = ref(false);
@@ -390,10 +425,14 @@ const loadExamState = async () => {
   }
 }
 
+const router = useRouter();
+
 const fetchData = async () => {
   try {
+    const slugStr = String(courseSlug.value || '').trim().toLowerCase();
+
     // If curriculum is already loaded for this course, update currentLesson without reloading all APIs
-    if (curriculum.value.length > 0 && enrollment.value && enrollment.value.slug === courseSlug.value) {
+    if (curriculum.value.length > 0 && enrollment.value) {
       const allLessons = curriculum.value.flatMap(c => (c.modules || []).flatMap(m => m.lessons || []));
       const targetLesson = allLessons.find(l => l.id === lessonId.value);
       if (targetLesson) {
@@ -403,28 +442,132 @@ const fetchData = async () => {
       }
     }
 
-    // Load dashboard & curriculum
-    const resDashboard = await api.get('/lms/student/dashboard');
-    const enrollments = resDashboard.data?.enrollments || resDashboard.enrollments || [];
-    const enroll = enrollments.find(e => e.slug === courseSlug.value);
-    if (!enroll) return navigateTo('/dashboard/student');
-    
-    enrollment.value = enroll;
-    const resCurr = await api.get(`/lms/student/courses/${enroll.course_id}/curriculum`);
-    curriculum.value = resCurr.data || resCurr || [];
+    // 1. Try finding enrollment from dashboard
+    let enroll = null;
+    try {
+      const resDashboard = await api.get('/lms/student/dashboard');
+      const enrollments = resDashboard.data?.enrollments || resDashboard.enrollments || [];
+      enroll = enrollments.find(e => 
+        (e.slug && e.slug.toLowerCase() === slugStr) || 
+        e.course_id === courseSlug.value || 
+        e.id === courseSlug.value
+      );
+    } catch (e) {
+      console.warn('Dashboard fetch error in lesson viewer:', e);
+    }
 
-    // Find current lesson
+    // 2. If not found, try my-courses
+    if (!enroll) {
+      try {
+        const resMy = await api.get('/lms/student/my-courses');
+        const myCourses = Array.isArray(resMy.data) ? resMy.data : (resMy.data?.data || []);
+        enroll = myCourses.find(e => 
+          (e.slug && e.slug.toLowerCase() === slugStr) || 
+          e.course_id === courseSlug.value || 
+          e.id === courseSlug.value
+        );
+      } catch (e) {
+        console.warn('My courses fetch error in lesson viewer:', e);
+      }
+    }
+
+    const courseId = enroll?.course_id || courseSlug.value;
+    enrollment.value = enroll || { course_id: courseId, slug: courseSlug.value, title: 'Course' };
+
+    // 3. Fetch curriculum
+    const resCurr = await api.get(`/lms/student/courses/${courseId}/curriculum`);
+    const currData = resCurr.data || resCurr || [];
+    curriculum.value = Array.isArray(currData) ? currData : (currData?.data || []);
+
+    // 3b. Fetch study materials for the course
+    try {
+      const resMat = await api.get(`/lms/student/courses/${courseId}/materials`);
+      studyMaterials.value = Array.isArray(resMat.data) ? resMat.data : (resMat.data?.data || []);
+    } catch (e) {
+      console.warn('Study materials fetch error in lesson viewer:', e);
+      studyMaterials.value = [];
+    }
+
+    // 4. Find current lesson
     const allLessons = curriculum.value.flatMap(c => (c.modules || []).flatMap(m => m.lessons || []));
-    currentLesson.value = allLessons.find(l => l.id === lessonId.value);
-    
-    if (!currentLesson.value && allLessons.length > 0) {
-      navigateTo(`/learn/${courseSlug.value}/${allLessons[0].id}`);
-    } else if (currentLesson.value) {
+    let targetLesson = allLessons.find(l => l.id === lessonId.value);
+
+    if (!targetLesson && allLessons.length > 0) {
+      targetLesson = allLessons[0];
+      currentLesson.value = targetLesson;
+      if (lessonId.value !== targetLesson.id) {
+        router.replace(`/learn/${enroll?.slug || courseSlug.value}/${targetLesson.id}`);
+      }
+    } else {
+      currentLesson.value = targetLesson;
+    }
+
+    if (currentLesson.value) {
       await loadExamState();
     }
   } catch (error) {
     console.error('Failed to load lesson:', error);
   }
+};
+
+const getMatUrl = (url) => {
+  if (!url) return '';
+  if (url.startsWith('http://') || url.startsWith('https://')) return url;
+  const base = config.public.apiBase.replace('/api', '');
+  return `${base}${url}`;
+};
+
+const formatMatSize = (bytes) => {
+  if (!bytes) return '';
+  const num = Number(bytes);
+  if (isNaN(num)) return '';
+  if (num < 1024) return `${num} B`;
+  if (num < 1024 * 1024) return `${(num / 1024).toFixed(1)} KB`;
+  return `${(num / (1024 * 1024)).toFixed(1)} MB`;
+};
+
+const formatMatType = (typeOrName) => {
+  if (!typeOrName) return 'FILE';
+  const str = String(typeOrName).toLowerCase();
+  if (str.includes('pdf')) return 'PDF';
+  if (str.includes('word') || str.includes('doc')) return 'DOCX';
+  if (str.includes('excel') || str.includes('sheet') || str.includes('xls') || str.includes('csv')) return 'XLS';
+  if (str.includes('presentation') || str.includes('powerpoint') || str.includes('ppt')) return 'PPT';
+  if (str.includes('zip') || str.includes('rar') || str.includes('7z') || str.includes('tar')) return 'ZIP';
+  if (str.includes('image') || str.includes('png') || str.includes('jpg') || str.includes('jpeg')) return 'IMG';
+  const ext = str.split('.').pop();
+  return ext && ext.length <= 4 ? ext.toUpperCase() : 'FILE';
+};
+
+const getMatIcon = (typeOrName) => {
+  const str = String(typeOrName || '').toLowerCase();
+  if (str.includes('pdf')) return 'mdi-file-pdf-box';
+  if (str.includes('word') || str.includes('doc')) return 'mdi-file-word-box';
+  if (str.includes('sheet') || str.includes('excel') || str.includes('xls') || str.includes('csv')) return 'mdi-file-excel-box';
+  if (str.includes('presentation') || str.includes('powerpoint') || str.includes('ppt')) return 'mdi-file-powerpoint-box';
+  if (str.includes('zip') || str.includes('rar') || str.includes('7z') || str.includes('tar') || str.includes('gz')) return 'mdi-folder-zip-outline';
+  if (str.includes('image') || str.includes('png') || str.includes('jpg') || str.includes('jpeg')) return 'mdi-file-image-outline';
+  return 'mdi-file-document-outline';
+};
+
+const getMatColor = (typeOrName) => {
+  const str = String(typeOrName || '').toLowerCase();
+  if (str.includes('pdf')) return 'red-darken-1';
+  if (str.includes('word') || str.includes('doc')) return 'blue-darken-2';
+  if (str.includes('sheet') || str.includes('excel') || str.includes('xls') || str.includes('csv')) return 'teal-darken-1';
+  if (str.includes('presentation') || str.includes('powerpoint') || str.includes('ppt')) return 'deep-orange-darken-1';
+  if (str.includes('zip') || str.includes('rar') || str.includes('7z')) return 'amber-darken-3';
+  if (str.includes('image') || str.includes('png') || str.includes('jpg')) return 'purple-darken-1';
+  return 'primary';
+};
+
+const isMatPdf = (urlOrName) => {
+  return String(urlOrName || '').toLowerCase().includes('.pdf');
+};
+
+const openMatPreview = (mat) => {
+  protectedViewer.material = mat;
+  protectedViewer.show = true;
 };
 
 const flatLessons = computed(() => curriculum.value.flatMap(c => (c.modules || []).flatMap(m => m.lessons || [])));

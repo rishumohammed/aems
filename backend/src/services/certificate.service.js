@@ -12,7 +12,7 @@ class CertificateService {
   async generate(attemptId) {
     // 1. Fetch Attempt, Exam, Course, and Student details
     const [attempts] = await pool.query(
-      `SELECT ea.*, e.title as exam_title, c.id as course_id, c.title as course_title, u.id as student_id, u.name, u.email
+      `SELECT ea.*, e.title as exam_title, e.enable_certificate as exam_enable_cert, c.id as course_id, c.title as course_title, c.enable_certificate as course_enable_cert, u.id as student_id, u.name, u.email
        FROM exam_attempts ea
        JOIN exams e ON ea.exam_id = e.id
        JOIN courses c ON e.course_id = c.id
@@ -26,6 +26,10 @@ class CertificateService {
     }
 
     const attempt = attempts[0];
+    if (attempt.course_enable_cert === 0 || attempt.course_enable_cert === false || attempt.exam_enable_cert === 0 || attempt.exam_enable_cert === false) {
+      throw new Error('Certificates are disabled for this course or exam');
+    }
+
     const studentName = attempt.name;
 
     // 2. Idempotency Check
@@ -312,10 +316,14 @@ class CertificateService {
   async issueManual(studentId, courseId) {
     // 1. Fetch Student and Course details
     const [students] = await pool.query('SELECT name, email FROM users WHERE id = ?', [studentId]);
-    const [courses] = await pool.query('SELECT title FROM courses WHERE id = ?', [courseId]);
+    const [courses] = await pool.query('SELECT title, enable_certificate FROM courses WHERE id = ?', [courseId]);
 
     if (students.length === 0) throw new Error('Student not found');
     if (courses.length === 0) throw new Error('Course not found');
+
+    if (courses[0].enable_certificate === 0 || courses[0].enable_certificate === false) {
+      throw new Error('Certificates are disabled for this course');
+    }
 
     const studentName = students[0].name;
     const courseTitle = courses[0].title;

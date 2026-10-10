@@ -74,12 +74,16 @@ class CourseCompletionService {
       let certificateDetails = null;
       let certGenerated = false;
 
+      // Check if course has certificates enabled
+      const [courseRows] = await connection.query('SELECT enable_certificate FROM courses WHERE id = ?', [courseId]);
+      const isCourseCertEnabled = courseRows.length > 0 ? (courseRows[0].enable_certificate !== 0 && courseRows[0].enable_certificate !== false) : true;
+
       // Check Option B (Restrict certificate generation until fully paid)
       const [configs] = await connection.query('SELECT value FROM system_config WHERE `key` = "payment_restrict_certificate"');
       const restrictCert = configs[0]?.value === 'true';
-      let canIssueCert = true;
+      let canIssueCert = isCourseCertEnabled;
 
-      if (restrictCert) {
+      if (isCourseCertEnabled && restrictCert) {
         const [invoices] = await connection.query(
           'SELECT payment_status FROM invoices WHERE student_id = ? AND course_id = ?',
           [studentId, courseId]
@@ -102,10 +106,12 @@ class CourseCompletionService {
               certificateDetails = existing[0];
               certGenerated = true;
             }
-          } else if (err.message !== 'Course not found') {
+          } else if (err.message !== 'Course not found' && !err.message.includes('disabled for this course')) {
             console.warn('Certificate generation skipped or failed:', err.message);
           }
         }
+      } else if (!isCourseCertEnabled) {
+        console.log(`Certificate generation disabled for course ${courseId}.`);
       } else {
         console.log(`Certificate generation restricted for student ${studentId} course ${courseId} due to balance payment rules.`);
       }

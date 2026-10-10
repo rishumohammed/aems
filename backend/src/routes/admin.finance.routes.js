@@ -221,22 +221,27 @@ router.put('/invoices/:id/payment-details', authenticateJWT, hasAccess, async (r
 
           if (passedAttempts.length > 0) {
             const attemptId = passedAttempts[0].id;
-            const [existingCerts] = await pool.query(
-              'SELECT id FROM certificates WHERE student_id = ? AND course_id = ? AND status = "active"',
-              [invoice.student_id, invoice.course_id]
-            );
-            if (existingCerts.length === 0) {
-              const certService = (await import('../services/certificate.service.js')).default;
-              await certService.generate(attemptId);
+            const [courseRows] = await pool.query('SELECT enable_certificate FROM courses WHERE id = ?', [invoice.course_id]);
+            const isCertEnabled = courseRows.length > 0 ? (courseRows[0].enable_certificate !== 0 && courseRows[0].enable_certificate !== false) : true;
 
-              await createNotification({
-                userId: invoice.student_id,
-                type: 'system',
-                title: 'Certificate Issued! 🎓',
-                body: 'Congratulations! Your certificate is now ready as your course is fully paid.',
-                link: '/dashboard/student/payments',
-                emailNotify: true
-              });
+            if (isCertEnabled) {
+              const [existingCerts] = await pool.query(
+                'SELECT id FROM certificates WHERE student_id = ? AND course_id = ? AND status = "active"',
+                [invoice.student_id, invoice.course_id]
+              );
+              if (existingCerts.length === 0) {
+                const certService = (await import('../services/certificate.service.js')).default;
+                await certService.generate(attemptId);
+
+                await createNotification({
+                  userId: invoice.student_id,
+                  type: 'system',
+                  title: 'Certificate Issued! 🎓',
+                  body: 'Congratulations! Your certificate is now ready as your course is fully paid.',
+                  link: '/dashboard/student/payments',
+                  emailNotify: true
+                });
+              }
             }
           }
         }

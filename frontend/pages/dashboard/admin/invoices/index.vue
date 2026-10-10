@@ -32,8 +32,9 @@
 
       <AppTable
         :headers="headers"
-        :items="filteredInvoices"
+        :items="paginatedInvoices"
         :loading="loading"
+        :pagination="true"
       >
         <template #item.invoice_number="{ item }">
           <div class="font-weight-bold">{{ item.invoice_number || '—' }}</div>
@@ -98,6 +99,39 @@
               color="red"
               title="Void Invoice"
             />
+          </div>
+        </template>
+
+        <template #footer>
+          <div class="d-flex align-center justify-space-between w-100 flex-wrap gap-4 py-1">
+            <div class="d-flex align-center flex-wrap gap-3">
+              <span class="text-caption text-secondary font-weight-medium">Rows per page:</span>
+              <select
+                v-model.number="itemsPerPage"
+                class="apple-select-compact"
+              >
+                <option :value="10">10</option>
+                <option :value="25">25</option>
+                <option :value="50">50</option>
+                <option :value="100">100</option>
+              </select>
+              <span class="text-caption text-secondary font-weight-medium">
+                Showing {{ paginationStart }}–{{ paginationEnd }} of {{ filteredInvoices.length }} invoices
+              </span>
+            </div>
+
+            <div class="d-flex align-center">
+              <v-pagination
+                v-if="totalPages > 1"
+                v-model="page"
+                :length="totalPages"
+                :total-visible="5"
+                density="compact"
+                active-color="primary"
+                rounded="lg"
+                size="small"
+              ></v-pagination>
+            </div>
           </div>
         </template>
       </AppTable>
@@ -413,6 +447,9 @@ const updateInvoiceDetails = async () => {
   }
 };
 
+const page = ref(1);
+const itemsPerPage = ref(10);
+
 const filteredInvoices = computed(() => {
   if (!invoices.value || !Array.isArray(invoices.value)) return [];
   const q = (search.value || '').trim().toLowerCase();
@@ -442,6 +479,29 @@ const filteredInvoices = computed(() => {
       dateFormatted.includes(q)
     );
   });
+});
+
+const totalPages = computed(() => {
+  const total = Math.ceil(filteredInvoices.value.length / itemsPerPage.value);
+  return total > 0 ? total : 1;
+});
+
+const paginatedInvoices = computed(() => {
+  const start = (page.value - 1) * itemsPerPage.value;
+  return filteredInvoices.value.slice(start, start + itemsPerPage.value);
+});
+
+const paginationStart = computed(() => {
+  if (filteredInvoices.value.length === 0) return 0;
+  return (page.value - 1) * itemsPerPage.value + 1;
+});
+
+const paginationEnd = computed(() => {
+  return Math.min(page.value * itemsPerPage.value, filteredInvoices.value.length);
+});
+
+watch([search, () => filters.value.status, itemsPerPage], () => {
+  page.value = 1;
 });
 
 const fetchInvoices = async () => {
@@ -584,11 +644,20 @@ const formatDate = (dateStr: string | null) => {
   border-bottom: 1px solid rgba(0, 0, 0, 0.05);
 }
 
-.bg-gray {
-  background: var(--g1);
+.apple-select-compact {
+  padding: 4px 10px;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: var(--radius-sm, 6px);
+  border: 1px solid var(--border, #e2e8f0);
+  background: white;
+  color: var(--g6, #334155);
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.15s ease;
 }
 
-.border-t {
-  border-top: 1px solid rgba(0, 0, 0, 0.05);
+.apple-select-compact:focus {
+  border-color: #007AFF;
 }
 </style>

@@ -87,7 +87,7 @@
       <!-- 7. Action Buttons -->
       <div class="d-flex flex-column gap-3 max-w-400 mx-auto">
         <v-btn 
-          v-if="course?.certificate_generated !== false" 
+          v-if="course?.enable_certificate !== false && course?.enable_certificate !== 0 && course?.certificate_generated !== false" 
           color="primary" 
           variant="flat" 
           size="x-large"
@@ -101,7 +101,7 @@
         </v-btn>
         
         <v-btn 
-          v-if="course?.certificate_generated !== false" 
+          v-if="course?.enable_certificate !== false && course?.enable_certificate !== 0 && course?.certificate_generated !== false" 
           color="grey-darken-3" 
           variant="tonal" 
           size="large"

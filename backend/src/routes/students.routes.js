@@ -295,20 +295,266 @@ router.get('/:id/jobs', async (req, res) => {
   }
 });
 
-// Get student's enrolled courses
+// Get student's enrolled courses with attached invoice billing details
 router.get('/:id/courses', async (req, res) => {
   try {
     const { id } = req.params;
     const [courses] = await pool.query(`
-      SELECT c.*, e.id as enrollment_id, e.enrolled_at, e.completion_percentage, e.status as enrollment_status
+      SELECT 
+        c.id as course_id,
+        c.title,
+        c.slug,
+        c.price as original_course_price,
+        c.thumbnail_url,
+        c.tutor_id,
+        u.name as tutor_name,
+        e.id as enrollment_id, 
+        e.enrolled_at, 
+        e.completion_percentage, 
+        e.status as enrollment_status,
+        (SELECT COUNT(*) FROM lesson_progress lp WHERE lp.enrollment_id = e.id AND lp.completed = TRUE) as completed_lessons,
+        (SELECT COUNT(*) FROM lessons l JOIN modules m ON l.module_id = m.id JOIN curriculum_sections cs ON m.section_id = cs.id WHERE cs.course_id = c.id) as total_lessons,
+        i.id as invoice_id,
+        i.invoice_number,
+        i.amount as invoice_amount,
+        i.total_fee as invoice_total_fee,
+        i.amount_paid as invoice_amount_paid,
+        i.balance_due as invoice_balance_due,
+        i.payment_status as invoice_payment_status,
+        i.payment_mode as invoice_payment_mode,
+        i.pdf_path as invoice_pdf_path
       FROM enrollments e
       JOIN courses c ON e.course_id = c.id
+      LEFT JOIN users u ON c.tutor_id = u.id
+      LEFT JOIN invoices i ON i.student_id = e.student_id AND i.course_id = e.course_id AND i.payment_status != 'voided'
       WHERE e.student_id = ?
+      ORDER BY e.enrolled_at DESC
     `, [id]);
-    res.json(courses);
+
+    const formatted = courses.map(c => ({
+      ...c,
+      id: c.enrollment_id,
+      course_id: c.course_id,
+      status: c.enrollment_status,
+      price: c.invoice_amount !== null ? parseFloat(c.invoice_amount) : parseFloat(c.original_course_price || 0),
+      amount_paid: parseFloat(c.invoice_amount_paid || 0),
+      balance_due: c.invoice_balance_due !== null ? parseFloat(c.invoice_balance_due) : parseFloat(c.invoice_amount || c.original_course_price || 0),
+      payment_status: c.invoice_payment_status || 'pending'
+    }));
+
+    res.json(formatted);
   } catch (error) {
     console.error('Error fetching student courses:', error);
     res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Remove / Unenroll student from course
+router.delete('/:id/courses/:enrollmentId', async (req, res) => {
+  const connection = await pool.getConnection();
+  try {
+    const { id: studentId, enrollmentId } = req.params;
+    const { cancel_invoice = true } = req.body || {};
+
+    await connection.beginTransaction();
+
+    // 1. Find enrollment
+    const [enrollments] = await connection.query(
+      'SELECT * FROM enrollments WHERE id = ? AND student_id = ?',
+      [enrollmentId, studentId]
+    );
+    if (enrollments.length === 0) {
+      await connection.rollback();
+      return res.status(404).json({ message: 'Enrollment not found' });
+    }
+    const enrollment = enrollments[0];
+
+    // 2. Delete lesson progress
+    await connection.query('DELETE FROM lesson_progress WHERE enrollment_id = ?', [enrollmentId]);
+
+    // 3. Delete enrollment
+    await connection.query('DELETE FROM enrollments WHERE id = ?', [enrollmentId]);
+
+    // 4. Handle attached invoices if requested
+    if (cancel_invoice) {
+      const [invoices] = await connection.query(
+        'SELECT * FROM invoices WHERE student_id = ? AND course_id = ? AND payment_status != "voided"',
+        [studentId, enrollment.course_id]
+      );
+      for (const inv of invoices) {
+        if (parseFloat(inv.amount_paid) === 0) {
+          await connection.query('DELETE FROM invoice_payments WHERE invoice_id = ?', [inv.id]);
+          await connection.query('DELETE FROM invoices WHERE id = ?', [inv.id]);
+        } else {
+          await connection.query(
+            'UPDATE invoices SET payment_status = "voided", balance_due = 0, balance_amount = 0 WHERE id = ?',
+            [inv.id]
+          );
+        }
+      }
+    }
+
+    await connection.commit();
+    res.json({ message: 'Enrolled course removed successfully' });
+  } catch (error) {
+    await connection.rollback();
+    console.error('Error removing enrolled course:', error);
+    res.status(500).json({ message: 'Failed to remove enrolled course' });
+  } finally {
+    connection.release();
+  }
+});
+
+// Change / Transfer student to another course
+router.post('/:id/courses/:enrollmentId/change', async (req, res) => {
+  const connection = await pool.getConnection();
+  try {
+    const { id: studentId, enrollmentId } = req.params;
+    const { new_course_id, new_price, reset_progress = true } = req.body;
+
+    if (!new_course_id) {
+      return res.status(400).json({ message: 'New course is required' });
+    }
+
+    await connection.beginTransaction();
+
+    // 1. Verify enrollment
+    const [enrollments] = await connection.query(
+      'SELECT * FROM enrollments WHERE id = ? AND student_id = ?',
+      [enrollmentId, studentId]
+    );
+    if (enrollments.length === 0) {
+      await connection.rollback();
+      return res.status(404).json({ message: 'Enrollment not found' });
+    }
+    const currentEnrollment = enrollments[0];
+    const oldCourseId = currentEnrollment.course_id;
+
+    if (oldCourseId === new_course_id) {
+      await connection.rollback();
+      return res.status(400).json({ message: 'Selected course is the same as the currently enrolled course' });
+    }
+
+    // 2. Check if already enrolled in new course
+    const [existingNew] = await connection.query(
+      'SELECT id FROM enrollments WHERE student_id = ? AND course_id = ?',
+      [studentId, new_course_id]
+    );
+    if (existingNew.length > 0) {
+      await connection.rollback();
+      return res.status(400).json({ message: 'Student is already enrolled in the selected course' });
+    }
+
+    // 3. Verify new course exists
+    const [newCourses] = await connection.query('SELECT * FROM courses WHERE id = ?', [new_course_id]);
+    if (newCourses.length === 0) {
+      await connection.rollback();
+      return res.status(404).json({ message: 'Target course not found' });
+    }
+    const targetCourse = newCourses[0];
+
+    // 4. Update enrollment
+    const newCompletion = reset_progress ? 0 : currentEnrollment.completion_percentage;
+    await connection.query(
+      'UPDATE enrollments SET course_id = ?, completion_percentage = ? WHERE id = ?',
+      [new_course_id, newCompletion, enrollmentId]
+    );
+
+    if (reset_progress) {
+      await connection.query('DELETE FROM lesson_progress WHERE enrollment_id = ?', [enrollmentId]);
+    }
+
+    // 5. Update / Migrate Attached Invoice
+    const [invoices] = await connection.query(
+      'SELECT * FROM invoices WHERE student_id = ? AND course_id = ? AND payment_status != "voided" ORDER BY created_at DESC LIMIT 1',
+      [studentId, oldCourseId]
+    );
+
+    const targetPrice = new_price !== undefined && new_price !== null && new_price !== ''
+      ? parseFloat(new_price)
+      : parseFloat(targetCourse.price || 0);
+
+    if (invoices.length > 0) {
+      const inv = invoices[0];
+      const amountPaid = parseFloat(inv.amount_paid) || 0;
+      const balanceDue = Math.max(0, targetPrice - amountPaid);
+      const newPaymentStatus = balanceDue <= 0 ? 'paid' : (amountPaid > 0 ? 'partial' : 'pending');
+
+      await connection.query(`
+        UPDATE invoices 
+        SET course_id = ?,
+            amount = ?,
+            total_fee = ?,
+            balance_due = ?,
+            balance_amount = ?,
+            payment_status = ?,
+            pdf_path = NULL
+        WHERE id = ?
+      `, [new_course_id, targetPrice, targetPrice, balanceDue, balanceDue, newPaymentStatus, inv.id]);
+    } else {
+      if (targetPrice > 0) {
+        const invoiceId = uuidv4();
+        await connection.query(`
+          INSERT INTO invoices (id, student_id, course_id, amount, total_fee, amount_paid, balance_due, balance_amount, payment_mode, payment_status)
+          VALUES (?, ?, ?, ?, ?, 0, ?, ?, 'offline', 'pending')
+        `, [invoiceId, studentId, new_course_id, targetPrice, targetPrice, targetPrice, targetPrice]);
+      }
+    }
+
+    await connection.commit();
+    res.json({ message: 'Course successfully changed to ' + targetCourse.title, new_course_title: targetCourse.title });
+  } catch (error) {
+    await connection.rollback();
+    console.error('Error changing student course:', error);
+    res.status(500).json({ message: 'Failed to change course' });
+  } finally {
+    connection.release();
+  }
+});
+
+// Adjust invoiced course price
+router.put('/invoices/:invoiceId/adjust-price', async (req, res) => {
+  const connection = await pool.getConnection();
+  try {
+    const { invoiceId } = req.params;
+    const { price } = req.body;
+
+    const newPrice = parseFloat(price);
+    if (isNaN(newPrice) || newPrice < 0) {
+      return res.status(400).json({ message: 'Valid price is required' });
+    }
+
+    await connection.beginTransaction();
+
+    const [invoices] = await connection.query('SELECT * FROM invoices WHERE id = ? FOR UPDATE', [invoiceId]);
+    if (invoices.length === 0) {
+      await connection.rollback();
+      return res.status(404).json({ message: 'Invoice not found' });
+    }
+    const inv = invoices[0];
+    const amountPaid = parseFloat(inv.amount_paid) || 0;
+    const balanceDue = Math.max(0, newPrice - amountPaid);
+    const paymentStatus = balanceDue <= 0 ? 'paid' : (amountPaid > 0 ? 'partial' : 'pending');
+
+    await connection.query(`
+      UPDATE invoices 
+      SET amount = ?,
+          total_fee = ?,
+          balance_due = ?,
+          balance_amount = ?,
+          payment_status = ?,
+          pdf_path = NULL
+      WHERE id = ?
+    `, [newPrice, newPrice, balanceDue, balanceDue, paymentStatus, invoiceId]);
+
+    await connection.commit();
+    res.json({ message: 'Invoiced price adjusted successfully', new_amount: newPrice, balance_due: balanceDue, payment_status: paymentStatus });
+  } catch (error) {
+    await connection.rollback();
+    console.error('Error adjusting invoice price:', error);
+    res.status(500).json({ message: 'Failed to adjust invoice price' });
+  } finally {
+    connection.release();
   }
 });
 

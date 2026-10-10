@@ -368,23 +368,56 @@ router.get('/courses/:id', authenticateJWT, async (req, res) => {
   }
 });
 
+// Ensure enable_certificate column exists in courses table
+let courseSchemaChecked = false;
+export async function ensureCourseSchema() {
+  if (courseSchemaChecked) return;
+  try {
+    await pool.query(`ALTER TABLE courses ADD COLUMN enable_certificate BOOLEAN DEFAULT TRUE COMMENT 'Whether this course awards a completion certificate'`);
+  } catch (err) {
+    if (err.code !== 'ER_DUP_FIELDNAME' && err.errno !== 1060) {
+      console.warn('[LMS] Note on enable_certificate column check:', err.message);
+    }
+  }
+  courseSchemaChecked = true;
+}
+ensureCourseSchema().catch(() => {});
+
 // Create Course
 router.post('/courses', authenticateJWT, isTutorOrAdmin, upload.single('thumbnail'), sanitizeBody, async (req, res) => {
-  const { title, slug, description, short_description, category_id, level, language, price_type, price, course_type, start_date } = req.body;
+  const { title, slug, description, short_description, category_id, level, language, price_type, price, course_type, start_date, enable_certificate } = req.body;
   const id = uuidv4();
   const tutor_id = req.user.id;
   const thumbnail_url = req.file ? `/uploads/thumbnails/${req.file.filename}` : null;
+  const isCertEnabled = enable_certificate === undefined || enable_certificate === null ? 1 : (enable_certificate === 'true' || enable_certificate === true || enable_certificate === 1 || enable_certificate === '1' ? 1 : 0);
+
+  await ensureCourseSchema().catch(() => {});
 
   try {
     const isApprovalRequired = req.user.role === USER_ROLES.TUTOR;
-    await pool.query(
-      `INSERT INTO courses (id, title, slug, description, short_description, tutor_id, category_id, level, language, price_type, price, thumbnail_url, status, approval_required, course_type, start_date) 
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'draft', ?, ?, ?)`,
-      [id, title, slug, description, short_description, tutor_id, category_id, level, language, price_type, price, thumbnail_url, isApprovalRequired, course_type || 'recorded', start_date || null]
-    );
+    try {
+      await pool.query(
+        `INSERT INTO courses (id, title, slug, description, short_description, tutor_id, category_id, level, language, price_type, price, thumbnail_url, status, approval_required, course_type, start_date, enable_certificate) 
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'draft', ?, ?, ?, ?)`,
+        [id, title, slug, description, short_description, tutor_id, category_id, level, language, price_type, price, thumbnail_url, isApprovalRequired, course_type || 'recorded', start_date || null, isCertEnabled]
+      );
+    } catch (dbErr) {
+      if (dbErr.code === 'ER_BAD_FIELD_ERROR' || dbErr.errno === 1054) {
+        courseSchemaChecked = false;
+        await ensureCourseSchema();
+        await pool.query(
+          `INSERT INTO courses (id, title, slug, description, short_description, tutor_id, category_id, level, language, price_type, price, thumbnail_url, status, approval_required, course_type, start_date, enable_certificate) 
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'draft', ?, ?, ?, ?)`,
+          [id, title, slug, description, short_description, tutor_id, category_id, level, language, price_type, price, thumbnail_url, isApprovalRequired, course_type || 'recorded', start_date || null, isCertEnabled]
+        );
+      } else {
+        throw dbErr;
+      }
+    }
     res.status(201).json({ id, message: 'Course created as draft' });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error('Error creating course:', error);
+    res.status(500).json({ message: error.message || 'Failed to create course' });
   }
 });
 
@@ -393,15 +426,18 @@ router.put('/courses/:id', authenticateJWT, isTutorOrAdmin, upload.single('thumb
   const data = req.body;
   const courseId = req.params.id;
   
+  await ensureCourseSchema().catch(() => {});
+
   try {
     let oldThumbnailUrl = null;
     const [oldCourse] = await pool.query('SELECT thumbnail_url FROM courses WHERE id = ?', [courseId]);
     if (oldCourse.length > 0) oldThumbnailUrl = oldCourse[0].thumbnail_url;
 
-    const fields = ['title', 'slug', 'description', 'short_description', 'category_id', 'level', 'language', 'price_type', 'price', 'intro_video_source', 'intro_video_id', 'is_featured', 'course_type', 'start_date'];
+    const fields = ['title', 'slug', 'description', 'short_description', 'category_id', 'level', 'language', 'price_type', 'price', 'intro_video_source', 'intro_video_id', 'is_featured', 'course_type', 'start_date', 'enable_certificate'];
     let updateStr = fields.filter(f => data[f] !== undefined).map(f => `${f} = ?`).join(', ');
     let values = fields.filter(f => data[f] !== undefined).map(f => {
       if (f === 'is_featured') return data[f] === 'true' || data[f] === true || data[f] === 1 || data[f] === '1' ? 1 : 0;
+      if (f === 'enable_certificate') return data[f] === 'true' || data[f] === true || data[f] === 1 || data[f] === '1' ? 1 : 0;
       if (f === 'start_date') return data[f] ? data[f] : null;
       return data[f];
     });
@@ -412,7 +448,17 @@ router.put('/courses/:id', authenticateJWT, isTutorOrAdmin, upload.single('thumb
     }
 
     if (updateStr) {
-      await pool.query(`UPDATE courses SET ${updateStr} WHERE id = ?`, [...values, courseId]);
+      try {
+        await pool.query(`UPDATE courses SET ${updateStr} WHERE id = ?`, [...values, courseId]);
+      } catch (dbErr) {
+        if (dbErr.code === 'ER_BAD_FIELD_ERROR' || dbErr.errno === 1054) {
+          courseSchemaChecked = false;
+          await ensureCourseSchema();
+          await pool.query(`UPDATE courses SET ${updateStr} WHERE id = ?`, [...values, courseId]);
+        } else {
+          throw dbErr;
+        }
+      }
       
       if (oldThumbnailUrl && (req.file || req.body.thumbnail_url === null)) {
         deleteFileSafe(oldThumbnailUrl);
@@ -421,16 +467,26 @@ router.put('/courses/:id', authenticateJWT, isTutorOrAdmin, upload.single('thumb
 
     // Update Prerequisites if provided
     if (data.prerequisites) {
-      const prereqIds = JSON.parse(data.prerequisites);
-      await pool.query('DELETE FROM course_prerequisites WHERE course_id = ?', [courseId]);
-      for (const pid of prereqIds) {
-        await pool.query('INSERT INTO course_prerequisites (course_id, prerequisite_course_id) VALUES (?, ?)', [courseId, pid]);
+      let prereqIds = [];
+      try {
+        prereqIds = typeof data.prerequisites === 'string' ? JSON.parse(data.prerequisites) : data.prerequisites;
+      } catch (e) {
+        prereqIds = [];
+      }
+      if (Array.isArray(prereqIds)) {
+        await pool.query('DELETE FROM course_prerequisites WHERE course_id = ?', [courseId]);
+        for (const pid of prereqIds) {
+          if (pid) {
+            await pool.query('INSERT INTO course_prerequisites (course_id, prerequisite_course_id) VALUES (?, ?)', [courseId, pid]);
+          }
+        }
       }
     }
 
     res.json({ message: 'Course updated' });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error('Error updating course:', error);
+    res.status(500).json({ message: error.message || 'Failed to update course' });
   }
 });
 
@@ -956,6 +1012,190 @@ router.put('/lessons/:lid/recording', authenticateJWT, isTutorOrAdmin, async (re
     res.json({ message: 'Recording added and session converted to video' });
   } catch (error) {
     res.status(500).json({ message: error.message });
+  }
+});
+
+// --- Course Study Materials ---
+
+// Ensure table exists
+const ensureStudyMaterialsTable = async () => {
+  try {
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS course_study_materials (
+        id VARCHAR(36) PRIMARY KEY,
+        course_id VARCHAR(36) NOT NULL,
+        title VARCHAR(255) NOT NULL,
+        description TEXT,
+        file_url TEXT NOT NULL,
+        file_name VARCHAR(255),
+        file_size VARCHAR(50),
+        file_type VARCHAR(50) DEFAULT 'document',
+        order_index INT DEFAULT 0,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        INDEX idx_course_study_materials_course (course_id)
+      )
+    `);
+  } catch (err) {
+    console.error('Failed to ensure course_study_materials table:', err);
+  }
+};
+ensureStudyMaterialsTable();
+
+const formatFileSize = (bytes) => {
+  if (!bytes || bytes === 0) return '0 B';
+  const k = 1024;
+  const sizes = ['B', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+};
+
+// Get all study materials for a course (combined direct materials + lesson resources)
+router.get('/courses/:courseId/materials', async (req, res) => {
+  try {
+    const { courseId } = req.params;
+
+    // Resolve courseId whether UUID or slug was passed
+    let resolvedCourseId = courseId;
+    const [courseCheck] = await pool.query('SELECT id FROM courses WHERE id = ? OR slug = ?', [courseId, courseId]);
+    if (courseCheck.length > 0) {
+      resolvedCourseId = courseCheck[0].id;
+    }
+
+    // 1. Direct course study materials
+    const [directMaterials] = await pool.query(`
+      SELECT 
+        id,
+        course_id,
+        title,
+        description,
+        file_url,
+        file_name,
+        file_size,
+        file_type,
+        order_index,
+        created_at,
+        'direct' as source_type
+      FROM course_study_materials
+      WHERE course_id = ? OR course_id = ?
+      ORDER BY order_index ASC, created_at DESC
+    `, [resolvedCourseId, courseId]);
+
+    // 2. Lesson resources attached to curriculum
+    const [lessonResources] = await pool.query(`
+      SELECT 
+        l.id,
+        s.course_id,
+        l.title,
+        l.notes as description,
+        l.resource_url as file_url,
+        SUBSTRING_INDEX(l.resource_url, '/', -1) as file_name,
+        NULL as file_size,
+        l.order_index,
+        NULL as created_at,
+        'lesson_resource' as source_type
+      FROM course_lessons l
+      JOIN course_sections s ON l.section_id = s.id
+      WHERE (s.course_id = ? OR s.course_id = ?) AND (l.type = 'resource' OR (l.resource_url IS NOT NULL AND l.resource_url != ''))
+      ORDER BY l.order_index ASC
+    `, [resolvedCourseId, courseId]);
+
+    const mappedLessonResources = lessonResources.map(lr => {
+      const ext = (lr.file_url || '').split('.').pop().toLowerCase();
+      return {
+        ...lr,
+        file_type: ext || 'document',
+        file_size: lr.file_size || 'Resource File'
+      };
+    });
+
+    const combined = [...directMaterials, ...mappedLessonResources];
+    res.json(combined);
+  } catch (error) {
+    console.error('Error fetching course study materials:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Upload a new study material to a course
+router.post('/courses/:courseId/materials', authenticateJWT, isTutorOrAdmin, upload.single('file'), async (req, res) => {
+  try {
+    const { courseId } = req.params;
+    const { title, description, order_index = 0 } = req.body;
+
+    if (!req.file) {
+      return res.status(400).json({ message: 'Please select a file to upload' });
+    }
+
+    const fileExt = path.extname(req.file.originalname).replace('.', '').toLowerCase();
+    if (fileExt !== 'pdf' && req.file.mimetype !== 'application/pdf') {
+      try { fs.unlinkSync(req.file.path); } catch (e) {}
+      return res.status(400).json({ message: 'Only PDF documents are allowed for course study materials.' });
+    }
+
+    // Resolve courseId whether UUID or slug was passed
+    let resolvedCourseId = courseId;
+    const [courseCheck] = await pool.query('SELECT id FROM courses WHERE id = ? OR slug = ?', [courseId, courseId]);
+    if (courseCheck.length > 0) {
+      resolvedCourseId = courseCheck[0].id;
+    }
+
+    const materialId = uuidv4();
+    const fileUrl = `/uploads/resources/${req.file.filename}`;
+    const originalName = req.file.originalname;
+    const ext = path.extname(originalName).replace('.', '').toLowerCase();
+    const fileSize = formatFileSize(req.file.size);
+    const materialTitle = title && title.trim() ? title.trim() : originalName.replace(/\.[^/.]+$/, "");
+
+    await pool.query(`
+      INSERT INTO course_study_materials (id, course_id, title, description, file_url, file_name, file_size, file_type, order_index)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `, [materialId, resolvedCourseId, materialTitle, description || null, fileUrl, originalName, fileSize, ext, parseInt(order_index) || 0]);
+
+    const [created] = await pool.query('SELECT *, "direct" as source_type FROM course_study_materials WHERE id = ?', [materialId]);
+    res.status(201).json({ message: 'Study material uploaded successfully', material: created[0] });
+  } catch (error) {
+    console.error('Error uploading study material:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Update study material details
+router.put('/courses/:courseId/materials/:materialId', authenticateJWT, isTutorOrAdmin, async (req, res) => {
+  try {
+    const { materialId } = req.params;
+    const { title, description, order_index } = req.body;
+
+    await pool.query(`
+      UPDATE course_study_materials
+      SET title = COALESCE(?, title),
+          description = COALESCE(?, description),
+          order_index = COALESCE(?, order_index)
+      WHERE id = ?
+    `, [title, description, order_index, materialId]);
+
+    res.json({ message: 'Study material updated successfully' });
+  } catch (error) {
+    console.error('Error updating study material:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// Delete study material
+router.delete('/courses/:courseId/materials/:materialId', authenticateJWT, isTutorOrAdmin, async (req, res) => {
+  try {
+    const { materialId } = req.params;
+    const [existing] = await pool.query('SELECT file_url FROM course_study_materials WHERE id = ?', [materialId]);
+    if (existing.length > 0) {
+      if (existing[0].file_url) deleteFileSafe(existing[0].file_url);
+      await pool.query('DELETE FROM course_study_materials WHERE id = ?', [materialId]);
+      return res.json({ message: 'Study material deleted successfully' });
+    }
+
+    res.status(404).json({ message: 'Study material not found' });
+  } catch (error) {
+    console.error('Error deleting study material:', error);
+    res.status(500).json({ message: 'Internal server error' });
   }
 });
 

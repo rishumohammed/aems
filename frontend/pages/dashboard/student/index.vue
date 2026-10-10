@@ -103,22 +103,36 @@
 
           <!-- Recent Achievements Section -->
           <section class="mb-10" v-if="recentCompletedCourses.length > 0">
-            <div class="d-flex align-center justify-space-between mb-6">
+            <div class="d-flex align-center justify-space-between mb-4">
               <h2 class="text-h5 font-weight-bold d-flex align-center">
                 <v-icon color="warning" class="mr-3">mdi-trophy-variant</v-icon>
                 Recent Achievements
               </h2>
+              <v-btn
+                v-if="certificates.length > 0"
+                variant="text"
+                color="primary"
+                class="text-none font-weight-bold"
+                to="/dashboard/certificates"
+              >
+                All Certificates ({{ certificates.length }})
+              </v-btn>
             </div>
-            <v-row>
-              <v-col v-for="course in recentCompletedCourses" :key="'achieve-' + course.id" cols="12" md="6">
-                <CourseCompletionCard 
-                  :course="course" 
-                  :showCelebration="false" 
-                  @download-certificate="downloadCert(getCertNumber(course.course_id))"
-                  @share-achievement="shareOnWhatsApp(certificates.find(c => c.course_id === course.course_id))"
-                />
-              </v-col>
-            </v-row>
+            
+            <div class="d-flex flex-column gap-3">
+              <AchievementHorizontalCard 
+                v-for="course in recentCompletedCourses" 
+                :key="'achieve-' + course.id"
+                :course="course" 
+                :certificate="certificates.find(c => c.course_id === course.course_id)"
+                :claiming="claimingCourseId === course.course_id"
+                @download-certificate="downloadCert"
+                @claim-certificate="claimCertificate"
+                @share-whatsapp="shareOnWhatsApp"
+                @share-linkedin="shareOnLinkedIn"
+                @review-course="navigateToCourse"
+              />
+            </div>
           </section>
 
           <!-- My Courses Section -->
@@ -172,7 +186,7 @@
                         </v-btn>
                         
                         <v-btn
-                          v-if="course.status === 'completed' && course.has_exam && !course.passed_exam && !hasCertificate(course.course_id)"
+                          v-if="course.status === 'completed' && (course.has_exam === 1 || course.has_exam === true || course.has_exam === '1') && !(course.passed_exam === 1 || course.passed_exam === true) && !hasCertificate(course.course_id)"
                           color="warning"
                           variant="flat"
                           rounded="lg"
@@ -183,7 +197,7 @@
                         </v-btn>
 
                         <v-btn
-                          v-else-if="course.status === 'completed' && (!course.has_exam || course.passed_exam) && !hasCertificate(course.course_id)"
+                          v-else-if="course.status === 'completed' && (!(course.has_exam === 1 || course.has_exam === true || course.has_exam === '1') || (course.passed_exam === 1 || course.passed_exam === true)) && !hasCertificate(course.course_id) && course.enable_certificate !== false && course.enable_certificate !== 0 && course.enable_certificate !== '0'"
                           color="success"
                           variant="tonal"
                           rounded="lg"
@@ -397,7 +411,7 @@
 import { useAuthStore } from '~/stores/auth';
 import { useApi } from '@/composables/useApi';
 import dayjs from 'dayjs';
-import CourseCompletionCard from '~/components/student/CourseCompletionCard.vue';
+import AchievementHorizontalCard from '~/components/student/AchievementHorizontalCard.vue';
 
 const authStore = useAuthStore();
 const api = useApi();
@@ -462,7 +476,9 @@ const formatDate = (date, format) => dayjs(date).format(format);
 const isOverdue = (date) => dayjs(date).isBefore(dayjs());
 
 const navigateToCourse = (course) => {
-  navigateTo(`/learn/${course.slug}`);
+  if (!course) return;
+  const target = course.slug || course.course_id || course.id;
+  navigateTo(`/learn/${target}`);
 };
 
 const downloadCert = async (certNumber) => {

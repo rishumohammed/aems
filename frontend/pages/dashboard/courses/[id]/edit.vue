@@ -35,6 +35,7 @@
       <v-tabs v-model="tab" color="primary" grow>
         <v-tab value="basic" prepend-icon="mdi-information-outline">Info</v-tab>
         <v-tab value="curriculum" prepend-icon="mdi-format-list-bulleted-type">Curriculum</v-tab>
+        <v-tab value="materials" prepend-icon="mdi-folder-download-outline">Study Materials</v-tab>
         <v-tab value="media" prepend-icon="mdi-image-outline">Media</v-tab>
         <v-tab value="pricing" prepend-icon="mdi-currency-inr">Pricing</v-tab>
         <v-tab value="settings" prepend-icon="mdi-cog-outline">Settings</v-tab>
@@ -75,6 +76,15 @@
         <!-- Tab: Curriculum -->
         <v-window-item value="curriculum">
           <CurriculumEditor v-if="course.id" :course-id="course.id" :initial-sections="course.sections" />
+        </v-window-item>
+
+        <!-- Tab: Study Materials -->
+        <v-window-item value="materials">
+          <CourseMaterialsManager
+            v-if="course.id || route.params.id"
+            :course-id="course.id || String(route.params.id)"
+            :active="tab === 'materials'"
+          />
         </v-window-item>
 
         <!-- Tab: Media -->
@@ -173,6 +183,25 @@
                 class="mb-4"
               ></v-select>
 
+              <v-card flat border rounded="lg" class="pa-4 mb-4">
+                <div class="text-subtitle-2 font-weight-bold mb-1 d-flex align-center">
+                  <v-icon size="18" color="primary" class="mr-1">mdi-certificate-outline</v-icon>
+                  Course Certification
+                </div>
+                <v-radio-group v-model="course.enable_certificate" density="compact" hide-details class="mt-1">
+                  <v-radio :value="true" color="primary">
+                    <template v-slot:label>
+                      <span class="text-body-2 font-weight-medium">With Certificate <span class="text-caption text-grey">(Issues certificate on completion)</span></span>
+                    </template>
+                  </v-radio>
+                  <v-radio :value="false" color="grey-darken-2">
+                    <template v-slot:label>
+                      <span class="text-body-2 font-weight-medium">Without Certificate <span class="text-caption text-grey">(No certificate awarded)</span></span>
+                    </template>
+                  </v-radio>
+                </v-radio-group>
+              </v-card>
+
               <v-card flat border rounded="lg" class="pa-4">
                 <v-switch
                   v-model="course.is_featured"
@@ -242,6 +271,7 @@
 import { useEditor, EditorContent } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
 import CurriculumEditor from '~/components/lms/CurriculumEditor.vue'
+import CourseMaterialsManager from '~/components/lms/CourseMaterialsManager.vue'
 
 definePageMeta({
   layout: 'dashboard',
@@ -295,6 +325,7 @@ const fetchCourse = async () => {
       const d = new Date(data.start_date);
       data.start_date = new Date(d.getTime() - (d.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);
     }
+    data.enable_certificate = data.enable_certificate !== undefined ? (data.enable_certificate === 1 || data.enable_certificate === true || data.enable_certificate === '1' || data.enable_certificate === 'true') : true;
     course.value = data
     if (editor.value) editor.value.commands.setContent(data.description || '')
     
@@ -343,7 +374,7 @@ const saveAll = async () => {
   saving.value = true
   const formData = new FormData()
   Object.keys(course.value).forEach(key => {
-    if (['sections', 'tutor_name', 'category_name', 'level', 'language', 'course_type', 'is_featured', 'start_date'].includes(key)) return
+    if (['sections', 'tutor_name', 'category_name', 'level', 'language', 'course_type', 'is_featured', 'start_date', 'enable_certificate'].includes(key)) return
     if (key === 'prerequisites') {
       formData.append(key, JSON.stringify(course.value[key]))
     } else {
@@ -353,6 +384,7 @@ const saveAll = async () => {
   formData.append('level', course.value.level || 'beginner')
   formData.append('language', course.value.language || 'English')
   formData.append('course_type', course.value.course_type || 'recorded')
+  formData.append('enable_certificate', course.value.enable_certificate ? 'true' : 'false')
   formData.append('is_featured', course.value.is_featured ? 'true' : 'false')
   if (course.value.course_type === 'live' && course.value.start_date) {
     formData.append('start_date', course.value.start_date)
@@ -370,7 +402,7 @@ const saveAll = async () => {
       navigateTo('/dashboard/tutor/courses')
     }
   } catch (error) {
-    showMessage('Error saving course', 'error')
+    showMessage(error.response?.data?.message || 'Error saving course', 'error')
   } finally {
     saving.value = false
   }

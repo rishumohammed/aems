@@ -23,13 +23,29 @@
           <div class="d-flex align-center gap-2 mb-1">
             <h4 class="text-subtitle-1 font-weight-bold text-truncate">{{ course.title }}</h4>
             <v-chip
-            :color="getStatusColor(course)"
-            size="small"
-            class="font-weight-bold text-uppercase"
-            variant="tonal"
-          >
-            {{ formatStatus(course) }}
-          </v-chip>
+              :color="getStatusColor(course)"
+              size="small"
+              class="font-weight-bold text-uppercase"
+              variant="tonal"
+            >
+              {{ formatStatus(course) }}
+            </v-chip>
+            <v-chip
+              v-if="course.enable_certificate === false || course.enable_certificate === 0"
+              size="small"
+              color="grey"
+              variant="tonal"
+            >
+              No Certificate
+            </v-chip>
+            <v-chip
+              v-else
+              size="small"
+              color="teal"
+              variant="tonal"
+            >
+              With Certificate
+            </v-chip>
           </div>
 
         </div>

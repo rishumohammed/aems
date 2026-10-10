@@ -41,8 +41,10 @@
             <CoursesTab 
               :enrollments="enrollments" 
               :loading="loadingEnrollments"
+              :student-id="id"
               @enroll="enrollModal = true"
               @update-status="updateEnrollmentStatus"
+              @refresh="onCoursesRefresh"
             />
           </v-window-item>
 
@@ -264,6 +266,11 @@ const updateEnrollmentStatus = async (enrollmentId, status) => {
   } catch (error) {
     console.error('Failed to update enrollment status:', error);
   }
+};
+
+const onCoursesRefresh = () => {
+  fetchEnrollments();
+  fetchInvoices();
 };
 
 // Lazy fetch tab data

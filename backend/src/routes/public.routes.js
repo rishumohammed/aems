@@ -283,6 +283,25 @@ router.get('/courses/:slug', async (req, res) => {
 
     course.sections = sections;
 
+    try {
+      const [materials] = await pool.query(
+        'SELECT id, title, description, file_name, file_size, file_type, created_at FROM course_study_materials WHERE course_id = ? ORDER BY order_index ASC, id ASC',
+        [course.id]
+      );
+      course.study_materials_count = materials.length;
+      course.study_materials_preview = materials.map(m => ({
+        id: m.id,
+        title: m.title,
+        description: m.description,
+        file_name: m.file_name,
+        file_size: m.file_size,
+        file_type: m.file_type
+      }));
+    } catch (e) {
+      course.study_materials_count = 0;
+      course.study_materials_preview = [];
+    }
+
     res.json(course);
   } catch (error) {
     console.error(error);
