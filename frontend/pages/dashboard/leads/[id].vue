@@ -8,34 +8,40 @@
       <!-- Main Content -->
       <v-col cols="12" md="8">
         <!-- Lead Header Card -->
-        <v-card variant="flat" border class="mb-6 rounded-xl pa-2">
-          <v-card-text class="d-flex align-center">
-            <v-avatar size="64" color="primary-lighten-4" class="mr-4">
-              <span class="text-h5 text-primary font-weight-bold">{{ getInitials(lead.name) }}</span>
-            </v-avatar>
-            <div class="flex-grow-1">
-              <div class="d-flex align-center gap-2 mb-1">
-                <h1 class="text-h4 font-weight-bold mb-1">{{ lead.name }}</h1>
-                <v-chip :color="getStatusColor(lead.status)" size="small" class="text-uppercase font-weight-bold">
-                  {{ lead.status }}
-                </v-chip>
-              </div>
-              <div class="text-body-2 text-grey">
-                Lead from <span class="text-primary font-weight-bold">{{ lead.source }}</span> • 
-                Created {{ formatDate(lead.created_at) }}
+        <v-card variant="flat" border class="mb-6 rounded-xl overflow-hidden">
+          <v-card-text class="d-flex flex-column flex-sm-row align-start align-sm-center justify-space-between gap-4 pa-4 pa-sm-5">
+            <div class="d-flex align-center gap-4 flex-grow-1" style="min-width: 0;">
+              <v-avatar size="64" color="primary-lighten-4" class="flex-shrink-0">
+                <span class="text-h5 text-primary font-weight-bold">{{ getInitials(lead.name) }}</span>
+              </v-avatar>
+              <div class="flex-grow-1" style="min-width: 0;">
+                <div class="d-flex align-center flex-wrap gap-2 mb-1">
+                  <h1 class="text-h5 text-md-h4 font-weight-bold mb-0 text-break">{{ lead.name }}</h1>
+                  <v-chip :color="getStatusColor(lead.status)" size="small" class="text-uppercase font-weight-bold flex-shrink-0">
+                    {{ lead.status }}
+                  </v-chip>
+                </div>
+                <div class="text-body-2 text-grey">
+                  Lead from <span class="text-primary font-weight-bold">{{ lead.source }}</span> • 
+                  Created {{ formatDate(lead.created_at) }}
+                </div>
               </div>
             </div>
-            <div class="d-flex gap-2">
+            <div class="d-flex align-center gap-2 flex-shrink-0 w-100 w-sm-auto justify-start justify-sm-end">
               <v-btn
                 color="success"
                 prepend-icon="mdi-whatsapp"
                 rounded="lg"
+                elevation="0"
+                class="font-weight-bold"
                 @click="openWhatsApp"
               >WhatsApp</v-btn>
               <v-btn
                 color="primary"
                 prepend-icon="mdi-phone"
                 rounded="lg"
+                elevation="0"
+                class="font-weight-bold"
                 :href="'tel:' + lead.phone"
               >Call</v-btn>
             </div>
