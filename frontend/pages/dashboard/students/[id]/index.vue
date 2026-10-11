@@ -169,7 +169,7 @@ const fetchEnrollments = async () => {
       ...course,
       id: course.enrollment_id, // ensure actions use the enrollment id
       status: course.enrollment_status,
-      course_id: course.id
+      course_id: course.course_id || course.id
     }));
   } catch (error) {
     console.error('Failed to fetch enrollments:', error);

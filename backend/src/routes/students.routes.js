@@ -313,7 +313,7 @@ router.get('/:id/courses', async (req, res) => {
         e.completion_percentage, 
         e.status as enrollment_status,
         (SELECT COUNT(*) FROM lesson_progress lp WHERE lp.enrollment_id = e.id AND lp.completed = TRUE) as completed_lessons,
-        (SELECT COUNT(*) FROM lessons l JOIN modules m ON l.module_id = m.id JOIN curriculum_sections cs ON m.section_id = cs.id WHERE cs.course_id = c.id) as total_lessons,
+        (SELECT COUNT(*) FROM course_lessons cl JOIN course_sections cs ON cl.section_id = cs.id WHERE cs.course_id = c.id) as total_lessons,
         i.id as invoice_id,
         i.invoice_number,
         i.amount as invoice_amount,

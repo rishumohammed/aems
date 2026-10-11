@@ -5,7 +5,7 @@
       <v-col v-for="kpi in kpis" :key="kpi.label" cols="12" sm="6" md="3">
         <KpiCard
           :title="kpi.label"
-          :value="'INR ' + kpi.value"
+          :value="kpi.value"
           :icon="kpi.icon || 'mdi-currency-inr'"
           :color="kpi.color"
         />
@@ -231,10 +231,10 @@ const kpis = computed(() => {
   const due = props.invoices.reduce((acc, i) => acc + parseFloat(i.balance_due || 0), 0);
   
   return [
-    { label: 'Total Billed', value: total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) },
-    { label: 'Total Paid', value: paid.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }), color: 'success' },
-    { label: 'Balance Due', value: due.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }), color: 'error' },
-    { label: 'Payment Status', value: due > 0 ? 'Partial' : (total > 0 ? 'Paid' : 'N/A') }
+    { label: 'Total Billed', value: 'INR ' + total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) },
+    { label: 'Total Paid', value: 'INR ' + paid.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }), color: 'success' },
+    { label: 'Balance Due', value: 'INR ' + due.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }), color: 'error' },
+    { label: 'Payment Status', value: due > 0 ? 'Partial' : (total > 0 ? 'Paid' : 'N/A'), icon: 'mdi-alert-circle-outline' }
   ];
 });
 
