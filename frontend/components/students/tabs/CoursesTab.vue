@@ -9,11 +9,11 @@
     >
       <!-- Course Column -->
       <template v-slot:item.course="{ item }">
-        <div class="d-flex align-center py-2">
-          <v-avatar size="44" rounded="lg" class="mr-3 bg-grey-lighten-4 border">
+        <div class="d-flex align-center py-2" style="min-width: 240px;">
+          <v-avatar size="44" rounded="lg" class="mr-3 bg-grey-lighten-4 border flex-shrink-0">
             <v-img :src="item.thumbnail_url || '/placeholder-course.png'" cover></v-img>
           </v-avatar>
-          <div>
+          <div class="overflow-hidden">
             <div class="text-subtitle-2 font-weight-bold text-truncate max-width-280">{{ item.title }}</div>
             <div class="text-caption text-grey d-flex align-center gap-1 mt-0-5">
               <v-icon size="13" color="grey">mdi-account-tie</v-icon>
@@ -25,25 +25,28 @@
 
       <!-- Attached Invoiced Price & Billing Column -->
       <template v-slot:item.billing="{ item }">
-        <div class="py-1">
-          <div class="d-flex align-center gap-1">
-            <span class="text-subtitle-2 font-weight-black text-grey-darken-3">INR {{ Number(item.price || 0).toLocaleString() }}</span>
+        <div class="py-2 billing-cell">
+          <div class="d-flex align-center gap-1 text-no-wrap mb-1">
+            <span class="text-subtitle-2 font-weight-black text-grey-darken-3">
+              INR {{ Number(item.price || 0).toLocaleString() }}
+            </span>
             <v-btn
               v-if="item.invoice_id"
               icon="mdi-pencil-outline"
               size="x-small"
               variant="text"
               color="primary"
+              density="compact"
               title="Adjust Course Price on Invoice"
               @click="openAdjustPriceModal(item)"
             ></v-btn>
           </div>
-          <div class="text-caption text-grey-darken-1 d-flex align-center gap-2 mt-0-5">
-            <span>Paid: <strong class="text-success">₹{{ Number(item.amount_paid || 0).toLocaleString() }}</strong></span>
-            <span>•</span>
-            <span>Due: <strong :class="Number(item.balance_due || 0) > 0 ? 'text-error' : 'text-grey'">₹{{ Number(item.balance_due || 0).toLocaleString() }}</strong></span>
+          <div class="text-caption text-grey-darken-1 d-flex align-center gap-2 text-no-wrap mb-1">
+            <span>Paid: <strong class="text-success font-weight-bold">₹{{ Number(item.amount_paid || 0).toLocaleString() }}</strong></span>
+            <span class="text-grey-lighten-1">•</span>
+            <span>Due: <strong :class="Number(item.balance_due || 0) > 0 ? 'text-error font-weight-bold' : 'text-grey-darken-1'">₹{{ Number(item.balance_due || 0).toLocaleString() }}</strong></span>
           </div>
-          <div class="mt-1">
+          <div class="d-flex align-center gap-2 text-no-wrap">
             <v-chip
               :color="getPaymentStatusColor(item.payment_status)"
               size="x-small"
@@ -58,7 +61,7 @@
 
       <!-- Enrolled Date Column -->
       <template v-slot:item.enrolled_at="{ item }">
-        <span class="text-caption font-weight-medium text-grey-darken-2">
+        <span class="text-caption font-weight-medium text-grey-darken-2 text-no-wrap">
           {{ formatDate(item.enrolled_at) }}
         </span>
       </template>
@@ -109,7 +112,7 @@
 
       <!-- Actions Column -->
       <template v-slot:item.actions="{ item }">
-        <div class="d-flex align-center justify-end gap-1">
+        <div class="d-flex align-center justify-end gap-1 text-no-wrap">
           <!-- View Course Page -->
           <v-btn
             icon="mdi-eye-outline"
@@ -422,12 +425,12 @@ const route = useRoute();
 const currentStudentId = computed(() => props.studentId || route.params.id);
 
 const headers = [
-  { title: 'Course', key: 'course', align: 'start' },
-  { title: 'Invoiced Price & Billing', key: 'billing', align: 'start' },
-  { title: 'Enrolled Date', key: 'enrolled_at', align: 'center' },
-  { title: 'Progress', key: 'progress', align: 'center' },
-  { title: 'Status', key: 'status', align: 'center' },
-  { title: 'Actions', key: 'actions', align: 'end', sortable: false }
+  { title: 'Course', key: 'course', align: 'start', minWidth: '260px' },
+  { title: 'Invoiced Price & Billing', key: 'billing', align: 'start', minWidth: '220px' },
+  { title: 'Enrolled Date', key: 'enrolled_at', align: 'center', minWidth: '130px' },
+  { title: 'Progress', key: 'progress', align: 'center', minWidth: '150px' },
+  { title: 'Status', key: 'status', align: 'center', minWidth: '120px' },
+  { title: 'Actions', key: 'actions', align: 'end', minWidth: '160px', sortable: false }
 ];
 
 // All courses cache for transfer
@@ -608,8 +611,16 @@ onMounted(() => {
 .max-width-280 {
   max-width: 280px;
 }
+.billing-cell {
+  min-width: 210px;
+  white-space: nowrap;
+}
 .courses-table :deep(th) {
   font-weight: 700 !important;
   color: #475569 !important;
+  white-space: nowrap !important;
+}
+.courses-table :deep(td) {
+  vertical-align: middle !important;
 }
 </style>

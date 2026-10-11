@@ -216,13 +216,13 @@ const paymentForm = ref({
 });
 
 const headers = [
-  { title: 'Invoice #', key: 'id', align: 'start', value: v => v.invoice_number || v.id.slice(0,8).toUpperCase() },
-  { title: 'Course', key: 'course_title' },
-  { title: 'Amount', key: 'amount', align: 'end' },
-  { title: 'Paid', key: 'amount_paid', align: 'end' },
-  { title: 'Balance', key: 'balance_due', align: 'end' },
-  { title: 'Status', key: 'payment_status', align: 'center' },
-  { title: 'Actions', key: 'actions', align: 'end', sortable: false }
+  { title: 'Invoice #', key: 'id', align: 'start', minWidth: '130px', value: v => v.invoice_number || v.id.slice(0,8).toUpperCase() },
+  { title: 'Course', key: 'course_title', minWidth: '240px' },
+  { title: 'Amount', key: 'amount', align: 'end', minWidth: '120px' },
+  { title: 'Paid', key: 'amount_paid', align: 'end', minWidth: '120px' },
+  { title: 'Balance', key: 'balance_due', align: 'end', minWidth: '120px' },
+  { title: 'Status', key: 'payment_status', align: 'center', minWidth: '110px' },
+  { title: 'Actions', key: 'actions', align: 'end', minWidth: '180px', sortable: false }
 ];
 
 const kpis = computed(() => {
@@ -272,3 +272,15 @@ const submitPayment = async () => {
   }
 };
 </script>
+
+<style scoped>
+.payments-tab :deep(th) {
+  font-weight: 700 !important;
+  color: #475569 !important;
+  white-space: nowrap !important;
+}
+.payments-tab :deep(td) {
+  vertical-align: middle !important;
+  white-space: nowrap !important;
+}
+</style>
