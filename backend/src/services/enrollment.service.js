@@ -95,9 +95,20 @@ class EnrollmentService {
       // 1. Create or Identify User & Ensure Student ID on active enrollment
       if (!studentId) {
         // Check if user already exists by email
-        const [existing] = await connection.query('SELECT id FROM users WHERE email = ?', [studentData.email]);
+        const [existing] = await connection.query('SELECT id, role, status FROM users WHERE email = ?', [studentData.email]);
         if (existing.length > 0) {
           studentId = existing[0].id;
+          const existingUser = existing[0];
+
+          // If user previously existed with another role (e.g. employer, tutor) or was suspended/inactive/pending_review/rejected:
+          // Switch primary role to 'student' and reactivate as 'active' so they appear in students list and can log in
+          if (existingUser.role !== 'student' || existingUser.status !== 'active') {
+            await connection.query(
+              'UPDATE users SET role = "student", status = "active" WHERE id = ?',
+              [studentId]
+            );
+          }
+
           readableStudentId = await this.ensureStudentId(connection, studentId, studentData, convertedBy, leadSource);
         } else {
           studentId = uuidv4();
@@ -118,6 +129,14 @@ class EnrollmentService {
           );
         }
       } else {
+        // When studentId is provided directly, ensure role is 'student' and status is 'active'
+        const [uRows] = await connection.query('SELECT role, status FROM users WHERE id = ?', [studentId]);
+        if (uRows.length > 0 && (uRows[0].role !== 'student' || uRows[0].status !== 'active')) {
+          await connection.query(
+            'UPDATE users SET role = "student", status = "active" WHERE id = ?',
+            [studentId]
+          );
+        }
         readableStudentId = await this.ensureStudentId(connection, studentId, studentData, convertedBy, leadSource || 'direct');
       }
 

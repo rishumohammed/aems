@@ -86,9 +86,13 @@ router.post('/users', async (req, res) => {
     // Initial profile
     await pool.query('INSERT INTO user_profiles (user_id) VALUES (?)', [id]);
     
-    // If student, also initialize student_profile
+    // If student, also initialize student_profile; if tutor/employer, initialize their profiles
     if (role === 'student') {
       await pool.query('INSERT INTO student_profiles (user_id) VALUES (?)', [id]);
+    } else if (role === 'tutor') {
+      await pool.query('INSERT INTO tutor_profiles (user_id) VALUES (?)', [id]);
+    } else if (role === 'employer') {
+      await pool.query('INSERT INTO employer_profiles (user_id, company_name) VALUES (?, ?)', [id, name.trim() || 'Company']);
     }
 
     if (send_welcome) {
@@ -152,6 +156,25 @@ router.put('/users/:id', async (req, res) => {
   const { name, role } = req.body;
   try {
     await pool.query('UPDATE users SET name = ?, role = ? WHERE id = ?', [name || null, role || null, req.params.id]);
+
+    // Ensure corresponding profile exists when role is updated
+    if (role === 'student') {
+      const [sp] = await pool.query('SELECT user_id FROM student_profiles WHERE user_id = ?', [req.params.id]);
+      if (sp.length === 0) {
+        await pool.query('INSERT INTO student_profiles (user_id) VALUES (?)', [req.params.id]);
+      }
+    } else if (role === 'tutor') {
+      const [tp] = await pool.query('SELECT user_id FROM tutor_profiles WHERE user_id = ?', [req.params.id]);
+      if (tp.length === 0) {
+        await pool.query('INSERT INTO tutor_profiles (user_id) VALUES (?)', [req.params.id]);
+      }
+    } else if (role === 'employer') {
+      const [ep] = await pool.query('SELECT user_id FROM employer_profiles WHERE user_id = ?', [req.params.id]);
+      if (ep.length === 0) {
+        await pool.query('INSERT INTO employer_profiles (user_id, company_name) VALUES (?, ?)', [req.params.id, name || 'Company']);
+      }
+    }
+
     res.json({ message: 'User updated' });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -275,7 +298,7 @@ router.get('/tutor-approvals', async (req, res) => {
              tp.resume_url, tp.linkedin_url, tp.portfolio_url,
              tp.approval_notes, tp.approved_at, tp.rejection_reason
       FROM users u
-      JOIN tutor_profiles tp ON u.id = tp.user_id
+      LEFT JOIN tutor_profiles tp ON u.id = tp.user_id
       WHERE u.role = 'tutor' AND u.status = 'pending_review'
       ORDER BY u.created_at DESC
     `);
@@ -296,7 +319,7 @@ router.get('/tutor-approvals/approved', async (req, res) => {
              (SELECT COUNT(DISTINCT e.student_id) FROM enrollments e JOIN courses c ON e.course_id = c.id WHERE c.tutor_id = u.id) as student_count
       FROM users u
       LEFT JOIN user_profiles up ON u.id = up.user_id
-      JOIN tutor_profiles tp ON u.id = tp.user_id
+      LEFT JOIN tutor_profiles tp ON u.id = tp.user_id
       WHERE u.role = 'tutor' AND u.status = 'active'
       ORDER BY tp.approved_at DESC, u.created_at DESC
     `);
@@ -315,7 +338,7 @@ router.get('/tutor-approvals/rejected', async (req, res) => {
              tp.rejection_reason, tp.rejected_at, tp.linkedin_url
       FROM users u
       LEFT JOIN user_profiles up ON u.id = up.user_id
-      JOIN tutor_profiles tp ON u.id = tp.user_id
+      LEFT JOIN tutor_profiles tp ON u.id = tp.user_id
       WHERE u.role = 'tutor' AND u.status = 'rejected'
       ORDER BY tp.rejected_at DESC, u.created_at DESC
     `);
@@ -345,17 +368,33 @@ router.patch('/tutor-approve/:id', async (req, res) => {
       [status, req.params.id]
     );
 
-    // Update tutor_profiles with approval/rejection details
+    // Update tutor_profiles with approval/rejection details (upsert if missing)
     if (status === 'active') {
-      await pool.query(
-        'UPDATE tutor_profiles SET approval_notes = ?, approved_at = NOW(), approved_by = ?, rejection_reason = NULL, rejected_at = NULL, rejected_by = NULL WHERE user_id = ?',
-        [notes || null, req.user.id, req.params.id]
-      );
+      const [tp] = await pool.query('SELECT user_id FROM tutor_profiles WHERE user_id = ?', [req.params.id]);
+      if (tp.length === 0) {
+        await pool.query(
+          'INSERT INTO tutor_profiles (user_id, approval_notes, approved_at, approved_by) VALUES (?, ?, NOW(), ?)',
+          [req.params.id, notes || null, req.user.id]
+        );
+      } else {
+        await pool.query(
+          'UPDATE tutor_profiles SET approval_notes = ?, approved_at = NOW(), approved_by = ?, rejection_reason = NULL, rejected_at = NULL, rejected_by = NULL WHERE user_id = ?',
+          [notes || null, req.user.id, req.params.id]
+        );
+      }
     } else if (status === 'rejected') {
-      await pool.query(
-        'UPDATE tutor_profiles SET rejection_reason = ?, rejected_at = NOW(), rejected_by = ?, approved_at = NULL, approved_by = NULL WHERE user_id = ?',
-        [notes || null, req.user.id, req.params.id]
-      );
+      const [tp] = await pool.query('SELECT user_id FROM tutor_profiles WHERE user_id = ?', [req.params.id]);
+      if (tp.length === 0) {
+        await pool.query(
+          'INSERT INTO tutor_profiles (user_id, rejection_reason, rejected_at, rejected_by) VALUES (?, ?, NOW(), ?)',
+          [req.params.id, notes || null, req.user.id]
+        );
+      } else {
+        await pool.query(
+          'UPDATE tutor_profiles SET rejection_reason = ?, rejected_at = NOW(), rejected_by = ?, approved_at = NULL, approved_by = NULL WHERE user_id = ?',
+          [notes || null, req.user.id, req.params.id]
+        );
+      }
     }
 
     const isApproved = status === 'active';
