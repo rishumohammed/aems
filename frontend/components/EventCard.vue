@@ -4,11 +4,13 @@
     @click="handleCardClick"
   >
     <!-- Thumbnail Container -->
-    <div class="event-image-container position-relative overflow-hidden" style="height: 200px;">
+    <div class="event-image-container position-relative overflow-hidden w-100" style="aspect-ratio: 1 / 1;">
       <v-img
         :src="imageUrl"
         cover
+        width="100%"
         height="100%"
+        aspect-ratio="1"
         class="event-img-zoom"
       >
         <template #placeholder>
@@ -70,14 +72,6 @@
       </div>
 
       <v-spacer></v-spacer>
-
-      <!-- Registered Count -->
-      <div class="d-flex align-center justify-space-between pt-2 pb-3 text-caption text-secondary">
-        <div class="d-flex align-center">
-          <v-icon size="15" color="grey" class="mr-1">mdi-account-group</v-icon>
-          <span>{{ event.registrations_count || 0 }} Candidates Registered</span>
-        </div>
-      </div>
 
       <!-- Action Button Section -->
       <div class="action-button-wrapper mt-auto" @click.stop>

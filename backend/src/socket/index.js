@@ -4,10 +4,10 @@ import messageHandler from './messageHandler.js';
 
 let io;
 
-export const initSocket = (server) => {
+export const initSocket = (server, allowedOrigins) => {
   io = new Server(server, {
     cors: {
-      origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+      origin: allowedOrigins || process.env.FRONTEND_URL || 'http://localhost:3000',
       methods: ['GET', 'POST'],
       credentials: true
     }

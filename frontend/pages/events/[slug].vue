@@ -54,11 +54,13 @@
             <!-- Event Header Card -->
             <v-card class="rounded-2xl overflow-hidden border bg-white mb-6 elevation-1">
               <!-- Banner Image -->
-              <div class="event-hero-banner position-relative" style="height: 320px;">
+              <div class="event-hero-banner position-relative overflow-hidden w-100" style="aspect-ratio: 1 / 1;">
                 <v-img
                   :src="getImageUrl(event.image_url)"
                   cover
+                  width="100%"
                   height="100%"
+                  aspect-ratio="1"
                 >
                   <template #placeholder>
                     <div class="d-flex align-center justify-center fill-height bg-grey-lighten-3">
@@ -92,7 +94,7 @@
                 <!-- Key Schedule Highlights -->
                 <div class="event-meta-grid p-4 rounded-xl border bg-slate-50 mb-6">
                   <v-row dense>
-                    <v-col cols="12" sm="6" class="pa-3">
+                    <v-col cols="12" sm="4" class="pa-3">
                       <div class="d-flex align-start gap-3">
                         <v-avatar color="indigo-lighten-5" size="40" rounded="lg">
                           <v-icon color="primary" size="20">mdi-calendar-clock</v-icon>
@@ -106,7 +108,7 @@
                       </div>
                     </v-col>
 
-                    <v-col cols="12" sm="6" class="pa-3">
+                    <v-col cols="12" sm="4" class="pa-3">
                       <div class="d-flex align-start gap-3">
                         <v-avatar color="amber-lighten-5" size="40" rounded="lg">
                           <v-icon color="amber-darken-3" size="20">mdi-account-clock-outline</v-icon>
@@ -120,21 +122,7 @@
                       </div>
                     </v-col>
 
-                    <v-col cols="12" sm="6" class="pa-3">
-                      <div class="d-flex align-start gap-3">
-                        <v-avatar color="green-lighten-5" size="40" rounded="lg">
-                          <v-icon color="success" size="20">mdi-account-group</v-icon>
-                        </v-avatar>
-                        <div>
-                          <div class="text-caption text-secondary font-weight-medium">Attendees</div>
-                          <div class="text-body-2 font-weight-bold text-slate-900">
-                            {{ event.registrations_count || 0 }} Verified Attendees
-                          </div>
-                        </div>
-                      </div>
-                    </v-col>
-
-                    <v-col cols="12" sm="6" class="pa-3">
+                    <v-col cols="12" sm="4" class="pa-3">
                       <div class="d-flex align-start gap-3">
                         <v-avatar color="deep-purple-lighten-5" size="40" rounded="lg">
                           <v-icon color="deep-purple" size="20">mdi-web</v-icon>

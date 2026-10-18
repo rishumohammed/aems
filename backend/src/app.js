@@ -72,26 +72,29 @@ initLiveSessionJob();
 initDatabaseBackupJob();
 initEventReminderJob();
 
-const app = express();
-app.set('trust proxy', 1);
-const httpServer = createServer(app);
-const io = initSocket(httpServer);
-
-// Middleware
-app.use(helmet({
-  crossOriginResourcePolicy: { policy: "cross-origin" }
-}));
 const allowedOrigins = [
   process.env.FRONTEND_URL || 'http://localhost:3000',
   (process.env.FRONTEND_URL || '').replace('https://', 'https://www.'),
   'https://brixify.online',
   'https://www.brixify.online',
+  'https://brixify.org',
+  'https://www.brixify.org',
   'http://localhost:3001',
   'http://127.0.0.1:3000',
   'http://127.0.0.1:3001',
   'http://[::1]:3000',
   'http://[::1]:3001'
 ].filter(Boolean);
+
+const app = express();
+app.set('trust proxy', 1);
+const httpServer = createServer(app);
+const io = initSocket(httpServer, allowedOrigins);
+
+// Middleware
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" }
+}));
 
 app.use(cors({
   origin: allowedOrigins,

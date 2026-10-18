@@ -387,6 +387,21 @@ export const getAdminEventById = async (req, res) => {
   }
 };
 
+const formatMysqlDateTime = (val) => {
+  if (!val) return null;
+  if (typeof val === 'string') {
+    const trimmed = val.trim();
+    if (!trimmed) return null;
+    if (trimmed.includes('T') && !trimmed.includes('Z')) {
+      const clean = trimmed.replace('T', ' ');
+      return clean.length === 16 ? `${clean}:00` : clean.slice(0, 19);
+    }
+  }
+  const d = new Date(val);
+  if (isNaN(d.getTime())) return null;
+  return d.toISOString().slice(0, 19).replace('T', ' ');
+};
+
 /**
  * ADMIN: Create new event
  */
@@ -436,10 +451,10 @@ export const createAdminEvent = async (req, res) => {
       slug,
       description || null,
       image_url,
-      registration_start,
-      registration_end,
-      event_start,
-      event_end || null,
+      formatMysqlDateTime(registration_start),
+      formatMysqlDateTime(registration_end),
+      formatMysqlDateTime(event_start),
+      formatMysqlDateTime(event_end),
       meet_link || null,
       status,
       req.user?.id || null
@@ -513,10 +528,10 @@ export const updateAdminEvent = async (req, res) => {
       finalSlug,
       description !== undefined ? description : current.description,
       image_url,
-      registration_start !== undefined ? registration_start : current.registration_start,
-      registration_end !== undefined ? registration_end : current.registration_end,
-      event_start !== undefined ? event_start : current.event_start,
-      event_end !== undefined ? (event_end || null) : current.event_end,
+      registration_start !== undefined ? formatMysqlDateTime(registration_start) : current.registration_start,
+      registration_end !== undefined ? formatMysqlDateTime(registration_end) : current.registration_end,
+      event_start !== undefined ? formatMysqlDateTime(event_start) : current.event_start,
+      event_end !== undefined ? formatMysqlDateTime(event_end) : current.event_end,
       meet_link !== undefined ? meet_link : current.meet_link,
       status !== undefined ? status : current.status,
       id
