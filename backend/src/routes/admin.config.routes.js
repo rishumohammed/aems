@@ -70,11 +70,28 @@ router.post('/invoices/regenerate-pdfs', authenticateJWT, authorizeRoles('super_
   }
 });
 
-// Test Email Config
+// Test Email Config via Brevo REST API
 router.post('/test-email', authenticateJWT, authorizeRoles('super_admin'), async (req, res) => {
-    // This would use a mail service to send a test email
-    // For now, just a placeholder
-    res.json({ message: 'Test email sent successfully' });
+  try {
+    const emailService = (await import('../services/email.service.js')).default;
+    const recipient = req.body.recipient || req.user?.email || 'admin@aems.local';
+    const result = await emailService.sendTestEmail(recipient);
+
+    if (result && result.simulated) {
+      return res.json({
+        message: `Brevo is in simulation mode (no API key set). Test email logged to backend console for ${recipient}.`
+      });
+    }
+
+    if (result && result.error) {
+      return res.status(400).json({ message: `Brevo dispatch error: ${result.error}`, details: result });
+    }
+
+    res.json({ message: `Test email successfully sent to ${recipient} via Brevo REST API!` });
+  } catch (error) {
+    console.error('Test email failed:', error);
+    res.status(500).json({ message: 'Failed to dispatch test email: ' + error.message });
+  }
 });
 
 // Upload Branding Assets (logo, favicon, hero images)

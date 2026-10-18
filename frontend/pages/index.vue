@@ -76,6 +76,43 @@
         </v-container>
       </div>
 
+      <!-- Upcoming Events & Masterclasses -->
+      <div v-if="upcomingEvents.length > 0" class="section-default bg-slate-50 border-t border-b" id="events">
+        <v-container>
+          <div class="d-flex flex-column flex-sm-row align-sm-center justify-space-between gap-4 mb-12">
+            <div>
+              <h2 class="section-title mb-1">Upcoming Events &amp; Webinars</h2>
+              <p class="section-sub mb-0" style="max-width:none">
+                Participate in interactive sessions, industry workshops, and technical summits hosted by global leaders.
+              </p>
+            </div>
+            <v-btn
+              variant="outlined"
+              color="primary"
+              rounded="lg"
+              class="text-capitalize font-weight-bold flex-shrink-0 align-self-start align-self-sm-center"
+              to="/events"
+            >
+              View All Events
+              <v-icon end>mdi-arrow-right</v-icon>
+            </v-btn>
+          </div>
+
+          <v-row>
+            <v-col
+              v-for="event in upcomingEvents"
+              :key="event.id"
+              cols="12"
+              sm="6"
+              md="4"
+              class="d-flex"
+            >
+              <EventCard :event="event" />
+            </v-col>
+          </v-row>
+        </v-container>
+      </div>
+
       <!-- Why Brix Certifications — Split Image Section -->
       <div class="why-section section-default">
         <v-container>
@@ -349,6 +386,7 @@ const featuredCourses = ref<any[]>([]);
 const liveCourses = ref<any[]>([]);
 const highlights = ref<any[]>([]);
 const latestNews = ref<any[]>([]);
+const upcomingEvents = ref<any[]>([]);
 
 const fetchHomepageData = async () => {
   api.get('/public/courses?course_type=recorded&sort=newest')
@@ -362,6 +400,17 @@ const fetchHomepageData = async () => {
   api.get('/public/courses?course_type=live&sort=newest&limit=4')
     .then(res => { liveCourses.value = res.data?.courses || []; })
     .catch(err => console.error('Failed to load live courses', err));
+
+  api.get('/public/events')
+    .then(res => {
+      const list = Array.isArray(res.data) ? res.data : [];
+      const live = list.filter((e: any) => e.event_status === 'live');
+      const upcoming = list.filter((e: any) => e.event_status === 'upcoming');
+      const openReg = list.filter((e: any) => e.registration_status === 'open' && !live.includes(e) && !upcoming.includes(e));
+      const others = list.filter((e: any) => !live.includes(e) && !upcoming.includes(e) && !openReg.includes(e));
+      upcomingEvents.value = [...live, ...upcoming, ...openReg, ...others].slice(0, 3);
+    })
+    .catch(err => console.error('Failed to load events for homepage', err));
 
   api.get('/highlights')
     .then(res => { highlights.value = res.data || []; })

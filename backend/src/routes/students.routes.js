@@ -649,7 +649,7 @@ router.post('/:id/send-welcome', async (req, res) => {
     
     res.json({ message: 'Welcome email sent successfully' });
   } catch (err) {
-    console.error('Resend welcome email error:', err);
+    console.error('Brevo welcome email error:', err);
     res.status(500).json({ message: 'Failed to send welcome email' });
   }
 });

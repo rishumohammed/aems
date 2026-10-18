@@ -20,7 +20,7 @@
         <div class="d-none d-md-flex align-center">
           <v-btn variant="text" to="/" class="text-capitalize px-4 font-weight-medium">Home</v-btn>
           <v-btn variant="text" to="/#courses" :active="false" class="text-capitalize px-4 font-weight-medium">Courses</v-btn>
-
+          <v-btn variant="text" to="/events" class="text-capitalize px-4 font-weight-medium">Events</v-btn>
           <v-btn variant="text" to="/verify" class="text-capitalize px-4 font-weight-medium">Verify Certificate</v-btn>
           <v-btn variant="text" to="/jobs" class="text-capitalize px-4 font-weight-medium">Job Portal</v-btn>
           
@@ -47,7 +47,7 @@
       <v-list nav class="pa-4">
         <v-list-item to="/" prepend-icon="mdi-home" title="Home" class="rounded-lg mb-2"></v-list-item>
         <v-list-item to="/#courses" :active="false" prepend-icon="mdi-book-open-variant" title="Courses" class="rounded-lg mb-2"></v-list-item>
-
+        <v-list-item to="/events" prepend-icon="mdi-calendar-star" title="Events" class="rounded-lg mb-2"></v-list-item>
         <v-list-item to="/verify" prepend-icon="mdi-certificate" title="Verify Certificate" class="rounded-lg mb-2"></v-list-item>
         <v-list-item to="/jobs" prepend-icon="mdi-briefcase" title="Job Portal" class="rounded-lg mb-2"></v-list-item>
         

@@ -175,18 +175,74 @@
 
           <!-- Email Tab -->
           <div v-if="activeTab[0] === 'email'" class="fade-in">
-            <h2 class="text-h6 font-weight-bold mb-6">Email Settings (Resend REST API)</h2>
-            <div class="mb-4 text-body-2 text-medium-emphasis">
-              We now use Resend via REST API for enhanced deliverability. You can configure your API Key in your <b>.env</b> file as <code>RESEND_API_KEY</code>, or provide it below (which will be saved securely).
+            <h2 class="text-h6 font-weight-bold mb-2">Email Settings (Brevo REST API)</h2>
+            <div class="mb-6 text-body-2 text-medium-emphasis">
+              Configure <b>Brevo (formerly Sendinblue) REST API</b> for fast, reliable transactional email delivery across all LMS notifications, student credentials, password resets, course certificates, and event registrations. You can also configure your API Key in your <b>.env</b> file as <code>BREVO_API_KEY</code>, or save it directly below.
             </div>
-            <div class="fr2 mb-4">
-              <AppInput v-model="form.smtp_pass" label="Resend API Key" type="password" placeholder="re_..." large />
+
+            <v-alert
+              type="info"
+              variant="tonal"
+              density="comfortable"
+              rounded="lg"
+              class="mb-6"
+            >
+              <div class="text-body-2">
+                <strong>Need an API key?</strong> Log into your Brevo account, navigate to <strong>SMTP &amp; API &rarr; API Keys</strong>, and generate a new v3 API key. Make sure your "From Email" is also added as a verified sender in Brevo.
+              </div>
+            </v-alert>
+
+            <div class="mb-4">
+              <AppInput
+                v-model="form.brevo_api_key"
+                label="Brevo API Key (v3)"
+                type="password"
+                placeholder="xkeysib-..."
+                large
+              />
             </div>
+
             <div class="fr2 mb-6">
-              <AppInput v-model="form.smtp_from_name" label="From Name" placeholder="Brix Certifications Team" large />
-              <AppInput v-model="form.smtp_from_email" label="From Email" placeholder="noreply@brixify.online" large />
+              <AppInput
+                v-model="form.brevo_from_name"
+                label="Sender Name"
+                placeholder="Brix Certifications Team"
+                large
+              />
+              <AppInput
+                v-model="form.brevo_from_email"
+                label="Sender Email (Verified in Brevo)"
+                placeholder="noreply@brixify.online"
+                large
+              />
             </div>
-            <AppButton variant="g" icon="mdi-send-outline" @click="testEmail">Send Test Email</AppButton>
+
+            <v-divider class="my-6"></v-divider>
+
+            <div class="d-flex flex-column flex-sm-row align-sm-center justify-space-between gap-4 pa-4 rounded-xl border bg-surface">
+              <div>
+                <div class="text-subtitle-2 font-weight-bold">Test Email Delivery</div>
+                <div class="text-caption text-secondary">
+                  Send a verification message through Brevo REST API to test your credentials.
+                </div>
+              </div>
+              <div class="d-flex align-center gap-2">
+                <AppInput
+                  v-model="testRecipientEmail"
+                  placeholder="Recipient email (optional)"
+                  density="compact"
+                  style="min-width: 220px;"
+                />
+                <AppButton
+                  variant="g"
+                  icon="mdi-send-outline"
+                  :loading="testingEmail"
+                  @click="testEmail"
+                >
+                  Send Test Email
+                </AppButton>
+              </div>
+            </div>
           </div>
 
           <!-- Contact Info Tab -->
@@ -686,7 +742,7 @@ const tabs = [
   { label: 'LMS Settings', value: 'lms', icon: 'mdi-school-outline' },
   { label: 'Homepage', value: 'homepage', icon: 'mdi-home-outline' },
   { label: 'Contact Info', value: 'contact', icon: 'mdi-map-marker-outline' },
-  { label: 'Email (SMTP)', value: 'email', icon: 'mdi-email-outline' },
+  { label: 'Email (Brevo API)', value: 'email', icon: 'mdi-email-outline' },
   { label: 'WhatsApp API', value: 'whatsapp', icon: 'mdi-whatsapp' },
   { label: 'Payments', value: 'payments', icon: 'mdi-credit-card-outline' },
   { label: 'Terms & Privacy', value: 'terms_privacy', icon: 'mdi-shield-lock-outline' },
@@ -694,6 +750,9 @@ const tabs = [
   { label: 'Currencies', value: 'currencies', icon: 'mdi-currency-usd' },
   { label: 'Marketing', value: 'marketing', icon: 'mdi-bullhorn-outline' },
 ];
+
+const testRecipientEmail = ref('');
+const testingEmail = ref(false);
 
 
 const fetchData = async () => {
@@ -717,6 +776,12 @@ const fetchData = async () => {
     configMap.course_show_students = configMap.course_show_students === 'true' || configMap.course_show_students === '1';
     configMap.ad_popup_enabled = configMap.ad_popup_enabled === 'true' || configMap.ad_popup_enabled === '1';
     configMap.online_payments_enabled = configMap.online_payments_enabled === undefined ? true : (configMap.online_payments_enabled === 'true' || configMap.online_payments_enabled === '1');
+    
+    // Normalize Brevo email fields with fallback to legacy smtp_* keys
+    configMap.brevo_api_key = configMap.brevo_api_key || configMap.smtp_pass || '';
+    configMap.brevo_from_name = configMap.brevo_from_name || configMap.smtp_from_name || '';
+    configMap.brevo_from_email = configMap.brevo_from_email || configMap.smtp_from_email || '';
+    
     form.value = configMap;
   } catch (err) {
     console.error('Failed to fetch config');
@@ -838,6 +903,17 @@ const save = async () => {
     payload.ad_popup_enabled = payload.ad_popup_enabled ? 'true' : 'false';
     payload.online_payments_enabled = payload.online_payments_enabled ? 'true' : 'false';
 
+    // Synchronize Brevo keys with legacy smtp_* keys for seamless compatibility
+    if (payload.brevo_api_key) {
+      payload.smtp_pass = payload.brevo_api_key;
+    }
+    if (payload.brevo_from_name) {
+      payload.smtp_from_name = payload.brevo_from_name;
+    }
+    if (payload.brevo_from_email) {
+      payload.smtp_from_email = payload.brevo_from_email;
+    }
+
     await api.put('/admin/config', payload);
     snackbarMessage.value = 'Settings saved successfully. Reloading to apply changes...';
     snackbarColor.value = 'success';
@@ -856,15 +932,23 @@ const save = async () => {
 };
 
 const testEmail = async () => {
+  testingEmail.value = true;
   try {
-    await api.post('/admin/config/test-email');
-    snackbarMessage.value = 'Test email sent successfully';
+    const payload: any = {};
+    if (testRecipientEmail.value && testRecipientEmail.value.trim() !== '') {
+      payload.recipient = testRecipientEmail.value.trim();
+    }
+    const { data } = await api.post('/admin/config/test-email', payload);
+    snackbarMessage.value = data?.message || 'Test email dispatched successfully via Brevo!';
     snackbarColor.value = 'success';
     snackbar.value = true;
-  } catch (err) {
-    snackbarMessage.value = 'Failed to send test email';
+  } catch (err: any) {
+    const msg = err.response?.data?.message || err.message || 'Failed to send test email';
+    snackbarMessage.value = msg;
     snackbarColor.value = 'error';
     snackbar.value = true;
+  } finally {
+    testingEmail.value = false;
   }
 };
 

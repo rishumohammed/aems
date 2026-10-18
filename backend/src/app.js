@@ -60,6 +60,9 @@ import adminMasterMetadataRoutes from './routes/admin.master-metadata.routes.js'
 import highlightsRoutes from './routes/highlights.routes.js';
 import noticeBoardRoutes from './routes/notice-board.routes.js';
 import reportsRoutes from './routes/reports.routes.js';
+import adminEventsRoutes from './routes/admin.events.routes.js';
+import publicEventsRoutes from './routes/public.events.routes.js';
+import { initEventReminderJob } from './jobs/event-reminder.job.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -67,6 +70,7 @@ const __dirname = path.dirname(__filename);
 initFollowupJob();
 initLiveSessionJob();
 initDatabaseBackupJob();
+initEventReminderJob();
 
 const app = express();
 app.set('trust proxy', 1);
@@ -172,6 +176,8 @@ app.use('/api/interviews', interviewsRoutes);
 app.use('/api/highlights', highlightsRoutes);
 app.use('/api/notice-board', noticeBoardRoutes);
 app.use('/api/reports', reportsRoutes);
+app.use('/api/public/events', publicEventsRoutes);
+app.use('/api/admin/events', adminEventsRoutes);
 
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'OK', timestamp: new Date().toISOString() });

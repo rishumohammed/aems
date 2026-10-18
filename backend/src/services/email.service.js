@@ -7,83 +7,150 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 class EmailService {
   constructor() {
     this.ready = false;
+    this.apiKey = null;
+    this.fromEmail = null;
+    this.fromName = null;
     this.init();
   }
 
   async init() {
-    let apiKey = process.env.RESEND_API_KEY;
-    let fromEmail = process.env.RESEND_FROM || process.env.SMTP_FROM || 'onboarding@resend.dev';
-    
-    // Try to load from database config if not in .env
+    let apiKey = process.env.BREVO_API_KEY;
+    let fromEmail = process.env.BREVO_FROM_EMAIL || process.env.SMTP_FROM || 'noreply@brixify.online';
+    let fromName = process.env.BREVO_FROM_NAME || 'Brix Certifications';
+
+    // Try to load from database config (checks brevo_* keys first, falls back to legacy smtp_* keys)
     try {
       const { ConfigService } = await import('./config.service.js');
-      const dbPass = await ConfigService.getByKey('smtp_pass', false);
-      const dbFrom = await ConfigService.getByKey('smtp_from_email');
-      const dbFromName = await ConfigService.getByKey('smtp_from_name');
       
-      if (!apiKey && dbPass && dbPass.value) {
-        apiKey = dbPass.value;
+      const dbKey = (await ConfigService.getByKey('brevo_api_key', false)) || (await ConfigService.getByKey('smtp_pass', false));
+      if (dbKey && dbKey.value && !dbKey.value.includes('...')) {
+        apiKey = dbKey.value;
       }
+
+      const dbFrom = (await ConfigService.getByKey('brevo_from_email')) || (await ConfigService.getByKey('smtp_from_email'));
       if (dbFrom && dbFrom.value) {
-        fromEmail = dbFromName && dbFromName.value ? `"${dbFromName.value}" <${dbFrom.value}>` : dbFrom.value;
+        fromEmail = dbFrom.value;
+      }
+
+      const dbFromName = (await ConfigService.getByKey('brevo_from_name')) || (await ConfigService.getByKey('smtp_from_name'));
+      if (dbFromName && dbFromName.value) {
+        fromName = dbFromName.value;
       }
     } catch (e) {
-      console.error('Failed to load email config from database:', e.message);
+      console.warn('EmailService: Failed to load email config from database:', e.message);
     }
 
-    if (apiKey) {
+    if (apiKey && apiKey.trim() !== '') {
       this.ready = true;
-      this.apiKey = apiKey;
+      this.apiKey = apiKey.trim();
       this.fromEmail = fromEmail;
+      this.fromName = fromName;
     } else {
-      console.warn('RESEND_API_KEY is not set in .env or database, emails will only be logged to console.');
       this.ready = false;
+      this.apiKey = null;
+      this.fromEmail = fromEmail;
+      this.fromName = fromName;
     }
+
+    return { ready: this.ready, apiKey: this.apiKey, fromEmail: this.fromEmail, fromName: this.fromName };
   }
 
   async sendRawEmail(to, subject, html) {
     return this.sendEmail({ to, subject, html });
   }
 
-  async sendEmail({ to, subject, html }) {
+  async sendEmail({ to, subject, html, text }) {
+    await this.init();
+
+    const recipientList = Array.isArray(to)
+      ? to.map(r => (typeof r === 'string' ? { email: r } : r))
+      : [typeof to === 'string' ? { email: to } : to];
+
+    const senderObj = {
+      name: this.fromName || 'Brix Certifications',
+      email: this.fromEmail || 'noreply@brixify.online'
+    };
+
     if (!this.ready) {
-      console.log('\n--- EMAIL LOG (NO RESEND API KEY) ---');
-      console.log('To:', to);
+      console.log('\n========================================');
+      console.log('📨 [BREVO REST API - SIMULATED SEND]');
+      console.log('To:', recipientList.map(r => r.email).join(', '));
       console.log('Subject:', subject);
-      console.log('Content:', html);
-      console.log('---------------------------\n');
-      return { messageId: 'console-log' };
+      console.log('Sender:', `${senderObj.name} <${senderObj.email}>`);
+      console.log('Note: To send live emails, configure your Brevo API key in Admin Settings or .env.');
+      console.log('========================================\n');
+      return { messageId: `mock-brevo-${Date.now()}`, simulated: true };
     }
 
     try {
-      const response = await fetch('https://api.resend.com/emails', {
+      const response = await fetch('https://api.brevo.com/v3/smtp/email', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${this.apiKey}`,
-          'Content-Type': 'application/json'
+          'api-key': this.apiKey,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
         },
         body: JSON.stringify({
-          from: this.fromEmail,
-          to: Array.isArray(to) ? to : [to],
+          sender: senderObj,
+          to: recipientList,
           subject,
-          html
+          htmlContent: html,
+          ...(text ? { textContent: text } : {})
         })
       });
 
-      const data = await response.json();
+      const data = await response.json().catch(() => ({}));
 
       if (!response.ok) {
-        console.error('Resend API Error:', data);
-        return { messageId: 'failed-to-send', error: data.message };
+        console.error('Brevo REST API Error:', data);
+        return { messageId: 'failed-to-send', error: data.message || 'Brevo API request failed', details: data };
       }
 
-      console.log('Email sent via Resend: %s', data.id);
-      return { messageId: data.id, ...data };
+      console.log('Email sent successfully via Brevo REST API. Message ID:', data.messageId);
+      return { messageId: data.messageId, success: true, ...data };
     } catch (error) {
-      console.error('Error sending email via Resend:', error.message || error);
-      // We do not throw here to prevent the backend from crashing when email fails
+      console.error('Failed to dispatch email via Brevo REST API:', error.message || error);
       return { messageId: 'failed-to-send', error: error.message };
     }
+  }
+
+  /**
+   * Send test email to verify Brevo configuration from Admin Panel
+   */
+  async sendTestEmail(recipientEmail) {
+    await this.init();
+    const subject = 'Test Email from Brevo REST API';
+    const html = `
+      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; padding: 28px; color: #1e293b; max-width: 580px; margin: 20px auto; border: 1px solid #e2e8f0; border-radius: 16px; background: #ffffff; box-shadow: 0 4px 12px rgba(0,0,0,0.04);">
+        <div style="background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); padding: 24px; border-radius: 12px; text-align: center; color: white; margin-bottom: 24px;">
+          <h2 style="margin: 0; font-size: 22px; font-weight: 700;">🎉 Brevo Email Integration Test</h2>
+          <p style="margin: 8px 0 0 0; opacity: 0.9; font-size: 14px;">Your Brevo REST API email service is active</p>
+        </div>
+        <p style="font-size: 15px; line-height: 1.6; color: #334155;">
+          This test message confirms that your <strong>Brevo REST API</strong> configuration is successfully delivering emails across the system.
+        </p>
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 16px; margin: 20px 0;">
+          <div style="font-size: 13px; color: #64748b; margin-bottom: 6px;">
+            <strong>Sender:</strong> ${this.fromName} &lt;${this.fromEmail}&gt;
+          </div>
+          <div style="font-size: 13px; color: #64748b; margin-bottom: 6px;">
+            <strong>Recipient:</strong> ${recipientEmail}
+          </div>
+          <div style="font-size: 13px; color: #64748b;">
+            <strong>Delivered At:</strong> ${new Date().toUTCString()}
+          </div>
+        </div>
+        <p style="font-size: 13px; line-height: 1.5; color: #64748b; margin-bottom: 0;">
+          All platform notifications (student credentials, password resets, course certificates, placement notices, and event registrations) now run through Brevo.
+        </p>
+      </div>
+    `;
+
+    return this.sendEmail({
+      to: recipientEmail,
+      subject,
+      html
+    });
   }
 
   async sendPasswordResetEmail(email, token) {
@@ -91,11 +158,11 @@ class EmailService {
       const resetLink = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password?token=${token}`;
       const html = `
         <div style="font-family: sans-serif; padding: 20px; color: #333; max-width: 600px; margin: auto; border: 1px solid #eee; border-radius: 12px;">
-          <h2 style="color: #007AFF;">Reset Your Password</h2>
+          <h2 style="color: #4f46e5;">Reset Your Password</h2>
           <p>You requested a password reset for your Brixify account.</p>
           <p>Please click the button below to set a new password:</p>
           <div style="text-align: center; margin: 30px 0;">
-            <a href="${resetLink}" style="display: inline-block; padding: 14px 30px; background: #007AFF; color: #fff; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px;">Reset Password</a>
+            <a href="${resetLink}" style="display: inline-block; padding: 14px 30px; background: #4f46e5; color: #fff; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px;">Reset Password</a>
           </div>
           <p style="font-size: 14px; color: #666;">If you didn't request this, you can safely ignore this email.</p>
           <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
@@ -109,7 +176,7 @@ class EmailService {
         html
       });
     } catch (error) {
-      console.error('Failed to send password reset email:', error);
+      console.error('Failed to send password reset email via Brevo:', error);
     }
   }
 
@@ -124,7 +191,7 @@ class EmailService {
         .replace(/{{EMAIL}}/g, student.email)
         .replace(/{{PASSWORD}}/g, credentials.password)
         .replace(/{{COURSE_NAME}}/g, courseName)
-        .replace(/{{LOGIN_URL}}/g, `${process.env.FRONTEND_URL}/login`);
+        .replace(/{{LOGIN_URL}}/g, `${process.env.FRONTEND_URL || 'http://localhost:3000'}/login`);
 
       await this.sendEmail({
         to: student.email,
@@ -132,8 +199,7 @@ class EmailService {
         html
       });
     } catch (error) {
-      console.error('Failed to send welcome email:', error);
-      // We don't throw here to avoid failing the whole conversion flow if email fails
+      console.error('Failed to send welcome email via Brevo:', error);
     }
   }
 
@@ -182,7 +248,7 @@ class EmailService {
         html
       });
     } catch (error) {
-      console.error('Failed to send course completion email:', error);
+      console.error('Failed to send course completion email via Brevo:', error);
     }
   }
 
@@ -209,7 +275,7 @@ class EmailService {
         html
       });
     } catch (error) {
-      console.error('Failed to send placement email:', error);
+      console.error('Failed to send placement email via Brevo:', error);
     }
   }
 }

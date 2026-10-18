@@ -79,6 +79,7 @@ export const useNavStore = defineStore('nav', {
       { label: 'Employer Approvals', icon: 'mdi-domain-plus', route: '/dashboard/admin/employer-approvals', roles: ['super_admin', 'placement_coordinator'], section: 'JOBS', badge: undefined },
       
       // ANNOUNCEMENTS
+      { label: 'Events', icon: 'mdi-calendar-star', route: '/dashboard/admin/events', roles: ['super_admin', 'sub_admin', 'lms_user', 'crm_agent'], section: 'ANNOUNCEMENTS' },
       { label: 'Notice Board', icon: 'mdi-bullhorn-outline', route: '/dashboard/admin/notice-board', roles: ['super_admin'], section: 'ANNOUNCEMENTS' },
       { label: 'News', icon: 'mdi-newspaper-variant-outline', route: '/dashboard/admin/news', roles: ['super_admin', 'content_manager'], section: 'ANNOUNCEMENTS' },
 
