@@ -639,14 +639,18 @@ const statusClass = computed(() => {
 // Format Dates
 const formatDateShort = (dateStr: string) => {
   if (!dateStr) return '';
-  const d = new Date(dateStr.includes('T') ? dateStr : dateStr.replace(' ', 'T'));
+  let str = String(dateStr).trim();
+  if (str.endsWith('Z')) str = str.slice(0, -1);
+  const d = new Date(str.includes('T') ? str : str.replace(' ', 'T'));
   if (isNaN(d.getTime())) return dateStr;
   return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 };
 
 const formatDateTimeLong = (dateStr: string) => {
   if (!dateStr) return '';
-  const d = new Date(dateStr.includes('T') ? dateStr : dateStr.replace(' ', 'T'));
+  let str = String(dateStr).trim();
+  if (str.endsWith('Z')) str = str.slice(0, -1);
+  const d = new Date(str.includes('T') ? str : str.replace(' ', 'T'));
   if (isNaN(d.getTime())) return dateStr;
   return d.toLocaleString('en-US', {
     weekday: 'short',

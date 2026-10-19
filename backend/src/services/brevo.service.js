@@ -164,7 +164,8 @@ class BrevoEmailService {
    */
   async sendEventRegistrationSuccessEmail({ registration, event }) {
     const subject = `Registration Confirmed: ${event.title} 🎉`;
-    const eventDateFormatted = new Date(event.event_start).toLocaleString('en-US', {
+    const cleanDate = typeof event.event_start === 'string' ? event.event_start.replace('Z', '').replace(' ', 'T') : event.event_start;
+    const eventDateFormatted = new Date(cleanDate).toLocaleString('en-US', {
       weekday: 'long',
       year: 'numeric',
       month: 'long',
@@ -260,7 +261,8 @@ class BrevoEmailService {
    */
   async sendEventReminderEmail({ registration, event }) {
     const subject = `Reminder: ${event.title} is Starting Tomorrow! 🚀`;
-    const eventDateFormatted = new Date(event.event_start).toLocaleString('en-US', {
+    const cleanDate = typeof event.event_start === 'string' ? event.event_start.replace('Z', '').replace(' ', 'T') : event.event_start;
+    const eventDateFormatted = new Date(cleanDate).toLocaleString('en-US', {
       weekday: 'long',
       year: 'numeric',
       month: 'long',

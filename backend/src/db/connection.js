@@ -16,7 +16,8 @@ export const pool = mysql.createPool({
   database: process.env.DB_NAME || 'aems_db',
   waitForConnections: true,
   connectionLimit: 10,
-  queueLimit: 0
+  queueLimit: 0,
+  dateStrings: true
 });
 
 // Redis Client

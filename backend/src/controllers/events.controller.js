@@ -4,13 +4,34 @@ import { pool } from '../db/connection.js';
 import brevoService from '../services/brevo.service.js';
 import { checkAndSendEventReminders } from '../jobs/event-reminder.job.js';
 
+// Helper to format any date representation to naive local ISO string YYYY-MM-DDTHH:mm:ss (WITHOUT Z)
+export const toLocalIsoString = (val) => {
+  if (!val) return null;
+  if (typeof val === 'string') {
+    let trimmed = val.trim();
+    if (!trimmed) return null;
+    if (trimmed.endsWith('Z')) trimmed = trimmed.slice(0, -1);
+    if (/^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}/.test(trimmed)) {
+      const datePart = trimmed.slice(0, 10);
+      const timePart = trimmed.slice(11, 19);
+      return `${datePart}T${timePart.length === 5 ? `${timePart}:00` : timePart}`;
+    }
+  }
+  const d = val instanceof Date ? val : new Date(val);
+  if (isNaN(d.getTime())) return null;
+  const pad = (n) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+};
+
 // Helper to compute event and registration status
 export const computeEventStatus = (event) => {
   const now = new Date();
   const parseDt = (val) => {
     if (!val) return null;
     if (val instanceof Date) return val;
-    const str = String(val).trim();
+    let str = String(val).trim();
+    if (!str) return null;
+    if (str.endsWith('Z')) str = str.slice(0, -1);
     return new Date(str.includes('T') ? str : str.replace(' ', 'T'));
   };
 
@@ -69,6 +90,10 @@ export const computeEventStatus = (event) => {
 
   return {
     ...event,
+    registration_start: toLocalIsoString(event.registration_start),
+    registration_end: toLocalIsoString(event.registration_end),
+    event_start: toLocalIsoString(event.event_start),
+    event_end: event.event_end ? toLocalIsoString(event.event_end) : null,
     registration_status: registrationStatus,
     event_status: eventStatus,
     button_state: buttonState,
@@ -400,8 +425,9 @@ export const getAdminEventById = async (req, res) => {
 export const formatMysqlDateTime = (val) => {
   if (!val) return null;
   if (typeof val === 'string') {
-    const trimmed = val.trim();
+    let trimmed = val.trim();
     if (!trimmed) return null;
+    if (trimmed.endsWith('Z')) trimmed = trimmed.slice(0, -1);
     // Already in MySQL format YYYY-MM-DD HH:mm:ss or YYYY-MM-DD HH:mm
     if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}(:\d{2})?$/.test(trimmed)) {
       return trimmed.length === 16 ? `${trimmed}:00` : trimmed.slice(0, 19);

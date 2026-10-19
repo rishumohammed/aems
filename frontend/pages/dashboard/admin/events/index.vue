@@ -322,53 +322,47 @@
               <!-- Registration Dates -->
               <v-col cols="12" sm="6">
                 <v-text-field
+                  ref="regStartInput"
                   v-model="formData.registration_start"
                   label="Registration Start Date &amp; Time *"
                   type="datetime-local"
                   variant="outlined"
                   rounded="lg"
                   density="comfortable"
-                  :rules="[
-                    v => !!v || 'Registration start is required',
-                    v => !formData.registration_end || new Date(v) < new Date(formData.registration_end) || 'Registration start must be before registration end'
-                  ]"
+                  :rules="regStartRules"
                 ></v-text-field>
               </v-col>
 
               <v-col cols="12" sm="6">
                 <v-text-field
+                  ref="regEndInput"
                   v-model="formData.registration_end"
                   label="Registration End Date &amp; Time *"
                   type="datetime-local"
                   variant="outlined"
                   rounded="lg"
                   density="comfortable"
-                  :rules="[
-                    v => !!v || 'Registration end is required',
-                    v => !formData.registration_start || new Date(v) > new Date(formData.registration_start) || 'Registration end must be after registration start',
-                    v => !formData.event_start || new Date(v) <= new Date(formData.event_start) || 'Registration must end on or before event starts'
-                  ]"
+                  :rules="regEndRules"
                 ></v-text-field>
               </v-col>
 
               <!-- Event Schedule Dates -->
               <v-col cols="12" sm="6">
                 <v-text-field
+                  ref="eventStartInput"
                   v-model="formData.event_start"
                   label="Event Date &amp; Time *"
                   type="datetime-local"
                   variant="outlined"
                   rounded="lg"
                   density="comfortable"
-                  :rules="[
-                    v => !!v || 'Event start time is required',
-                    v => !formData.registration_end || new Date(v) >= new Date(formData.registration_end) || 'Event cannot start before registration ends'
-                  ]"
+                  :rules="eventStartRules"
                 ></v-text-field>
               </v-col>
 
               <v-col cols="12" sm="6">
                 <v-text-field
+                  ref="eventEndInput"
                   v-model="formData.event_end"
                   label="Event Concludes At (Optional)"
                   type="datetime-local"
@@ -376,9 +370,7 @@
                   rounded="lg"
                   density="comfortable"
                   clearable
-                  :rules="[
-                    v => !v || !formData.event_start || new Date(v) > new Date(formData.event_start) || 'Conclusion time must be after event start'
-                  ]"
+                  :rules="eventEndRules"
                 ></v-text-field>
               </v-col>
 
@@ -462,7 +454,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { useApi } from '@/composables/useApi';
 
 definePageMeta({
@@ -490,6 +482,12 @@ const isFormValid = ref(false);
 const selectedFile = ref<File | null>(null);
 const imagePreview = ref<string | null>(null);
 
+// Date Input Component Refs
+const regStartInput = ref<any>(null);
+const regEndInput = ref<any>(null);
+const eventStartInput = ref<any>(null);
+const eventEndInput = ref<any>(null);
+
 // Form
 const slugManuallyEdited = ref(false);
 const formData = ref({
@@ -504,6 +502,102 @@ const formData = ref({
   meet_link: '',
   status: 'published'
 });
+
+const parseDateTimestamp = (val: any): number | null => {
+  if (!val) return null;
+  let str = String(val).trim();
+  if (!str) return null;
+  if (str.endsWith('Z')) str = str.slice(0, -1);
+  const d = new Date(str.includes('T') ? str : str.replace(' ', 'T'));
+  const time = d.getTime();
+  return isNaN(time) ? null : time;
+};
+
+// Date Validation Rules
+const regStartRules = [
+  (v: string) => !!v || 'Registration start is required',
+  (v: string) => {
+    const startT = parseDateTimestamp(v);
+    const endT = parseDateTimestamp(formData.value.registration_end);
+    if (!startT || !endT) return true;
+    return startT < endT || 'Registration start must be before registration end';
+  }
+];
+
+const regEndRules = [
+  (v: string) => !!v || 'Registration end is required',
+  (v: string) => {
+    const endT = parseDateTimestamp(v);
+    const startT = parseDateTimestamp(formData.value.registration_start);
+    if (!endT || !startT) return true;
+    return endT > startT || 'Registration end must be after registration start';
+  },
+  (v: string) => {
+    const endT = parseDateTimestamp(v);
+    const eventT = parseDateTimestamp(formData.value.event_start);
+    if (!endT || !eventT) return true;
+    return endT <= eventT || 'Registration must end on or before event starts';
+  }
+];
+
+const eventStartRules = [
+  (v: string) => !!v || 'Event start time is required',
+  (v: string) => {
+    const eventT = parseDateTimestamp(v);
+    const regEndT = parseDateTimestamp(formData.value.registration_end);
+    if (!eventT || !regEndT) return true;
+    return eventT >= regEndT || 'Event cannot start before registration ends';
+  }
+];
+
+const eventEndRules = [
+  (v: string) => {
+    if (!v) return true;
+    const endT = parseDateTimestamp(v);
+    const startT = parseDateTimestamp(formData.value.event_start);
+    if (!endT || !startT) return true;
+    return endT > startT || 'Conclusion time must be after event start';
+  }
+];
+
+// Reactive re-validation of dependent date inputs
+watch(
+  () => formData.value.registration_start,
+  () => {
+    if (dialog.value && formData.value.registration_end) {
+      regEndInput.value?.validate?.();
+    }
+  }
+);
+
+watch(
+  () => formData.value.registration_end,
+  () => {
+    if (dialog.value) {
+      if (formData.value.registration_start) regStartInput.value?.validate?.();
+      if (formData.value.event_start) eventStartInput.value?.validate?.();
+    }
+  }
+);
+
+watch(
+  () => formData.value.event_start,
+  () => {
+    if (dialog.value) {
+      if (formData.value.registration_end) regEndInput.value?.validate?.();
+      if (formData.value.event_end) eventEndInput.value?.validate?.();
+    }
+  }
+);
+
+watch(
+  () => formData.value.event_end,
+  () => {
+    if (dialog.value && formData.value.event_start) {
+      eventStartInput.value?.validate?.();
+    }
+  }
+);
 
 // Snackbar
 const snackbar = ref({
@@ -575,18 +669,19 @@ const fetchEvents = async () => {
 const toInputFormat = (val: any) => {
   if (!val) return '';
   if (typeof val === 'string') {
-    const trimmed = val.trim();
+    let trimmed = val.trim();
     if (!trimmed) return '';
-    // If it's already YYYY-MM-DDTHH:mm
-    if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(trimmed)) {
-      return trimmed;
+    if (trimmed.endsWith('Z')) trimmed = trimmed.slice(0, -1);
+    // If it's already YYYY-MM-DDTHH:mm or YYYY-MM-DDTHH:mm:ss
+    if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(trimmed)) {
+      return trimmed.slice(0, 16);
     }
     // If it's MySQL datetime string YYYY-MM-DD HH:mm:ss or YYYY-MM-DD HH:mm
     if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}/.test(trimmed)) {
       return trimmed.slice(0, 16).replace(' ', 'T');
     }
     // If it's ISO string with seconds / milliseconds / Z
-    const d = new Date(trimmed);
+    const d = new Date(trimmed.includes('T') ? trimmed : trimmed.replace(' ', 'T'));
     if (!isNaN(d.getTime())) {
       const pad = (n: number) => n.toString().padStart(2, '0');
       return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
@@ -602,7 +697,9 @@ const toInputFormat = (val: any) => {
 
 const formatDateTime = (dateStr: string) => {
   if (!dateStr) return '—';
-  const d = new Date(dateStr.includes('T') ? dateStr : dateStr.replace(' ', 'T'));
+  let str = String(dateStr).trim();
+  if (str.endsWith('Z')) str = str.slice(0, -1);
+  const d = new Date(str.includes('T') ? str : str.replace(' ', 'T'));
   if (isNaN(d.getTime())) return dateStr;
   return d.toLocaleString('en-US', {
     month: 'short',
@@ -692,6 +789,9 @@ const openDialog = (item?: any) => {
     editingId.value = null;
     slugManuallyEdited.value = false;
     const now = new Date();
+    const pad = (n: number) => n.toString().padStart(2, '0');
+    const fmt = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+
     // Default registration_start: today at current hour:00
     const regStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), 0, 0);
     // Default registration_end: 7 days from today at 18:00
@@ -706,15 +806,18 @@ const openDialog = (item?: any) => {
       slug: '',
       description: '',
       image_url: '',
-      registration_start: toInputFormat(regStart),
-      registration_end: toInputFormat(regEnd),
-      event_start: toInputFormat(evStart),
-      event_end: toInputFormat(evEnd),
+      registration_start: fmt(regStart),
+      registration_end: fmt(regEnd),
+      event_start: fmt(evStart),
+      event_end: fmt(evEnd),
       meet_link: '',
       status: 'published'
     };
   }
   dialog.value = true;
+  setTimeout(() => {
+    eventForm.value?.resetValidation?.();
+  }, 50);
 };
 
 // Save Event
@@ -724,9 +827,14 @@ const saveEvent = async () => {
   if (!valid) return;
 
   // Pre-flight chronological validation
-  const rStart = new Date(formData.value.registration_start);
-  const rEnd = new Date(formData.value.registration_end);
-  const eStart = new Date(formData.value.event_start);
+  const rStart = parseDateTimestamp(formData.value.registration_start);
+  const rEnd = parseDateTimestamp(formData.value.registration_end);
+  const eStart = parseDateTimestamp(formData.value.event_start);
+
+  if (!rStart || !rEnd || !eStart) {
+    showSnackbar('Please enter valid dates and times for registration and event', 'error');
+    return;
+  }
 
   if (rStart >= rEnd) {
     showSnackbar('Registration start date must be before registration end date', 'error');
@@ -737,8 +845,8 @@ const saveEvent = async () => {
     return;
   }
   if (formData.value.event_end) {
-    const eEnd = new Date(formData.value.event_end);
-    if (eStart >= eEnd) {
+    const eEnd = parseDateTimestamp(formData.value.event_end);
+    if (eEnd && eStart >= eEnd) {
       showSnackbar('Event conclusion time must be after the event start time', 'error');
       return;
     }
