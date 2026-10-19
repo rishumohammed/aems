@@ -116,7 +116,7 @@
                         <div>
                           <div class="text-caption text-secondary font-weight-medium">Registration Window</div>
                           <div class="text-body-2 font-weight-bold text-slate-900">
-                            {{ formatDateShort(event.registration_start) }} &ndash; {{ formatDateShort(event.registration_end) }}
+                            {{ formatDateShort(event.registration_start) }} &ndash; {{ formatDateShort(event.registration_end) }} IST
                           </div>
                         </div>
                       </div>
@@ -652,7 +652,7 @@ const formatDateTimeLong = (dateStr: string) => {
   if (str.endsWith('Z')) str = str.slice(0, -1);
   const d = new Date(str.includes('T') ? str : str.replace(' ', 'T'));
   if (isNaN(d.getTime())) return dateStr;
-  return d.toLocaleString('en-US', {
+  const formatted = d.toLocaleString('en-US', {
     weekday: 'short',
     month: 'short',
     day: 'numeric',
@@ -660,6 +660,7 @@ const formatDateTimeLong = (dateStr: string) => {
     hour: '2-digit',
     minute: '2-digit'
   });
+  return `${formatted} IST`;
 };
 
 // Fetch Event Details

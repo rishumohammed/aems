@@ -23,9 +23,13 @@ export const toLocalIsoString = (val) => {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
 };
 
-// Helper to compute event and registration status
+// Helper to compute event and registration status in IST (+05:30)
 export const computeEventStatus = (event) => {
-  const now = new Date();
+  // Current time normalized to IST (+05:30) regardless of server host timezone
+  const dNow = new Date();
+  const utcMs = dNow.getTime() + (dNow.getTimezoneOffset() * 60000);
+  const now = new Date(utcMs + (5.5 * 3600000));
+
   const parseDt = (val) => {
     if (!val) return null;
     if (val instanceof Date) return val;
@@ -90,6 +94,8 @@ export const computeEventStatus = (event) => {
 
   return {
     ...event,
+    timezone: 'IST',
+    timezone_label: 'IST (UTC+05:30)',
     registration_start: toLocalIsoString(event.registration_start),
     registration_end: toLocalIsoString(event.registration_end),
     event_start: toLocalIsoString(event.event_start),

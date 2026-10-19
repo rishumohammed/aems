@@ -44,7 +44,7 @@
 
               <div class="d-flex align-center">
                 <v-icon size="16" color="indigo" class="mr-1">mdi-account-clock-outline</v-icon>
-                <span><strong>Registration:</strong> {{ formatDateShort(event.registration_start) }} &ndash; {{ formatDateShort(event.registration_end) }}</span>
+                <span><strong>Registration:</strong> {{ formatDateShort(event.registration_start) }} &ndash; {{ formatDateShort(event.registration_end) }} IST</span>
               </div>
 
               <div v-if="event.meet_link" class="d-flex align-center">
@@ -489,13 +489,14 @@ const formatDateTime = (dStr: string) => {
   if (str.endsWith('Z')) str = str.slice(0, -1);
   const d = new Date(str.includes('T') ? str : str.replace(' ', 'T'));
   if (isNaN(d.getTime())) return dStr;
-  return d.toLocaleString('en-US', {
+  const formatted = d.toLocaleString('en-US', {
     month: 'short',
     day: 'numeric',
     year: 'numeric',
     hour: '2-digit',
     minute: '2-digit'
   });
+  return `${formatted} IST`;
 };
 
 onMounted(() => {

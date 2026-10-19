@@ -165,14 +165,14 @@ class BrevoEmailService {
   async sendEventRegistrationSuccessEmail({ registration, event }) {
     const subject = `Registration Confirmed: ${event.title} 🎉`;
     const cleanDate = typeof event.event_start === 'string' ? event.event_start.replace('Z', '').replace(' ', 'T') : event.event_start;
-    const eventDateFormatted = new Date(cleanDate).toLocaleString('en-US', {
+    const eventDateFormatted = `${new Date(cleanDate).toLocaleString('en-US', {
       weekday: 'long',
       year: 'numeric',
       month: 'long',
       day: 'numeric',
       hour: '2-digit',
       minute: '2-digit'
-    });
+    })} IST`;
 
     const categoryDetail = registration.occupation === 'Student'
       ? `College: ${registration.organization}`
@@ -262,14 +262,14 @@ class BrevoEmailService {
   async sendEventReminderEmail({ registration, event }) {
     const subject = `Reminder: ${event.title} is Starting Tomorrow! 🚀`;
     const cleanDate = typeof event.event_start === 'string' ? event.event_start.replace('Z', '').replace(' ', 'T') : event.event_start;
-    const eventDateFormatted = new Date(cleanDate).toLocaleString('en-US', {
+    const eventDateFormatted = `${new Date(cleanDate).toLocaleString('en-US', {
       weekday: 'long',
       year: 'numeric',
       month: 'long',
       day: 'numeric',
       hour: '2-digit',
       minute: '2-digit'
-    });
+    })} IST`;
 
     const joinLink = event.meet_link || `${process.env.FRONTEND_URL || 'http://localhost:3000'}/events`;
 

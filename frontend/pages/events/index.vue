@@ -153,7 +153,7 @@
                       <v-icon size="16" color="indigo" class="mr-2">mdi-account-clock-outline</v-icon>
                       <div>
                         <span class="font-weight-medium">Registration:</span>
-                        {{ formatDateShort(event.registration_start) }} &ndash; {{ formatDateShort(event.registration_end) }}
+                        {{ formatDateShort(event.registration_start) }} &ndash; {{ formatDateShort(event.registration_end) }} IST
                       </div>
                     </div>
 
@@ -819,14 +819,20 @@ const getStatusClass = (event: any) => {
 // Format Date Helpers
 const formatDateShort = (dateStr: string) => {
   if (!dateStr) return '';
-  const d = new Date(dateStr);
+  let str = String(dateStr).trim();
+  if (str.endsWith('Z')) str = str.slice(0, -1);
+  const d = new Date(str.includes('T') ? str : str.replace(' ', 'T'));
+  if (isNaN(d.getTime())) return dateStr;
   return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 };
 
 const formatEventDateTime = (dateStr: string) => {
   if (!dateStr) return '';
-  const d = new Date(dateStr);
-  return d.toLocaleString('en-US', {
+  let str = String(dateStr).trim();
+  if (str.endsWith('Z')) str = str.slice(0, -1);
+  const d = new Date(str.includes('T') ? str : str.replace(' ', 'T'));
+  if (isNaN(d.getTime())) return dateStr;
+  const formatted = d.toLocaleString('en-US', {
     weekday: 'short',
     month: 'short',
     day: 'numeric',
@@ -834,6 +840,7 @@ const formatEventDateTime = (dateStr: string) => {
     hour: '2-digit',
     minute: '2-digit'
   });
+  return `${formatted} IST`;
 };
 
 const formatRelativeTime = (dateStr: string) => {

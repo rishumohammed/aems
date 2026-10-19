@@ -324,7 +324,7 @@
                 <v-text-field
                   ref="regStartInput"
                   v-model="formData.registration_start"
-                  label="Registration Start Date &amp; Time *"
+                  label="Registration Start Date &amp; Time (IST) *"
                   type="datetime-local"
                   variant="outlined"
                   rounded="lg"
@@ -337,7 +337,7 @@
                 <v-text-field
                   ref="regEndInput"
                   v-model="formData.registration_end"
-                  label="Registration End Date &amp; Time *"
+                  label="Registration End Date &amp; Time (IST) *"
                   type="datetime-local"
                   variant="outlined"
                   rounded="lg"
@@ -351,7 +351,7 @@
                 <v-text-field
                   ref="eventStartInput"
                   v-model="formData.event_start"
-                  label="Event Date &amp; Time *"
+                  label="Event Date &amp; Time (IST) *"
                   type="datetime-local"
                   variant="outlined"
                   rounded="lg"
@@ -364,7 +364,7 @@
                 <v-text-field
                   ref="eventEndInput"
                   v-model="formData.event_end"
-                  label="Event Concludes At (Optional)"
+                  label="Event Concludes At (IST) (Optional)"
                   type="datetime-local"
                   variant="outlined"
                   rounded="lg"
@@ -621,8 +621,8 @@ const statusOptions = [
 const headers = [
   { title: 'Poster', key: 'image_url', sortable: false, width: '80px' },
   { title: 'Event Name', key: 'title' },
-  { title: 'Registration Schedule', key: 'registration_period', sortable: false },
-  { title: 'Event Timing', key: 'event_start' },
+  { title: 'Registration Schedule (IST)', key: 'registration_period', sortable: false },
+  { title: 'Event Timing (IST)', key: 'event_start' },
   { title: 'Status', key: 'status', width: '120px' },
   { title: 'Candidates', key: 'registrations_count', width: '150px' },
   { title: 'Actions', key: 'actions', sortable: false, width: '130px', align: 'end' as const }
@@ -701,13 +701,14 @@ const formatDateTime = (dateStr: string) => {
   if (str.endsWith('Z')) str = str.slice(0, -1);
   const d = new Date(str.includes('T') ? str : str.replace(' ', 'T'));
   if (isNaN(d.getTime())) return dateStr;
-  return d.toLocaleString('en-US', {
+  const formatted = d.toLocaleString('en-US', {
     month: 'short',
     day: 'numeric',
     year: 'numeric',
     hour: '2-digit',
     minute: '2-digit'
   });
+  return `${formatted} IST`;
 };
 
 const windowOpen = (url: string) => {
