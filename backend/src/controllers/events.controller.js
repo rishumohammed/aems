@@ -7,38 +7,52 @@ import { checkAndSendEventReminders } from '../jobs/event-reminder.job.js';
 // Helper to compute event and registration status
 export const computeEventStatus = (event) => {
   const now = new Date();
-  const regStart = new Date(event.registration_start);
-  const regEnd = new Date(event.registration_end);
-  const eventStart = new Date(event.event_start);
-  const eventEnd = event.event_end ? new Date(event.event_end) : new Date(eventStart.getTime() + 4 * 60 * 60 * 1000); // 4h default duration
+  const parseDt = (val) => {
+    if (!val) return null;
+    if (val instanceof Date) return val;
+    const str = String(val).trim();
+    return new Date(str.includes('T') ? str : str.replace(' ', 'T'));
+  };
+
+  const regStart = parseDt(event.registration_start);
+  const regEnd = parseDt(event.registration_end);
+  const eventStart = parseDt(event.event_start);
+  const eventEnd = event.event_end
+    ? parseDt(event.event_end)
+    : (eventStart ? new Date(eventStart.getTime() + 4 * 60 * 60 * 1000) : null);
 
   let registrationStatus = 'open';
-  if (now < regStart) {
+  if (regStart && now < regStart) {
     registrationStatus = 'upcoming';
-  } else if (now > regEnd) {
+  } else if (regEnd && now > regEnd) {
     registrationStatus = 'closed';
   }
 
   let eventStatus = 'upcoming';
-  if (now >= eventStart && now <= eventEnd) {
+  if (eventStart && eventEnd && now >= eventStart && now <= eventEnd) {
     eventStatus = 'live';
-  } else if (now > eventEnd) {
+  } else if (eventEnd && now > eventEnd) {
     eventStatus = 'completed';
   }
 
   // Exact button logic:
-  // 1. If registration is open: "register"
-  // 2. If registration is over, but event not started yet: "waiting_to_start" (disabled button)
-  // 3. If event time start: "join_event" (enabled Join Event button)
-  // 4. If event completed: "concluded"
+  // 1. If event is completed: "Event Concluded" (disabled)
+  // 2. If event is currently live: "Join Event" (enabled!)
+  // 3. If registration is open: "Register Now" (enabled)
+  // 4. If registration is closed, but event not started yet: "waiting_to_start" (disabled until event start time)
+  // 5. If registration is upcoming: "Registration Soon" (disabled)
   let buttonState = 'register';
   let buttonText = 'Register Now';
   let isButtonDisabled = false;
 
-  if (registrationStatus === 'upcoming') {
-    buttonState = 'reg_not_started';
-    buttonText = 'Registration Soon';
+  if (eventStatus === 'completed') {
+    buttonState = 'concluded';
+    buttonText = 'Event Concluded';
     isButtonDisabled = true;
+  } else if (eventStatus === 'live') {
+    buttonState = 'join_event';
+    buttonText = 'Join Event';
+    isButtonDisabled = false; // Enabled when event time starts!
   } else if (registrationStatus === 'open') {
     buttonState = 'register';
     buttonText = 'Register Now';
@@ -47,13 +61,9 @@ export const computeEventStatus = (event) => {
     buttonState = 'waiting_to_start';
     buttonText = 'Join Event';
     isButtonDisabled = true; // Disabled until event start time!
-  } else if (eventStatus === 'live') {
-    buttonState = 'join_event';
-    buttonText = 'Join Event';
-    isButtonDisabled = false; // Enabled when event time starts!
-  } else if (eventStatus === 'completed') {
-    buttonState = 'concluded';
-    buttonText = 'Event Concluded';
+  } else if (registrationStatus === 'upcoming') {
+    buttonState = 'reg_not_started';
+    buttonText = 'Registration Soon';
     isButtonDisabled = true;
   }
 
@@ -387,19 +397,26 @@ export const getAdminEventById = async (req, res) => {
   }
 };
 
-const formatMysqlDateTime = (val) => {
+export const formatMysqlDateTime = (val) => {
   if (!val) return null;
   if (typeof val === 'string') {
     const trimmed = val.trim();
     if (!trimmed) return null;
-    if (trimmed.includes('T') && !trimmed.includes('Z')) {
+    // Already in MySQL format YYYY-MM-DD HH:mm:ss or YYYY-MM-DD HH:mm
+    if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}(:\d{2})?$/.test(trimmed)) {
+      return trimmed.length === 16 ? `${trimmed}:00` : trimmed.slice(0, 19);
+    }
+    // HTML datetime-local format YYYY-MM-DDTHH:mm or YYYY-MM-DDTHH:mm:ss
+    if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?$/.test(trimmed)) {
       const clean = trimmed.replace('T', ' ');
       return clean.length === 16 ? `${clean}:00` : clean.slice(0, 19);
     }
   }
-  const d = new Date(val);
+  const d = val instanceof Date ? val : new Date(val);
   if (isNaN(d.getTime())) return null;
-  return d.toISOString().slice(0, 19).replace('T', ' ');
+  const pad = (n) => String(n).padStart(2, '0');
+  // Format using local date and time components, preserving local wall-clock time without UTC distortion
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
 };
 
 /**
@@ -422,6 +439,32 @@ export const createAdminEvent = async (req, res) => {
     return res.status(400).json({
       message: 'Title, Registration Start & End date, and Event Date/Time are required.'
     });
+  }
+
+  const finalRegStart = formatMysqlDateTime(registration_start);
+  const finalRegEnd = formatMysqlDateTime(registration_end);
+  const finalEventStart = formatMysqlDateTime(event_start);
+  const finalEventEnd = event_end && event_end.trim() !== '' ? formatMysqlDateTime(event_end) : null;
+
+  if (!finalRegStart || !finalRegEnd || !finalEventStart) {
+    return res.status(400).json({ message: 'Invalid date/time format provided for event dates.' });
+  }
+
+  const dRegStart = new Date(finalRegStart.replace(' ', 'T'));
+  const dRegEnd = new Date(finalRegEnd.replace(' ', 'T'));
+  const dEventStart = new Date(finalEventStart.replace(' ', 'T'));
+
+  if (dRegStart >= dRegEnd) {
+    return res.status(400).json({ message: 'Registration start date & time must be before registration end date.' });
+  }
+  if (dRegEnd > dEventStart) {
+    return res.status(400).json({ message: 'Registration must end on or before the event start date/time.' });
+  }
+  if (finalEventEnd) {
+    const dEventEnd = new Date(finalEventEnd.replace(' ', 'T'));
+    if (dEventStart >= dEventEnd) {
+      return res.status(400).json({ message: 'Event conclusion time must be after the event start time.' });
+    }
   }
 
   try {
@@ -451,10 +494,10 @@ export const createAdminEvent = async (req, res) => {
       slug,
       description || null,
       image_url,
-      formatMysqlDateTime(registration_start),
-      formatMysqlDateTime(registration_end),
-      formatMysqlDateTime(event_start),
-      formatMysqlDateTime(event_end),
+      finalRegStart,
+      finalRegEnd,
+      finalEventStart,
+      finalEventEnd,
       meet_link || null,
       status,
       req.user?.id || null
@@ -509,6 +552,45 @@ export const updateAdminEvent = async (req, res) => {
       ? `/uploads/events/${req.file.filename}`
       : (req.body.image_url !== undefined ? req.body.image_url : current.image_url);
 
+    // Resolve date values safely: if undefined in payload, keep current; if empty string, set null
+    const finalRegStart = registration_start !== undefined
+      ? formatMysqlDateTime(registration_start)
+      : formatMysqlDateTime(current.registration_start);
+
+    const finalRegEnd = registration_end !== undefined
+      ? formatMysqlDateTime(registration_end)
+      : formatMysqlDateTime(current.registration_end);
+
+    const finalEventStart = event_start !== undefined
+      ? formatMysqlDateTime(event_start)
+      : formatMysqlDateTime(current.event_start);
+
+    const finalEventEnd = event_end !== undefined
+      ? (event_end && String(event_end).trim() !== '' ? formatMysqlDateTime(event_end) : null)
+      : (current.event_end ? formatMysqlDateTime(current.event_end) : null);
+
+    if (!finalRegStart || !finalRegEnd || !finalEventStart) {
+      return res.status(400).json({ message: 'Registration start, registration end, and event date/time are required.' });
+    }
+
+    // Validate date chronology
+    const dRegStart = new Date(finalRegStart.replace(' ', 'T'));
+    const dRegEnd = new Date(finalRegEnd.replace(' ', 'T'));
+    const dEventStart = new Date(finalEventStart.replace(' ', 'T'));
+
+    if (dRegStart >= dRegEnd) {
+      return res.status(400).json({ message: 'Registration start date & time must be before registration end date.' });
+    }
+    if (dRegEnd > dEventStart) {
+      return res.status(400).json({ message: 'Registration must end on or before the event start date/time.' });
+    }
+    if (finalEventEnd) {
+      const dEventEnd = new Date(finalEventEnd.replace(' ', 'T'));
+      if (dEventStart >= dEventEnd) {
+        return res.status(400).json({ message: 'Event conclusion time must be after the event start time.' });
+      }
+    }
+
     await pool.query(`
       UPDATE events SET
         title = ?,
@@ -528,10 +610,10 @@ export const updateAdminEvent = async (req, res) => {
       finalSlug,
       description !== undefined ? description : current.description,
       image_url,
-      registration_start !== undefined ? formatMysqlDateTime(registration_start) : current.registration_start,
-      registration_end !== undefined ? formatMysqlDateTime(registration_end) : current.registration_end,
-      event_start !== undefined ? formatMysqlDateTime(event_start) : current.event_start,
-      event_end !== undefined ? formatMysqlDateTime(event_end) : current.event_end,
+      finalRegStart,
+      finalRegEnd,
+      finalEventStart,
+      finalEventEnd,
       meet_link !== undefined ? meet_link : current.meet_link,
       status !== undefined ? status : current.status,
       id

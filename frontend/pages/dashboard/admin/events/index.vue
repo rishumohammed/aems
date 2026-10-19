@@ -328,7 +328,10 @@
                   variant="outlined"
                   rounded="lg"
                   density="comfortable"
-                  :rules="[v => !!v || 'Registration start is required']"
+                  :rules="[
+                    v => !!v || 'Registration start is required',
+                    v => !formData.registration_end || new Date(v) < new Date(formData.registration_end) || 'Registration start must be before registration end'
+                  ]"
                 ></v-text-field>
               </v-col>
 
@@ -340,7 +343,11 @@
                   variant="outlined"
                   rounded="lg"
                   density="comfortable"
-                  :rules="[v => !!v || 'Registration end is required']"
+                  :rules="[
+                    v => !!v || 'Registration end is required',
+                    v => !formData.registration_start || new Date(v) > new Date(formData.registration_start) || 'Registration end must be after registration start',
+                    v => !formData.event_start || new Date(v) <= new Date(formData.event_start) || 'Registration must end on or before event starts'
+                  ]"
                 ></v-text-field>
               </v-col>
 
@@ -353,7 +360,10 @@
                   variant="outlined"
                   rounded="lg"
                   density="comfortable"
-                  :rules="[v => !!v || 'Event start time is required']"
+                  :rules="[
+                    v => !!v || 'Event start time is required',
+                    v => !formData.registration_end || new Date(v) >= new Date(formData.registration_end) || 'Event cannot start before registration ends'
+                  ]"
                 ></v-text-field>
               </v-col>
 
@@ -365,6 +375,10 @@
                   variant="outlined"
                   rounded="lg"
                   density="comfortable"
+                  clearable
+                  :rules="[
+                    v => !v || !formData.event_start || new Date(v) > new Date(formData.event_start) || 'Conclusion time must be after event start'
+                  ]"
                 ></v-text-field>
               </v-col>
 
@@ -558,16 +572,38 @@ const fetchEvents = async () => {
 };
 
 // Date Formatters
-const toInputFormat = (dStr: string) => {
-  if (!dStr) return '';
-  const d = new Date(dStr);
-  const pad = (n: number) => n.toString().padStart(2, '0');
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+const toInputFormat = (val: any) => {
+  if (!val) return '';
+  if (typeof val === 'string') {
+    const trimmed = val.trim();
+    if (!trimmed) return '';
+    // If it's already YYYY-MM-DDTHH:mm
+    if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(trimmed)) {
+      return trimmed;
+    }
+    // If it's MySQL datetime string YYYY-MM-DD HH:mm:ss or YYYY-MM-DD HH:mm
+    if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}/.test(trimmed)) {
+      return trimmed.slice(0, 16).replace(' ', 'T');
+    }
+    // If it's ISO string with seconds / milliseconds / Z
+    const d = new Date(trimmed);
+    if (!isNaN(d.getTime())) {
+      const pad = (n: number) => n.toString().padStart(2, '0');
+      return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    }
+  }
+  if (val instanceof Date) {
+    if (isNaN(val.getTime())) return '';
+    const pad = (n: number) => n.toString().padStart(2, '0');
+    return `${val.getFullYear()}-${pad(val.getMonth() + 1)}-${pad(val.getDate())}T${pad(val.getHours())}:${pad(val.getMinutes())}`;
+  }
+  return '';
 };
 
 const formatDateTime = (dateStr: string) => {
   if (!dateStr) return '—';
-  const d = new Date(dateStr);
+  const d = new Date(dateStr.includes('T') ? dateStr : dateStr.replace(' ', 'T'));
+  if (isNaN(d.getTime())) return dateStr;
   return d.toLocaleString('en-US', {
     month: 'short',
     day: 'numeric',
@@ -656,19 +692,24 @@ const openDialog = (item?: any) => {
     editingId.value = null;
     slugManuallyEdited.value = false;
     const now = new Date();
-    const tomorrow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
-    const in3Days = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000);
-    const in4Days = new Date(now.getTime() + 4 * 24 * 60 * 60 * 1000);
+    // Default registration_start: today at current hour:00
+    const regStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), 0, 0);
+    // Default registration_end: 7 days from today at 18:00
+    const regEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 7, 18, 0, 0);
+    // Default event_start: 7 days from today at 19:00 (1h after registration closes)
+    const evStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 7, 19, 0, 0);
+    // Default event_end: 7 days from today at 21:00 (2h duration)
+    const evEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 7, 21, 0, 0);
 
     formData.value = {
       title: '',
       slug: '',
       description: '',
       image_url: '',
-      registration_start: toInputFormat(now.toISOString()),
-      registration_end: toInputFormat(in3Days.toISOString()),
-      event_start: toInputFormat(in4Days.toISOString()),
-      event_end: '',
+      registration_start: toInputFormat(regStart),
+      registration_end: toInputFormat(regEnd),
+      event_start: toInputFormat(evStart),
+      event_end: toInputFormat(evEnd),
       meet_link: '',
       status: 'published'
     };
@@ -682,17 +723,38 @@ const saveEvent = async () => {
   const { valid } = await eventForm.value.validate();
   if (!valid) return;
 
+  // Pre-flight chronological validation
+  const rStart = new Date(formData.value.registration_start);
+  const rEnd = new Date(formData.value.registration_end);
+  const eStart = new Date(formData.value.event_start);
+
+  if (rStart >= rEnd) {
+    showSnackbar('Registration start date must be before registration end date', 'error');
+    return;
+  }
+  if (rEnd > eStart) {
+    showSnackbar('Registration must end on or before the event start time', 'error');
+    return;
+  }
+  if (formData.value.event_end) {
+    const eEnd = new Date(formData.value.event_end);
+    if (eStart >= eEnd) {
+      showSnackbar('Event conclusion time must be after the event start time', 'error');
+      return;
+    }
+  }
+
   saving.value = true;
   try {
     const data = new FormData();
     data.append('title', formData.value.title);
     data.append('slug', formData.value.slug);
-    data.append('description', formData.value.description);
+    data.append('description', formData.value.description || '');
     data.append('registration_start', formData.value.registration_start);
     data.append('registration_end', formData.value.registration_end);
     data.append('event_start', formData.value.event_start);
-    if (formData.value.event_end) data.append('event_end', formData.value.event_end);
-    if (formData.value.meet_link) data.append('meet_link', formData.value.meet_link);
+    data.append('event_end', formData.value.event_end || '');
+    data.append('meet_link', formData.value.meet_link || '');
     data.append('status', formData.value.status);
 
     if (selectedFile.value) {

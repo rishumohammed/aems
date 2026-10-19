@@ -445,20 +445,6 @@
                   </v-form>
                 </div>
 
-                <!-- Registration Closed View -->
-                <div v-else-if="event.registration_status === 'closed'" class="pa-6 text-center">
-                  <v-avatar color="amber-lighten-5" size="56" class="mb-3">
-                    <v-icon color="amber-darken-3" size="28">mdi-account-cancel-outline</v-icon>
-                  </v-avatar>
-                  <h3 class="text-subtitle-1 font-weight-bold text-slate-900 mb-1">Registration Closed</h3>
-                  <p class="text-caption text-secondary mb-4">
-                    Registration for this event ended on {{ formatDateTimeLong(event.registration_end) }}.
-                  </p>
-                  <v-btn block variant="outlined" color="primary" rounded="lg" to="/events" class="text-capitalize">
-                    Explore Other Events
-                  </v-btn>
-                </div>
-
                 <!-- Event Concluded View -->
                 <div v-else-if="event.event_status === 'completed'" class="pa-6 text-center">
                   <v-avatar color="grey-lighten-4" size="56" class="mb-3">
@@ -468,8 +454,50 @@
                   <p class="text-caption text-secondary mb-4">
                     This session has finished. Check out our upcoming live webinars and masterclasses.
                   </p>
-                  <v-btn block variant="outlined" color="primary" rounded="lg" to="/events" class="text-capitalize">
+                  <v-btn block variant="outlined" color="primary" rounded="lg" to="/events" class="text-capitalize font-weight-bold">
                     View Upcoming Events
+                  </v-btn>
+                </div>
+
+                <!-- Event Live View (Registration closed/in progress but meeting is live) -->
+                <div v-else-if="event.event_status === 'live'" class="pa-6 text-center">
+                  <v-avatar color="red-lighten-5" size="56" class="mb-3">
+                    <v-icon color="error" size="28">mdi-video</v-icon>
+                  </v-avatar>
+                  <h3 class="text-subtitle-1 font-weight-bold text-slate-900 mb-1">Event is Live Now! 🚀</h3>
+                  <p class="text-caption text-secondary mb-4">
+                    The live session is in progress. Click below to join the meeting room.
+                  </p>
+                  <v-btn
+                    v-if="event.meet_link"
+                    block
+                    color="success"
+                    rounded="lg"
+                    height="46"
+                    elevation="2"
+                    class="text-capitalize font-weight-bold pulse-green mb-3"
+                    :href="event.meet_link"
+                    target="_blank"
+                  >
+                    <v-icon start size="18">mdi-video</v-icon>
+                    Join Live Session
+                  </v-btn>
+                  <v-btn block variant="outlined" color="primary" rounded="lg" to="/events" class="text-capitalize">
+                    Browse Other Events
+                  </v-btn>
+                </div>
+
+                <!-- Registration Closed View (Waiting to start) -->
+                <div v-else-if="event.registration_status === 'closed'" class="pa-6 text-center">
+                  <v-avatar color="amber-lighten-5" size="56" class="mb-3">
+                    <v-icon color="amber-darken-3" size="28">mdi-lock-clock</v-icon>
+                  </v-avatar>
+                  <h3 class="text-subtitle-1 font-weight-bold text-slate-900 mb-1">Registration Closed</h3>
+                  <p class="text-caption text-secondary mb-4">
+                    Registration for this event ended on {{ formatDateTimeLong(event.registration_end) }}. The event will start on {{ formatDateTimeLong(event.event_start) }}.
+                  </p>
+                  <v-btn block variant="outlined" color="primary" rounded="lg" to="/events" class="text-capitalize">
+                    Explore Other Events
                   </v-btn>
                 </div>
 
@@ -592,32 +620,34 @@ const getImageUrl = (url: string | null) => {
 // Status Helpers
 const statusLabel = computed(() => {
   if (!event.value) return '';
+  if (event.value.event_status === 'completed') return 'Concluded';
   if (event.value.event_status === 'live') return 'Live Now';
   if (event.value.registration_status === 'open') return 'Registration Open';
   if (event.value.registration_status === 'closed' && event.value.event_status === 'upcoming') return 'Registration Closed';
-  if (event.value.event_status === 'completed') return 'Concluded';
   return 'Coming Soon';
 });
 
 const statusClass = computed(() => {
   if (!event.value) return '';
+  if (event.value.event_status === 'completed') return 'bg-slate-600 text-white';
   if (event.value.event_status === 'live') return 'bg-red-600 text-white shadow-md';
   if (event.value.registration_status === 'open') return 'bg-emerald-600 text-white shadow-md';
   if (event.value.registration_status === 'closed' && event.value.event_status === 'upcoming') return 'bg-amber-600 text-white shadow-md';
-  if (event.value.event_status === 'completed') return 'bg-slate-600 text-white';
   return 'bg-indigo-600 text-white';
 });
 
 // Format Dates
 const formatDateShort = (dateStr: string) => {
   if (!dateStr) return '';
-  const d = new Date(dateStr);
+  const d = new Date(dateStr.includes('T') ? dateStr : dateStr.replace(' ', 'T'));
+  if (isNaN(d.getTime())) return dateStr;
   return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 };
 
 const formatDateTimeLong = (dateStr: string) => {
   if (!dateStr) return '';
-  const d = new Date(dateStr);
+  const d = new Date(dateStr.includes('T') ? dateStr : dateStr.replace(' ', 'T'));
+  if (isNaN(d.getTime())) return dateStr;
   return d.toLocaleString('en-US', {
     weekday: 'short',
     month: 'short',

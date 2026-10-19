@@ -476,13 +476,15 @@ const getStatusChipLabel = (e: any) => {
 
 const formatDateShort = (dStr: string) => {
   if (!dStr) return '';
-  const d = new Date(dStr);
+  const d = new Date(dStr.includes('T') ? dStr : dStr.replace(' ', 'T'));
+  if (isNaN(d.getTime())) return dStr;
   return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 };
 
 const formatDateTime = (dStr: string) => {
   if (!dStr) return '—';
-  const d = new Date(dStr);
+  const d = new Date(dStr.includes('T') ? dStr : dStr.replace(' ', 'T'));
+  if (isNaN(d.getTime())) return dStr;
   return d.toLocaleString('en-US', {
     month: 'short',
     day: 'numeric',

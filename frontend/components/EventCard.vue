@@ -75,39 +75,23 @@
 
       <!-- Action Button Section -->
       <div class="action-button-wrapper mt-auto" @click.stop>
-        <!-- Case 1: Registration Open -> Register Now -->
-        <template v-if="event.registration_status === 'open'">
-          <v-btn
-            block
-            color="primary"
-            rounded="lg"
-            height="42"
-            elevation="0"
-            class="text-capitalize font-weight-bold"
-            :to="`/events/${event.slug || event.id}`"
-          >
-            <v-icon start size="18">mdi-account-plus</v-icon>
-            Register Now
-          </v-btn>
-        </template>
-
-        <!-- Case 2: Registration Over, Event Not Started Yet -->
-        <template v-else-if="event.registration_status === 'closed' && event.event_status === 'upcoming'">
+        <!-- Case 1: Event Concluded -->
+        <template v-if="event.event_status === 'completed'">
           <v-btn
             block
             disabled
-            variant="flat"
-            color="grey-lighten-3"
+            variant="outlined"
+            color="grey"
             rounded="lg"
             height="42"
-            class="text-capitalize font-weight-bold text-grey-darken-1"
+            class="text-capitalize font-weight-medium"
           >
-            <v-icon start size="18">mdi-lock-clock</v-icon>
-            Join Event (Opens at Event Time)
+            <v-icon start size="18">mdi-check-circle-outline</v-icon>
+            Event Concluded
           </v-btn>
         </template>
 
-        <!-- Case 3: Live Now -->
+        <!-- Case 2: Live Now -->
         <template v-else-if="event.event_status === 'live'">
           <v-btn
             block
@@ -124,19 +108,35 @@
           </v-btn>
         </template>
 
-        <!-- Case 4: Event Concluded -->
-        <template v-else-if="event.event_status === 'completed'">
+        <!-- Case 3: Registration Open -> Register Now -->
+        <template v-else-if="event.registration_status === 'open'">
+          <v-btn
+            block
+            color="primary"
+            rounded="lg"
+            height="42"
+            elevation="0"
+            class="text-capitalize font-weight-bold"
+            :to="`/events/${event.slug || event.id}`"
+          >
+            <v-icon start size="18">mdi-account-plus</v-icon>
+            Register Now
+          </v-btn>
+        </template>
+
+        <!-- Case 4: Registration Over, Event Not Started Yet -->
+        <template v-else-if="event.registration_status === 'closed' && event.event_status === 'upcoming'">
           <v-btn
             block
             disabled
-            variant="outlined"
-            color="grey"
+            variant="flat"
+            color="grey-lighten-3"
             rounded="lg"
             height="42"
-            class="text-capitalize font-weight-medium"
+            class="text-capitalize font-weight-bold text-grey-darken-1"
           >
-            <v-icon start size="18">mdi-check-circle-outline</v-icon>
-            Event Concluded
+            <v-icon start size="18">mdi-lock-clock</v-icon>
+            Join Event (Opens at Event Time)
           </v-btn>
         </template>
 
@@ -185,32 +185,34 @@ const imageUrl = computed(() => {
 
 // Status Label
 const statusLabel = computed(() => {
+  if (props.event.event_status === 'completed') return 'Concluded';
   if (props.event.event_status === 'live') return 'Live Now';
   if (props.event.registration_status === 'open') return 'Registration Open';
   if (props.event.registration_status === 'closed' && props.event.event_status === 'upcoming') return 'Registration Closed';
-  if (props.event.event_status === 'completed') return 'Concluded';
   return 'Coming Soon';
 });
 
 // Status Color Class
 const statusClass = computed(() => {
+  if (props.event.event_status === 'completed') return 'bg-slate-600 text-white';
   if (props.event.event_status === 'live') return 'bg-red-600 text-white shadow-md';
   if (props.event.registration_status === 'open') return 'bg-emerald-600 text-white shadow-md';
   if (props.event.registration_status === 'closed' && props.event.event_status === 'upcoming') return 'bg-amber-600 text-white shadow-md';
-  if (props.event.event_status === 'completed') return 'bg-slate-600 text-white';
   return 'bg-indigo-600 text-white';
 });
 
 // Format Date Helpers
 const formatDateShort = (dateStr: string) => {
   if (!dateStr) return '';
-  const d = new Date(dateStr);
+  const d = new Date(dateStr.includes('T') ? dateStr : dateStr.replace(' ', 'T'));
+  if (isNaN(d.getTime())) return dateStr;
   return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 };
 
 const formatEventDateTime = (dateStr: string) => {
   if (!dateStr) return '';
-  const d = new Date(dateStr);
+  const d = new Date(dateStr.includes('T') ? dateStr : dateStr.replace(' ', 'T'));
+  if (isNaN(d.getTime())) return dateStr;
   return d.toLocaleString('en-US', {
     weekday: 'short',
     month: 'short',
