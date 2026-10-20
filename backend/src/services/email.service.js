@@ -156,24 +156,32 @@ class EmailService {
   async sendPasswordResetEmail(email, token) {
     try {
       const resetLink = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password?token=${token}`;
-      const html = `
+      const emailTemplateService = (await import('./email-template.service.js')).default;
+
+      const fallbackHtml = `
         <div style="font-family: sans-serif; padding: 20px; color: #333; max-width: 600px; margin: auto; border: 1px solid #eee; border-radius: 12px;">
           <h2 style="color: #4f46e5;">Reset Your Password</h2>
           <p>You requested a password reset for your Brixify account.</p>
           <p>Please click the button below to set a new password:</p>
           <div style="text-align: center; margin: 30px 0;">
-            <a href="${resetLink}" style="display: inline-block; padding: 14px 30px; background: #4f46e5; color: #fff; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px;">Reset Password</a>
+            <a href="{{RESET_LINK}}" style="display: inline-block; padding: 14px 30px; background: #4f46e5; color: #fff; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px;">Reset Password</a>
           </div>
           <p style="font-size: 14px; color: #666;">If you didn't request this, you can safely ignore this email.</p>
           <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
-          <p style="font-size: 12px; color: #999;">This link will expire in 1 hour.</p>
+          <p style="font-size: 12px; color: #999;">This link will expire in {{EXPIRY_TIME}}.</p>
         </div>
       `;
 
-      await this.sendEmail({
+      await emailTemplateService.sendTemplatedEmail({
+        code: 'password_reset',
         to: email,
-        subject: 'Reset Your Password - Brixify',
-        html
+        variables: {
+          '{{RESET_LINK}}': resetLink,
+          '{{EXPIRY_TIME}}': '1 hour',
+          '{{PLATFORM_NAME}}': this.fromName || 'Brix Certifications'
+        },
+        fallbackSubject: 'Reset Your Password - Brixify',
+        fallbackHtml
       });
     } catch (error) {
       console.error('Failed to send password reset email via Brevo:', error);
@@ -182,21 +190,28 @@ class EmailService {
 
   async sendWelcomeEmail(student, credentials, courseName) {
     try {
-      const templatePath = path.join(__dirname, '../templates/emails/welcome-student.html');
-      let html = await fs.readFile(templatePath, 'utf-8');
+      const emailTemplateService = (await import('./email-template.service.js')).default;
+      const loginUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/login`;
 
-      // Replace placeholders
-      html = html
-        .replace(/{{NAME}}/g, student.name)
-        .replace(/{{EMAIL}}/g, student.email)
-        .replace(/{{PASSWORD}}/g, credentials.password)
-        .replace(/{{COURSE_NAME}}/g, courseName)
-        .replace(/{{LOGIN_URL}}/g, `${process.env.FRONTEND_URL || 'http://localhost:3000'}/login`);
+      let fallbackHtml = '';
+      try {
+        const templatePath = path.join(__dirname, '../templates/emails/welcome-student.html');
+        fallbackHtml = await fs.readFile(templatePath, 'utf-8');
+      } catch (e) {}
 
-      await this.sendEmail({
+      await emailTemplateService.sendTemplatedEmail({
+        code: 'student_welcome',
         to: student.email,
-        subject: 'Your Student Account Has Been Created',
-        html
+        variables: {
+          '{{NAME}}': student.name || 'Student',
+          '{{EMAIL}}': student.email,
+          '{{PASSWORD}}': credentials.password,
+          '{{COURSE_NAME}}': courseName,
+          '{{LOGIN_URL}}': loginUrl,
+          '{{PLATFORM_NAME}}': this.fromName || 'Brix Certifications'
+        },
+        fallbackSubject: 'Your Student Account Has Been Created',
+        fallbackHtml
       });
     } catch (error) {
       console.error('Failed to send welcome email via Brevo:', error);
@@ -205,9 +220,7 @@ class EmailService {
 
   async sendCourseCompletionEmail(student, courseName, completionDate, certificateDetails) {
     try {
-      const templatePath = path.join(__dirname, '../templates/emails/course-completion.html');
-      let html = await fs.readFile(templatePath, 'utf-8');
-
+      const emailTemplateService = (await import('./email-template.service.js')).default;
       const dateStr = new Date(completionDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
       
       let certText = '';
@@ -233,19 +246,26 @@ class EmailService {
         }
       }
 
-      html = html
-        .replace(/{{PROFILE_PICTURE_HTML}}/g, profilePicHtml)
-        .replace(/{{STUDENT_NAME}}/g, student.name)
-        .replace(/{{COURSE_NAME}}/g, courseName)
-        .replace(/{{COMPLETION_DATE}}/g, dateStr)
-        .replace(/{{CERTIFICATE_TEXT}}/g, certText)
-        .replace(/{{CERTIFICATE_BUTTON}}/g, certButton)
-        .replace(/{{FRONTEND_URL}}/g, process.env.FRONTEND_URL || 'http://localhost:3000');
+      let fallbackHtml = '';
+      try {
+        const templatePath = path.join(__dirname, '../templates/emails/course-completion.html');
+        fallbackHtml = await fs.readFile(templatePath, 'utf-8');
+      } catch (e) {}
 
-      await this.sendEmail({
+      await emailTemplateService.sendTemplatedEmail({
+        code: 'course_completion',
         to: student.email,
-        subject: `Congratulations on Completing ${courseName}! 🎉`,
-        html
+        variables: {
+          '{{PROFILE_PICTURE_HTML}}': profilePicHtml,
+          '{{STUDENT_NAME}}': student.name || 'Student',
+          '{{COURSE_NAME}}': courseName,
+          '{{COMPLETION_DATE}}': dateStr,
+          '{{CERTIFICATE_TEXT}}': certText,
+          '{{CERTIFICATE_BUTTON}}': certButton,
+          '{{FRONTEND_URL}}': process.env.FRONTEND_URL || 'http://localhost:3000'
+        },
+        fallbackSubject: `Congratulations on Completing ${courseName}! 🎉`,
+        fallbackHtml
       });
     } catch (error) {
       console.error('Failed to send course completion email via Brevo:', error);
@@ -254,14 +274,17 @@ class EmailService {
 
   async sendPlacementEmail(student, jobTitle, companyName) {
     try {
-      const html = `
+      const emailTemplateService = (await import('./email-template.service.js')).default;
+      const portalUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/dashboard/placements`;
+
+      const fallbackHtml = `
         <div style="font-family: sans-serif; padding: 20px; color: #333; max-width: 600px; margin: auto; border: 1px solid #eee; border-radius: 12px;">
           <h2 style="color: #4f46e5;">🎉 Congratulations! You Have Been Selected</h2>
-          <p>Dear ${student.name || 'Candidate'},</p>
-          <p>We are thrilled to inform you that you have been selected for the position of <strong>${jobTitle}</strong> at <strong>${companyName}</strong>.</p>
+          <p>Dear {{NAME}},</p>
+          <p>We are thrilled to inform you that you have been selected for the position of <strong>{{JOB_TITLE}}</strong> at <strong>{{COMPANY_NAME}}</strong>.</p>
           <p>Your hard work and dedication have paid off. The employer will be reaching out to you shortly with the official offer details and your joining schedule.</p>
           <div style="text-align: center; margin: 30px 0;">
-            <a href="${process.env.FRONTEND_URL || 'http://localhost:3000'}/dashboard/placements" style="display: inline-block; padding: 14px 30px; background: #4f46e5; color: #fff; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px;">View Placement Details</a>
+            <a href="{{PORTAL_URL}}" style="display: inline-block; padding: 14px 30px; background: #4f46e5; color: #fff; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px;">View Placement Details</a>
           </div>
           <p style="font-size: 14px; color: #666;">If you have any questions, feel free to contact your career counselor or the employer directly.</p>
           <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
@@ -269,10 +292,17 @@ class EmailService {
         </div>
       `;
 
-      await this.sendEmail({
+      await emailTemplateService.sendTemplatedEmail({
+        code: 'placement_selection',
         to: student.email,
-        subject: `Congratulations! You Have Been Selected for ${jobTitle}`,
-        html
+        variables: {
+          '{{NAME}}': student.name || 'Candidate',
+          '{{JOB_TITLE}}': jobTitle,
+          '{{COMPANY_NAME}}': companyName,
+          '{{PORTAL_URL}}': portalUrl
+        },
+        fallbackSubject: `Congratulations! You Have Been Selected for ${jobTitle}`,
+        fallbackHtml
       });
     } catch (error) {
       console.error('Failed to send placement email via Brevo:', error);

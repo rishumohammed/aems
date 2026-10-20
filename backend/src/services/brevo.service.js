@@ -99,8 +99,31 @@ class BrevoEmailService {
    * Send 6-digit OTP email for registration verification
    */
   async sendEventOtpEmail({ email, name, otp, eventTitle }) {
-    const subject = `Your Verification Code for ${eventTitle}: ${otp}`;
     const displayName = name || 'Learner';
+
+    try {
+      const emailTemplateService = (await import('./email-template.service.js')).default;
+      const template = await emailTemplateService.getTemplateByCode('event_otp');
+      if (template && template.is_active && template.body_html) {
+        const vars = {
+          '{{NAME}}': displayName,
+          '{{EVENT_TITLE}}': eventTitle,
+          '{{OTP}}': otp,
+          '{{VALIDITY}}': '10 minutes'
+        };
+        const subject = emailTemplateService.render(template.subject, vars);
+        const htmlContent = emailTemplateService.render(template.body_html, vars);
+        return this.sendEmail({
+          to: { email, name: displayName },
+          subject,
+          htmlContent
+        });
+      }
+    } catch (e) {
+      console.warn('BrevoService: template lookup failed for event_otp, using fallback:', e.message);
+    }
+
+    const subject = `Your Verification Code for ${eventTitle}: ${otp}`;
 
     const htmlContent = `
       <!DOCTYPE html>
@@ -163,7 +186,6 @@ class BrevoEmailService {
    * Send Registration Confirmation Email
    */
   async sendEventRegistrationSuccessEmail({ registration, event }) {
-    const subject = `Registration Confirmed: ${event.title} 🎉`;
     const cleanDate = typeof event.event_start === 'string' ? event.event_start.replace('Z', '').replace(' ', 'T') : event.event_start;
     const eventDateFormatted = `${new Date(cleanDate).toLocaleString('en-US', {
       weekday: 'long',
@@ -180,70 +202,155 @@ class BrevoEmailService {
       ? `Company: ${registration.organization}`
       : `Institution: ${registration.organization}`;
 
+    const joinLink = event.meet_link || `${process.env.FRONTEND_URL || 'http://localhost:3000'}/events`;
+
+    try {
+      const emailTemplateService = (await import('./email-template.service.js')).default;
+      const template = await emailTemplateService.getTemplateByCode('event_registration_success');
+      if (template && template.is_active && template.body_html) {
+        const vars = {
+          '{{NAME}}': registration.name,
+          '{{EVENT_TITLE}}': event.title,
+          '{{EVENT_DATE}}': eventDateFormatted,
+          '{{ATTENDEE_TYPE}}': registration.occupation,
+          '{{ORGANIZATION}}': categoryDetail,
+          '{{JOIN_LINK}}': joinLink
+        };
+        const subject = emailTemplateService.render(template.subject, vars);
+        const htmlContent = emailTemplateService.render(template.body_html, vars);
+        return this.sendEmail({
+          to: { email: registration.email, name: registration.name },
+          subject,
+          htmlContent
+        });
+      }
+    } catch (e) {
+      console.warn('BrevoService: template lookup failed for event_registration_success, using fallback:', e.message);
+    }
+
+    const subject = `Registration Confirmed: ${event.title} 🎉`;
+
     const htmlContent = `
       <!DOCTYPE html>
       <html>
       <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Registration Confirmed</title>
+        <title>Registration Confirmed - ${event.title}</title>
       </head>
-      <body style="margin: 0; padding: 0; background-color: #f6f9fc; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
-        <div style="max-width: 580px; margin: 30px auto; background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,0.06); border: 1px solid #eef2f6;">
-          
-          <!-- Header -->
-          <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 36px 30px; text-align: center;">
-            <div style="font-size: 40px; margin-bottom: 8px;">🎉</div>
-            <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 700;">You're Registered!</h1>
-            <p style="color: #d1fae5; margin: 8px 0 0 0; font-size: 15px;">Your seat has been reserved</p>
-          </div>
+      <body style="margin: 0; padding: 0; background-color: #f1f5f9; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased;">
+        <div style="background-color: #f1f5f9; padding: 36px 16px;">
+          <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.06); border: 1px solid #e2e8f0;">
+            
+            <!-- Top Brand Accent Bar -->
+            <div style="height: 6px; background: linear-gradient(90deg, #10b981 0%, #059669 50%, #d97706 100%);"></div>
 
-          <!-- Body -->
-          <div style="padding: 32px 30px;">
-            <p style="color: #1e293b; font-size: 16px; line-height: 1.6; margin: 0 0 16px 0;">
-              Hello <strong>${registration.name}</strong>,
-            </p>
-            <p style="color: #475569; font-size: 15px; line-height: 1.6; margin: 0 0 24px 0;">
-              Congratulations! Your registration for <strong>${event.title}</strong> is confirmed. Below are your event access and participation details:
-            </p>
-
-            <!-- Event Card -->
-            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 22px; margin: 24px 0;">
-              <h3 style="color: #1e293b; margin: 0 0 12px 0; font-size: 18px;">${event.title}</h3>
-              
-              <div style="margin-bottom: 10px; color: #475569; font-size: 14px;">
-                <strong>📅 Date &amp; Time:</strong> ${eventDateFormatted}
+            <!-- Header -->
+            <div style="background: linear-gradient(135deg, #064e3b 0%, #047857 60%, #059669 100%); padding: 36px 30px; text-align: center; color: #ffffff;">
+              <div style="display: inline-block; background: rgba(255, 255, 255, 0.15); border: 1px solid rgba(255, 255, 255, 0.25); border-radius: 20px; padding: 4px 14px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 12px; color: #a7f3d0;">
+                CONFIRMED REGISTRATION
               </div>
-              <div style="margin-bottom: 10px; color: #475569; font-size: 14px;">
-                <strong>👤 Attendee:</strong> ${registration.name} (${registration.occupation})
-              </div>
-              <div style="margin-bottom: 10px; color: #475569; font-size: 14px;">
-                <strong>🏢 Organization:</strong> ${categoryDetail}
-              </div>
-              <div style="color: #475569; font-size: 14px;">
-                <strong>📍 Mode:</strong> Online Live Session
-              </div>
-            </div>
-
-            <!-- Join Notice -->
-            <div style="background: #e0e7ff; border-left: 4px solid #4f46e5; border-radius: 4px; padding: 14px 18px; margin: 24px 0;">
-              <p style="color: #3730a3; margin: 0; font-size: 14px; line-height: 1.5;">
-                <strong>Important:</strong> When the event start time arrives, the <strong>"Join Event"</strong> button will become active on the event page. You can click to enter the meeting room directly.
+              <h1 style="color: #ffffff; margin: 0 0 8px 0; font-size: 24px; font-weight: 800; letter-spacing: -0.3px;">
+                You're Registered! 🎉
+              </h1>
+              <p style="color: #d1fae5; margin: 0; font-size: 15px; font-weight: 400;">
+                Your seat has been reserved successfully
               </p>
             </div>
 
-            <p style="color: #475569; font-size: 14px; line-height: 1.6; margin: 0 0 10px 0;">
-              🔔 <strong>Reminder notice:</strong> We will also email you an automated reminder with the direct join link <strong>24 hours before the event starts</strong>.
-            </p>
-          </div>
+            <!-- Body -->
+            <div style="padding: 32px 28px;">
+              <p style="color: #1e293b; font-size: 16px; line-height: 1.6; margin: 0 0 14px 0;">
+                Hello <strong>${registration.name}</strong>,
+              </p>
+              <p style="color: #475569; font-size: 15px; line-height: 1.6; margin: 0 0 24px 0;">
+                Congratulations! Your registration for <strong>${event.title}</strong> is confirmed. Below are your event access and participation details:
+              </p>
 
-          <!-- Footer -->
-          <div style="background-color: #f8fafc; border-top: 1px solid #eef2f6; padding: 20px 30px; text-align: center;">
-            <p style="color: #94a3b8; font-size: 12px; margin: 0;">
-              Sent via Brevo REST API &bull; Academy &amp; Employment Management System
-            </p>
-          </div>
+              <!-- Highfield UK Certificate Card -->
+              <div style="background: linear-gradient(180deg, #fffbeb 0%, #fef3c7 100%); border: 2px solid #f59e0b; border-radius: 14px; padding: 20px; margin: 0 0 24px 0; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.12);">
+                <div style="font-size: 16px; font-weight: 800; color: #92400e; line-height: 1.4; margin-bottom: 10px;">
+                  🎓 Just 1 Hour | Get Your Highfield UK Certificate! 🎊🎊🎉🎉
+                </div>
+                <div style="background: #ffffff; border-left: 4px solid #d97706; border-radius: 8px; padding: 12px 14px; font-size: 13px; line-height: 1.6; color: #78350f;">
+                  <strong>• Highfield Certificate:</strong> Full attendance throughout the programme is mandatory to qualify for the certificate. Attendance will be monitored directly by Highfield.
+                </div>
+              </div>
 
+              <!-- Event Card -->
+              <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; padding: 22px; margin: 0 0 24px 0;">
+                <h3 style="color: #0f172a; margin: 0 0 14px 0; font-size: 17px; font-weight: 700; line-height: 1.4; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px;">
+                  ${event.title}
+                </h3>
+                
+                <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="font-size: 14px; color: #334155;">
+                  <tr>
+                    <td style="padding: 6px 0; vertical-align: top; width: 140px; font-weight: 600; color: #64748b;">
+                      📅 Date &amp; Time:
+                    </td>
+                    <td style="padding: 6px 0; font-weight: 600; color: #0f172a;">
+                      ${eventDateFormatted}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 6px 0; vertical-align: top; font-weight: 600; color: #64748b;">
+                      👤 Attendee:
+                    </td>
+                    <td style="padding: 6px 0; color: #0f172a;">
+                      <strong>${registration.name}</strong> (${registration.occupation})
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 6px 0; vertical-align: top; font-weight: 600; color: #64748b;">
+                      🏢 Organization:
+                    </td>
+                    <td style="padding: 6px 0; color: #0f172a;">
+                      ${categoryDetail}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 6px 0; vertical-align: top; font-weight: 600; color: #64748b;">
+                      📍 Mode:
+                    </td>
+                    <td style="padding: 6px 0; color: #0f172a;">
+                      <span style="display: inline-block; background: #e0f2fe; color: #0369a1; padding: 2px 10px; border-radius: 6px; font-weight: 600; font-size: 12px;">
+                        Online Live Session
+                      </span>
+                    </td>
+                  </tr>
+                </table>
+              </div>
+
+              <!-- Join CTA Button -->
+              <div style="text-align: center; margin: 26px 0;">
+                <a href="${joinLink}" target="_blank" style="display: inline-block; background: linear-gradient(135deg, #059669 0%, #10b981 100%); color: #ffffff !important; text-decoration: none; font-size: 15px; font-weight: 700; padding: 14px 34px; border-radius: 10px; box-shadow: 0 4px 14px rgba(5, 150, 105, 0.35); letter-spacing: 0.2px;">
+                  Join Event Link &rarr;
+                </a>
+              </div>
+
+              <!-- Join Notice Box -->
+              <div style="background: #f0fdf4; border-left: 4px solid #10b981; border-radius: 6px; padding: 13px 16px; margin: 22px 0;">
+                <p style="color: #065f46; margin: 0; font-size: 13px; line-height: 1.5;">
+                  <strong>Important:</strong> When the event start time arrives, the <strong>"Join Event"</strong> button will become active on the event page. You can click to enter the meeting room directly.
+                </p>
+              </div>
+
+              <p style="color: #64748b; font-size: 13px; line-height: 1.6; margin: 0; text-align: center;">
+                🔔 <strong>Reminder notice:</strong> We will also email you an automated reminder with the direct join link <strong>24 hours before the event starts</strong>.
+              </p>
+            </div>
+
+            <!-- Footer -->
+            <div style="background-color: #f8fafc; border-top: 1px solid #eef2f6; padding: 22px 30px; text-align: center;">
+              <p style="color: #64748b; font-size: 12px; margin: 0 0 6px 0;">
+                Need assistance or have questions? Email us at <a href="mailto:support@brixify.online" style="color: #059669; text-decoration: none; font-weight: 600;">support@brixify.online</a>
+              </p>
+              <p style="color: #94a3b8; font-size: 11px; margin: 0;">
+                Academy &amp; Employment Management System &bull; Brix
+              </p>
+            </div>
+
+          </div>
         </div>
       </body>
       </html>
@@ -260,7 +367,6 @@ class BrevoEmailService {
    * Send 24-hour reminder email
    */
   async sendEventReminderEmail({ registration, event }) {
-    const subject = `Reminder: ${event.title} is Starting Tomorrow! 🚀`;
     const cleanDate = typeof event.event_start === 'string' ? event.event_start.replace('Z', '').replace(' ', 'T') : event.event_start;
     const eventDateFormatted = `${new Date(cleanDate).toLocaleString('en-US', {
       weekday: 'long',
@@ -272,6 +378,32 @@ class BrevoEmailService {
     })} IST`;
 
     const joinLink = event.meet_link || `${process.env.FRONTEND_URL || 'http://localhost:3000'}/events`;
+    const attendeeDetail = `${registration.occupation} (${registration.organization})`;
+
+    try {
+      const emailTemplateService = (await import('./email-template.service.js')).default;
+      const template = await emailTemplateService.getTemplateByCode('event_reminder');
+      if (template && template.is_active && template.body_html) {
+        const vars = {
+          '{{NAME}}': registration.name,
+          '{{EVENT_TITLE}}': event.title,
+          '{{EVENT_DATE}}': eventDateFormatted,
+          '{{JOIN_LINK}}': joinLink,
+          '{{ATTENDEE_DETAIL}}': attendeeDetail
+        };
+        const subject = emailTemplateService.render(template.subject, vars);
+        const htmlContent = emailTemplateService.render(template.body_html, vars);
+        return this.sendEmail({
+          to: { email: registration.email, name: registration.name },
+          subject,
+          htmlContent
+        });
+      }
+    } catch (e) {
+      console.warn('BrevoService: template lookup failed for event_reminder, using fallback:', e.message);
+    }
+
+    const subject = `Reminder: ${event.title} is Starting Tomorrow! 🚀`;
 
     const htmlContent = `
       <!DOCTYPE html>

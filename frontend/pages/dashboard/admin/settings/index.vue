@@ -22,7 +22,7 @@
       </div>
 
       <!-- Main Content -->
-      <div class="settings-content pa-8">
+      <div class="settings-content pa-4 pa-md-8">
         <v-form @submit.prevent="save">
           <!-- Branding Tab -->
           <div v-if="activeTab[0] === 'branding'" class="fade-in">
@@ -219,6 +219,29 @@
 
             <v-divider class="my-6"></v-divider>
 
+            <!-- Quick link to Email Templates -->
+            <v-card variant="tonal" color="primary" class="rounded-xl pa-4 mb-6 d-flex flex-column flex-sm-row justify-space-between align-sm-center gap-3">
+              <div class="d-flex align-center gap-3">
+                <v-avatar color="primary" variant="flat" size="40">
+                  <v-icon color="white" size="22">mdi-email-edit-outline</v-icon>
+                </v-avatar>
+                <div>
+                  <div class="text-subtitle-2 font-weight-bold">Customize Email Content &amp; Subjects</div>
+                  <div class="text-caption text-secondary">Manage dynamic email templates, subjects, and supported placeholder tags for onboarding, events, and completions.</div>
+                </div>
+              </div>
+              <v-btn
+                color="primary"
+                variant="flat"
+                rounded="lg"
+                size="small"
+                class="text-none font-weight-bold"
+                @click="activeTab = ['email_templates']"
+              >
+                Manage Email Templates &rarr;
+              </v-btn>
+            </v-card>
+
             <div class="d-flex flex-column flex-sm-row align-sm-center justify-space-between gap-4 pa-4 rounded-xl border bg-surface">
               <div>
                 <div class="text-subtitle-2 font-weight-bold">Test Email Delivery</div>
@@ -243,6 +266,11 @@
                 </AppButton>
               </div>
             </div>
+          </div>
+
+          <!-- Email Templates Tab -->
+          <div v-if="activeTab[0] === 'email_templates'" class="fade-in">
+            <EmailTemplatesTab />
           </div>
 
           <!-- Contact Info Tab -->
@@ -685,7 +713,7 @@
             </v-card>
           </div>
 
-          <div class="d-flex justify-end gap-3 mt-12 pt-6 border-t" v-if="activeTab[0] !== 'social' && activeTab[0] !== 'currencies' && activeTab[0] !== 'homepage' && activeTab[0] !== 'certifications'">
+          <div class="d-flex justify-end gap-3 mt-12 pt-6 border-t" v-if="activeTab[0] !== 'social' && activeTab[0] !== 'currencies' && activeTab[0] !== 'homepage' && activeTab[0] !== 'certifications' && activeTab[0] !== 'email_templates'">
             <AppButton variant="g" size="lg" icon="mdi-refresh" @click="fetchData">
               Reset Changes
             </AppButton>
@@ -710,6 +738,7 @@ import { useApi } from '@/composables/useApi';
 import SocialPlatformsTab from '@/components/admin/settings/SocialPlatformsTab.vue';
 import CurrenciesTab from '@/components/admin/settings/CurrenciesTab.vue';
 import CertificationsTab from '@/components/admin/settings/CertificationsTab.vue';
+import EmailTemplatesTab from '@/components/admin/settings/EmailTemplatesTab.vue';
 
 definePageMeta({
   layout: 'dashboard',
@@ -743,6 +772,7 @@ const tabs = [
   { label: 'Homepage', value: 'homepage', icon: 'mdi-home-outline' },
   { label: 'Contact Info', value: 'contact', icon: 'mdi-map-marker-outline' },
   { label: 'Email (Brevo API)', value: 'email', icon: 'mdi-email-outline' },
+  { label: 'Email Templates', value: 'email_templates', icon: 'mdi-email-edit-outline' },
   { label: 'WhatsApp API', value: 'whatsapp', icon: 'mdi-whatsapp' },
   { label: 'Payments', value: 'payments', icon: 'mdi-credit-card-outline' },
   { label: 'Terms & Privacy', value: 'terms_privacy', icon: 'mdi-shield-lock-outline' },
@@ -979,31 +1009,43 @@ onMounted(() => {
 .settings-layout {
   display: flex;
   background: white;
-  border-radius: var(--radius-lg);
-  
+  border-radius: var(--radius-lg, 16px);
   min-height: 600px;
   overflow: hidden;
-  border: 1px solid var(--border);
+  border: 1px solid var(--border, rgba(0, 0, 0, 0.08));
+  width: 100%;
 }
 
 .settings-sidebar {
   width: 260px;
-  background: var(--g1);
-  border-right: 1px solid rgba(0, 0, 0, 0.05);
+  min-width: 260px;
+  max-width: 260px;
+  flex: 0 0 260px;
+  background: var(--g1, #f8fafc);
+  border-right: 1px solid rgba(0, 0, 0, 0.06);
+  overflow-y: auto;
 }
 
 .settings-content {
   flex: 1;
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 .settings-list {
   background: transparent !important;
 }
 
+.settings-list :deep(.v-list-item-title) {
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
 :deep(.v-list-item--selected) {
   background-color: white !important;
-  border: 1px solid var(--border);
-  
+  border: 1px solid var(--border, rgba(0, 0, 0, 0.08));
 }
 
 .fr2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }

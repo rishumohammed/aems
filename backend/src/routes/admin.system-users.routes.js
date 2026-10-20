@@ -87,10 +87,18 @@ router.post('/', authenticateJWT, authorizeRoles('super_admin'), async (req, res
 
     // Optionally send email with plainPassword
     try {
-      await emailService.sendEmail({
+      const emailTemplateService = (await import('../services/email-template.service.js')).default;
+      await emailTemplateService.sendTemplatedEmail({
+        code: 'system_user_welcome',
         to: email,
-        subject: 'Your System Account has been created',
-        html: `
+        variables: {
+          '{{NAME}}': name,
+          '{{ROLE}}': role,
+          '{{TEMPORARY_PASSWORD}}': plainPassword,
+          '{{LOGIN_URL}}': `${process.env.FRONTEND_URL || 'http://localhost:3000'}/login`
+        },
+        fallbackSubject: 'Your System Account has been created',
+        fallbackHtml: `
           <h3>Welcome to the Team, ${name}!</h3>
           <p>Your account has been created with the role: <strong>${role}</strong>.</p>
           <p>Your temporary password is: <strong>${plainPassword}</strong></p>

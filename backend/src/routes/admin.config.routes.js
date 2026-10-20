@@ -211,6 +211,7 @@ router.get('/terms-privacy-acceptances', authenticateJWT, authorizeRoles('super_
 });
 
 import { AdminCurrenciesController } from '../controllers/admin.config.currencies.controller.js';
+import { AdminEmailTemplatesController } from '../controllers/admin.email-templates.controller.js';
 
 // --- Currency Management ---
 router.get('/currencies', authenticateJWT, authorizeRoles('super_admin'), AdminCurrenciesController.getCurrencies);
@@ -219,4 +220,15 @@ router.put('/currencies/:id', authenticateJWT, authorizeRoles('super_admin'), Ad
 router.delete('/currencies/:id', authenticateJWT, authorizeRoles('super_admin'), AdminCurrenciesController.deleteCurrency);
 router.patch('/currencies/:id/set-base', authenticateJWT, authorizeRoles('super_admin'), AdminCurrenciesController.setBaseCurrency);
 
+// --- Email Templates Management ---
+router.get('/email-templates', authenticateJWT, authorizeRoles('super_admin'), AdminEmailTemplatesController.getTemplates);
+router.get('/email-templates/:id', authenticateJWT, authorizeRoles('super_admin'), AdminEmailTemplatesController.getTemplate);
+router.post('/email-templates', authenticateJWT, authorizeRoles('super_admin'), AdminEmailTemplatesController.createTemplate);
+router.put('/email-templates/:id', authenticateJWT, authorizeRoles('super_admin'), AdminEmailTemplatesController.updateTemplate);
+router.delete('/email-templates/:id', authenticateJWT, authorizeRoles('super_admin'), AdminEmailTemplatesController.deleteTemplate);
+router.post('/email-templates/:id/reset', authenticateJWT, authorizeRoles('super_admin'), AdminEmailTemplatesController.resetTemplate);
+router.post('/email-templates/preview', authenticateJWT, authorizeRoles('super_admin'), AdminEmailTemplatesController.previewTemplate);
+router.post('/email-templates/:id/test', authenticateJWT, authorizeRoles('super_admin'), AdminEmailTemplatesController.sendTestTemplate);
+
 export default router;
+

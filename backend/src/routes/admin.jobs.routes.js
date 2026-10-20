@@ -175,11 +175,24 @@ router.put('/jobs/:id/approve', authenticateJWT, hasAccess, async (req, res) => 
     // Optionally fetch employer email and notify
     const [jobs] = await pool.query('SELECT j.title, u.email, u.name FROM jobs j JOIN users u ON j.posted_by = u.id WHERE j.id = ?', [req.params.id]);
     if (jobs.length > 0 && jobs[0].email) {
-      emailService.sendEmail({
-        to: jobs[0].email,
-        subject: `✅ Your Job Listing is Live: ${jobs[0].title}`,
-        html: `<p>Hello ${jobs[0].name},</p><p>Your job listing for <strong>${jobs[0].title}</strong> has been approved and is now live on our board.</p>`
-      }).catch(e => console.log('Email error:', e?.message || e));
+      (async () => {
+        try {
+          const emailTemplateService = (await import('../services/email-template.service.js')).default;
+          await emailTemplateService.sendTemplatedEmail({
+            code: 'job_approved',
+            to: jobs[0].email,
+            variables: {
+              '{{NAME}}': jobs[0].name || 'Employer',
+              '{{JOB_TITLE}}': jobs[0].title,
+              '{{PORTAL_URL}}': `${process.env.FRONTEND_URL || 'http://localhost:3000'}/dashboard/employer/jobs`
+            },
+            fallbackSubject: `✅ Your Job Listing is Live: ${jobs[0].title}`,
+            fallbackHtml: `<p>Hello ${jobs[0].name},</p><p>Your job listing for <strong>${jobs[0].title}</strong> has been approved and is now live on our board.</p>`
+          });
+        } catch (e) {
+          console.log('Job approval email error:', e?.message || e);
+        }
+      })();
     }
 
     res.json({ message: 'Job approved' });
@@ -196,11 +209,25 @@ router.put('/jobs/:id/reject', authenticateJWT, hasAccess, async (req, res) => {
     // Notify employer
     const [jobs] = await pool.query('SELECT j.title, u.email, u.name FROM jobs j JOIN users u ON j.posted_by = u.id WHERE j.id = ?', [req.params.id]);
     if (jobs.length > 0 && jobs[0].email) {
-      emailService.sendEmail({
-        to: jobs[0].email,
-        subject: `❌ Your Job Listing requires revisions: ${jobs[0].title}`,
-        html: `<p>Hello ${jobs[0].name},</p><p>Your job listing for <strong>${jobs[0].title}</strong> could not be approved.</p><p><strong>Reason:</strong> ${reason}</p><p>Please edit your draft and resubmit.</p>`
-      }).catch(e => console.log('Email error:', e?.message || e));
+      (async () => {
+        try {
+          const emailTemplateService = (await import('../services/email-template.service.js')).default;
+          await emailTemplateService.sendTemplatedEmail({
+            code: 'job_rejected',
+            to: jobs[0].email,
+            variables: {
+              '{{NAME}}': jobs[0].name || 'Employer',
+              '{{JOB_TITLE}}': jobs[0].title,
+              '{{REASON}}': reason || 'No reason provided',
+              '{{PORTAL_URL}}': `${process.env.FRONTEND_URL || 'http://localhost:3000'}/dashboard/employer/jobs`
+            },
+            fallbackSubject: `❌ Your Job Listing requires revisions: ${jobs[0].title}`,
+            fallbackHtml: `<p>Hello ${jobs[0].name},</p><p>Your job listing for <strong>${jobs[0].title}</strong> could not be approved.</p><p><strong>Reason:</strong> ${reason}</p><p>Please edit your draft and resubmit.</p>`
+          });
+        } catch (e) {
+          console.log('Job rejection email error:', e?.message || e);
+        }
+      })();
     }
 
     res.json({ message: 'Job rejected' });
