@@ -33,6 +33,8 @@
 </template>
 
 <script setup>
+import { ref, watch } from 'vue'
+
 const props = defineProps({
   modelValue: {
     type: Object,
@@ -49,14 +51,75 @@ const error = ref(null)
 const metadata = ref(null)
 const isValid = ref(false)
 
+// Reconstruct standard video URL from source and ID
+const getVideoUrl = (source, id) => {
+  if (!id) return ''
+  if (id.startsWith('http://') || id.startsWith('https://')) return id
+  if (source === 'youtube') return `https://www.youtube.com/watch?v=${id}`
+  if (source === 'vimeo') return `https://vimeo.com/${id}`
+  return id
+}
+
+// Synchronize local input state and metadata preview with modelValue
+const syncFromProps = () => {
+  const currentId = props.modelValue?.video_id
+  const currentSource = props.modelValue?.video_source || 'youtube'
+
+  if (currentId) {
+    const expectedUrl = getVideoUrl(currentSource, currentId)
+    if (!url.value || url.value !== expectedUrl) {
+      url.value = expectedUrl
+    }
+
+    metadata.value = {
+      source: currentSource,
+      video_id: currentId,
+      title: props.modelValue?.title || '',
+      thumbnail_url: props.modelValue?.thumbnail_url || (
+        currentSource === 'youtube'
+          ? `https://img.youtube.com/vi/${currentId}/hqdefault.jpg`
+          : ''
+      )
+    }
+    isValid.value = true
+    error.value = null
+  } else if (!url.value) {
+    metadata.value = null
+    isValid.value = false
+    error.value = null
+  }
+}
+
+watch(
+  () => [props.modelValue?.video_id, props.modelValue?.video_source, props.modelValue?.id],
+  () => {
+    syncFromProps()
+  },
+  { immediate: true }
+)
+
 // Debounced URL parser
 let timeout = null
 const onUrlChange = (val) => {
   if (timeout) clearTimeout(timeout)
-  if (!val) {
+  const trimmed = val ? val.trim() : ''
+
+  if (!trimmed) {
     metadata.value = null
     isValid.value = false
     error.value = null
+    emit('update:modelValue', {
+      ...props.modelValue,
+      video_source: '',
+      video_id: '',
+      thumbnail_url: ''
+    })
+    return
+  }
+
+  // If already matches current parsed video, avoid redundant fetch
+  const currentExpected = getVideoUrl(props.modelValue?.video_source, props.modelValue?.video_id)
+  if (trimmed === currentExpected && metadata.value) {
     return
   }
 
@@ -64,32 +127,34 @@ const onUrlChange = (val) => {
     loading.value = true
     error.value = null
     try {
-      const { data: res } = await api.post('/lms/parse-video-url', { url: val })
-      metadata.value = res
+      const { data: res } = await api.post('/lms/parse-video-url', { url: trimmed })
+      const resolvedThumbnail = res.thumbnail_url || (res.source === 'youtube' ? `https://img.youtube.com/vi/${res.id}/hqdefault.jpg` : '')
+
+      metadata.value = {
+        source: res.source,
+        video_id: res.id,
+        title: res.title || props.modelValue?.title || '',
+        thumbnail_url: resolvedThumbnail
+      }
       isValid.value = true
+
       emit('update:modelValue', {
         ...props.modelValue,
         video_source: res.source,
         video_id: res.id,
-        title: res.title, // Use fetched title as default
-        thumbnail_url: res.thumbnail_url
+        // Preserve user's existing title if already provided
+        title: props.modelValue?.title?.trim() ? props.modelValue.title : (res.title || ''),
+        thumbnail_url: resolvedThumbnail
       })
       emit('metadata-fetched', res)
     } catch (e) {
-      error.value = 'Could not parse video URL. Please check if it is valid.'
+      error.value = 'Could not parse video URL. Please check if it is a valid YouTube or Vimeo link.'
       isValid.value = false
       metadata.value = null
     } finally {
       loading.value = false
     }
-  }, 800)
-}
-
-const lineClampStyle = {
-  display: '-webkit-box',
-  WebkitLineClamp: '1',
-  WebkitBoxOrient: 'vertical',
-  overflow: 'hidden'
+  }, 600)
 }
 </script>
 

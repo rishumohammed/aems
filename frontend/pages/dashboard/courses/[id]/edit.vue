@@ -326,6 +326,18 @@ const fetchCourse = async () => {
       data.start_date = new Date(d.getTime() - (d.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);
     }
     data.enable_certificate = data.enable_certificate !== undefined ? (data.enable_certificate === 1 || data.enable_certificate === true || data.enable_certificate === '1' || data.enable_certificate === 'true') : true;
+
+    // Reconstruct intro video URL for input field
+    if (data.intro_video_id && !data.intro_video_url) {
+      if (data.intro_video_source === 'youtube') {
+        data.intro_video_url = `https://www.youtube.com/watch?v=${data.intro_video_id}`;
+      } else if (data.intro_video_source === 'vimeo') {
+        data.intro_video_url = `https://vimeo.com/${data.intro_video_id}`;
+      } else {
+        data.intro_video_url = data.intro_video_id;
+      }
+    }
+
     course.value = data
     if (editor.value) editor.value.commands.setContent(data.description || '')
     
