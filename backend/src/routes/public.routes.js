@@ -421,9 +421,16 @@ router.get('/jobs', async (req, res) => {
   const offset = (page - 1) * limit;
 
   let query = `
-    SELECT j.*, jc.name as category_name
+    SELECT j.*, jc.name as category_name, jc.slug as category_slug,
+           u.name as employer_name, u.role as poster_role,
+           COALESCE(ep.logo_url, up.avatar_url) as company_logo,
+           COALESCE(ep.about_company, up.bio) as company_bio,
+           COALESCE(ep.website, up.linkedin) as company_website
     FROM jobs j
     LEFT JOIN job_categories jc ON j.category = jc.id
+    LEFT JOIN users u ON j.posted_by = u.id
+    LEFT JOIN employer_profiles ep ON ep.user_id = u.id
+    LEFT JOIN user_profiles up ON up.user_id = u.id
     WHERE j.status = 'approved'
   `;
   const params = [];
@@ -481,8 +488,21 @@ router.get('/jobs', async (req, res) => {
     const [jobs] = await pool.query(query, params);
     const [total] = await pool.query('SELECT COUNT(*) as count FROM jobs WHERE status = "approved"');
     
+    const formattedJobs = jobs.map(job => {
+      if (job.hide_company_name) {
+        return {
+          ...job,
+          company: 'Confidential Organization',
+          company_logo: null,
+          company_bio: null,
+          company_website: null
+        };
+      }
+      return job;
+    });
+
     res.json({
-      jobs,
+      jobs: formattedJobs,
       total: total[0].count,
       page: parseInt(page || '1'),
       limit: parseInt(limit || '10')
@@ -496,10 +516,15 @@ router.get('/jobs', async (req, res) => {
 router.get('/jobs/:id', async (req, res) => {
   try {
     const [jobs] = await pool.query(`
-      SELECT j.*, jc.name as category_name, jc.icon as category_icon, u.name as employer_name, up.avatar_url as company_logo, up.bio as company_bio, up.linkedin as company_website
+      SELECT j.*, jc.name as category_name, jc.icon as category_icon, 
+             u.name as employer_name, u.role as poster_role,
+             COALESCE(ep.logo_url, up.avatar_url) as company_logo, 
+             COALESCE(ep.about_company, up.bio) as company_bio, 
+             COALESCE(ep.website, up.linkedin) as company_website
       FROM jobs j
       LEFT JOIN job_categories jc ON j.category = jc.id
       LEFT JOIN users u ON j.posted_by = u.id
+      LEFT JOIN employer_profiles ep ON ep.user_id = u.id
       LEFT JOIN user_profiles up ON u.id = up.user_id
       WHERE j.id = ? AND j.status = 'approved'
     `, [req.params.id]);
@@ -510,15 +535,26 @@ router.get('/jobs/:id', async (req, res) => {
 
     const job = jobs[0];
 
+    if (job.hide_company_name) {
+      job.company = 'Confidential Organization';
+      job.company_logo = null;
+      job.company_bio = null;
+      job.company_website = null;
+    }
+
     // Related jobs
     const [related] = await pool.query(`
-      SELECT id, title, company, location, type, salary_range, created_at
-      FROM jobs
-      WHERE category = ? AND id != ? AND status = 'approved'
+      SELECT j.id, j.title, j.company, j.location, j.type, j.salary_range, j.created_at, j.hide_company_name,
+             COALESCE(ep.logo_url, up.avatar_url) as company_logo
+      FROM jobs j
+      LEFT JOIN users u ON j.posted_by = u.id
+      LEFT JOIN employer_profiles ep ON ep.user_id = u.id
+      LEFT JOIN user_profiles up ON up.user_id = u.id
+      WHERE j.category = ? AND j.id != ? AND j.status = 'approved'
       LIMIT 3
     `, [job.category, job.id]);
 
-    job.related = related;
+    job.related = related.map(r => r.hide_company_name ? { ...r, company: 'Confidential Organization', company_logo: null } : r);
 
     res.json(job);
   } catch (error) {

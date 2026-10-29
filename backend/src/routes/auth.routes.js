@@ -202,7 +202,7 @@ router.post('/login', async (req, res) => {
   try {
     console.log('Login attempt for email:', email);
     const [users] = await pool.query(`
-      SELECT u.*, up.avatar_url, ep.approval_status 
+      SELECT u.*, COALESCE(ep.logo_url, up.avatar_url) as avatar_url, ep.approval_status 
       FROM users u
       LEFT JOIN user_profiles up ON u.id = up.user_id
       LEFT JOIN employer_profiles ep ON u.id = ep.user_id
@@ -358,7 +358,7 @@ router.post('/logout', authenticateJWT, async (req, res) => {
 router.get('/me', authenticateJWT, async (req, res) => {
   try {
     const [users] = await pool.query(`
-      SELECT u.id, u.name, u.email, u.role, u.status, u.force_password_change, up.avatar_url, ep.approval_status
+      SELECT u.id, u.name, u.email, u.role, u.status, u.force_password_change, COALESCE(ep.logo_url, up.avatar_url) as avatar_url, ep.approval_status
       FROM users u
       LEFT JOIN user_profiles up ON u.id = up.user_id
       LEFT JOIN employer_profiles ep ON u.id = ep.user_id

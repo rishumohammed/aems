@@ -52,14 +52,21 @@
         <v-menu location="bottom end" offset="10" transition="slide-y-transition">
           <template v-slot:activator="{ props }">
             <v-avatar size="32" class="user-pill-avatar" v-bind="props">
-              <span class="text-caption font-weight-bold">{{ userInitials }}</span>
+              <v-img v-if="authStore.user?.avatar_url" :src="getImageUrl(authStore.user.avatar_url)" cover></v-img>
+              <span v-else class="text-caption font-weight-bold">{{ userInitials }}</span>
             </v-avatar>
           </template>
           
-          <v-card width="220" rounded="xl" class="mt-2 shadow-apple overflow-hidden">
-            <div class="pa-4 bg-grey-lighten-4">
-              <div class="text-subtitle-2 font-weight-black">{{ authStore.user?.name }}</div>
-              <div class="text-caption text-secondary uppercase font-weight-bold">{{ authStore.userRole }}</div>
+          <v-card width="240" rounded="xl" class="mt-2 shadow-apple overflow-hidden">
+            <div class="pa-4 bg-grey-lighten-4 d-flex align-center gap-3">
+              <v-avatar size="36" color="white" class="border flex-shrink-0">
+                <v-img v-if="authStore.user?.avatar_url" :src="getImageUrl(authStore.user.avatar_url)" cover></v-img>
+                <span v-else class="text-caption font-weight-bold">{{ userInitials }}</span>
+              </v-avatar>
+              <div class="overflow-hidden">
+                <div class="text-subtitle-2 font-weight-black text-truncate">{{ authStore.user?.name }}</div>
+                <div class="text-caption text-secondary uppercase font-weight-bold">{{ authStore.userRole }}</div>
+              </div>
             </div>
             <v-divider opacity="0.05"></v-divider>
             <v-list density="compact" class="pa-1">
@@ -94,6 +101,7 @@ import { useDisplay } from 'vuetify';
 const authStore = useAuthStore();
 const uiStore = useUIStore();
 const navStore = useNavStore();
+const { getImageUrl } = useImageUrl();
 const { mobile } = useDisplay();
 const { connect, disconnect } = useSocket();
 

@@ -53,8 +53,9 @@
       >
         <template v-slot:item.title="{ item }">
           <div class="d-flex align-center py-2">
-            <div class="company-logo mr-3">
-              <v-icon icon="mdi-domain" color="blue" size="20"></v-icon>
+            <div class="company-logo mr-3 overflow-hidden d-flex align-center justify-center">
+              <v-img v-if="item.employer_logo" :src="getImageUrl(item.employer_logo)" cover width="36" height="36" class="rounded-lg"></v-img>
+              <v-icon v-else icon="mdi-domain" color="blue" size="20"></v-icon>
             </div>
             <div>
               <div class="job-title">{{ item.title }}</div>
@@ -127,6 +128,7 @@ import { useApi } from '@/composables/useApi';
 definePageMeta({ layout: 'dashboard', middleware: ['auth', 'role'], role: ['super_admin', 'sub_admin', 'placement_coordinator'] });
 
 const api = useApi();
+const { getImageUrl } = useImageUrl();
 const activeTab = ref('all');
 const activeCategory = ref('all');
 const searchQuery = ref('');

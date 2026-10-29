@@ -7,8 +7,10 @@
         <v-col cols="12" md="8">
           <v-card rounded="xl" border flat class="pa-8 mb-6 shadow-sm">
             <div class="d-flex align-center gap-6 mb-8">
-              <v-avatar size="80" rounded="xl" color="grey-lighten-4">
-                <v-icon size="40">mdi-office-building</v-icon>
+              <v-avatar size="80" rounded="xl" color="grey-lighten-4" class="border flex-shrink-0">
+                <v-icon v-if="job.hide_company_name" color="primary" size="40">mdi-shield-lock-outline</v-icon>
+                <img v-else-if="job.company_logo" :src="getImageUrl(job.company_logo)" :alt="job.company" style="width: 100%; height: 100%; object-fit: cover;" />
+                <v-icon v-else color="grey-darken-1" size="40">mdi-office-building</v-icon>
               </v-avatar>
               <div>
                 <h1 class="text-h4 font-weight-bold mb-1">{{ job.title }}</h1>
@@ -95,6 +97,7 @@ definePageMeta({
 
 const route = useRoute();
 const config = useRuntimeConfig();
+const { getImageUrl } = useImageUrl();
 const apiBase = config.public.apiBase;
 const showApplyModal = ref(false);
 const hasApplied = ref(false);

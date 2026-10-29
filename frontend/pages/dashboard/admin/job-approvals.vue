@@ -18,8 +18,9 @@
         <!-- Employer Column -->
         <template v-slot:item.employer="{ item }">
           <div class="d-flex align-center gap-3">
-            <v-avatar color="blue-lighten-5" size="40">
-              <span class="text-blue font-weight-bold">{{ (item.company || item.company_name)?.substring(0,2).toUpperCase() || 'CO' }}</span>
+            <v-avatar color="blue-lighten-5" size="40" class="border flex-shrink-0">
+              <v-img v-if="item.employer_logo" :src="getImageUrl(item.employer_logo)" cover></v-img>
+              <span v-else class="text-blue font-weight-bold">{{ (item.company || item.company_name)?.substring(0,2).toUpperCase() || 'CO' }}</span>
             </v-avatar>
             <div>
               <div class="font-weight-bold text-body-1">{{ item.company || item.company_name || 'Unknown Company' }}</div>
@@ -144,8 +145,9 @@
         </v-toolbar>
         <v-card-text class="pa-6">
           <div class="d-flex align-center gap-4 mb-6 pb-6 border-b">
-            <v-avatar color="primary-lighten-4" size="64">
-              <span class="text-h5 font-weight-black text-primary">{{ (selectedJob.company || selectedJob.company_name)?.substring(0,1) || 'C' }}</span>
+            <v-avatar color="primary-lighten-4" size="64" class="border flex-shrink-0">
+              <v-img v-if="selectedJob.employer_logo" :src="getImageUrl(selectedJob.employer_logo)" cover></v-img>
+              <span v-else class="text-h5 font-weight-black text-primary">{{ (selectedJob.company || selectedJob.company_name)?.substring(0,1) || 'C' }}</span>
             </v-avatar>
             <div>
               <h2 class="text-h4 font-weight-black mb-1">{{ selectedJob.title }}</h2>
@@ -222,6 +224,7 @@ import { useApi } from '@/composables/useApi';
 definePageMeta({ layout: 'dashboard', middleware: ['auth', 'role'], role: ['super_admin', 'placement_coordinator'] });
 
 const api = useApi();
+const { getImageUrl } = useImageUrl();
 const jobs = ref<any[]>([]);
 const loading = ref(false);
 const actionLoading = ref(false);

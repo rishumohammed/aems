@@ -1,12 +1,43 @@
 import express from 'express';
 import bcrypt from 'bcryptjs';
 import { v4 as uuidv4 } from 'uuid';
+import path from 'path';
+import fs from 'fs';
+import multer from 'multer';
 import { pool } from '../db/connection.js';
 import { authenticateJWT, authorizeRoles } from '../middleware/auth.js';
 import { getJobMatchedCandidates } from '../services/jobMatching.service.js';
 import { createNotification } from '../services/notification.service.js';
 
 const router = express.Router();
+
+// Multer Storage Configuration for Employer Profile Pictures / Logos
+const logoStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const uploadPath = 'uploads/employers';
+    if (!fs.existsSync(uploadPath)) fs.mkdirSync(uploadPath, { recursive: true });
+    cb(null, uploadPath);
+  },
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname).toLowerCase();
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+    cb(null, `employer-${req.user.id}-${uniqueSuffix}${ext}`);
+  }
+});
+
+const uploadLogo = multer({
+  storage: logoStorage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+  fileFilter: (req, file, cb) => {
+    const filetypes = /jpeg|jpg|png|webp|gif|svg/;
+    const mimetype = filetypes.test(file.mimetype);
+    const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+    if (mimetype && extname) {
+      return cb(null, true);
+    }
+    cb(new Error('Only image files (jpeg, jpg, png, webp, gif, svg) are allowed!'));
+  }
+});
 
 // 1. Employer Registration (Public)
 router.post('/register', async (req, res) => {
@@ -238,6 +269,57 @@ router.put('/profile', authenticateJWT, isEmployer, async (req, res) => {
     res.status(500).json({ message: error.message });
   } finally {
     connection.release();
+  }
+});
+
+// Upload / Update Employer Profile Picture / Logo
+router.post('/profile/logo', authenticateJWT, isEmployer, uploadLogo.single('logo'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: 'No image file uploaded' });
+    }
+
+    const logoUrl = `/uploads/employers/${req.file.filename}`;
+
+    // Delete previous uploaded local file if existed to avoid disk clutter
+    const [oldRows] = await pool.query('SELECT logo_url FROM employer_profiles WHERE user_id = ?', [req.user.id]);
+    if (oldRows.length && oldRows[0].logo_url && oldRows[0].logo_url.startsWith('/uploads/employers/')) {
+      const oldFilename = path.basename(oldRows[0].logo_url);
+      const oldPath = path.join('uploads', 'employers', oldFilename);
+      if (fs.existsSync(oldPath)) {
+        try { fs.unlinkSync(oldPath); } catch (e) { console.warn('Could not remove old logo file:', e.message); }
+      }
+    }
+
+    await pool.query('UPDATE employer_profiles SET logo_url = ? WHERE user_id = ?', [logoUrl, req.user.id]);
+
+    res.json({
+      message: 'Profile picture uploaded successfully',
+      logo_url: logoUrl
+    });
+  } catch (error) {
+    console.error('Error uploading employer logo:', error);
+    res.status(500).json({ message: error.message || 'Failed to upload profile picture' });
+  }
+});
+
+// Remove Employer Profile Picture / Logo
+router.delete('/profile/logo', authenticateJWT, isEmployer, async (req, res) => {
+  try {
+    const [oldRows] = await pool.query('SELECT logo_url FROM employer_profiles WHERE user_id = ?', [req.user.id]);
+    if (oldRows.length && oldRows[0].logo_url && oldRows[0].logo_url.startsWith('/uploads/employers/')) {
+      const oldFilename = path.basename(oldRows[0].logo_url);
+      const oldPath = path.join('uploads', 'employers', oldFilename);
+      if (fs.existsSync(oldPath)) {
+        try { fs.unlinkSync(oldPath); } catch (e) { console.warn('Could not remove old logo file:', e.message); }
+      }
+    }
+
+    await pool.query('UPDATE employer_profiles SET logo_url = NULL WHERE user_id = ?', [req.user.id]);
+    res.json({ message: 'Profile picture removed successfully' });
+  } catch (error) {
+    console.error('Error removing employer logo:', error);
+    res.status(500).json({ message: error.message || 'Failed to remove profile picture' });
   }
 });
 

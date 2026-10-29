@@ -93,8 +93,10 @@
           <div v-for="job in jobs" :key="job.id" class="mb-4">
             <v-card link :to="`/dashboard/jobs/${job.id}`" rounded="xl" border flat class="pa-5 hover-card">
               <div class="d-flex align-center gap-4">
-                <v-avatar size="56" rounded="lg" color="grey-lighten-4">
-                  <v-icon color="grey-darken-1">mdi-office-building</v-icon>
+                <v-avatar size="56" rounded="lg" color="grey-lighten-4" class="border flex-shrink-0">
+                  <v-icon v-if="job.hide_company_name" color="primary" size="28">mdi-shield-lock-outline</v-icon>
+                  <img v-else-if="job.company_logo" :src="getImageUrl(job.company_logo)" :alt="job.company" style="width: 100%; height: 100%; object-fit: cover;" />
+                  <v-icon v-else color="grey-darken-1" size="28">mdi-office-building</v-icon>
                 </v-avatar>
                 <div class="flex-grow-1">
                   <div class="d-flex align-center justify-space-between mb-1">
@@ -156,6 +158,7 @@ definePageMeta({
 
 const authStore = useAuthStore();
 const config = useRuntimeConfig();
+const { getImageUrl } = useImageUrl();
 const apiBase = config.public.apiBase;
 
 const search = ref('');

@@ -8,7 +8,7 @@
       <!-- Company Logo / Icon -->
       <v-avatar color="grey-lighten-4" size="64" rounded="lg" class="border flex-shrink-0">
         <v-icon v-if="job.hide_company_name" color="primary" size="32">mdi-shield-lock-outline</v-icon>
-        <img v-else-if="job.company_logo" :src="job.company_logo" :alt="job.company" style="width: 100%; height: 100%; object-fit: cover;" />
+        <img v-else-if="job.company_logo" :src="getImageUrl(job.company_logo)" :alt="job.company" style="width: 100%; height: 100%; object-fit: cover;" />
         <v-icon v-else color="grey-darken-1" size="32">mdi-office-building</v-icon>
       </v-avatar>
       
@@ -69,6 +69,9 @@
 
 <script setup>
 import { computed } from 'vue';
+import { useImageUrl } from '@/composables/useImageUrl';
+
+const { getImageUrl } = useImageUrl();
 
 const props = defineProps({
   job: {

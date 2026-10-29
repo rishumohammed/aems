@@ -71,10 +71,12 @@ router.get('/jobs', authenticateJWT, hasAccess, async (req, res) => {
     const status = req.query.status;
     let query = `
       SELECT j.*, jc.name as category_name, jc.slug as category_slug, u.name as employer_name, u.email as employer_email,
+             ep.logo_url as employer_logo, ep.company_name as employer_company,
              (SELECT COUNT(*) FROM job_applications ja WHERE ja.job_id = j.id) as applicant_count
       FROM jobs j
       LEFT JOIN job_categories jc ON j.category = jc.id
       LEFT JOIN users u ON j.posted_by = u.id
+      LEFT JOIN employer_profiles ep ON ep.user_id = u.id
     `;
     const params = [];
     if (status && status !== 'all') {
@@ -95,7 +97,7 @@ router.get('/job-approvals', authenticateJWT, hasAccess, async (req, res) => {
   try {
     let query = `
       SELECT j.*, jc.name as category_name, jc.slug as category_slug, 
-             u.name as employer_name, u.email as employer_email, ep.company_name
+             u.name as employer_name, u.email as employer_email, ep.company_name, ep.logo_url as employer_logo
       FROM jobs j
       LEFT JOIN job_categories jc ON j.category = jc.id
       LEFT JOIN users u ON j.posted_by = u.id
