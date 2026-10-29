@@ -332,61 +332,6 @@
             </v-window-item>
           </v-window>
 
-          <!-- Bottom Navigation (Enables effortless continuation after reading/scrolling content on mobile/desktop) -->
-          <div class="mt-10 pt-6 border-t d-flex align-center justify-space-between flex-wrap gap-3 lesson-nav-actions">
-            <v-btn
-              variant="outlined"
-              rounded="lg"
-              prepend-icon="mdi-chevron-left"
-              :disabled="!prevLesson"
-              @click="navigateToLesson(prevLesson)"
-              class="font-weight-bold"
-            >
-              Previous
-            </v-btn>
-            <v-btn
-              v-if="!(currentLesson?.type === 'quiz' && currentLesson?.is_mandatory) && !currentLesson?.completed"
-              color="success"
-              rounded="lg"
-              prepend-icon="mdi-check-circle-outline"
-              @click="markComplete"
-              :loading="markingComplete"
-              class="font-weight-bold"
-            >
-              <span class="d-none d-sm-inline">Mark as </span>Complete
-            </v-btn>
-            <v-btn
-              v-if="nextLesson"
-              color="primary"
-              rounded="lg"
-              append-icon="mdi-chevron-right"
-              :disabled="currentLesson?.type === 'quiz' && currentLesson?.is_mandatory && !currentLesson?.completed"
-              @click="navigateToLesson(nextLesson)"
-              class="font-weight-bold"
-            >
-              Next
-            </v-btn>
-            <v-btn
-              v-else-if="enrollment?.has_exam && !enrollment?.passed_exam"
-              color="warning"
-              rounded="lg"
-              append-icon="mdi-file-document-edit"
-              to="/dashboard/exams"
-              class="font-weight-bold"
-            >
-              Take Exam
-            </v-btn>
-            <v-btn
-              v-else-if="enrollment?.enable_certificate !== false"
-              color="success"
-              rounded="lg"
-              append-icon="mdi-certificate"
-              @click="showCompletionModal = true"
-              class="font-weight-bold"
-            >
-              Claim Certificate
-            </v-btn>
-          </div>
         </div>
       </div>
     </div>
