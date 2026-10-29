@@ -57,12 +57,13 @@ export const DashboardController = {
       // Funnel Chart: Count per status
       const [funnelData] = await pool.query('SELECT status, COUNT(*) as count FROM leads GROUP BY status');
 
-      // Recent Enrollments (Invoices joining users and courses)
+      // Recent Enrollments (Invoices joining users and courses, latest 10)
       const [recentEnrollments] = await pool.query(`
         SELECT u.id as student_id, u.name, c.title as course, i.created_at as date, i.amount_paid as amount 
         FROM invoices i 
         JOIN users u ON i.student_id = u.id 
-        LEFT JOIN courses c ON i.course_id = c.id 
+        JOIN courses c ON i.course_id = c.id 
+        WHERE i.course_id IS NOT NULL
         ORDER BY i.created_at DESC LIMIT 10
       `);
 

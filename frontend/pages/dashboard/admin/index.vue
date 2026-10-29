@@ -170,7 +170,10 @@
       <v-col cols="12">
         <v-card class="pa-6 rounded-lg shadow-sm mt-4">
           <div class="d-flex align-center mb-6">
-            <div class="text-h6 font-weight-bold">Recent Enrollments</div>
+            <div>
+              <div class="text-h6 font-weight-bold">Recent Enrollments</div>
+              <div class="text-caption text-grey">Showing latest 10 enrollments</div>
+            </div>
             <v-spacer></v-spacer>
             <v-btn variant="text" color="primary" to="/dashboard/students">View All Students</v-btn>
           </div>
@@ -185,17 +188,17 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="e in data.recentEnrollments" :key="e.date">
+              <tr v-for="(e, idx) in displayedEnrollments" :key="`${e.student_id}-${e.date}-${idx}`">
                 <td class="font-weight-bold">{{ e.name }}</td>
                 <td>{{ e.course }}</td>
                 <td class="text-grey">{{ formatDate(e.date) }}</td>
-                <td class="font-weight-bold">₹{{ e.amount.toLocaleString() }}</td>
+                <td class="font-weight-bold">₹{{ Number(e.amount || 0).toLocaleString() }}</td>
                 <td class="text-right">
                   <Badge :color="e.amount > 0 ? 'green' : 'orange'">Paid</Badge>
                   <v-btn icon="mdi-eye-outline" variant="text" size="small" :to="`/dashboard/students/${e.student_id}`"></v-btn>
                 </td>
               </tr>
-              <tr v-if="data.recentEnrollments.length === 0">
+              <tr v-if="displayedEnrollments.length === 0">
                 <td colspan="5" class="text-center py-8 text-grey">No enrollments recorded yet</td>
               </tr>
             </tbody>
@@ -322,6 +325,10 @@ const funnelChartData = computed(() => {
     // pass total for tooltip
     _total: total,
   };
+});
+
+const displayedEnrollments = computed(() => {
+  return (data.value.recentEnrollments || []).slice(0, 10);
 });
 
 const chartOptions = computed(() => ({
