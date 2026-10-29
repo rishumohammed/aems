@@ -74,40 +74,29 @@
     <div v-if="sidebarTab === 'curriculum'" class="flex-grow-1 overflow-y-auto">
       <v-list v-model:opened="openedSections" select-strategy="single-independent">
         <v-list-group v-for="section in curriculum" :key="section.id" :value="section.id">
-          <template v-slot:activator="{ props }">
+          <template v-slot:activator="{ props: sectionProps }">
             <v-list-item
-              v-bind="props"
-              :title="section.title"
+              v-bind="sectionProps"
               class="section-item font-weight-bold"
             >
               <template v-slot:prepend>
-                <v-icon size="small" color="primary">mdi-book-open-variant</v-icon>
+                <v-icon size="small" color="primary" class="mr-2">mdi-book-open-variant</v-icon>
               </template>
+              <v-list-item-title class="font-weight-bold text-body-2 text-truncate section-title-text">
+                {{ section.title || 'Untitled Section' }}
+              </v-list-item-title>
             </v-list-item>
           </template>
 
-          <!-- Nested Modules -->
-          <v-list-group v-for="module in section.modules" :key="module.id" :value="module.id">
-            <template v-slot:activator="{ props }">
-              <v-list-item
-                v-bind="props"
-                :title="module.title"
-                class="module-item font-weight-bold pl-6"
-              >
-                <template v-slot:prepend>
-                  <v-icon size="small" color="teal">mdi-package-variant-closed</v-icon>
-                </template>
-              </v-list-item>
-            </template>
-
-            <!-- Lessons under Modules -->
+          <!-- Direct Lessons (when section is flattened / single dummy module) -->
+          <template v-if="!hasMultipleModules(section)">
             <v-list-item
-              v-for="lesson in module.lessons"
+              v-for="lesson in getSectionLessons(section)"
               :key="lesson.id"
               :value="lesson.id"
-              :active="lesson.id === currentLessonId"
+              :active="String(lesson.id) === String(currentLessonId)"
               @click="onLessonSelect(lesson)"
-              class="lesson-item pl-10"
+              class="lesson-item pl-6"
               :class="{ 'completed': lesson.completed }"
               active-color="primary"
             >
@@ -132,7 +121,7 @@
                 </v-icon>
               </template>
               
-              <v-list-item-title class="text-body-2" :class="{ 'text-grey': lesson.completed && lesson.id !== currentLessonId, 'text-grey-lighten-1': lesson.is_locked }">
+              <v-list-item-title class="text-body-2" :class="{ 'text-grey': lesson.completed && String(lesson.id) !== String(currentLessonId), 'text-grey-lighten-1': lesson.is_locked }">
                 {{ lesson.title }}
                 <v-chip v-if="lesson.type === 'live'" size="x-small" color="primary" class="ml-2 font-weight-bold" variant="tonal">LIVE</v-chip>
                 <v-chip v-if="lesson.is_free_preview" size="x-small" color="success" class="ml-2 font-weight-bold" variant="flat">PREVIEW</v-chip>
@@ -143,7 +132,70 @@
                 <span v-else-if="lesson.type === 'live'" class="text-caption text-primary font-weight-bold">{{ lesson.duration_minutes }}m</span>
               </template>
             </v-list-item>
-          </v-list-group>
+          </template>
+
+          <!-- Nested Modules (if course genuinely has multiple modules per section) -->
+          <template v-else>
+            <v-list-group v-for="module in section.modules" :key="module.id" :value="module.id">
+              <template v-slot:activator="{ props: modProps }">
+                <v-list-item
+                  v-bind="modProps"
+                  class="module-item font-weight-bold pl-6"
+                >
+                  <template v-slot:prepend>
+                    <v-icon size="small" color="teal" class="mr-2">mdi-package-variant-closed</v-icon>
+                  </template>
+                  <v-list-item-title class="font-weight-medium text-body-2 text-truncate module-title-text">
+                    {{ module.title || 'Untitled Module' }}
+                  </v-list-item-title>
+                </v-list-item>
+              </template>
+
+              <!-- Lessons under Module -->
+              <v-list-item
+                v-for="lesson in module.lessons"
+                :key="lesson.id"
+                :value="lesson.id"
+                :active="String(lesson.id) === String(currentLessonId)"
+                @click="onLessonSelect(lesson)"
+                class="lesson-item pl-10"
+                :class="{ 'completed': lesson.completed }"
+                active-color="primary"
+              >
+                <template v-slot:prepend>
+                  <v-icon 
+                    v-if="lesson.is_locked"
+                    color="grey-lighten-1"
+                    size="small"
+                  >
+                    mdi-lock-outline
+                  </v-icon>
+                  <v-icon 
+                    v-else
+                    :color="lesson.completed ? 'success' : (lesson.type === 'live' ? 'primary' : 'grey')" 
+                    size="small"
+                  >
+                    {{ lesson.completed ? 'mdi-check-circle' : 
+                       (lesson.type === 'video' ? 'mdi-play-circle-outline' : 
+                       (lesson.type === 'live' ? 'mdi-broadcast' : 
+                       (lesson.type === 'quiz' ? 'mdi-help-circle-outline' :
+                       (lesson.type === 'assignment' ? 'mdi-clipboard-edit-outline' : 'mdi-file-document-outline')))) }}
+                  </v-icon>
+                </template>
+                
+                <v-list-item-title class="text-body-2" :class="{ 'text-grey': lesson.completed && String(lesson.id) !== String(currentLessonId), 'text-grey-lighten-1': lesson.is_locked }">
+                  {{ lesson.title }}
+                  <v-chip v-if="lesson.type === 'live'" size="x-small" color="primary" class="ml-2 font-weight-bold" variant="tonal">LIVE</v-chip>
+                  <v-chip v-if="lesson.is_free_preview" size="x-small" color="success" class="ml-2 font-weight-bold" variant="flat">PREVIEW</v-chip>
+                </v-list-item-title>
+
+                <template v-slot:append>
+                  <span v-if="lesson.type === 'video' && lesson.duration_seconds" class="text-caption text-grey">{{ formatDuration(lesson.duration_seconds) }}</span>
+                  <span v-else-if="lesson.type === 'live'" class="text-caption text-primary font-weight-bold">{{ lesson.duration_minutes }}m</span>
+                </template>
+              </v-list-item>
+            </v-list-group>
+          </template>
         </v-list-group>
       </v-list>
     </div>
@@ -295,34 +347,72 @@ const openMaterial = (mat) => {
 
 const openedSections = ref([]);
 
+const hasMultipleModules = (section) => {
+  if (!section || !section.modules || !Array.isArray(section.modules)) return false;
+  if (section.modules.length > 1) return true;
+  if (section.modules.length === 1) {
+    const mod = section.modules[0];
+    const isSameId = String(mod.id) === String(section.id);
+    const isSameTitle = String(mod.title || '').trim().toLowerCase() === String(section.title || '').trim().toLowerCase();
+    return !isSameId && !isSameTitle;
+  }
+  return false;
+};
+
+const getSectionLessons = (section) => {
+  if (!section) return [];
+  if (section.lessons && Array.isArray(section.lessons) && section.lessons.length > 0) {
+    return section.lessons;
+  }
+  if (section.modules && Array.isArray(section.modules) && section.modules.length > 0) {
+    return section.modules[0].lessons || [];
+  }
+  return [];
+};
+
 // Auto-open section and module of current lesson
 watch(() => props.currentLessonId, (newId) => {
   if (!newId || !props.curriculum) return;
   props.curriculum.forEach(section => {
-    if (section.modules) {
-      section.modules.forEach(mod => {
-        if (mod.lessons && mod.lessons.some(l => l.id === newId)) {
-          if (!openedSections.value.includes(section.id)) {
-            openedSections.value.push(section.id);
+    const secLessons = getSectionLessons(section);
+    const hasLesson = secLessons.some(l => String(l.id) === String(newId));
+    
+    if (hasLesson) {
+      if (!openedSections.value.includes(section.id)) {
+        openedSections.value.push(section.id);
+      }
+      if (hasMultipleModules(section) && section.modules) {
+        section.modules.forEach(mod => {
+          if (mod.lessons && mod.lessons.some(l => String(l.id) === String(newId))) {
+            if (!openedSections.value.includes(mod.id)) {
+              openedSections.value.push(mod.id);
+            }
           }
-          if (!openedSections.value.includes(mod.id)) {
-            openedSections.value.push(mod.id);
-          }
-        }
-      });
+        });
+      }
     }
   });
 }, { immediate: true, deep: true });
 
 const totalLessons = computed(() => {
+  if (!props.curriculum || !Array.isArray(props.curriculum)) return 0;
   return props.curriculum.reduce((acc, s) => {
-    return acc + (s.modules || []).reduce((mAcc, m) => mAcc + (m.lessons || []).length, 0);
+    const lessons = getSectionLessons(s);
+    if (hasMultipleModules(s) && s.modules) {
+      return acc + s.modules.reduce((mAcc, m) => mAcc + (m.lessons || []).length, 0);
+    }
+    return acc + lessons.length;
   }, 0);
 });
 
 const completedCount = computed(() => {
+  if (!props.curriculum || !Array.isArray(props.curriculum)) return 0;
   return props.curriculum.reduce((acc, s) => {
-    return acc + (s.modules || []).reduce((mAcc, m) => mAcc + (m.lessons || []).filter(l => l.completed).length, 0);
+    if (hasMultipleModules(s) && s.modules) {
+      return acc + s.modules.reduce((mAcc, m) => mAcc + (m.lessons || []).filter(l => l.completed).length, 0);
+    }
+    const lessons = getSectionLessons(s);
+    return acc + lessons.filter(l => l.completed).length;
   }, 0);
 });
 
@@ -349,10 +439,23 @@ const onLessonSelect = (lesson) => {
 .section-item {
   background: #f8fafc;
   min-height: 48px !important;
+  color: #1e293b !important;
+}
+.section-title-text {
+  color: #0f172a !important;
+  font-weight: 700 !important;
+  font-size: 0.875rem !important;
+  letter-spacing: -0.01em;
 }
 .module-item {
   background: #f1f5f9;
   min-height: 44px !important;
+  color: #334155 !important;
+}
+.module-title-text {
+  color: #334155 !important;
+  font-weight: 600 !important;
+  font-size: 0.825rem !important;
 }
 .lesson-item {
   min-height: 40px !important;
@@ -366,13 +469,11 @@ const onLessonSelect = (lesson) => {
   opacity: 0.8;
 }
 .shadow-glow {
-  
   transition: all 0.3s ease;
   border: 1px solid var(--border);
 }
 .shadow-glow:hover {
   transform: translateY(-2px);
   border: 1px solid var(--border);
-  
 }
 </style>

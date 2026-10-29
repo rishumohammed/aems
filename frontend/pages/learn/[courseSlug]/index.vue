@@ -52,7 +52,12 @@ onMounted(async () => {
     const resCurr = await api.get(`/lms/student/courses/${courseId}/curriculum`);
     const currData = resCurr.data || resCurr || [];
     const curriculum = Array.isArray(currData) ? currData : (currData?.data || []);
-    const allLessons = curriculum.flatMap(c => (c.modules || []).flatMap(m => m.lessons || []));
+    const allLessons = curriculum.flatMap(c => {
+      if (c.modules && c.modules.length > 0) {
+        return c.modules.flatMap(m => m.lessons || []);
+      }
+      return c.lessons || [];
+    });
     
     if (allLessons.length > 0) {
       // Find first incomplete lesson or first lesson

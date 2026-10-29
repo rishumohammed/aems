@@ -2,7 +2,7 @@
   <v-app>
     <div class="lesson-viewer d-flex flex-column flex-md-row h-screen overflow-hidden bg-grey-lighten-5">
     <!-- Main Content Area -->
-    <div class="flex-grow-1 d-flex flex-column h-100 overflow-y-auto">
+    <div class="flex-grow-1 d-flex flex-column h-100 overflow-y-auto content-scroll-area" ref="mainContentRef">
       <!-- Top Navigation (Mobile) -->
       <v-toolbar flat class="d-md-none px-4 bg-white border-b" density="comfortable">
         <v-btn icon="mdi-menu" @click="drawer = !drawer"></v-btn>
@@ -43,6 +43,7 @@
       <div v-else class="pa-4 pa-md-8">
         <div v-if="currentLesson?.type === 'video'" class="video-wrapper">
           <VideoPlayer
+            :key="currentLesson.id"
             :source="currentLesson.video_source"
             :video-id="currentLesson.video_id"
             :last-watched-seconds="currentLesson.watched_seconds || 0"
@@ -203,13 +204,14 @@
         <div class="mt-8">
           <div class="d-flex align-center justify-space-between flex-wrap gap-4 mb-4">
             <h1 class="text-h4 font-weight-black">{{ currentLesson?.title }}</h1>
-            <div class="d-flex gap-3">
+            <div class="d-flex align-center flex-wrap gap-3 lesson-nav-actions">
               <v-btn
                 variant="outlined"
                 rounded="lg"
                 prepend-icon="mdi-chevron-left"
                 :disabled="!prevLesson"
                 @click="navigateToLesson(prevLesson)"
+                class="font-weight-bold"
               >
                 Previous
               </v-btn>
@@ -220,17 +222,40 @@
                 prepend-icon="mdi-check-circle-outline"
                 @click="markComplete"
                 :loading="markingComplete"
+                class="font-weight-bold"
               >
-                Mark as Complete
+                <span class="d-none d-sm-inline">Mark as </span>Complete
               </v-btn>
               <v-btn
+                v-if="nextLesson"
                 color="primary"
                 rounded="lg"
                 append-icon="mdi-chevron-right"
-                :disabled="!nextLesson || (currentLesson?.type === 'quiz' && currentLesson?.is_mandatory && !currentLesson?.completed)"
+                :disabled="currentLesson?.type === 'quiz' && currentLesson?.is_mandatory && !currentLesson?.completed"
                 @click="navigateToLesson(nextLesson)"
+                class="font-weight-bold"
               >
                 Next
+              </v-btn>
+              <v-btn
+                v-else-if="enrollment?.has_exam && !enrollment?.passed_exam"
+                color="warning"
+                rounded="lg"
+                append-icon="mdi-file-document-edit"
+                to="/dashboard/exams"
+                class="font-weight-bold"
+              >
+                Take Exam
+              </v-btn>
+              <v-btn
+                v-else-if="enrollment?.enable_certificate !== false"
+                color="success"
+                rounded="lg"
+                append-icon="mdi-certificate"
+                @click="showCompletionModal = true"
+                class="font-weight-bold"
+              >
+                Claim Certificate
               </v-btn>
             </div>
           </div>
@@ -306,6 +331,62 @@
               </v-card>
             </v-window-item>
           </v-window>
+
+          <!-- Bottom Navigation (Enables effortless continuation after reading/scrolling content on mobile/desktop) -->
+          <div class="mt-10 pt-6 border-t d-flex align-center justify-space-between flex-wrap gap-3 lesson-nav-actions">
+            <v-btn
+              variant="outlined"
+              rounded="lg"
+              prepend-icon="mdi-chevron-left"
+              :disabled="!prevLesson"
+              @click="navigateToLesson(prevLesson)"
+              class="font-weight-bold"
+            >
+              Previous
+            </v-btn>
+            <v-btn
+              v-if="!(currentLesson?.type === 'quiz' && currentLesson?.is_mandatory) && !currentLesson?.completed"
+              color="success"
+              rounded="lg"
+              prepend-icon="mdi-check-circle-outline"
+              @click="markComplete"
+              :loading="markingComplete"
+              class="font-weight-bold"
+            >
+              <span class="d-none d-sm-inline">Mark as </span>Complete
+            </v-btn>
+            <v-btn
+              v-if="nextLesson"
+              color="primary"
+              rounded="lg"
+              append-icon="mdi-chevron-right"
+              :disabled="currentLesson?.type === 'quiz' && currentLesson?.is_mandatory && !currentLesson?.completed"
+              @click="navigateToLesson(nextLesson)"
+              class="font-weight-bold"
+            >
+              Next
+            </v-btn>
+            <v-btn
+              v-else-if="enrollment?.has_exam && !enrollment?.passed_exam"
+              color="warning"
+              rounded="lg"
+              append-icon="mdi-file-document-edit"
+              to="/dashboard/exams"
+              class="font-weight-bold"
+            >
+              Take Exam
+            </v-btn>
+            <v-btn
+              v-else-if="enrollment?.enable_certificate !== false"
+              color="success"
+              rounded="lg"
+              append-icon="mdi-certificate"
+              @click="showCompletionModal = true"
+              class="font-weight-bold"
+            >
+              Claim Certificate
+            </v-btn>
+          </div>
         </div>
       </div>
     </div>
@@ -390,6 +471,7 @@ const resourceFullUrl = computed(() => {
 });
 
 const drawer = ref(false);
+const mainContentRef = ref(null);
 const infoTab = ref('description');
 const curriculum = ref([]);
 const enrollment = ref(null);
@@ -401,6 +483,16 @@ const claimingCertificate = ref(false);
 const showCompletionModal = ref(false);
 const examAttempt = ref(null);
 const loadingExamState = ref(false);
+
+const extractLessons = (curr) => {
+  if (!curr || !Array.isArray(curr)) return [];
+  return curr.flatMap(c => {
+    if (c.modules && c.modules.length > 0) {
+      return c.modules.flatMap(m => m.lessons || []);
+    }
+    return c.lessons || [];
+  });
+};
 
 const loadExamState = async () => {
   if (currentLesson.value?.type !== 'quiz' || !currentLesson.value?.quiz_id) return;
@@ -433,11 +525,14 @@ const fetchData = async () => {
 
     // If curriculum is already loaded for this course, update currentLesson without reloading all APIs
     if (curriculum.value.length > 0 && enrollment.value) {
-      const allLessons = curriculum.value.flatMap(c => (c.modules || []).flatMap(m => m.lessons || []));
-      const targetLesson = allLessons.find(l => l.id === lessonId.value);
+      const allLessons = extractLessons(curriculum.value);
+      const targetLesson = allLessons.find(l => String(l.id).toLowerCase() === String(lessonId.value || '').toLowerCase());
       if (targetLesson) {
         currentLesson.value = targetLesson;
         await loadExamState();
+        if (mainContentRef.value) {
+          mainContentRef.value.scrollTo({ top: 0, behavior: 'smooth' });
+        }
         return;
       }
     }
@@ -489,13 +584,13 @@ const fetchData = async () => {
     }
 
     // 4. Find current lesson
-    const allLessons = curriculum.value.flatMap(c => (c.modules || []).flatMap(m => m.lessons || []));
-    let targetLesson = allLessons.find(l => l.id === lessonId.value);
+    const allLessons = extractLessons(curriculum.value);
+    let targetLesson = allLessons.find(l => String(l.id).toLowerCase() === String(lessonId.value || '').toLowerCase());
 
     if (!targetLesson && allLessons.length > 0) {
       targetLesson = allLessons[0];
       currentLesson.value = targetLesson;
-      if (lessonId.value !== targetLesson.id) {
+      if (String(lessonId.value) !== String(targetLesson.id)) {
         router.replace(`/learn/${enroll?.slug || courseSlug.value}/${targetLesson.id}`);
       }
     } else {
@@ -504,6 +599,9 @@ const fetchData = async () => {
 
     if (currentLesson.value) {
       await loadExamState();
+      if (mainContentRef.value) {
+        mainContentRef.value.scrollTo({ top: 0, behavior: 'smooth' });
+      }
     }
   } catch (error) {
     console.error('Failed to load lesson:', error);
@@ -570,19 +668,42 @@ const openMatPreview = (mat) => {
   protectedViewer.show = true;
 };
 
-const flatLessons = computed(() => curriculum.value.flatMap(c => (c.modules || []).flatMap(m => m.lessons || [])));
-const currentIdx = computed(() => flatLessons.value.findIndex(l => l.id === lessonId.value));
-const prevLesson = computed(() => currentIdx.value > 0 ? flatLessons.value[currentIdx.value - 1] : null);
-const nextLesson = computed(() => currentIdx.value < flatLessons.value.length - 1 ? flatLessons.value[currentIdx.value + 1] : null);
+const flatLessons = computed(() => extractLessons(curriculum.value));
+
+const currentIdx = computed(() => {
+  const activeId = currentLesson.value?.id || lessonId.value;
+  if (!activeId) return -1;
+  return flatLessons.value.findIndex(l => String(l.id).toLowerCase() === String(activeId).toLowerCase());
+});
+
+const prevLesson = computed(() => {
+  if (currentIdx.value <= 0) return null;
+  return flatLessons.value[currentIdx.value - 1] || null;
+});
+
+const nextLesson = computed(() => {
+  if (currentIdx.value < 0 || currentIdx.value >= flatLessons.value.length - 1) return null;
+  return flatLessons.value[currentIdx.value + 1] || null;
+});
 
 const navigateToLesson = (lesson) => {
-  if (lesson) {
-    if (currentLesson.value?.type === 'quiz' && currentLesson.value?.is_mandatory && !currentLesson.value?.completed && lesson.order_index > currentLesson.value.order_index) {
-       // Prevent navigation to next lesson if mandatory is incomplete
-       return;
-    }
-    drawer.value = false;
-    navigateTo(`/learn/${courseSlug.value}/${lesson.id}`);
+  if (!lesson) return;
+
+  const targetIdx = flatLessons.value.findIndex(l => String(l.id).toLowerCase() === String(lesson.id).toLowerCase());
+  const isForward = targetIdx > currentIdx.value;
+
+  // Prevent navigation past a mandatory quiz if incomplete
+  if (currentLesson.value?.type === 'quiz' && currentLesson.value?.is_mandatory && !currentLesson.value?.completed && isForward) {
+    alert('This is a mandatory exam. Please pass it before continuing to the next lesson.');
+    return;
+  }
+
+  drawer.value = false;
+  const targetSlug = enrollment.value?.slug || courseSlug.value;
+  navigateTo(`/learn/${targetSlug}/${lesson.id}`);
+
+  if (mainContentRef.value) {
+    mainContentRef.value.scrollTo({ top: 0, behavior: 'smooth' });
   }
 };
 
@@ -775,6 +896,39 @@ definePageMeta({
 <style scoped>
 .h-screen {
   height: 100vh;
+  height: 100dvh;
+}
+.lesson-viewer {
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+}
+.content-scroll-area {
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 36px) !important;
+  -webkit-overflow-scrolling: touch;
+}
+.lesson-nav-actions .v-btn {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+@media (max-width: 600px) {
+  .lesson-nav-actions {
+    display: flex !important;
+    width: 100% !important;
+    gap: 8px !important;
+  }
+  .lesson-nav-actions .v-btn {
+    flex: 1 1 0 !important;
+    min-height: 44px !important;
+    padding-left: 6px !important;
+    padding-right: 6px !important;
+    font-size: 13px !important;
+  }
+  .lesson-nav-actions :deep(.v-btn__content) {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 }
 .video-wrapper {
   max-width: 1200px;
@@ -817,6 +971,5 @@ definePageMeta({
 }
 .shadow-apple {
   border: 1px solid var(--border);
-  
 }
 </style>

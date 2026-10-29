@@ -223,6 +223,7 @@ router.get('/courses/:courseId/curriculum', async (req, res) => {
       return {
         ...section,
         modules: [dummyModule],
+        lessons: sectLessons,
         total_lessons: totalLessons,
         completed_lessons: completedLessons,
         progress_percentage: progressPercentage,
