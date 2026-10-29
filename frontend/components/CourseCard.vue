@@ -30,7 +30,7 @@
 
       <div :class="viewType === 'list' ? 'pa-4 d-flex flex-column flex-grow-1 justify-center' : 'pa-4 d-flex flex-column flex-grow-1'">
 
-        <h3 :class="viewType === 'list' ? 'text-h5' : ''" class="course-card-title font-weight-bold mb-2 line-clamp-2 text-grey-darken-4">
+        <h3 :class="viewType === 'list' ? 'text-h5' : ''" class="course-card-title mb-2 line-clamp-2 text-grey-darken-4">
           {{ course.title }}
         </h3>
 
@@ -202,7 +202,7 @@ const countdownText = computed(() => {
 
 .course-card-title {
   font-size: clamp(1.1rem, 4.2vw, 1.25rem) !important;
-  font-weight: 800 !important;
+  font-weight: 600 !important;
   line-height: 1.3 !important;
   min-height: 2.6em;
 }

@@ -59,7 +59,7 @@
         </div>
       </div>
 
-      <h3 class="course-grid-title font-weight-bold mb-2 line-clamp-2">
+      <h3 class="course-grid-title mb-2 line-clamp-2">
         {{ course.title }}
       </h3>
     </v-card-text>
@@ -155,7 +155,7 @@ const formatStatus = (course) => {
 }
 .course-grid-title {
   font-size: clamp(1.05rem, 4vw, 1.2rem) !important;
-  font-weight: 800 !important;
+  font-weight: 600 !important;
   line-height: 1.3;
   min-height: 2.6rem;
 }
