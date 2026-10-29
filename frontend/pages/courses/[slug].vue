@@ -93,12 +93,18 @@
                 </div>
                 
                 <v-expansion-panels variant="accordion" class="rounded-xl border overflow-hidden">
-                  <v-expansion-panel v-for="section in course.sections" :key="section.id">
-                    <v-expansion-panel-title class="font-weight-bold">
-                      {{ section.title }}
+                  <v-expansion-panel v-for="(section, sIndex) in course.sections" :key="section.id || sIndex">
+                    <v-expansion-panel-title class="py-4 px-6">
+                      <div class="d-flex align-center flex-grow-1 pr-4 min-width-0">
+                        <span class="font-weight-bold text-body-1 text-truncate text-grey-darken-4">
+                          {{ section.title || section.name || `Module ${sIndex + 1}` }}
+                        </span>
+                      </div>
                       <template v-slot:actions="{ expanded }">
-                        <span class="text-caption text-grey mr-4">{{ getModuleLessonsCount(section) }} lessons</span>
-                        <v-icon :icon="expanded ? 'mdi-minus' : 'mdi-plus'"></v-icon>
+                        <div class="d-flex align-center flex-shrink-0">
+                          <span class="text-caption text-grey mr-3">{{ getModuleLessonsCount(section) }} lessons</span>
+                          <v-icon size="20" color="grey-darken-2" :icon="expanded ? 'mdi-minus' : 'mdi-plus'"></v-icon>
+                        </div>
                       </template>
                     </v-expansion-panel-title>
                     <v-expansion-panel-text class="pa-0">
