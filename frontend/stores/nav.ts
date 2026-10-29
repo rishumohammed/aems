@@ -25,7 +25,7 @@ export const useNavStore = defineStore('nav', {
       
       // LMS (Tutor & Student)
       { label: 'Courses', icon: 'mdi-book-open-page-variant-outline', route: '/dashboard/tutor/courses', roles: ['tutor'], section: 'LMS' },
-      { label: 'Courses', icon: 'mdi-book-open-page-variant-outline', route: '/dashboard/courses', roles: ['student'], section: 'LMS' },
+      { label: 'All Courses', icon: 'mdi-book-open-page-variant-outline', route: '/dashboard/courses', roles: ['student'], section: 'LMS' },
       { label: 'My Learning', icon: 'mdi-play-circle-outline', route: '/dashboard/student/my-courses', roles: ['student'], section: 'LMS' },
       { label: 'Assignments', icon: 'mdi-file-edit-outline', route: '/dashboard/student/assignments', roles: ['student'], section: 'LMS', badge: undefined },
       { label: 'Students', icon: 'mdi-school-outline', route: '/dashboard/students', roles: ['super_admin', 'crm_agent'], section: 'LMS' },
@@ -133,8 +133,8 @@ export const useNavStore = defineStore('nav', {
             return { ...item, route: roleRoute };
           }
 
-          // Dynamically point "Courses" to the role-specific courses page
-          if (item.label === 'Courses' && item.route === '/dashboard/courses') {
+          // Dynamically point "Courses" / "All Courses" to the role-specific courses page
+          if ((item.label === 'Courses' || item.label === 'All Courses') && item.route === '/dashboard/courses') {
             // super_admin goes to /dashboard/courses (all courses)
             // tutor uses /dashboard/tutor/courses which is hardcoded above
             if (role === 'student') return { ...item, route: '/dashboard/courses' };
