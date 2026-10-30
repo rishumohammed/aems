@@ -6,16 +6,24 @@
         color="primary"
         block
         prepend-icon="mdi-arrow-left"
-        class="text-none font-weight-bold rounded-lg mb-4"
+        class="text-none font-weight-bold rounded-lg mb-3"
         to="/dashboard/student"
       >
         Back to Dashboard
       </v-btn>
-      <h3 class="text-subtitle-1 font-weight-bold">Course Content</h3>
+      <div class="mb-3">
+        <div class="text-caption text-primary font-weight-bold text-uppercase tracking-wider mb-1 d-flex align-center gap-1">
+          <v-icon size="14">mdi-school-outline</v-icon>
+          <span>Course</span>
+        </div>
+        <h3 class="text-subtitle-1 font-weight-black text-grey-darken-4 line-clamp-2 leading-snug" :title="courseTitle">
+          {{ courseTitle || 'Course Content' }}
+        </h3>
+      </div>
       <UiProgressFraction
         :current="completedCount"
         :total="totalLessons"
-        class="mt-2 mb-4"
+        class="mt-1 mb-4"
       />
 
       <v-btn
@@ -73,7 +81,7 @@
     <!-- Curriculum View -->
     <div v-if="sidebarTab === 'curriculum'" class="flex-grow-1 overflow-y-auto">
       <v-list v-model:opened="openedSections" select-strategy="single-independent">
-        <v-list-group v-for="section in curriculum" :key="section.id" :value="section.id">
+        <v-list-group v-for="(section, sIndex) in curriculum" :key="section.id" :value="section.id">
           <template v-slot:activator="{ props: sectionProps }">
             <v-list-item
               v-bind="sectionProps"
@@ -83,7 +91,7 @@
                 <v-icon size="small" color="primary" class="mr-2">mdi-book-open-variant</v-icon>
               </template>
               <v-list-item-title class="font-weight-bold text-body-2 text-truncate section-title-text">
-                {{ section.title || 'Untitled Section' }}
+                {{ formatSectionTitle(section.title, sIndex) }}
               </v-list-item-title>
             </v-list-item>
           </template>
@@ -136,7 +144,7 @@
 
           <!-- Nested Modules (if course genuinely has multiple modules per section) -->
           <template v-else>
-            <v-list-group v-for="module in section.modules" :key="module.id" :value="module.id">
+            <v-list-group v-for="(module, mIndex) in section.modules" :key="module.id" :value="module.id">
               <template v-slot:activator="{ props: modProps }">
                 <v-list-item
                   v-bind="modProps"
@@ -146,14 +154,14 @@
                     <v-icon size="small" color="teal" class="mr-2">mdi-package-variant-closed</v-icon>
                   </template>
                   <v-list-item-title class="font-weight-medium text-body-2 text-truncate module-title-text">
-                    {{ module.title || 'Untitled Module' }}
+                    {{ formatModuleTitle(module.title, mIndex) }}
                   </v-list-item-title>
                 </v-list-item>
               </template>
 
               <!-- Lessons under Module -->
               <v-list-item
-                v-for="lesson in module.lessons"
+                v-for="lesson in getModuleLessons(module)"
                 :key="lesson.id"
                 :value="lesson.id"
                 :active="String(lesson.id) === String(currentLessonId)"
@@ -271,6 +279,7 @@ const props = defineProps({
   curriculum: { type: Array, required: true },
   currentLessonId: { type: String, required: true },
   courseId: { type: String, default: '' },
+  courseTitle: { type: String, default: '' },
   completionPercentage: { type: Number, default: 0 },
   hasExam: { type: Boolean, default: false },
   passedExam: { type: Boolean, default: false },
@@ -359,15 +368,44 @@ const hasMultipleModules = (section) => {
   return false;
 };
 
+const formatSectionTitle = (title, index) => {
+  if (!title || !title.trim() || title.trim().toLowerCase() === 'untitled section') {
+    return `Section ${index + 1}`;
+  }
+  return title;
+};
+
+const formatModuleTitle = (title, index) => {
+  if (!title || !title.trim() || title.trim().toLowerCase() === 'untitled module') {
+    return `Module ${index + 1}`;
+  }
+  return title;
+};
+
+const getModuleLessons = (module) => {
+  if (!module || !Array.isArray(module.lessons)) return [];
+  const seen = new Set();
+  return module.lessons.filter(l => {
+    if (!l?.id || seen.has(l.id)) return false;
+    seen.add(l.id);
+    return true;
+  });
+};
+
 const getSectionLessons = (section) => {
   if (!section) return [];
+  let raw = [];
   if (section.lessons && Array.isArray(section.lessons) && section.lessons.length > 0) {
-    return section.lessons;
+    raw = section.lessons;
+  } else if (section.modules && Array.isArray(section.modules) && section.modules.length > 0) {
+    raw = section.modules[0].lessons || [];
   }
-  if (section.modules && Array.isArray(section.modules) && section.modules.length > 0) {
-    return section.modules[0].lessons || [];
-  }
-  return [];
+  const seen = new Set();
+  return raw.filter(l => {
+    if (!l?.id || seen.has(l.id)) return false;
+    seen.add(l.id);
+    return true;
+  });
 };
 
 // Auto-open section and module of current lesson
@@ -383,7 +421,8 @@ watch(() => props.currentLessonId, (newId) => {
       }
       if (hasMultipleModules(section) && section.modules) {
         section.modules.forEach(mod => {
-          if (mod.lessons && mod.lessons.some(l => String(l.id) === String(newId))) {
+          const modLessons = getModuleLessons(mod);
+          if (modLessons.some(l => String(l.id) === String(newId))) {
             if (!openedSections.value.includes(mod.id)) {
               openedSections.value.push(mod.id);
             }
@@ -397,11 +436,10 @@ watch(() => props.currentLessonId, (newId) => {
 const totalLessons = computed(() => {
   if (!props.curriculum || !Array.isArray(props.curriculum)) return 0;
   return props.curriculum.reduce((acc, s) => {
-    const lessons = getSectionLessons(s);
     if (hasMultipleModules(s) && s.modules) {
-      return acc + s.modules.reduce((mAcc, m) => mAcc + (m.lessons || []).length, 0);
+      return acc + s.modules.reduce((mAcc, m) => mAcc + getModuleLessons(m).length, 0);
     }
-    return acc + lessons.length;
+    return acc + getSectionLessons(s).length;
   }, 0);
 });
 
@@ -409,7 +447,7 @@ const completedCount = computed(() => {
   if (!props.curriculum || !Array.isArray(props.curriculum)) return 0;
   return props.curriculum.reduce((acc, s) => {
     if (hasMultipleModules(s) && s.modules) {
-      return acc + s.modules.reduce((mAcc, m) => mAcc + (m.lessons || []).filter(l => l.completed).length, 0);
+      return acc + s.modules.reduce((mAcc, m) => mAcc + getModuleLessons(m).filter(l => l.completed).length, 0);
     }
     const lessons = getSectionLessons(s);
     return acc + lessons.filter(l => l.completed).length;
@@ -417,8 +455,10 @@ const completedCount = computed(() => {
 });
 
 const isCompleted = computed(() => {
-  if (props.completionPercentage === 100) return true;
-  return totalLessons.value > 0 && completedCount.value === totalLessons.value;
+  if (totalLessons.value > 0) {
+    return completedCount.value >= totalLessons.value;
+  }
+  return Number(props.completionPercentage) === 100 && totalLessons.value > 0;
 });
 
 const formatDuration = (seconds) => {
@@ -475,5 +515,15 @@ const onLessonSelect = (lesson) => {
 .shadow-glow:hover {
   transform: translateY(-2px);
   border: 1px solid var(--border);
+}
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.leading-snug {
+  line-height: 1.35;
 }
 </style>

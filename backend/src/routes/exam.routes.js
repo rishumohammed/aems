@@ -52,25 +52,37 @@ async function autoCompleteLessonForExam(connection, studentId, courseId, enroll
   );
   if (lessons.length > 0) {
     const lessonId = lessons[0].id;
-    const watched = lessons[0].duration_seconds || 0;
-    
-    await connection.query(`
-      INSERT INTO lesson_progress (id, enrollment_id, lesson_id, watched_seconds, completed, completed_at)
-      VALUES (?, ?, ?, ?, TRUE, NOW())
-      ON DUPLICATE KEY UPDATE
-        completed = TRUE,
-        completed_at = CASE WHEN completed_at IS NULL THEN NOW() ELSE completed_at END
-    `, [uuidv4(), enrollmentId, lessonId, watched]);
+    // Check if progress already exists
+    const [existing] = await connection.query(
+      'SELECT id FROM lesson_progress WHERE enrollment_id = ? AND lesson_id = ?',
+      [enrollmentId, lessonId]
+    );
+
+    if (existing.length > 0) {
+      await connection.query(
+        'UPDATE lesson_progress SET completed = TRUE, completed_at = COALESCE(completed_at, NOW()), watched_seconds = GREATEST(watched_seconds, ?) WHERE id = ?',
+        [watched, existing[0].id]
+      );
+      if (existing.length > 1) {
+        const extraIds = existing.slice(1).map(r => r.id);
+        await connection.query('DELETE FROM lesson_progress WHERE id IN (?)', [extraIds]);
+      }
+    } else {
+      await connection.query(`
+        INSERT INTO lesson_progress (id, enrollment_id, lesson_id, watched_seconds, completed, completed_at)
+        VALUES (?, ?, ?, ?, TRUE, NOW())
+      `, [uuidv4(), enrollmentId, lessonId, watched]);
+    }
 
     const [counts] = await connection.query(`
       SELECT 
-        (SELECT COUNT(*) FROM lesson_progress WHERE enrollment_id = ? AND completed = TRUE) as completed_count,
+        (SELECT COUNT(DISTINCT lesson_id) FROM lesson_progress WHERE enrollment_id = ? AND completed = TRUE) as completed_count,
         (SELECT COUNT(*) FROM course_lessons cl 
          JOIN course_sections cs ON cl.section_id = cs.id 
          WHERE cs.course_id = ?) as total_count
     `, [enrollmentId, courseId]);
 
-    const percentage = counts[0].total_count > 0 ? Math.round((counts[0].completed_count / counts[0].total_count) * 100) : 0;
+    const percentage = counts[0].total_count > 0 ? Math.min(100, Math.round((counts[0].completed_count / counts[0].total_count) * 100)) : 0;
     await connection.query('UPDATE enrollments SET completion_percentage = ? WHERE id = ?', [percentage, enrollmentId]);
   }
 }

@@ -6,10 +6,63 @@
       <!-- Top Navigation (Mobile) -->
       <v-toolbar flat class="d-md-none px-4 bg-white border-b" density="comfortable">
         <v-btn icon="mdi-menu" @click="drawer = !drawer"></v-btn>
-        <v-toolbar-title class="text-subtitle-1 font-weight-bold text-truncate">{{ currentLesson?.title }}</v-toolbar-title>
-        <v-spacer></v-spacer>
+        <div class="overflow-hidden flex-grow-1 pr-2">
+          <div v-if="courseTitle" class="text-caption text-primary font-weight-bold text-truncate leading-tight">
+            {{ courseTitle }}
+          </div>
+          <div class="text-subtitle-2 font-weight-bold text-truncate leading-tight text-grey-darken-3">
+            {{ currentLesson?.title }}
+          </div>
+        </div>
         <v-btn icon="mdi-arrow-left" color="primary" variant="text" to="/dashboard/student" title="Back to Dashboard"></v-btn>
       </v-toolbar>
+
+      <!-- Top Navigation (Desktop) -->
+      <div class="d-none d-md-flex align-center justify-space-between px-6 py-3 bg-white border-b sticky-header">
+        <div class="d-flex align-center gap-3 overflow-hidden">
+          <v-btn
+            variant="tonal"
+            color="primary"
+            size="small"
+            prepend-icon="mdi-arrow-left"
+            class="text-none font-weight-bold rounded-lg flex-shrink-0"
+            to="/dashboard/student"
+          >
+            Dashboard
+          </v-btn>
+          <v-divider vertical inset style="height: 20px;"></v-divider>
+          <div class="d-flex align-center gap-2 overflow-hidden text-no-wrap">
+            <v-icon size="18" color="primary" class="flex-shrink-0">mdi-school-outline</v-icon>
+            <span class="text-subtitle-2 font-weight-black text-grey-darken-4 text-truncate" :title="courseTitle">
+              {{ courseTitle }}
+            </span>
+            <template v-if="currentSectionTitle">
+              <v-icon size="14" color="grey-lighten-1" class="flex-shrink-0">mdi-chevron-right</v-icon>
+              <span class="text-caption text-grey-darken-1 text-truncate" :title="currentSectionTitle">
+                {{ currentSectionTitle }}
+              </span>
+            </template>
+            <template v-if="currentLesson?.title">
+              <v-icon size="14" color="grey-lighten-1" class="flex-shrink-0">mdi-chevron-right</v-icon>
+              <span class="text-caption font-weight-medium text-grey-darken-2 text-truncate" :title="currentLesson?.title">
+                {{ currentLesson?.title }}
+              </span>
+            </template>
+          </div>
+        </div>
+        <div class="d-flex align-center gap-3 flex-shrink-0 ml-4">
+          <v-chip
+            v-if="enrollment?.completion_percentage !== undefined"
+            size="small"
+            color="primary"
+            variant="tonal"
+            class="font-weight-bold"
+          >
+            <v-icon start size="14">mdi-chart-donut</v-icon>
+            {{ Math.round(enrollment?.completion_percentage || 0) }}% Completed
+          </v-chip>
+        </div>
+      </div>
 
       <!-- Locked State Overlay -->
       <div v-if="currentLesson?.is_locked" class="locked-overlay d-flex flex-column align-center justify-center pa-12 text-center flex-grow-1 bg-grey-lighten-4">
@@ -202,6 +255,14 @@
 
         <!-- Lesson Info -->
         <div class="mt-8">
+          <div v-if="courseTitle" class="d-flex align-center gap-2 mb-2 text-caption font-weight-bold text-primary">
+            <v-icon size="15">mdi-school-outline</v-icon>
+            <span class="course-name-badge">{{ courseTitle }}</span>
+            <template v-if="currentSectionTitle">
+              <v-icon size="13" color="grey-lighten-1">mdi-chevron-right</v-icon>
+              <span class="text-grey-darken-1 font-weight-medium">{{ currentSectionTitle }}</span>
+            </template>
+          </div>
           <div class="d-flex align-center justify-space-between flex-wrap gap-4 mb-4">
             <h1 class="text-h4 font-weight-black">{{ currentLesson?.title }}</h1>
             <div class="d-flex align-center flex-wrap gap-3 lesson-nav-actions">
@@ -299,7 +360,7 @@
                       </div>
                     </div>
 
-                    <div class="text-body-2 text-grey-darken-1 flex-grow-1 mb-4" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;" v-if="mat.description">
+                    <div class="text-body-2 text-grey-darken-1 flex-grow-1 mb-4" style="display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;" v-if="mat.description">
                       {{ mat.description }}
                     </div>
                     <div class="text-caption text-grey flex-grow-1 mb-4 text-truncate" v-else>
@@ -342,6 +403,7 @@
         :curriculum="curriculum"
         :current-lesson-id="lessonId"
         :course-id="enrollment?.course_id || courseSlug"
+        :course-title="courseTitle"
         :study-materials="studyMaterials"
         :completion-percentage="enrollment?.completion_percentage || 0"
         :has-exam="enrollment?.has_exam === 1 || enrollment?.has_exam === true || enrollment?.has_exam === '1'"
@@ -359,6 +421,7 @@
         :curriculum="curriculum"
         :current-lesson-id="lessonId"
         :course-id="enrollment?.course_id || courseSlug"
+        :course-title="courseTitle"
         :study-materials="studyMaterials"
         :completion-percentage="enrollment?.completion_percentage || 0"
         :has-exam="enrollment?.has_exam === 1 || enrollment?.has_exam === true || enrollment?.has_exam === '1'"
@@ -429,13 +492,49 @@ const showCompletionModal = ref(false);
 const examAttempt = ref(null);
 const loadingExamState = ref(false);
 
+const courseTitle = computed(() => {
+  return enrollment.value?.title || enrollment.value?.course_title || '';
+});
+
+const currentSectionTitle = computed(() => {
+  if (!currentLesson.value || !curriculum.value?.length) return '';
+  for (let i = 0; i < curriculum.value.length; i++) {
+    const sect = curriculum.value[i];
+    const lessons = sect.lessons || sect.modules?.flatMap(m => m.lessons || []) || [];
+    if (lessons.some(l => String(l.id) === String(currentLesson.value?.id))) {
+      const title = sect.title;
+      if (!title || !title.trim() || title.trim().toLowerCase() === 'untitled section') {
+        return `Section ${i + 1}`;
+      }
+      return title;
+    }
+  }
+  return '';
+});
+
+useHead({
+  title: () => {
+    const lTitle = currentLesson.value?.title;
+    const cTitle = courseTitle.value;
+    if (lTitle && cTitle) return `${lTitle} - ${cTitle}`;
+    if (cTitle) return cTitle;
+    return 'Course Player';
+  }
+});
+
 const extractLessons = (curr) => {
   if (!curr || !Array.isArray(curr)) return [];
-  return curr.flatMap(c => {
+  const raw = curr.flatMap(c => {
     if (c.modules && c.modules.length > 0) {
       return c.modules.flatMap(m => m.lessons || []);
     }
     return c.lessons || [];
+  });
+  const seen = new Set();
+  return raw.filter(l => {
+    if (!l?.id || seen.has(l.id)) return false;
+    seen.add(l.id);
+    return true;
   });
 };
 
@@ -513,6 +612,24 @@ const fetchData = async () => {
 
     const courseId = enroll?.course_id || courseSlug.value;
     enrollment.value = enroll || { course_id: courseId, slug: courseSlug.value, title: 'Course' };
+
+    // 2b. If course title is missing or generic, fetch course details
+    if (!enrollment.value?.title || enrollment.value?.title === 'Course') {
+      try {
+        const resCourse = await api.get(`/public/courses/${courseSlug.value}`);
+        const cData = resCourse.data || resCourse;
+        if (cData?.title) {
+          enrollment.value = {
+            ...enrollment.value,
+            title: cData.title,
+            course_title: cData.title,
+            slug: cData.slug || enrollment.value?.slug || courseSlug.value
+          };
+        }
+      } catch (e) {
+        console.warn('Fallback public course fetch error in lesson viewer:', e);
+      }
+    }
 
     // 3. Fetch curriculum
     const resCurr = await api.get(`/lms/student/courses/${courseId}/curriculum`);
@@ -916,5 +1033,15 @@ definePageMeta({
 }
 .shadow-apple {
   border: 1px solid var(--border);
+}
+.sticky-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+.course-name-badge {
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
 }
 </style>

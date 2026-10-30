@@ -41,7 +41,7 @@ router.get('/dashboard', async (req, res) => {
              (SELECT COUNT(*) FROM course_lessons cl 
               JOIN course_sections cs ON cl.section_id = cs.id 
               WHERE cs.course_id = c.id) as total_lessons,
-             (SELECT COUNT(*) FROM lesson_progress lp WHERE lp.enrollment_id = e.id AND lp.completed = TRUE) as completed_lessons,
+             (SELECT COUNT(DISTINCT lp.lesson_id) FROM lesson_progress lp WHERE lp.enrollment_id = e.id AND lp.completed = TRUE) as completed_lessons,
              EXISTS(SELECT 1 FROM exams ex WHERE ex.course_id = c.id AND ex.status = 'published') as has_exam,
              EXISTS(SELECT 1 FROM exam_attempts ea JOIN exams ex ON ea.exam_id = ex.id WHERE ex.course_id = c.id AND ex.status = 'published' AND ea.student_id = e.student_id AND ea.passed = TRUE) as passed_exam
       FROM enrollments e
@@ -174,9 +174,16 @@ router.get('/courses/:courseId/curriculum', async (req, res) => {
     let lessons = [];
     if (sectionIds.length > 0) {
       const [lessonsData] = await pool.query(`
-        SELECT l.*, p.watched_seconds, p.completed
+        SELECT l.*, COALESCE(p.watched_seconds, 0) as watched_seconds, COALESCE(p.completed, 0) as completed
         FROM course_lessons l
-        LEFT JOIN lesson_progress p ON l.id = p.lesson_id AND p.enrollment_id = ?
+        LEFT JOIN (
+          SELECT lesson_id, 
+                 MAX(watched_seconds) as watched_seconds, 
+                 MAX(completed) as completed
+          FROM lesson_progress 
+          WHERE enrollment_id = ?
+          GROUP BY lesson_id
+        ) p ON l.id = p.lesson_id
         WHERE l.section_id IN (?)
         ORDER BY l.order_index ASC
       `, [enrollmentId, sectionIds]);
@@ -286,22 +293,43 @@ router.post('/progress', async (req, res) => {
     connection = await pool.getConnection();
     await connection.beginTransaction();
 
-    // Upsert progress
-    await connection.query(`
-      INSERT INTO lesson_progress (id, enrollment_id, lesson_id, watched_seconds, completed, completed_at)
-      VALUES (?, ?, ?, ?, ?, ?)
-      ON DUPLICATE KEY UPDATE
-        watched_seconds = GREATEST(watched_seconds, VALUES(watched_seconds)),
-        completed = CASE WHEN completed = TRUE THEN TRUE ELSE VALUES(completed) END,
-        completed_at = CASE WHEN completed = TRUE AND completed_at IS NULL THEN VALUES(completed_at) ELSE completed_at END
-    `, [
-      uuidv4(), enrollment_id, lesson_id, watched_seconds || 0, !!completed, completed ? new Date() : null
-    ]);
+    // Upsert progress cleanly
+    const [existingProgress] = await connection.query(
+      'SELECT id, watched_seconds, completed FROM lesson_progress WHERE enrollment_id = ? AND lesson_id = ? ORDER BY completed DESC, watched_seconds DESC',
+      [enrollment_id, lesson_id]
+    );
 
-    // Recalculate enrollment completion
+    const isNowCompleted = completed ? true : (existingProgress.length > 0 && existingProgress[0].completed ? true : false);
+    const maxWatched = Math.max(watched_seconds || 0, existingProgress.length > 0 ? (existingProgress[0].watched_seconds || 0) : 0);
+
+    if (existingProgress.length > 0) {
+      const primaryId = existingProgress[0].id;
+      await connection.query(
+        `UPDATE lesson_progress 
+         SET watched_seconds = ?, 
+             completed = ?, 
+             completed_at = CASE WHEN ? = TRUE AND completed_at IS NULL THEN NOW() ELSE completed_at END 
+         WHERE id = ?`,
+        [maxWatched, isNowCompleted, isNowCompleted, primaryId]
+      );
+      // Clean up any extra duplicate rows if they exist
+      if (existingProgress.length > 1) {
+        const duplicateIds = existingProgress.slice(1).map(r => r.id);
+        await connection.query('DELETE FROM lesson_progress WHERE id IN (?)', [duplicateIds]);
+      }
+    } else {
+      await connection.query(`
+        INSERT INTO lesson_progress (id, enrollment_id, lesson_id, watched_seconds, completed, completed_at)
+        VALUES (?, ?, ?, ?, ?, ?)
+      `, [
+        uuidv4(), enrollment_id, lesson_id, maxWatched, isNowCompleted, isNowCompleted ? new Date() : null
+      ]);
+    }
+
+    // Recalculate enrollment completion using DISTINCT lesson_id
     const [counts] = await connection.query(`
       SELECT 
-        (SELECT COUNT(*) FROM lesson_progress WHERE enrollment_id = ? AND completed = TRUE) as completed_count,
+        (SELECT COUNT(DISTINCT lesson_id) FROM lesson_progress WHERE enrollment_id = ? AND completed = TRUE) as completed_count,
         (SELECT COUNT(*) FROM course_lessons cl 
          JOIN course_sections cs ON cl.section_id = cs.id 
          WHERE cs.course_id = ?) as total_count
@@ -449,7 +477,7 @@ router.get('/my-courses', async (req, res) => {
              (SELECT COUNT(*) FROM course_lessons cl 
               JOIN course_sections cs ON cl.section_id = cs.id 
               WHERE cs.course_id = c.id) as total_lessons,
-             (SELECT COUNT(*) FROM lesson_progress lp WHERE lp.enrollment_id = e.id AND lp.completed = TRUE) as completed_lessons,
+             (SELECT COUNT(DISTINCT lp.lesson_id) FROM lesson_progress lp WHERE lp.enrollment_id = e.id AND lp.completed = TRUE) as completed_lessons,
              EXISTS(SELECT 1 FROM exams ex WHERE ex.course_id = c.id AND ex.status = 'published') as has_exam,
              EXISTS(SELECT 1 FROM exam_attempts ea JOIN exams ex ON ea.exam_id = ex.id WHERE ex.course_id = c.id AND ex.status = 'published' AND ea.student_id = e.student_id AND ea.passed = TRUE) as passed_exam
       FROM enrollments e
