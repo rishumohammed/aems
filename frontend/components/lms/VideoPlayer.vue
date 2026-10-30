@@ -12,14 +12,12 @@
         ></iframe>
         <!-- Invisible overlay to block title details & sharing button clicks at the top -->
         <div class="absolute" style="top: 0; left: 0; width: 100%; height: 50px; z-index: 1; cursor: default;" @click.stop.prevent></div>
-        <!-- Invisible overlay to block 'More Videos' overlay menu trigger button (sits above the bottom seek/control bar) -->
-        <div class="absolute" style="bottom: 35px; right: 10px; width: 180px; height: 60px; z-index: 1; cursor: default;" @click.stop.prevent></div>
         
         <!-- Custom Pause Overlay to hide YouTube native related videos / more videos menu -->
         <div
           v-if="isPaused"
-          class="absolute inset-0 d-flex align-center justify-center bg-black-opacity-60 cursor-pointer"
-          style="z-index: 2;"
+          class="absolute d-flex align-center justify-center bg-black-opacity-60 cursor-pointer"
+          style="top: 0; left: 0; right: 0; bottom: 48px; z-index: 2;"
           @click="resumeVideo"
         >
           <v-avatar color="primary" size="80" class="elevation-4">
