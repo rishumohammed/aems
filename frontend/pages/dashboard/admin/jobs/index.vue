@@ -59,10 +59,21 @@
             </div>
             <div>
               <div class="job-title">{{ item.title }}</div>
-              <div class="company-name">{{ item.company }} • {{ item.category_name }}</div>
+              <div class="company-name">
+                <NuxtLink 
+                  v-if="!item.hide_company_name && item.company"
+                  :to="item.employer_id ? `/dashboard/admin/employers/${item.employer_id}` : `/dashboard/admin/employers?search=${encodeURIComponent(item.company)}`"
+                  class="font-weight-medium text-primary text-decoration-none company-hover-link"
+                  title="View Employer Profile"
+                >
+                  {{ item.company }}
+                </NuxtLink>
+                <span v-else>{{ item.company }}</span>
+                • {{ item.category_name }}
+              </div>
             </div>
           </div>
-</template>
+        </template>
 
         <template v-slot:item.location="{ item }">
           <Badge :color="item.is_remote ? 'blue' : 'gray'">
@@ -285,6 +296,10 @@ async function deleteJob(job: any) {
 .company-name {
   font-size: 11px;
   color: var(--g4);
+}
+
+.company-hover-link:hover {
+  text-decoration: underline !important;
 }
 
 .company-logo {

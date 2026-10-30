@@ -423,13 +423,14 @@ router.get('/jobs', async (req, res) => {
   let query = `
     SELECT j.*, jc.name as category_name, jc.slug as category_slug,
            u.name as employer_name, u.role as poster_role,
+           COALESCE(ep.user_id, CASE WHEN u.role = 'employer' THEN u.id ELSE NULL END) as employer_id,
            COALESCE(ep.logo_url, up.avatar_url) as company_logo,
            COALESCE(ep.about_company, up.bio) as company_bio,
            COALESCE(ep.website, up.linkedin) as company_website
     FROM jobs j
     LEFT JOIN job_categories jc ON j.category = jc.id
     LEFT JOIN users u ON j.posted_by = u.id
-    LEFT JOIN employer_profiles ep ON ep.user_id = u.id
+    LEFT JOIN employer_profiles ep ON (ep.user_id = u.id OR (ep.company_name = j.company AND ep.company_name != ''))
     LEFT JOIN user_profiles up ON up.user_id = u.id
     WHERE j.status = 'approved'
   `;
@@ -489,16 +490,21 @@ router.get('/jobs', async (req, res) => {
     const [total] = await pool.query('SELECT COUNT(*) as count FROM jobs WHERE status = "approved"');
     
     const formattedJobs = jobs.map(job => {
+      const employerId = job.employer_id || (job.poster_role === 'employer' ? job.posted_by : null);
       if (job.hide_company_name) {
         return {
           ...job,
           company: 'Confidential Organization',
+          employer_id: null,
           company_logo: null,
           company_bio: null,
           company_website: null
         };
       }
-      return job;
+      return {
+        ...job,
+        employer_id: employerId
+      };
     });
 
     res.json({
@@ -518,13 +524,14 @@ router.get('/jobs/:id', async (req, res) => {
     const [jobs] = await pool.query(`
       SELECT j.*, jc.name as category_name, jc.icon as category_icon, 
              u.name as employer_name, u.role as poster_role,
+             COALESCE(ep.user_id, CASE WHEN u.role = 'employer' THEN u.id ELSE NULL END) as employer_id,
              COALESCE(ep.logo_url, up.avatar_url) as company_logo, 
              COALESCE(ep.about_company, up.bio) as company_bio, 
              COALESCE(ep.website, up.linkedin) as company_website
       FROM jobs j
       LEFT JOIN job_categories jc ON j.category = jc.id
       LEFT JOIN users u ON j.posted_by = u.id
-      LEFT JOIN employer_profiles ep ON ep.user_id = u.id
+      LEFT JOIN employer_profiles ep ON (ep.user_id = u.id OR (ep.company_name = j.company AND ep.company_name != ''))
       LEFT JOIN user_profiles up ON u.id = up.user_id
       WHERE j.id = ? AND j.status = 'approved'
     `, [req.params.id]);
@@ -534,9 +541,11 @@ router.get('/jobs/:id', async (req, res) => {
     }
 
     const job = jobs[0];
+    job.employer_id = job.employer_id || (job.poster_role === 'employer' ? job.posted_by : null);
 
     if (job.hide_company_name) {
       job.company = 'Confidential Organization';
+      job.employer_id = null;
       job.company_logo = null;
       job.company_bio = null;
       job.company_website = null;
@@ -545,16 +554,17 @@ router.get('/jobs/:id', async (req, res) => {
     // Related jobs
     const [related] = await pool.query(`
       SELECT j.id, j.title, j.company, j.location, j.type, j.salary_range, j.created_at, j.hide_company_name,
+             COALESCE(ep.user_id, CASE WHEN u.role = 'employer' THEN u.id ELSE NULL END) as employer_id,
              COALESCE(ep.logo_url, up.avatar_url) as company_logo
       FROM jobs j
       LEFT JOIN users u ON j.posted_by = u.id
-      LEFT JOIN employer_profiles ep ON ep.user_id = u.id
+      LEFT JOIN employer_profiles ep ON (ep.user_id = u.id OR (ep.company_name = j.company AND ep.company_name != ''))
       LEFT JOIN user_profiles up ON up.user_id = u.id
       WHERE j.category = ? AND j.id != ? AND j.status = 'approved'
       LIMIT 3
     `, [job.category, job.id]);
 
-    job.related = related.map(r => r.hide_company_name ? { ...r, company: 'Confidential Organization', company_logo: null } : r);
+    job.related = related.map(r => r.hide_company_name ? { ...r, company: 'Confidential Organization', employer_id: null, company_logo: null } : r);
 
     res.json(job);
   } catch (error) {

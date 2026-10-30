@@ -637,10 +637,10 @@ router.get('/employers/:id', async (req, res) => {
       SELECT u.id, u.email, u.status, u.created_at, u.name as contact_person, u.phone,
              ep.company_name, ep.logo_url, ep.industry, ep.website, ep.about_company as description, ep.approval_status,
              ep.company_size, ep.address, ep.linkedin_url,
-             (SELECT COUNT(*) FROM jobs j WHERE j.posted_by = u.id) as total_jobs,
-             (SELECT COUNT(*) FROM jobs j WHERE j.posted_by = u.id AND j.status = 'approved') as active_jobs,
-             (SELECT COUNT(*) FROM jobs j WHERE j.posted_by = u.id AND j.status = 'pending_approval') as pending_approval_jobs,
-             (SELECT COUNT(*) FROM job_applications ja JOIN jobs j ON ja.job_id = j.id WHERE j.posted_by = u.id) as total_applications
+             (SELECT COUNT(*) FROM jobs j WHERE j.posted_by = u.id OR (ep.company_name IS NOT NULL AND ep.company_name != '' AND j.company = ep.company_name)) as total_jobs,
+             (SELECT COUNT(*) FROM jobs j WHERE (j.posted_by = u.id OR (ep.company_name IS NOT NULL AND ep.company_name != '' AND j.company = ep.company_name)) AND j.status = 'approved') as active_jobs,
+             (SELECT COUNT(*) FROM jobs j WHERE (j.posted_by = u.id OR (ep.company_name IS NOT NULL AND ep.company_name != '' AND j.company = ep.company_name)) AND j.status = 'pending_approval') as pending_approval_jobs,
+             (SELECT COUNT(*) FROM job_applications ja JOIN jobs j ON ja.job_id = j.id WHERE j.posted_by = u.id OR (ep.company_name IS NOT NULL AND ep.company_name != '' AND j.company = ep.company_name)) as total_applications
       FROM users u
       LEFT JOIN employer_profiles ep ON u.id = ep.user_id
       WHERE u.id = ? AND u.role = 'employer'
@@ -648,15 +648,18 @@ router.get('/employers/:id', async (req, res) => {
 
     if (employers.length === 0) return res.status(404).json({ message: 'Employer not found' });
 
+    const employer = employers[0];
+    const companyName = employer.company_name || '';
+
     const [jobs] = await pool.query(`
       SELECT j.id, j.title, j.status, j.created_at,
              (SELECT COUNT(*) FROM job_applications ja WHERE ja.job_id = j.id) as application_count
       FROM jobs j
-      WHERE j.posted_by = ?
+      WHERE j.posted_by = ? OR (? != '' AND j.company = ?)
       ORDER BY j.created_at DESC
-    `, [req.params.id]);
+    `, [req.params.id, companyName, companyName]);
 
-    res.json({ employer: employers[0], jobs });
+    res.json({ employer, jobs });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

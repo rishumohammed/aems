@@ -17,16 +17,20 @@
       >
         <!-- Employer Column -->
         <template v-slot:item.employer="{ item }">
-          <div class="d-flex align-center gap-3">
+          <NuxtLink 
+            :to="item.employer_id ? `/dashboard/admin/employers/${item.employer_id}` : `/dashboard/admin/employers?search=${encodeURIComponent(item.company || item.company_name || '')}`"
+            class="d-flex align-center gap-3 text-decoration-none text-high-emphasis employer-hover-link"
+            title="View Employer Profile"
+          >
             <v-avatar color="blue-lighten-5" size="40" class="border flex-shrink-0">
               <v-img v-if="item.employer_logo" :src="getImageUrl(item.employer_logo)" cover></v-img>
               <span v-else class="text-blue font-weight-bold">{{ (item.company || item.company_name)?.substring(0,2).toUpperCase() || 'CO' }}</span>
             </v-avatar>
             <div>
-              <div class="font-weight-bold text-body-1">{{ item.company || item.company_name || 'Unknown Company' }}</div>
+              <div class="font-weight-bold text-body-1 text-primary">{{ item.company || item.company_name || 'Unknown Company' }}</div>
               <div class="text-caption text-secondary">{{ item.employer_email }}</div>
             </div>
-          </div>
+          </NuxtLink>
         </template>
 
         <!-- Job Details Column -->
@@ -152,7 +156,16 @@
             <div>
               <h2 class="text-h4 font-weight-black mb-1">{{ selectedJob.title }}</h2>
               <div class="d-flex align-center gap-4 text-grey-darken-1">
-                <span><v-icon size="small" class="mr-1">mdi-domain</v-icon> {{ selectedJob.company || selectedJob.company_name }}</span>
+                <NuxtLink
+                  :to="selectedJob.employer_id ? `/dashboard/admin/employers/${selectedJob.employer_id}` : `/dashboard/admin/employers?search=${encodeURIComponent(selectedJob.company || selectedJob.company_name || '')}`"
+                  class="text-decoration-none text-primary font-weight-bold d-inline-flex align-center gap-1"
+                  target="_blank"
+                  title="View Employer Profile"
+                >
+                  <v-icon size="small">mdi-domain</v-icon>
+                  <span>{{ selectedJob.company || selectedJob.company_name }}</span>
+                  <v-icon size="x-small">mdi-open-in-new</v-icon>
+                </NuxtLink>
                 <span><v-icon size="small" class="mr-1">mdi-map-marker</v-icon> {{ selectedJob.is_remote ? 'Remote' : selectedJob.location }}</span>
               </div>
             </div>
@@ -347,5 +360,15 @@ const confirmReject = async () => {
   display: flex;
   gap: 8px;
   justify-content: flex-end;
+}
+
+.employer-hover-link {
+  transition: opacity 0.2s ease;
+}
+.employer-hover-link:hover {
+  opacity: 0.85;
+}
+.employer-hover-link:hover .text-primary {
+  text-decoration: underline !important;
 }
 </style>

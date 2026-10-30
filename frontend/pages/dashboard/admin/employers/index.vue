@@ -1,11 +1,24 @@
 <template>
   <v-container fluid class="pa-6">
-    <div class="d-flex align-center justify-space-between mb-8">
+    <div class="d-flex flex-wrap align-center justify-space-between gap-4 mb-8">
       <div>
         <h1 class="text-h4 font-weight-bold mb-1">Employers</h1>
         <p class="text-secondary">Manage all registered companies and their job postings.</p>
       </div>
-      <v-btn icon="mdi-refresh" variant="tonal" color="primary" @click="loadEmployers" :loading="loading"></v-btn>
+      <div class="d-flex align-center gap-3">
+        <v-text-field
+          v-model="search"
+          placeholder="Search company, contact, or email..."
+          prepend-inner-icon="mdi-magnify"
+          variant="outlined"
+          density="compact"
+          rounded="lg"
+          hide-details
+          clearable
+          style="min-width: 280px;"
+        ></v-text-field>
+        <v-btn icon="mdi-refresh" variant="tonal" color="primary" @click="loadEmployers" :loading="loading"></v-btn>
+      </div>
     </div>
 
     <v-card rounded="xl" border elevation="0" class="shadow-card overflow-hidden">
@@ -13,20 +26,21 @@
         :headers="headers"
         :items="employers"
         :loading="loading"
+        :search="search"
         class="bg-transparent"
       >
         <!-- Company Column -->
         <template v-slot:item.company="{ item }">
-          <div class="d-flex align-center gap-3">
+          <NuxtLink :to="`/dashboard/admin/employers/${item.id}`" class="d-flex align-center gap-3 text-decoration-none text-high-emphasis company-row-link">
             <v-avatar color="teal-lighten-5" size="40">
               <v-img v-if="item.logo_url" :src="item.logo_url"></v-img>
               <span v-else class="text-teal font-weight-bold">{{ item.company_name?.substring(0,1).toUpperCase() || 'C' }}</span>
             </v-avatar>
             <div>
-              <div class="font-weight-bold text-body-1">{{ item.company_name || 'Unknown' }}</div>
+              <div class="font-weight-bold text-body-1 text-primary">{{ item.company_name || 'Unknown' }}</div>
               <div class="text-caption text-secondary">{{ item.industry || 'Not specified' }}</div>
             </div>
-          </div>
+          </NuxtLink>
         </template>
 
         <!-- Contact Column -->
@@ -99,14 +113,23 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, watch, onMounted } from 'vue';
+import { useRoute } from 'vue-router';
 import { useApi } from '@/composables/useApi';
 
-definePageMeta({ layout: 'dashboard', middleware: ['auth', 'role'], role: ['super_admin', 'placement_coordinator'] });
+definePageMeta({ layout: 'dashboard', middleware: ['auth', 'role'], role: ['super_admin', 'sub_admin', 'placement_coordinator'] });
 
 const api = useApi();
+const route = useRoute();
 const employers = ref<any[]>([]);
 const loading = ref(false);
+const search = ref((route.query.search as string) || '');
+
+watch(() => route.query.search, (newSearch) => {
+  if (typeof newSearch === 'string') {
+    search.value = newSearch;
+  }
+});
 
 const showPasswordDialog = ref(false);
 const tempPassword = ref('');
@@ -205,9 +228,13 @@ const copyPassword = () => {
   padding: 16px !important;
   border-bottom: 1px solid rgba(0,0,0,0.05) !important;
 }
-::v-deep(.custom-table td) {
-  padding-top: 16px !important;
-  padding-bottom: 16px !important;
-  border-bottom: 1px solid rgba(0,0,0,0.05) !important;
+.company-row-link {
+  transition: opacity 0.2s ease;
+}
+.company-row-link:hover {
+  opacity: 0.85;
+}
+.company-row-link:hover .text-primary {
+  text-decoration: underline !important;
 }
 </style>

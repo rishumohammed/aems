@@ -37,11 +37,12 @@ router.get('/', async (req, res) => {
     const [jobs] = await pool.query(`
       SELECT j.*, jc.name as category_name, jc.icon as category_icon, jc.slug as category_slug, 
              u.name as employer_name, u.role as poster_role,
+             COALESCE(ep.user_id, CASE WHEN u.role = 'employer' THEN u.id ELSE NULL END) as employer_id,
              ep.logo_url as employer_logo, ep.about_company as employer_bio, ep.website as employer_website
       FROM jobs j
       LEFT JOIN job_categories jc ON j.category = jc.id
       LEFT JOIN users u ON j.posted_by = u.id
-      LEFT JOIN employer_profiles ep ON (u.id = ep.user_id AND u.role = 'employer')
+      LEFT JOIN employer_profiles ep ON (ep.user_id = u.id OR (ep.company_name = j.company AND ep.company_name != ''))
       WHERE j.status = 'approved'
       ORDER BY j.created_at DESC
     `);
@@ -51,10 +52,12 @@ router.get('/', async (req, res) => {
       if (job.poster_role !== 'employer' && finalCompany === 'Brixify') {
         finalCompany = null;
       }
+      const employerId = job.employer_id || (job.poster_role === 'employer' ? job.posted_by : null);
       if (job.hide_company_name) {
         return {
           ...job,
           company: 'Confidential Organization',
+          employer_id: null,
           company_logo: null,
           company_bio: null,
           company_website: null
@@ -64,6 +67,7 @@ router.get('/', async (req, res) => {
         return {
           ...job,
           company: finalCompany,
+          employer_id: employerId,
           company_logo: job.employer_logo || null,
           company_bio: job.employer_bio || null,
           company_website: job.employer_website || null
@@ -72,9 +76,10 @@ router.get('/', async (req, res) => {
       return {
         ...job,
         company: finalCompany,
-        company_logo: null,
-        company_bio: null,
-        company_website: null
+        employer_id: employerId,
+        company_logo: job.employer_logo || null,
+        company_bio: job.employer_bio || null,
+        company_website: job.employer_website || null
       };
     });
 
@@ -90,11 +95,12 @@ router.get('/:id', async (req, res) => {
     const [jobs] = await pool.query(`
       SELECT j.*, jc.name as category_name, jc.icon as category_icon, 
              u.name as employer_name, u.role as poster_role,
+             COALESCE(ep.user_id, CASE WHEN u.role = 'employer' THEN u.id ELSE NULL END) as employer_id,
              ep.logo_url as employer_logo, ep.about_company as employer_bio, ep.website as employer_website
       FROM jobs j
       LEFT JOIN job_categories jc ON j.category = jc.id
       LEFT JOIN users u ON j.posted_by = u.id
-      LEFT JOIN employer_profiles ep ON (u.id = ep.user_id AND u.role = 'employer')
+      LEFT JOIN employer_profiles ep ON (ep.user_id = u.id OR (ep.company_name = j.company AND ep.company_name != ''))
       WHERE j.id = ? AND j.status = 'approved'
     `, [req.params.id]);
     
@@ -106,8 +112,11 @@ router.get('/:id', async (req, res) => {
       finalCompany = null;
     }
 
+    job.employer_id = job.employer_id || (job.poster_role === 'employer' ? job.posted_by : null);
+
     if (job.hide_company_name) {
       job.company = 'Confidential Organization';
+      job.employer_id = null;
       job.company_logo = null;
       job.company_bio = null;
       job.company_website = null;
@@ -118,9 +127,9 @@ router.get('/:id', async (req, res) => {
       job.company_website = job.employer_website || null;
     } else {
       job.company = finalCompany;
-      job.company_logo = null;
-      job.company_bio = null;
-      job.company_website = null;
+      job.company_logo = job.employer_logo || null;
+      job.company_bio = job.employer_bio || null;
+      job.company_website = job.employer_website || null;
     }
 
     res.json(job);

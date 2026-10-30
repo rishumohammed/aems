@@ -7,7 +7,15 @@
         <v-col cols="12" md="8">
           <v-card rounded="xl" border flat class="pa-8 mb-6 shadow-sm">
             <div class="d-flex align-center gap-6 mb-8">
-              <v-avatar size="80" rounded="xl" color="grey-lighten-4" class="border flex-shrink-0">
+              <v-avatar 
+                size="80" 
+                rounded="xl" 
+                color="grey-lighten-4" 
+                class="border flex-shrink-0"
+                :class="{ 'cursor-pointer hover-shadow': !job.hide_company_name && job.company }"
+                @click="goToEmployer"
+                :title="!job.hide_company_name && job.company ? (canAccessAdminEmployers ? 'View Employer Profile' : 'Visit Company') : ''"
+              >
                 <v-icon v-if="job.hide_company_name" color="primary" size="40">mdi-shield-lock-outline</v-icon>
                 <img v-else-if="job.company_logo" :src="getImageUrl(job.company_logo)" :alt="job.company" style="width: 100%; height: 100%; object-fit: cover;" />
                 <v-icon v-else color="grey-darken-1" size="40">mdi-office-building</v-icon>
@@ -15,7 +23,17 @@
               <div>
                 <h1 class="text-h4 font-weight-bold mb-1">{{ job.title }}</h1>
                 <div class="d-flex align-center gap-4 text-subtitle-1 text-secondary">
-                  <span class="font-weight-bold text-primary">{{ job.company }}</span>
+                  <a
+                    v-if="!job.hide_company_name && job.company"
+                    href="javascript:void(0)"
+                    class="font-weight-bold text-primary text-decoration-none company-link d-inline-flex align-center gap-1"
+                    @click="goToEmployer"
+                    :title="canAccessAdminEmployers ? 'View Employer in Admin' : (job.employer_website || job.company_website ? 'Visit Website' : '')"
+                  >
+                    <span>{{ job.company }}</span>
+                    <v-icon size="16" class="company-link-icon">mdi-open-in-new</v-icon>
+                  </a>
+                  <span v-else class="font-weight-bold text-primary">{{ job.company }}</span>
                   <v-divider vertical inset class="mx-1"></v-divider>
                   <span>{{ job.location }}</span>
                 </div>
@@ -85,10 +103,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import dayjs from 'dayjs';
 import JobApplicationModal from '@/components/jobs/JobApplicationModal.vue';
 import { useApi } from '@/composables/useApi';
+import { useAuthStore } from '@/stores/auth';
 
 definePageMeta({
   layout: 'dashboard',
@@ -102,8 +121,31 @@ const apiBase = config.public.apiBase;
 const showApplyModal = ref(false);
 const hasApplied = ref(false);
 const api = useApi();
+const authStore = useAuthStore();
 
 const { data: job } = await useFetch<any>(`${apiBase}/public/jobs/${route.params.id}`);
+
+const canAccessAdminEmployers = computed(() => {
+  const role = authStore.userRole || authStore.user?.role;
+  return ['super_admin', 'sub_admin', 'placement_coordinator', 'admin'].includes(role);
+});
+
+const goToEmployer = () => {
+  if (job.value?.hide_company_name) return;
+
+  if (canAccessAdminEmployers.value) {
+    if (job.value?.employer_id) {
+      navigateTo(`/dashboard/admin/employers/${job.value.employer_id}`);
+    } else if (job.value?.company) {
+      navigateTo({
+        path: '/dashboard/admin/employers',
+        query: { search: job.value.company }
+      });
+    }
+  } else if (job.value?.employer_website || job.value?.company_website) {
+    openCompanyWebsite();
+  }
+};
 
 onMounted(async () => {
   try {
@@ -117,8 +159,9 @@ onMounted(async () => {
 });
 
 const openCompanyWebsite = () => {
-  if (job.value?.employer_website) {
-    let url = job.value.employer_website;
+  const website = job.value?.employer_website || job.value?.company_website;
+  if (website) {
+    let url = website;
     if (!url.startsWith('http')) url = 'https://' + url;
     window.open(url, '_blank');
   } else {
@@ -141,4 +184,33 @@ const onApplySuccess = () => {
 .gap-4 { gap: 16px; }
 .gap-3 { gap: 12px; }
 .uppercase { text-transform: uppercase; letter-spacing: 0.5px; }
+
+.cursor-pointer {
+  cursor: pointer;
+}
+.hover-shadow {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.hover-shadow:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12) !important;
+}
+
+.company-link {
+  transition: all 0.2s ease;
+  border-radius: 4px;
+}
+.company-link:hover {
+  text-decoration: underline !important;
+  color: #1976d2 !important;
+  opacity: 0.9;
+}
+.company-link-icon {
+  opacity: 0.7;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+.company-link:hover .company-link-icon {
+  opacity: 1;
+  transform: translate(1px, -1px);
+}
 </style>

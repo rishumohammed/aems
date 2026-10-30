@@ -104,7 +104,15 @@
                     <v-chip size="x-small" color="primary" variant="tonal" class="font-weight-bold uppercase">{{ job.type.replace('_', ' ') }}</v-chip>
                   </div>
                   <div class="d-flex align-center flex-wrap gap-x-4 gap-y-1 text-caption text-secondary">
-                    <span class="d-flex align-center"><v-icon size="14" class="mr-1">mdi-domain</v-icon>{{ job.company }}</span>
+                    <span 
+                      class="d-flex align-center"
+                      :class="{ 'text-primary font-weight-medium company-click': !job.hide_company_name && canViewEmployer }"
+                      @click.stop="goToEmployer(job)"
+                      :title="!job.hide_company_name && canViewEmployer ? 'View Employer Profile' : ''"
+                    >
+                      <v-icon size="14" class="mr-1">mdi-domain</v-icon>
+                      <span>{{ job.company }}</span>
+                    </span>
                     <span class="d-flex align-center"><v-icon size="14" class="mr-1">mdi-map-marker-outline</v-icon>{{ job.location }}</span>
                     <span class="d-flex align-center"><v-icon size="14" class="mr-1">mdi-currency-inr</v-icon>{{ job.salary_range }}</span>
                     <span class="d-flex align-center"><v-icon size="14" class="mr-1">mdi-clock-outline</v-icon>{{ formatDate(job.created_at) }}</span>
@@ -175,6 +183,25 @@ const jobTypes = [
   { label: 'Internship', value: 'internship' }
 ];
 
+const canViewEmployer = computed(() => {
+  const role = authStore.userRole || authStore.user?.role;
+  return ['super_admin', 'sub_admin', 'placement_coordinator', 'admin'].includes(role);
+});
+
+const goToEmployer = (job: any) => {
+  if (job?.hide_company_name) return;
+  if (canViewEmployer.value) {
+    if (job?.employer_id) {
+      navigateTo(`/dashboard/admin/employers/${job.employer_id}`);
+    } else if (job?.company) {
+      navigateTo({
+        path: '/dashboard/admin/employers',
+        query: { search: job.company }
+      });
+    }
+  }
+};
+
 // Fetch Categories
 const { data: categoriesData } = await useFetch<any>(`${apiBase}/public/job-categories`);
 const categories = computed(() => {
@@ -238,4 +265,16 @@ const formatDate = (date: string) => dayjs(date).fromNow();
 .gap-4 { gap: 16px; }
 .gap-x-4 { column-gap: 16px; }
 .gap-y-1 { row-gap: 4px; }
+
+.company-click {
+  cursor: pointer;
+  border-radius: 4px;
+  padding: 1px 4px;
+  margin: -1px -4px;
+  transition: background-color 0.2s ease, text-decoration 0.2s ease;
+}
+.company-click:hover {
+  text-decoration: underline !important;
+  background-color: rgba(25, 118, 210, 0.08);
+}
 </style>
