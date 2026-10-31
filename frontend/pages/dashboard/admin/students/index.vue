@@ -126,7 +126,7 @@
         hover
         class="apple-data-table"
       >
-        <template v-slot:item.name="{ item }">
+        <template v-slot:item.student="{ item }">
           <div class="d-flex align-center py-2">
             <v-avatar size="36" class="mr-3 av-sq">
               <v-img :src="`https://ui-avatars.com/api/?name=${item.name}&background=007AFF&color=fff`"></v-img>
@@ -303,7 +303,7 @@ const submitAddStudent = async () => {
 };
 
 const headers: any[] = [
-  { title: 'Student', key: 'name', align: 'start' },
+  { title: 'Student', key: 'student', value: (item: any) => item.name, align: 'start' },
   { title: 'Courses', key: 'enrolled_courses', align: 'start', sortable: false },
   { title: 'Progress', key: 'avg_progress', align: 'start' },
   { title: 'Status', key: 'status', align: 'start' },
