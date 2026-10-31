@@ -358,8 +358,14 @@ const sendingEmail = ref(false);
 const fetchCourses = async () => {
   loadingCourses.value = true;
   try {
-    const { data } = await api.get('/public/courses');
-    courses.value = data.courses.filter(c => c.status === 'published');
+    const res = await api.get('/lms/courses').catch(() => api.get('/public/courses?all=true'));
+    const list = Array.isArray(res.data) ? res.data : (res.data?.courses || []);
+    courses.value = list.filter(c => c.status === 'published');
+    if (courses.value.length === 0 && list.length > 0) {
+      courses.value = list.filter(c => c.status !== 'archived');
+    }
+  } catch (error) {
+    console.error('Failed to fetch courses:', error);
   } finally {
     loadingCourses.value = false;
   }

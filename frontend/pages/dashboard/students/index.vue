@@ -298,8 +298,9 @@ const fetchStudents = async () => {
 
 const fetchCourses = async () => {
   try {
-    const { data } = await api.get('/public/courses');
-    courses.value = data.courses.filter(c => c.status === 'published');
+    const res = await api.get('/lms/courses').catch(() => api.get('/public/courses?all=true'));
+    const list = Array.isArray(res.data) ? res.data : (res.data?.courses || []);
+    courses.value = list.filter(c => c.status === 'published');
   } catch (error) {
     console.error('Failed to fetch courses:', error);
   }

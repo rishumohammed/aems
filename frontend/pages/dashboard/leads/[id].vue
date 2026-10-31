@@ -506,11 +506,12 @@ const fetchData = async () => {
     if (lead.value.status === 'converted') {
       await fetchConvertedStudentDetails();
     }
-    const [{ data: coursesData }, agentsResponse] = await Promise.all([
-      api.get('/public/courses'),
+    const [coursesRes, agentsResponse] = await Promise.all([
+      api.get('/lms/courses').catch(() => api.get('/public/courses?all=true')),
       api.get('/crm/agents')
     ]);
-    courses.value = coursesData.courses || [];
+    const coursesList = Array.isArray(coursesRes.data) ? coursesRes.data : (coursesRes.data?.courses || []);
+    courses.value = coursesList;
     agents.value = agentsResponse.data || [];
   } catch (error) {
     console.error('Failed to fetch lead details:', error);

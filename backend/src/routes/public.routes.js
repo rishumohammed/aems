@@ -160,8 +160,11 @@ router.get('/categories', async (req, res) => {
 
 // GET /api/public/courses - Paginated course listing
 router.get('/courses', async (req, res) => {
-  const { category, sort, is_featured, course_type, page = 1, limit = 12 } = req.query;
-  const offset = (page - 1) * limit;
+  const { category, sort, is_featured, course_type, page = 1, limit = 12, all } = req.query;
+  const isAll = all === 'true' || limit === 'all' || limit === '-1';
+  const parsedLimit = isAll ? null : (parseInt(limit, 10) || 12);
+  const parsedPage = isAll ? 1 : (parseInt(page, 10) || 1);
+  const offset = isAll ? 0 : (parsedPage - 1) * parsedLimit;
 
   let query = `
     SELECT c.*, u.name as tutor_name, cat.name as category_name
@@ -196,8 +199,10 @@ router.get('/courses', async (req, res) => {
     query += ' ORDER BY c.title ASC';
   }
 
-  query += ' LIMIT ? OFFSET ?';
-  params.push(parseInt(limit), offset);
+  if (!isAll) {
+    query += ' LIMIT ? OFFSET ?';
+    params.push(parsedLimit, offset);
+  }
 
   try {
     const [courses] = await pool.query(query, params);
@@ -222,8 +227,8 @@ router.get('/courses', async (req, res) => {
     res.json({
       courses,
       total: total[0].count,
-      page: parseInt(page),
-      limit: parseInt(limit)
+      page: parsedPage,
+      limit: isAll ? total[0].count : parsedLimit
     });
   } catch (error) {
     console.error(error);

@@ -231,10 +231,16 @@ const fetchData = async () => {
   try {
     const [studentsResponse, coursesResponse] = await Promise.all([
       api.get('/admin/users?role=student'),
-      api.get('/public/courses')
+      api.get('/lms/courses').catch(() => api.get('/public/courses?all=true'))
     ]);
     students.value = studentsResponse.data || [];
-    courses.value = (coursesResponse.data?.courses || []).filter(c => c.status === 'published');
+    const courseList = Array.isArray(coursesResponse.data)
+      ? coursesResponse.data
+      : (coursesResponse.data?.courses || coursesResponse || []);
+    courses.value = courseList.filter(c => c.status === 'published');
+    if (courses.value.length === 0 && courseList.length > 0) {
+      courses.value = courseList.filter(c => c.status !== 'archived');
+    }
     
     if (selectedCourseIds.value.length > 0) {
       onCourseSelect(selectedCourseIds.value);

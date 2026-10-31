@@ -393,11 +393,12 @@ const submitAddLead = async () => {
 onMounted(async () => {
   fetchData();
   try {
-    const [{ data: coursesData }, agentsResponse] = await Promise.all([
-      api.get('/public/courses'),
+    const [coursesRes, agentsResponse] = await Promise.all([
+      api.get('/lms/courses').catch(() => api.get('/public/courses?all=true')),
       api.get('/crm/agents')
     ]);
-    courses.value = (coursesData.courses || []).map((c: any) => ({ label: c.title, value: c.id }));
+    const coursesList = Array.isArray(coursesRes.data) ? coursesRes.data : (coursesRes.data?.courses || []);
+    courses.value = coursesList.map((c: any) => ({ label: c.title, value: c.id }));
     agents.value = (agentsResponse.data || []).map((a: any) => ({ label: a.name, value: a.id }));
   } catch (err) {
     console.error('Failed to load CRM metadata:', err);
