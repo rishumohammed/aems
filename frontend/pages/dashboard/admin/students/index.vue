@@ -126,7 +126,7 @@
         hover
         class="apple-data-table"
       >
-        <template #[`item.name`]="{ item }">
+        <template v-slot:item.name="{ item }">
           <div class="d-flex align-center py-2">
             <v-avatar size="36" class="mr-3 av-sq">
               <v-img :src="`https://ui-avatars.com/api/?name=${item.name}&background=007AFF&color=fff`"></v-img>
@@ -136,9 +136,9 @@
               <div class="user-email">{{ item.email }}</div>
             </div>
           </div>
-</template>
+        </template>
 
-        <template #[`item.enrolled_courses`]="{ item }">
+        <template v-slot:item.enrolled_courses="{ item }">
           <div class="d-flex flex-wrap gap-1">
             <template v-if="item.enrolled_courses && item.enrolled_courses.length">
               <Badge v-for="course in item.enrolled_courses.slice(0, 2)" :key="course" color="blue" size="xs">
@@ -152,7 +152,7 @@
           </div>
         </template>
 
-        <template #[`item.avg_progress`]="{ item }">
+        <template v-slot:item.avg_progress="{ item }">
           <div style="width: 100px;">
             <UiProgressFraction
               :current="Math.round(item.avg_progress || 0)"
@@ -161,13 +161,13 @@
           </div>
         </template>
 
-        <template #[`item.status`]="{ item }">
+        <template v-slot:item.status="{ item }">
           <Badge :color="statusColor(item.status)">
             {{ item.status }}
           </Badge>
         </template>
 
-        <template #[`item.actions`]="{ item }">
+        <template v-slot:item.actions="{ item }">
           <v-btn
             color="primary"
             variant="tonal"

@@ -179,6 +179,10 @@
       </div>
       <AppInput v-model="newLead.notes" label="Initial Notes" type="textarea" placeholder="Add any initial details..." :error="errors.notes" large />
     </AppModal>
+
+    <v-snackbar v-model="snackbar.show" :color="snackbar.color" :timeout="4000">
+      {{ snackbar.text }}
+    </v-snackbar>
   </v-container>
 </template>
 
@@ -207,6 +211,7 @@ const showAddLeadModal = ref(false);
 const saving = ref(false);
 const dismissFollowupAlert = ref(false);
 const csvInput = ref<HTMLInputElement | null>(null);
+const snackbar = ref({ show: false, text: '', color: 'success' });
 
 const downloadSampleCSV = () => {
   const csvContent = "name,email,phone,source,status,notes\nJohn Doe,john@example.com,+1234567890,manual,open,Interested in certification\nJane Smith,jane@example.com,,whatsapp,interested,Available on weekends\nUnknown Lead,,+0987654321,website,called,Custom Field: Some custom data here";
