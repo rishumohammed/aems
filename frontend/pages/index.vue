@@ -454,14 +454,26 @@ const whyPoints = [
   { icon: 'mdi-tune', color: 'deep-purple', title: 'Flexible Learning', sub: 'Online, hybrid, in-person' },
 ];
 
-const standards = ref<any[]>([]);
+const defaultStandards = [
+  { name: 'ISO 22000:2018', sub: 'Quality Mgmt', icon: 'mdi-certificate-outline', color: 'primary', slug: 'iso' },
+  { name: 'ISO', sub: 'Quality Mgmt', icon: 'mdi-certificate-outline', color: 'primary', slug: 'iso' },
+  { name: 'FSSC', sub: 'Food Safety', icon: 'mdi-food-apple-outline', color: 'teal', slug: 'fssc' },
+  { name: 'BRCGS', sub: 'Global Std', icon: 'mdi-shield-check-outline', color: 'orange', slug: 'brcgs' },
+  { name: 'OHSMS', sub: 'Safety Mgmt', icon: 'mdi-hard-hat', color: 'deep-purple', slug: 'ohsms' },
+  { name: 'QMS', sub: 'Quality Sys', icon: 'mdi-check-circle-outline', color: 'success', slug: 'qms' },
+  { name: 'HACCP', sub: 'Hazard Control', icon: 'mdi-flask-outline', color: 'red', slug: 'haccp' },
+];
+
+const standards = ref<any[]>(defaultStandards);
 
 const fetchStandards = async () => {
   try {
     const { data } = await api.get('/public/standards');
-    standards.value = data || [];
+    if (data && data.length) {
+      standards.value = data;
+    }
   } catch (e) {
-    console.error('Failed to fetch standards');
+    console.error('Failed to fetch standards, using defaults');
   }
 };
 

@@ -44,7 +44,14 @@ export default defineNuxtConfig({
       '/about',
       '/courses',
       '/jobs',
-      '/verify'
+      '/verify',
+      '/certifications/fssc-22000',
+      '/certifications/iso-22000',
+      '/certifications/iso-certification',
+      '/certifications/brcgs',
+      '/certifications/ohsms',
+      '/certifications/qms',
+      '/certifications/haccp'
     ]
   },
 

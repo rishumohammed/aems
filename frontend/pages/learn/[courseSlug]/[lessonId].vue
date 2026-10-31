@@ -17,52 +17,6 @@
         <v-btn icon="mdi-arrow-left" color="primary" variant="text" to="/dashboard/student" title="Back to Dashboard"></v-btn>
       </v-toolbar>
 
-      <!-- Top Navigation (Desktop) -->
-      <div class="d-none d-md-flex align-center justify-space-between px-6 py-3 bg-white border-b sticky-header">
-        <div class="d-flex align-center gap-3 overflow-hidden">
-          <v-btn
-            variant="tonal"
-            color="primary"
-            size="small"
-            prepend-icon="mdi-arrow-left"
-            class="text-none font-weight-bold rounded-lg flex-shrink-0"
-            to="/dashboard/student"
-          >
-            Dashboard
-          </v-btn>
-          <v-divider vertical inset style="height: 20px;"></v-divider>
-          <div class="d-flex align-center gap-2 overflow-hidden text-no-wrap">
-            <v-icon size="18" color="primary" class="flex-shrink-0">mdi-school-outline</v-icon>
-            <span class="text-subtitle-2 font-weight-black text-grey-darken-4 text-truncate" :title="courseTitle">
-              {{ courseTitle }}
-            </span>
-            <template v-if="currentSectionTitle">
-              <v-icon size="14" color="grey-lighten-1" class="flex-shrink-0">mdi-chevron-right</v-icon>
-              <span class="text-caption text-grey-darken-1 text-truncate" :title="currentSectionTitle">
-                {{ currentSectionTitle }}
-              </span>
-            </template>
-            <template v-if="currentLesson?.title">
-              <v-icon size="14" color="grey-lighten-1" class="flex-shrink-0">mdi-chevron-right</v-icon>
-              <span class="text-caption font-weight-medium text-grey-darken-2 text-truncate" :title="currentLesson?.title">
-                {{ currentLesson?.title }}
-              </span>
-            </template>
-          </div>
-        </div>
-        <div class="d-flex align-center gap-3 flex-shrink-0 ml-4">
-          <v-chip
-            v-if="enrollment?.completion_percentage !== undefined"
-            size="small"
-            color="primary"
-            variant="tonal"
-            class="font-weight-bold"
-          >
-            <v-icon start size="14">mdi-chart-donut</v-icon>
-            {{ Math.round(enrollment?.completion_percentage || 0) }}% Completed
-          </v-chip>
-        </div>
-      </div>
 
       <!-- Locked State Overlay -->
       <div v-if="currentLesson?.is_locked" class="locked-overlay d-flex flex-column align-center justify-center pa-12 text-center flex-grow-1 bg-grey-lighten-4">
@@ -1033,12 +987,6 @@ definePageMeta({
 }
 .shadow-apple {
   border: 1px solid var(--border);
-}
-.sticky-header {
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 .course-name-badge {
   letter-spacing: 0.3px;

@@ -341,11 +341,19 @@ router.get('/jobs/:id/applicants', authenticateJWT, hasAccess, async (req, res) 
   try {
     const { match_status } = req.query;
 
-    // Basic job details including requirements
+    // Basic job details including requirements and employer info
     const [jobs] = await pool.query(`
-      SELECT id, title, company, location, requirements_json, qualification_req, experience_level, 
-             specialization_req, gender_preference, language_req, joining_status_req 
-      FROM jobs WHERE id = ?
+      SELECT j.id, j.title, 
+             COALESCE(j.company, ep.company_name, u.name, 'Employer') as company, 
+             j.location, j.is_remote, j.type, j.requirements_json, j.qualification_req, j.experience_level, 
+             j.specialization_req, j.gender_preference, j.language_req, j.joining_status_req,
+             u.name as employer_name, u.email as employer_email,
+             ep.company_name as employer_company, ep.logo_url as employer_logo,
+             COALESCE(ep.user_id, CASE WHEN u.role = 'employer' THEN u.id ELSE NULL END) as employer_id
+      FROM jobs j
+      LEFT JOIN users u ON j.posted_by = u.id
+      LEFT JOIN employer_profiles ep ON (ep.user_id = u.id OR (ep.company_name = j.company AND ep.company_name != ''))
+      WHERE j.id = ?
     `, [req.params.id]);
 
     if (jobs.length === 0) return res.status(404).json({ message: 'Job not found' });
@@ -354,6 +362,17 @@ router.get('/jobs/:id/applicants', authenticateJWT, hasAccess, async (req, res) 
     // Applicants with student info
     const [applicants] = await pool.query(`
       SELECT ja.*, 
+             COALESCE(ja.applicant_name, u.name) as applicant_name,
+             COALESCE(ja.applicant_email, u.email) as applicant_email,
+             COALESCE(ja.applicant_phone, u.phone, sp.phone) as applicant_phone,
+             COALESCE(ja.gender, sp.gender) as gender,
+             COALESCE(ja.qualification, sp.education_level) as qualification,
+             COALESCE(ja.field_of_study, sp.field_of_study) as field_of_study,
+             COALESCE(ja.experience_years, sp.experience_years, 0) as experience_years,
+             COALESCE(ja.skills_json, sp.skills) as skills_json,
+             sp.language_proficiency,
+             sp.joining_status,
+             sp.college_name,
              u.name as fallback_name, u.email as fallback_email, up.avatar_url,
              (SELECT COUNT(*) FROM enrollments e WHERE e.student_id = ja.student_id AND e.status = 'completed') as courses_completed,
              (
@@ -366,6 +385,7 @@ router.get('/jobs/:id/applicants', authenticateJWT, hasAccess, async (req, res) 
       FROM job_applications ja
       JOIN users u ON ja.student_id = u.id
       LEFT JOIN user_profiles up ON u.id = up.user_id
+      LEFT JOIN student_profiles sp ON u.id = sp.user_id
       WHERE ja.job_id = ?
       ORDER BY ja.applied_at DESC
     `, [req.params.id]);
@@ -385,7 +405,7 @@ router.get('/jobs/:id/applicants', authenticateJWT, hasAccess, async (req, res) 
         experience_years: app.experience_years,
         qualification: app.qualification,
         field_of_study: app.field_of_study,
-        gender: app.applicant_gender,
+        gender: app.gender,
         language_proficiency: app.language_proficiency,
         joining_status: app.joining_status,
         certs_active: app.certs_active,

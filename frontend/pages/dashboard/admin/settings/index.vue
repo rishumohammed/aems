@@ -713,7 +713,7 @@
             </v-card>
           </div>
 
-          <div class="d-flex justify-end gap-3 mt-12 pt-6 border-t" v-if="activeTab[0] !== 'social' && activeTab[0] !== 'currencies' && activeTab[0] !== 'homepage' && activeTab[0] !== 'certifications' && activeTab[0] !== 'email_templates'">
+          <div class="d-flex justify-end gap-3 mt-12 pt-6 border-t" v-if="activeTab[0] !== 'social' && activeTab[0] !== 'currencies' && activeTab[0] !== 'homepage' && activeTab[0] !== 'email_templates'">
             <AppButton variant="g" size="lg" icon="mdi-refresh" @click="fetchData">
               Reset Changes
             </AppButton>
@@ -737,7 +737,6 @@ import { ref, onMounted, watch, computed } from 'vue';
 import { useApi } from '@/composables/useApi';
 import SocialPlatformsTab from '@/components/admin/settings/SocialPlatformsTab.vue';
 import CurrenciesTab from '@/components/admin/settings/CurrenciesTab.vue';
-import CertificationsTab from '@/components/admin/settings/CertificationsTab.vue';
 import EmailTemplatesTab from '@/components/admin/settings/EmailTemplatesTab.vue';
 
 definePageMeta({

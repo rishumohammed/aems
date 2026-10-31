@@ -2,20 +2,82 @@
   <v-container fluid class="pa-6">
     <div class="d-flex flex-wrap align-center justify-space-between gap-4 mb-6">
       <div class="d-flex align-center gap-4">
-        <AppButton variant="g" icon="mdi-arrow-left" to="/dashboard/admin/jobs"></AppButton>
+        <AppButton variant="g" icon="mdi-arrow-left" to="/dashboard/admin/jobs" title="Back to Jobs"></AppButton>
         <div>
-          <div class="d-flex align-center gap-2">
-            <h1 class="text-h4 font-weight-bold mb-1" style="color: var(--g7);">Applicants: {{ job?.title }}</h1>
+          <div class="d-flex align-center gap-2 flex-wrap">
+            <h1 class="text-h4 font-weight-bold mb-1" style="color: var(--g7);">
+              Applicants: {{ job?.title || 'Job Applicants' }}
+            </h1>
             <Badge color="blue">Admin Portal</Badge>
           </div>
-          <p style="color: var(--g4); font-size: 13px; font-weight: 500;" class="mb-0">
-            <v-icon size="small" class="mr-1">mdi-domain</v-icon> {{ job?.company }} <span class="mx-2">|</span> 
-            <v-icon size="small" class="mr-1">mdi-map-marker</v-icon> {{ job?.location || 'Remote' }}
-          </p>
+          <div class="d-flex align-center flex-wrap gap-2" style="color: var(--g4); font-size: 13px; font-weight: 500;">
+            <!-- Company / Employer Name with Clickable link -->
+            <span class="d-inline-flex align-center">
+              <v-icon size="small" class="mr-1 text-primary">mdi-domain</v-icon>
+              <NuxtLink
+                v-if="job?.employer_id"
+                :to="`/dashboard/admin/employers/${job.employer_id}`"
+                class="font-weight-bold text-primary text-decoration-none company-hover-link"
+                title="View Employer Profile"
+              >
+                {{ job?.company || job?.employer_company || 'Employer' }}
+              </NuxtLink>
+              <NuxtLink
+                v-else-if="job?.company || job?.employer_company"
+                :to="`/dashboard/admin/employers?search=${encodeURIComponent(job?.company || job?.employer_company)}`"
+                class="font-weight-bold text-primary text-decoration-none company-hover-link"
+                title="Search Employer"
+              >
+                {{ job?.company || job?.employer_company }}
+              </NuxtLink>
+              <span v-else class="font-weight-bold text-grey-darken-3">Employer</span>
+            </span>
+
+            <!-- Employer Contact Person / Posted By if different from company -->
+            <template v-if="job?.employer_name && job?.employer_name !== (job?.company || job?.employer_company)">
+              <span class="mx-1 text-grey-lighten-1">•</span>
+              <span class="d-inline-flex align-center">
+                <v-icon size="small" class="mr-1 text-grey">mdi-account-tie-outline</v-icon>
+                <span>Employer: 
+                  <NuxtLink
+                    v-if="job?.employer_id"
+                    :to="`/dashboard/admin/employers/${job.employer_id}`"
+                    class="font-weight-bold text-grey-darken-3 text-decoration-none"
+                    title="View Employer Profile"
+                  >
+                    {{ job.employer_name }}
+                  </NuxtLink>
+                  <strong v-else class="text-grey-darken-3">{{ job.employer_name }}</strong>
+                </span>
+              </span>
+            </template>
+
+            <span class="mx-1 text-grey-lighten-1">•</span>
+            <span class="d-inline-flex align-center">
+              <v-icon size="small" class="mr-1">mdi-map-marker</v-icon> 
+              <span>{{ job?.is_remote ? 'Remote' : (job?.location || 'Remote') }}</span>
+            </span>
+
+            <template v-if="job?.type">
+              <span class="mx-1 text-grey-lighten-1">•</span>
+              <span class="text-capitalize">{{ job.type.replace('_', ' ') }}</span>
+            </template>
+          </div>
         </div>
       </div>
       
       <div class="d-flex align-center gap-2">
+        <v-btn
+          v-if="job?.employer_id"
+          variant="tonal"
+          color="primary"
+          size="small"
+          prepend-icon="mdi-domain"
+          :to="`/dashboard/admin/employers/${job.employer_id}`"
+          class="font-weight-bold text-none rounded-lg mr-2"
+        >
+          View Employer
+        </v-btn>
         <AppButton variant="g" icon="mdi-download" @click="exportCSV">
           Export CSV
         </AppButton>
@@ -297,9 +359,26 @@
         </template>
 
         <template v-slot:no-data>
-          <div class="pa-8 text-center text-secondary">
-            <v-icon size="48" class="mb-2 opacity-50">mdi-account-search-outline</v-icon>
-            <div class="font-weight-bold">No applicants found in this view.</div>
+          <div class="pa-10 text-center text-secondary">
+            <v-avatar color="primary-lighten-5" size="56" class="mb-3">
+              <v-icon size="32" color="primary">mdi-account-search-outline</v-icon>
+            </v-avatar>
+            <div class="font-weight-bold text-subtitle-1 text-grey-darken-3 mb-1">
+              {{ matchTab === 'matched' ? 'No criteria-matched applicants found.' : (matchTab === 'unmatched' ? 'No unmatched applicants found.' : 'No candidates have applied to this job yet.') }}
+            </div>
+            <div class="text-caption text-secondary mb-4 max-width-400 mx-auto" v-if="talentPool.length > 0">
+              There are {{ talentPool.length }} potential candidates in the Matching Talent pool ready to be invited!
+            </div>
+            <v-btn
+              v-if="talentPool.length > 0"
+              color="primary"
+              variant="tonal"
+              prepend-icon="mdi-sparkles"
+              class="text-none font-weight-bold rounded-lg"
+              @click="matchTab = 'talent'"
+            >
+              Browse Matching Talent ({{ talentPool.length }})
+            </v-btn>
           </div>
         </template>
       </v-data-table>
@@ -655,7 +734,9 @@ const loadApplicants = async () => {
   loading.value = true;
   try {
     const { data } = await api.get(`/admin/jobs/${jobId}/applicants`);
-    job.value = data?.job;
+    if (data?.job) {
+      job.value = { ...job.value, ...data.job };
+    }
     applicants.value = (data?.applicants || []).map((a: any) => ({ ...a, status: a.status || 'applied' }));
   } catch (error) {
     console.error('Failed to load applicants', error);
@@ -669,6 +750,9 @@ const loadTalentPool = async () => {
   try {
     const { data } = await api.get(`/admin/jobs/${jobId}/matched-candidates`);
     talentPool.value = data?.candidates || [];
+    if (data?.job) {
+      job.value = { ...data.job, ...job.value };
+    }
   } catch (error) {
     console.error('Failed to load talent pool', error);
   } finally {

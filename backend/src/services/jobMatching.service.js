@@ -341,8 +341,18 @@ export function calculateJobMatch(job, student) {
 export async function getJobMatchedCandidates(jobId, options = {}) {
   const { minScore = 0, limit = 100 } = options;
 
-  // 1. Fetch Job
-  const [jobs] = await pool.query('SELECT * FROM jobs WHERE id = ?', [jobId]);
+  // 1. Fetch Job with employer info
+  const [jobs] = await pool.query(`
+    SELECT j.*, 
+           COALESCE(j.company, ep.company_name, u.name, 'Employer') as company,
+           u.name as employer_name, u.email as employer_email,
+           ep.company_name as employer_company, ep.logo_url as employer_logo,
+           COALESCE(ep.user_id, CASE WHEN u.role = 'employer' THEN u.id ELSE NULL END) as employer_id
+    FROM jobs j
+    LEFT JOIN users u ON j.posted_by = u.id
+    LEFT JOIN employer_profiles ep ON (ep.user_id = u.id OR (ep.company_name = j.company AND ep.company_name != ''))
+    WHERE j.id = ?
+  `, [jobId]);
   if (!jobs.length) {
     throw new Error('Job not found');
   }
@@ -427,7 +437,12 @@ export async function getJobMatchedCandidates(jobId, options = {}) {
       id: job.id,
       title: job.title,
       company: job.company,
+      employer_name: job.employer_name,
+      employer_id: job.employer_id,
+      employer_company: job.employer_company,
+      employer_logo: job.employer_logo,
       location: job.location,
+      is_remote: job.is_remote,
       type: job.type,
       qualification_req: job.qualification_req,
       experience_level: job.experience_level,
