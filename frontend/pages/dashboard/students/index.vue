@@ -298,7 +298,9 @@ const fetchStudents = async () => {
 
 const fetchCourses = async () => {
   try {
-    const res = await api.get('/lms/courses').catch(() => api.get('/public/courses?all=true'));
+    const res = await api.get('/admin/courses')
+      .catch(() => api.get('/lms/courses'))
+      .catch(() => api.get('/public/courses?all=true&limit=1000'));
     const list = Array.isArray(res.data) ? res.data : (res.data?.courses || []);
     courses.value = list.filter(c => c.status === 'published');
   } catch (error) {

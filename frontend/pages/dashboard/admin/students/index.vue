@@ -126,7 +126,7 @@
         hover
         class="apple-data-table"
       >
-        <template v-slot:item.student="{ item }">
+        <template v-slot:item.name="{ item }">
           <div class="d-flex align-center py-2">
             <v-avatar size="36" class="mr-3 av-sq">
               <v-img :src="`https://ui-avatars.com/api/?name=${item.name}&background=007AFF&color=fff`"></v-img>
@@ -184,7 +184,7 @@
   </v-container>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { useApi } from '@/composables/useApi';
 
 definePageMeta({
@@ -195,24 +195,15 @@ definePageMeta({
 
 const api = useApi();
 
-interface Student {
-  id: string | number;
-  name: string;
-  email: string;
-  enrolled_courses?: string[];
-  avg_progress?: number;
-  status: string;
-}
-
-const students = ref<Student[]>([]);
+const students = ref([]);
 const loading = ref(false);
 const stats = ref({ total: 0, active: 0, avgProgress: 0, pendingPayments: 0 });
-const filters = ref<{ search: string; status?: string }>({ search: '', status: 'All Status' });
+const filters = ref({ search: '', status: 'All Status' });
 
 const showAddModal = ref(false);
 const saving = ref(false);
 const newStudent = ref({ name: '', email: '', role: 'student', course_ids: [] });
-const courses = ref<any[]>([]);
+const courses = ref([]);
 
 const tempPasswordModal = ref({ show: false, password: '', name: '', email: '' });
 
@@ -302,8 +293,8 @@ const submitAddStudent = async () => {
   }
 };
 
-const headers: any[] = [
-  { title: 'Student', key: 'student', value: (item: any) => item.name, align: 'start' },
+const headers = [
+  { title: 'Student', key: 'name', align: 'start' },
   { title: 'Courses', key: 'enrolled_courses', align: 'start', sortable: false },
   { title: 'Progress', key: 'avg_progress', align: 'start' },
   { title: 'Status', key: 'status', align: 'start' },
@@ -336,15 +327,17 @@ const fetchData = async () => {
 
 const fetchCourses = async () => {
   try {
-    const res = await api.get('/lms/courses').catch(() => api.get('/public/courses?all=true'));
+    const res = await api.get('/admin/courses')
+      .catch(() => api.get('/lms/courses'))
+      .catch(() => api.get('/public/courses?all=true&limit=1000'));
     const list = Array.isArray(res.data) ? res.data : (res.data?.courses || []);
-    courses.value = list.filter((c: any) => c.status === 'published');
+    courses.value = list.filter(c => c.status === 'published');
   } catch (error) {
     console.error('Failed to fetch courses:', error);
   }
 };
 
-let debounceTimer: any;
+let debounceTimer;
 const debouncedFetch = () => {
   clearTimeout(debounceTimer);
   debounceTimer = setTimeout(fetchData, 500);
@@ -355,11 +348,11 @@ onMounted(() => {
   fetchCourses();
 });
 
-const viewStudent = (id: string | number) => {
+const viewStudent = (id) => {
   navigateTo(`/dashboard/students/${id}`);
 };
 
-const statusColor = (status: string) => {
+const statusColor = (status) => {
   switch (status) {
     case 'active': return 'green';
     case 'suspended': return 'red';

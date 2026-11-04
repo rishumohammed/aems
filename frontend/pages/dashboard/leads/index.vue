@@ -399,7 +399,7 @@ onMounted(async () => {
   fetchData();
   try {
     const [coursesRes, agentsResponse] = await Promise.all([
-      api.get('/lms/courses').catch(() => api.get('/public/courses?all=true')),
+      api.get('/admin/courses').catch(() => api.get('/lms/courses')).catch(() => api.get('/public/courses?all=true&limit=1000')),
       api.get('/crm/agents')
     ]);
     const coursesList = Array.isArray(coursesRes.data) ? coursesRes.data : (coursesRes.data?.courses || []);

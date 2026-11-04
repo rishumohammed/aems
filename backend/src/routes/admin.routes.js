@@ -665,6 +665,33 @@ router.get('/employers/:id', async (req, res) => {
   }
 });
 
+// Get all courses for admin operations / enrollments
+router.get('/courses', async (req, res) => {
+  try {
+    const { status, all } = req.query;
+    let query = `
+      SELECT c.id, c.title, c.slug, c.status, c.course_type, c.price, c.price_type, c.created_at,
+             u.name as tutor_name, cat.name as category_name
+      FROM courses c
+      LEFT JOIN users u ON c.tutor_id = u.id
+      LEFT JOIN course_categories cat ON c.category_id = cat.id
+      WHERE c.deleted_at IS NULL
+    `;
+    const params = [];
+    if (status && status !== 'all') {
+      query += ' AND c.status = ?';
+      params.push(status);
+    } else if (all !== 'true') {
+      query += ' AND c.status = "published"';
+    }
+    query += ' ORDER BY c.title ASC';
+    const [courses] = await pool.query(query, params);
+    res.json(courses);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 // Get Pending Course Approvals
 router.get('/courses/pending-approvals', async (req, res) => {
   try {

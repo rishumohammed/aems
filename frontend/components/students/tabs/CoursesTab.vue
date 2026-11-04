@@ -441,7 +441,9 @@ const fetchPublishedCourses = async () => {
   if (allCourses.value.length > 0) return;
   loadingCourses.value = true;
   try {
-    const res = await $api.get('/lms/courses').catch(() => $api.get('/public/courses?all=true'));
+    const res = await $api.get('/admin/courses')
+      .catch(() => $api.get('/lms/courses'))
+      .catch(() => $api.get('/public/courses?all=true&limit=1000'));
     const list = Array.isArray(res.data) ? res.data : (res.data?.courses || []);
     allCourses.value = list.filter(c => c.status === 'published');
   } catch (err) {

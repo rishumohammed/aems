@@ -231,7 +231,9 @@ const fetchData = async () => {
   try {
     const [studentsResponse, coursesResponse] = await Promise.all([
       api.get('/admin/users?role=student'),
-      api.get('/lms/courses').catch(() => api.get('/public/courses?all=true'))
+      api.get('/admin/courses')
+        .catch(() => api.get('/lms/courses'))
+        .catch(() => api.get('/public/courses?all=true&limit=1000'))
     ]);
     students.value = studentsResponse.data || [];
     const courseList = Array.isArray(coursesResponse.data)
