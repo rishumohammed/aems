@@ -237,7 +237,7 @@
                     Reserve Your Seat
                   </h2>
                   <div class="text-caption text-indigo-lighten-4">
-                    {{ event.registration_status === 'open' ? 'Instant seat confirmation via Brevo verification' : 'Registration status update below' }}
+                    {{ event.registration_status === 'open' ? 'Instant seat confirmation via email verification' : 'Registration status update below' }}
                   </div>
                 </div>
 
@@ -259,7 +259,7 @@
                     class="text-left mb-6"
                   >
                     <div class="text-caption">
-                      <strong>Check your inbox!</strong> A confirmation email has been dispatched via Brevo REST API to <strong>{{ form.email }}</strong>. We will also automatically send you a reminder <strong>24 hours before the event starts</strong>.
+                      <strong>Check your inbox!</strong> A confirmation email has been dispatched via Resend REST API to <strong>{{ form.email }}</strong>. We will also automatically send you a reminder <strong>24 hours before the event starts</strong>.
                     </div>
                   </v-alert>
 
@@ -706,7 +706,7 @@ const sendOtp = async () => {
     });
 
     otpSent.value = true;
-    showSnackbar(data.message || 'Verification code sent to your email via Brevo.');
+    showSnackbar(data.message || 'Verification code sent to your email.');
 
     // 60-second cooldown
     resendCooldown.value = 60;

@@ -411,7 +411,7 @@
                     Email Verification (OTP)
                   </div>
                   <div v-if="otpSent" class="text-caption text-success font-weight-medium">
-                    Code sent via Brevo
+                    Code sent to email
                   </div>
                 </div>
 
@@ -539,7 +539,7 @@
                 density="comfortable"
                 class="text-left text-caption mb-6"
               >
-                <strong>Check your inbox!</strong> A confirmation email has been dispatched via Brevo REST API. We will also automatically send you a reminder email <strong>24 hours before the event starts</strong>.
+                <strong>Check your inbox!</strong> A confirmation email has been dispatched via Resend REST API. We will also automatically send you a reminder email <strong>24 hours before the event starts</strong>.
               </v-alert>
 
               <!-- Actions -->

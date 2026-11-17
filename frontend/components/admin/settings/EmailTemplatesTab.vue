@@ -590,7 +590,7 @@
 
         <v-card-text class="px-4 py-2">
           <p class="text-body-2 text-medium-emphasis mb-4">
-            Enter a recipient email address to test deliverability and examine formatting directly inside your inbox via Brevo REST API.
+            Enter a recipient email address to test deliverability and examine formatting directly inside your inbox via Resend REST API.
           </p>
 
           <v-text-field

@@ -175,9 +175,9 @@
 
           <!-- Email Tab -->
           <div v-if="activeTab[0] === 'email'" class="fade-in">
-            <h2 class="text-h6 font-weight-bold mb-2">Email Settings (Brevo REST API)</h2>
+            <h2 class="text-h6 font-weight-bold mb-2">Email Settings (Resend REST API)</h2>
             <div class="mb-6 text-body-2 text-medium-emphasis">
-              Configure <b>Brevo (formerly Sendinblue) REST API</b> for fast, reliable transactional email delivery across all LMS notifications, student credentials, password resets, course certificates, and event registrations. You can also configure your API Key in your <b>.env</b> file as <code>BREVO_API_KEY</code>, or save it directly below.
+              Configure <b>Resend REST API</b> for fast, reliable transactional email delivery across all LMS notifications, student credentials, password resets, course certificates, and event registrations. You can also configure your API Key in your <b>.env</b> file as <code>RESEND_API_KEY</code>, or save it directly below.
             </div>
 
             <v-alert
@@ -188,30 +188,30 @@
               class="mb-6"
             >
               <div class="text-body-2">
-                <strong>Need an API key?</strong> Log into your Brevo account, navigate to <strong>SMTP &amp; API &rarr; API Keys</strong>, and generate a new v3 API key. Make sure your "From Email" is also added as a verified sender in Brevo.
+                <strong>Need an API key?</strong> Log into your Resend account at <a href="https://resend.com" target="_blank" class="text-primary font-weight-bold" style="text-decoration: underline;">resend.com</a>, navigate to <strong>API Keys</strong>, and generate a new API key. Make sure your "From Email" is configured on a verified domain in Resend (e.g. <code>noreply@brixify.online</code> or <code>onboarding@resend.dev</code> for testing).
               </div>
             </v-alert>
 
             <div class="mb-4">
               <AppInput
-                v-model="form.brevo_api_key"
-                label="Brevo API Key (v3)"
+                v-model="form.resend_api_key"
+                label="Resend API Key"
                 type="password"
-                placeholder="xkeysib-..."
+                placeholder="re_123456789..."
                 large
               />
             </div>
 
             <div class="fr2 mb-6">
               <AppInput
-                v-model="form.brevo_from_name"
+                v-model="form.resend_from_name"
                 label="Sender Name"
                 placeholder="Brix Certifications Team"
                 large
               />
               <AppInput
-                v-model="form.brevo_from_email"
-                label="Sender Email (Verified in Brevo)"
+                v-model="form.resend_from_email"
+                label="Sender Email (Verified in Resend)"
                 placeholder="noreply@brixify.online"
                 large
               />
@@ -246,7 +246,7 @@
               <div>
                 <div class="text-subtitle-2 font-weight-bold">Test Email Delivery</div>
                 <div class="text-caption text-secondary">
-                  Send a verification message through Brevo REST API to test your credentials.
+                  Send a verification message through Resend REST API to test your credentials.
                 </div>
               </div>
               <div class="d-flex align-center gap-2">
@@ -770,7 +770,7 @@ const tabs = [
   { label: 'LMS Settings', value: 'lms', icon: 'mdi-school-outline' },
   { label: 'Homepage', value: 'homepage', icon: 'mdi-home-outline' },
   { label: 'Contact Info', value: 'contact', icon: 'mdi-map-marker-outline' },
-  { label: 'Email (Brevo API)', value: 'email', icon: 'mdi-email-outline' },
+  { label: 'Email (Resend API)', value: 'email', icon: 'mdi-email-outline' },
   { label: 'Email Templates', value: 'email_templates', icon: 'mdi-email-edit-outline' },
   { label: 'WhatsApp API', value: 'whatsapp', icon: 'mdi-whatsapp' },
   { label: 'Payments', value: 'payments', icon: 'mdi-credit-card-outline' },
@@ -806,10 +806,16 @@ const fetchData = async () => {
     configMap.ad_popup_enabled = configMap.ad_popup_enabled === 'true' || configMap.ad_popup_enabled === '1';
     configMap.online_payments_enabled = configMap.online_payments_enabled === undefined ? true : (configMap.online_payments_enabled === 'true' || configMap.online_payments_enabled === '1');
     
-    // Normalize Brevo email fields with fallback to legacy smtp_* keys
-    configMap.brevo_api_key = configMap.brevo_api_key || configMap.smtp_pass || '';
-    configMap.brevo_from_name = configMap.brevo_from_name || configMap.smtp_from_name || '';
-    configMap.brevo_from_email = configMap.brevo_from_email || configMap.smtp_from_email || '';
+    // Normalize Resend email fields with fallback to legacy brevo_* and smtp_* keys
+    const resendKey = configMap.resend_api_key || configMap.brevo_api_key || configMap.smtp_pass || '';
+    const resendFromName = configMap.resend_from_name || configMap.brevo_from_name || configMap.smtp_from_name || '';
+    const resendFromEmail = configMap.resend_from_email || configMap.brevo_from_email || configMap.smtp_from_email || '';
+    configMap.resend_api_key = resendKey;
+    configMap.resend_from_name = resendFromName;
+    configMap.resend_from_email = resendFromEmail;
+    configMap.brevo_api_key = resendKey;
+    configMap.brevo_from_name = resendFromName;
+    configMap.brevo_from_email = resendFromEmail;
     
     form.value = configMap;
   } catch (err) {
@@ -932,14 +938,28 @@ const save = async () => {
     payload.ad_popup_enabled = payload.ad_popup_enabled ? 'true' : 'false';
     payload.online_payments_enabled = payload.online_payments_enabled ? 'true' : 'false';
 
-    // Synchronize Brevo keys with legacy smtp_* keys for seamless compatibility
-    if (payload.brevo_api_key) {
+    // Synchronize Resend keys with brevo_* and smtp_* keys for seamless compatibility
+    if (payload.resend_api_key) {
+      payload.brevo_api_key = payload.resend_api_key;
+      payload.smtp_pass = payload.resend_api_key;
+    } else if (payload.brevo_api_key) {
+      payload.resend_api_key = payload.brevo_api_key;
       payload.smtp_pass = payload.brevo_api_key;
     }
-    if (payload.brevo_from_name) {
+
+    if (payload.resend_from_name) {
+      payload.brevo_from_name = payload.resend_from_name;
+      payload.smtp_from_name = payload.resend_from_name;
+    } else if (payload.brevo_from_name) {
+      payload.resend_from_name = payload.brevo_from_name;
       payload.smtp_from_name = payload.brevo_from_name;
     }
-    if (payload.brevo_from_email) {
+
+    if (payload.resend_from_email) {
+      payload.brevo_from_email = payload.resend_from_email;
+      payload.smtp_from_email = payload.resend_from_email;
+    } else if (payload.brevo_from_email) {
+      payload.resend_from_email = payload.brevo_from_email;
       payload.smtp_from_email = payload.brevo_from_email;
     }
 
@@ -968,7 +988,7 @@ const testEmail = async () => {
       payload.recipient = testRecipientEmail.value.trim();
     }
     const { data } = await api.post('/admin/config/test-email', payload);
-    snackbarMessage.value = data?.message || 'Test email dispatched successfully via Brevo!';
+    snackbarMessage.value = data?.message || 'Test email dispatched successfully via Resend!';
     snackbarColor.value = 'success';
     snackbar.value = true;
   } catch (err: any) {

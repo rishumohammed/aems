@@ -1,15 +1,16 @@
 <template>
   <!-- OVERLAYS -->
   <ProctoringOverlay 
-    v-if="attempt?.proctoring_enabled && proctoring.violationWarning.value.show"
+    v-if="isProctoringEnabled && proctoring.violationWarning.value.show"
     :show="proctoring.violationWarning.value.show" 
     :message="proctoring.violationWarning.value.message" 
     :is-auto-submitting="examStore.isSubmitting"
     @dismiss="proctoring.dismissWarning()" 
   />
   <WebcamThumbnail 
-    v-if="isProctoringEnabled && stage === 'exam'" 
+    v-if="requiresCamera && stage === 'exam'" 
     :stream="recorder.stream.value" 
+    :is-recording="recorder.isRecording.value"
     @video-ready="onVideoReady"
   />
 
@@ -50,7 +51,7 @@
       </div>
 
       <!-- Proctoring Setup -->
-      <div v-if="isProctoringEnabled" class="mb-6 pa-4 rounded-lg bg-indigo-darken-4">
+      <div v-if="requiresCamera" class="mb-6 pa-4 rounded-lg bg-indigo-darken-4">
         <h4 class="text-white mb-2"><v-icon left>mdi-shield-check</v-icon> Proctoring Setup</h4>
         <div class="d-flex align-center gap-4">
           <v-btn 
@@ -81,7 +82,7 @@
         color="primary"
         size="large"
         rounded="xl"
-        :disabled="!agreedToTC || (isProctoringEnabled && !cameraReady)"
+        :disabled="!agreedToTC || (requiresCamera && !cameraReady)"
         :loading="starting"
         @click="startExam"
         class="start-btn"
@@ -296,6 +297,48 @@ const isProctoringEnabled = computed(() => {
          attempt.value?.proctoring_enabled === '1';
 });
 
+// Full Proctoring Default Configuration
+const DEFAULT_PROCTORING_CONFIG = {
+  face_detection: true,
+  capture_on_violation: true,
+  face_missing_alert: true,
+  multiple_faces_alert: true,
+  record_full_video: false,
+  face_missing_threshold: 5,
+  block_tab_switching: true,
+  block_browser_switching: true,
+  block_right_click: true,
+  enable_voice_alert: true
+};
+
+// Proctoring Configuration helper
+const proctoringConfig = computed(() => {
+  let parsed: any = {};
+  if (attempt.value?.proctoring_config) {
+    try {
+      parsed = typeof attempt.value.proctoring_config === 'string' 
+        ? JSON.parse(attempt.value.proctoring_config) 
+        : attempt.value.proctoring_config;
+    } catch (e) {
+      console.error('Failed to parse proctoring_config', e);
+    }
+  }
+  return {
+    ...DEFAULT_PROCTORING_CONFIG,
+    ...(parsed || {})
+  };
+});
+
+const requiresCamera = computed(() => {
+  if (!isProctoringEnabled.value) return false;
+  const cfg = proctoringConfig.value;
+  return cfg.face_detection !== false || 
+         cfg.capture_on_violation !== false || 
+         cfg.record_full_video === true || 
+         cfg.record_full_video === 'true' || 
+         cfg.record_full_video === 1;
+});
+
 // ── Load attempt details ──────────────────────────────────────────────────────
 onMounted(async () => {
   examStore.reset();
@@ -305,47 +348,26 @@ onMounted(async () => {
   // If attempt is already in_progress (e.g. after refresh), skip checklist
   if (attempt.value?.status === 'in_progress') {
     await resumeExam();
-  } else if (isProctoringEnabled.value && stage.value === 'checklist') {
-    // Automatically trigger the camera permission prompt
+  } else if (requiresCamera.value && stage.value === 'checklist') {
+    // Automatically trigger the camera permission prompt if camera is required
     setupCamera();
-  }
-});
-
-// Proctoring Configuration helper
-const proctoringConfig = computed(() => {
-  if (!attempt.value?.proctoring_config) {
-    return {
-      face_detection: true,
-      capture_on_violation: true,
-      face_missing_alert: true,
-      multiple_faces_alert: true,
-      record_full_video: false,
-      face_missing_threshold: 5
-    };
-  }
-  try {
-    return typeof attempt.value.proctoring_config === 'string' 
-      ? JSON.parse(attempt.value.proctoring_config) 
-      : attempt.value.proctoring_config;
-  } catch (e) {
-    console.error('Failed to parse proctoring_config', e);
-    return {
-      face_detection: true,
-      capture_on_violation: true,
-      face_missing_alert: true,
-      multiple_faces_alert: true,
-      record_full_video: false,
-      face_missing_threshold: 5
-    };
   }
 });
 
 // ── Proctoring Setup ──────────────────────────────────────────────────────────
 const setupCamera = async () => {
+  if (!requiresCamera.value) {
+    cameraReady.value = true;
+    return;
+  }
   const granted = await recorder.requestCamera();
   if (granted) {
-    await faceDetection.loadModel();
-    if (!faceDetection.faceDetectionError.value) {
+    if (proctoringConfig.value?.face_detection !== false) {
+      await faceDetection.loadModel();
+      if (!faceDetection.faceDetectionError.value) {
+        cameraReady.value = true;
+      }
+    } else {
       cameraReady.value = true;
     }
   }
@@ -375,8 +397,13 @@ const startExam = async () => {
     watchTimer();
     
     if (isProctoringEnabled.value) {
-      proctoring.initProctoring(attemptId.value, triggerAutoSubmitLimit, proctoringConfig.value, () => recorder.captureScreenshot(attemptId.value));
-      if (!recorder.isRecording.value) {
+      proctoring.initProctoring(
+        attemptId.value, 
+        triggerAutoSubmitLimit, 
+        proctoringConfig.value, 
+        requiresCamera.value ? () => recorder.captureScreenshot(attemptId.value) : undefined
+      );
+      if (requiresCamera.value && !recorder.isRecording.value) {
         recorder.startRecording(attemptId.value, proctoringConfig.value.record_full_video);
       }
     }
@@ -393,13 +420,20 @@ const resumeExam = async () => {
   watchTimer();
 
   if (isProctoringEnabled.value) {
-    // Attempt to silently restart camera if we lost it (refresh)
-    if (!recorder.stream.value) {
+    // Attempt to silently restart camera if camera is required and lost (refresh)
+    if (requiresCamera.value && !recorder.stream.value) {
       await recorder.requestCamera();
-      await faceDetection.loadModel();
+      if (proctoringConfig.value?.face_detection !== false) {
+        await faceDetection.loadModel();
+      }
     }
-    proctoring.initProctoring(attemptId.value, triggerAutoSubmitLimit, proctoringConfig.value, () => recorder.captureScreenshot(attemptId.value));
-    if (!recorder.isRecording.value) {
+    proctoring.initProctoring(
+      attemptId.value, 
+      triggerAutoSubmitLimit, 
+      proctoringConfig.value, 
+      requiresCamera.value ? () => recorder.captureScreenshot(attemptId.value) : undefined
+    );
+    if (requiresCamera.value && !recorder.isRecording.value) {
       recorder.startRecording(attemptId.value, proctoringConfig.value.record_full_video);
     }
   }

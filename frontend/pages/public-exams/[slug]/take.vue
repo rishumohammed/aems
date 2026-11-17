@@ -571,7 +571,11 @@ const proctoringConfig = computed(() => {
     face_missing_alert: true,
     multiple_faces_alert: true,
     record_full_video: true,
-    face_missing_threshold: 5
+    face_missing_threshold: 5,
+    block_tab_switching: true,
+    block_browser_switching: true,
+    block_right_click: true,
+    enable_voice_alert: true
   };
 });
 

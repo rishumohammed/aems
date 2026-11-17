@@ -1,7 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import slugify from 'slugify';
 import { pool } from '../db/connection.js';
-import brevoService from '../services/brevo.service.js';
+import resendService from '../services/resend.service.js';
 import { checkAndSendEventReminders } from '../jobs/event-reminder.job.js';
 
 // Helper to format any date representation to naive local ISO string YYYY-MM-DDTHH:mm:ss (WITHOUT Z)
@@ -230,8 +230,8 @@ export const requestRegistrationOtp = async (req, res) => {
       VALUES (?, ?, ?, ?, DATE_ADD(NOW(), INTERVAL 10 MINUTE))
     `, [otpId, eventId, email.trim().toLowerCase(), otp]);
 
-    // Send via Brevo REST API
-    await brevoService.sendEventOtpEmail({
+    // Send via Resend REST API
+    await resendService.sendEventOtpEmail({
       email: email.trim().toLowerCase(),
       name: name || 'Attendee',
       otp,
@@ -333,7 +333,7 @@ export const registerForEvent = async (req, res) => {
       institutionName
     ]);
 
-    // Send confirmation email via Brevo REST API
+    // Send confirmation email via Resend REST API
     const registrationData = {
       id: registrationId,
       name: name.trim(),
@@ -344,7 +344,7 @@ export const registerForEvent = async (req, res) => {
     };
 
     try {
-      await brevoService.sendEventRegistrationSuccessEmail({
+      await resendService.sendEventRegistrationSuccessEmail({
         registration: registrationData,
         event
       });

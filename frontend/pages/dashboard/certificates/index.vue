@@ -28,7 +28,7 @@
 
     <div v-if="userRole === 'student'" class="mb-6">
       <v-tabs v-model="activeTab" color="primary" class="bg-white rounded-lg border">
-        <v-tab value="external" class="text-capitalize font-weight-bold">External Certificates</v-tab>
+        <v-tab value="external" class="text-capitalize font-weight-bold">International Certificates</v-tab>
         <v-tab value="readiness" class="text-capitalize font-weight-bold">
           Exam Readiness Requests
           <v-chip v-if="pendingReadinessCount > 0" size="x-small" color="amber" class="ml-2 font-weight-bold">{{ pendingReadinessCount }}</v-chip>
@@ -86,7 +86,7 @@
 
       <v-window-item value="external">
         <div class="d-flex justify-space-between align-center mb-6">
-          <h2 class="text-h6 font-weight-bold">My External Certificates</h2>
+          <h2 class="text-h6 font-weight-bold">My International Certificates</h2>
           <v-btn color="primary" rounded="lg" prepend-icon="mdi-plus" class="text-capitalize font-weight-bold" @click="openAddExternalModal">
             Add Certificate
           </v-btn>
@@ -97,8 +97,8 @@
         </div>
         <div v-else-if="externalCertificates.length === 0" class="pa-12 text-center bg-white rounded-xl border">
           <v-icon size="64" color="grey-lighten-2">mdi-certificate-outline</v-icon>
-          <h3 class="text-h6 mt-4">No external certificates</h3>
-          <p class="text-secondary">You have not added any external certifications yet.</p>
+          <h3 class="text-h6 mt-4">No international certificates</h3>
+          <p class="text-secondary">You have not added any international certifications yet.</p>
         </div>
         <v-row v-else dense>
           <v-col v-for="cert in externalCertificates" :key="cert.id" cols="12" md="6" lg="4">

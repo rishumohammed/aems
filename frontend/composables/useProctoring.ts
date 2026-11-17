@@ -30,10 +30,10 @@ export const useProctoring = () => {
     document.addEventListener('visibilitychange', handleVisibilityChange);
     window.addEventListener('blur', handleWindowBlur);
     document.addEventListener('fullscreenchange', handleFullscreenChange);
-    document.addEventListener('contextmenu', preventDefaultAction);
-    document.addEventListener('copy', preventDefaultAction);
-    document.addEventListener('cut', preventDefaultAction);
-    document.addEventListener('paste', preventDefaultAction);
+    document.addEventListener('contextmenu', handleContextMenu);
+    document.addEventListener('copy', handleClipboardAction);
+    document.addEventListener('cut', handleClipboardAction);
+    document.addEventListener('paste', handleClipboardAction);
     document.addEventListener('keydown', handleKeydown);
 
     // DevTools detection loop
@@ -47,10 +47,10 @@ export const useProctoring = () => {
     document.removeEventListener('visibilitychange', handleVisibilityChange);
     window.removeEventListener('blur', handleWindowBlur);
     document.removeEventListener('fullscreenchange', handleFullscreenChange);
-    document.removeEventListener('contextmenu', preventDefaultAction);
-    document.removeEventListener('copy', preventDefaultAction);
-    document.removeEventListener('cut', preventDefaultAction);
-    document.removeEventListener('paste', preventDefaultAction);
+    document.removeEventListener('contextmenu', handleContextMenu);
+    document.removeEventListener('copy', handleClipboardAction);
+    document.removeEventListener('cut', handleClipboardAction);
+    document.removeEventListener('paste', handleClipboardAction);
     document.removeEventListener('keydown', handleKeydown);
     
     clearInterval(devToolsInterval);
@@ -63,7 +63,10 @@ export const useProctoring = () => {
     if (!attemptId.value) return;
     try {
       // Auto-capture screenshot on violation if option enabled
-      if (proctoringConfig.value?.capture_on_violation && captureScreenshotCallback) {
+      const shouldCapture = proctoringConfig.value?.capture_on_violation !== false &&
+                            proctoringConfig.value?.capture_on_violation !== 'false' &&
+                            proctoringConfig.value?.capture_on_violation !== 0;
+      if (shouldCapture && captureScreenshotCallback) {
         const screenshotUrl = await captureScreenshotCallback();
         if (screenshotUrl) {
           metadata.screenshot = screenshotUrl;
@@ -82,32 +85,53 @@ export const useProctoring = () => {
   };
 
   const speakWarning = (text: string) => {
-    if (proctoringConfig.value?.enable_voice_alert !== false && 'speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(text);
-      
-      const voices = window.speechSynthesis.getVoices();
-      if (voices.length > 0) {
-        const enVoice = voices.find(v => v.lang.startsWith('en'));
-        if (enVoice) utterance.voice = enVoice;
+    const isVoiceAlertEnabled = proctoringConfig.value?.enable_voice_alert !== false &&
+                                proctoringConfig.value?.enable_voice_alert !== 'false' &&
+                                proctoringConfig.value?.enable_voice_alert !== 0;
+    if (isVoiceAlertEnabled && typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      try {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        
+        const voices = window.speechSynthesis.getVoices();
+        if (voices.length > 0) {
+          const enVoice = voices.find(v => v.lang.startsWith('en'));
+          if (enVoice) utterance.voice = enVoice;
+        }
+        
+        utterance.volume = 1;
+        utterance.rate = 1;
+        window.speechSynthesis.speak(utterance);
+      } catch (e) {
+        console.warn('SpeechSynthesis error', e);
       }
-      
-      utterance.volume = 1;
-      utterance.rate = 1;
-      window.speechSynthesis.speak(utterance);
     }
   };
 
   const handleVisibilityChange = () => {
     if (document.visibilityState === 'hidden') {
-      handleViolation('tab_switch');
+      const isBlocked = proctoringConfig.value?.block_tab_switching !== false &&
+                        proctoringConfig.value?.block_tab_switching !== 'false' &&
+                        proctoringConfig.value?.block_tab_switching !== 0;
+      if (isBlocked) {
+        handleViolation('tab_switch');
+      } else {
+        logEvent('tab_switch', { blocked: false });
+      }
     }
   };
 
   const handleWindowBlur = () => {
-    // Window blur is another strong indicator of leaving the exam
+    // Window blur is another strong indicator of leaving the exam window / switching applications
     if (document.visibilityState !== 'hidden') {
-      handleViolation('window_blur');
+      const isBlocked = proctoringConfig.value?.block_browser_switching !== false &&
+                        proctoringConfig.value?.block_browser_switching !== 'false' &&
+                        proctoringConfig.value?.block_browser_switching !== 0;
+      if (isBlocked) {
+        handleViolation('window_blur');
+      } else {
+        logEvent('window_blur', { blocked: false });
+      }
     }
   };
 
@@ -116,12 +140,14 @@ export const useProctoring = () => {
     logEvent(type, { count: tabSwitchCount.value });
 
     if (tabSwitchCount.value >= maxTabSwitches) {
-      const msg = 'You have exceeded the maximum allowed tab switches. Your exam is being automatically submitted.';
+      const msg = 'You have exceeded the maximum allowed violations. Your exam is being automatically submitted.';
       violationWarning.value = { show: true, message: msg };
       speakWarning(msg);
-      if (submitCallback) submitCallback('tab_switch_limit_exceeded');
+      if (submitCallback) submitCallback(`${type}_limit_exceeded`);
     } else {
-      const msg = `Warning ${tabSwitchCount.value} out of ${maxTabSwitches}: Please do not leave the exam window. Doing so again may result in auto-submission.`;
+      const remaining = maxTabSwitches - tabSwitchCount.value;
+      const violationLabel = type === 'tab_switch' ? 'switching tabs' : 'switching away from the exam window';
+      const msg = `Warning ${tabSwitchCount.value} of ${maxTabSwitches}: Please do not leave the exam window by ${violationLabel}. (${remaining} warning${remaining > 1 ? 's' : ''} remaining before auto-submission).`;
       violationWarning.value = { show: true, message: msg };
       speakWarning(msg);
     }
@@ -152,8 +178,24 @@ export const useProctoring = () => {
     }
   };
 
-  const preventDefaultAction = (e: Event) => {
-    e.preventDefault();
+  const handleContextMenu = (e: MouseEvent) => {
+    const isBlocked = proctoringConfig.value?.block_right_click !== false &&
+                      proctoringConfig.value?.block_right_click !== 'false' &&
+                      proctoringConfig.value?.block_right_click !== 0;
+    if (isBlocked) {
+      e.preventDefault();
+      logEvent('right_click_blocked');
+    }
+  };
+
+  const handleClipboardAction = (e: Event) => {
+    const isBlocked = proctoringConfig.value?.block_right_click !== false &&
+                      proctoringConfig.value?.block_right_click !== 'false' &&
+                      proctoringConfig.value?.block_right_click !== 0;
+    if (isBlocked) {
+      e.preventDefault();
+      logEvent('clipboard_action_blocked', { action: e.type });
+    }
   };
 
   const handleKeydown = (e: KeyboardEvent) => {
@@ -184,6 +226,9 @@ export const useProctoring = () => {
 
   const dismissWarning = () => {
     violationWarning.value.show = false;
+    if (typeof document !== 'undefined' && !document.fullscreenElement) {
+      requestFullscreen();
+    }
   };
 
   return {

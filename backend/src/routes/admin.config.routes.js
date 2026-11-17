@@ -70,7 +70,7 @@ router.post('/invoices/regenerate-pdfs', authenticateJWT, authorizeRoles('super_
   }
 });
 
-// Test Email Config via Brevo REST API
+// Test Email Config via Resend REST API
 router.post('/test-email', authenticateJWT, authorizeRoles('super_admin'), async (req, res) => {
   try {
     const emailService = (await import('../services/email.service.js')).default;
@@ -79,15 +79,15 @@ router.post('/test-email', authenticateJWT, authorizeRoles('super_admin'), async
 
     if (result && result.simulated) {
       return res.json({
-        message: `Brevo is in simulation mode (no API key set). Test email logged to backend console for ${recipient}.`
+        message: `Resend is in simulation mode (no API key set). Test email logged to backend console for ${recipient}.`
       });
     }
 
     if (result && result.error) {
-      return res.status(400).json({ message: `Brevo dispatch error: ${result.error}`, details: result });
+      return res.status(400).json({ message: `Resend dispatch error: ${result.error}`, details: result });
     }
 
-    res.json({ message: `Test email successfully sent to ${recipient} via Brevo REST API!` });
+    res.json({ message: `Test email successfully sent to ${recipient} via Resend REST API!` });
   } catch (error) {
     console.error('Test email failed:', error);
     res.status(500).json({ message: 'Failed to dispatch test email: ' + error.message });

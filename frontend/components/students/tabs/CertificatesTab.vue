@@ -2,7 +2,7 @@
   <div class="certificates-tab">
     <v-tabs v-model="tab" color="primary" class="mb-6">
       <v-tab value="system" class="text-capitalize font-weight-bold">System Certificates</v-tab>
-      <v-tab value="external" class="text-capitalize font-weight-bold">Third-Party Certificates</v-tab>
+      <v-tab value="external" class="text-capitalize font-weight-bold">International Certificates</v-tab>
     </v-tabs>
 
     <v-window v-model="tab">
@@ -54,11 +54,11 @@
         </v-data-table>
       </v-window-item>
 
-      <!-- External Certificates -->
+      <!-- External / International Certificates -->
       <v-window-item value="external">
         <div class="d-flex justify-end mb-4">
           <v-btn color="primary" prepend-icon="mdi-plus" rounded="lg" class="text-none" @click="openExternalModal()">
-            Add External Certificate
+            Add International Certificate
           </v-btn>
         </div>
         <v-data-table
@@ -88,7 +88,7 @@
           <template v-slot:no-data>
             <div class="text-center py-12">
               <v-icon size="64" color="grey-lighten-2">mdi-certificate-outline</v-icon>
-              <div class="text-h6 text-grey mt-4">No third-party certificates</div>
+              <div class="text-h6 text-grey mt-4">No international certificates</div>
             </div>
           </template>
         </v-data-table>

@@ -1,6 +1,6 @@
 import cron from 'node-cron';
 import { pool } from '../db/connection.js';
-import brevoService from '../services/brevo.service.js';
+import resendService from '../services/resend.service.js';
 
 /**
  * Dispatches 24-hour reminder emails for upcoming events
@@ -53,7 +53,7 @@ export const checkAndSendEventReminders = async (specificEventId = null) => {
     let sentCount = 0;
     for (const attendee of attendees) {
       try {
-        await brevoService.sendEventReminderEmail({
+        await resendService.sendEventReminderEmail({
           registration: {
             name: attendee.candidate_name,
             email: attendee.candidate_email,

@@ -131,7 +131,7 @@ export const AdminEmailTemplatesController = {
 
       if (result && result.simulated) {
         return res.json({
-          message: `Brevo is currently simulated (no API key). Test email was logged to backend console for ${targetEmail}.`,
+          message: `Resend is currently simulated (no API key). Test email was logged to backend console for ${targetEmail}.`,
           simulated: true,
           details: result
         });
@@ -139,14 +139,14 @@ export const AdminEmailTemplatesController = {
 
       if (result && result.error) {
         return res.status(400).json({
-          message: `Brevo dispatch error: ${result.error}`,
+          message: `Resend dispatch error: ${result.error}`,
           error: result.error,
           details: result
         });
       }
 
       res.json({
-        message: `Test email successfully dispatched to ${targetEmail} via Brevo!`,
+        message: `Test email successfully dispatched to ${targetEmail} via Resend!`,
         result
       });
     } catch (error) {

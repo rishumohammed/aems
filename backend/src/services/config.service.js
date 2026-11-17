@@ -84,12 +84,12 @@ export class ConfigService {
           group = 'payments';
         } else if (['course_languages', 'course_show_rating', 'course_show_students', 'education_levels'].includes(key)) {
           group = 'lms';
-        } else if (['brevo_api_key', 'brevo_from_name', 'brevo_from_email', 'smtp_pass', 'smtp_from_name', 'smtp_from_email'].includes(key)) {
+        } else if (['resend_api_key', 'resend_from_name', 'resend_from_email', 'brevo_api_key', 'brevo_from_name', 'brevo_from_email', 'smtp_pass', 'smtp_from_name', 'smtp_from_email'].includes(key)) {
           group = 'email';
         } else if (['contact_email', 'contact_phone', 'contact_address'].includes(key)) {
           group = 'contact';
         }
-        const isSensitive = ['brevo_api_key', 'smtp_pass', 'razorpay_key_secret', 'razorpay_webhook_secret', 'whatsapp_access_token'].includes(key);
+        const isSensitive = ['resend_api_key', 'brevo_api_key', 'smtp_pass', 'razorpay_key_secret', 'razorpay_webhook_secret', 'whatsapp_access_token'].includes(key);
         await connection.query(
           'INSERT INTO system_config (`key`, `value`, `group`, `is_sensitive`) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE `value` = ?, `group` = ?, `is_sensitive` = ?',
           [key, value, group, isSensitive, value, group, isSensitive]

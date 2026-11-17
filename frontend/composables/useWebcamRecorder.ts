@@ -26,13 +26,18 @@ export const useWebcamRecorder = () => {
     }
   };
 
-  const startRecording = (attemptId: string, recordFullVideo: boolean = false) => {
+  const startRecording = (attemptId: string, recordFullVideo: any = false) => {
     if (!stream.value) return;
     
     attemptIdRef = attemptId;
     chunkIndex = 0;
 
-    if (!recordFullVideo) {
+    const shouldRecord = recordFullVideo === true || 
+                         recordFullVideo === 'true' || 
+                         recordFullVideo === 1 || 
+                         recordFullVideo === '1';
+
+    if (!shouldRecord) {
       isRecording.value = false;
       return;
     }

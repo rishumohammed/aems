@@ -6,8 +6,8 @@
     @mousedown="startDrag"
   >
     <video ref="videoEl" autoplay playsinline muted></video>
-    <div class="recording-indicator">
-      <span class="red-dot"></span> REC
+    <div class="recording-indicator" :class="{ 'is-rec': isRecording, 'is-live': !isRecording }">
+      <span class="status-dot"></span> {{ isRecording ? 'REC' : 'LIVE' }}
     </div>
   </div>
 </template>
@@ -17,6 +17,7 @@ import { ref, watch, onMounted, onUnmounted } from 'vue';
 
 const props = defineProps<{
   stream: MediaStream | null;
+  isRecording?: boolean;
 }>();
 
 const emit = defineEmits(['video-ready']);
@@ -125,12 +126,19 @@ video {
   pointer-events: none;
 }
 
-.red-dot {
+.status-dot {
   width: 6px;
   height: 6px;
-  background: #ef4444;
   border-radius: 50%;
+}
+
+.is-rec .status-dot {
+  background: #ef4444;
   animation: blink 1s infinite;
+}
+
+.is-live .status-dot {
+  background: #10b981;
 }
 
 @keyframes blink {

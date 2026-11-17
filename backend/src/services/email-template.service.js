@@ -250,7 +250,7 @@ export const DEFAULT_EMAIL_TEMPLATES = [
     </div>
     <div style="background-color: #f8fafc; border-top: 1px solid #eef2f6; padding: 20px 30px; text-align: center;">
       <p style="color: #94a3b8; font-size: 12px; margin: 0;">
-        Sent via Brevo REST API &bull; Academy &amp; Employment Management System
+        Sent via Resend REST API &bull; Academy &amp; Employment Management System
       </p>
     </div>
   </div>
@@ -449,7 +449,7 @@ export const DEFAULT_EMAIL_TEMPLATES = [
     </div>
     <div style="background-color: #f8fafc; border-top: 1px solid #eef2f6; padding: 20px 30px; text-align: center;">
       <p style="color: #94a3b8; font-size: 12px; margin: 0;">
-        Sent via Brevo REST API &bull; Academy &amp; Employment Management System
+        Sent via Resend REST API &bull; Academy &amp; Employment Management System
       </p>
     </div>
   </div>

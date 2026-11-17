@@ -36,10 +36,10 @@ export const useFaceDetection = () => {
   const startDetection = (videoElement: HTMLVideoElement, logEventCallback: (type: string, meta?: any) => void, warningCallback: (msg: string) => void, config: any = {}) => {
     if (!model.value) return;
 
-    const threshold = config.face_missing_threshold || 5;
-    const enableFaceDetection = config.face_detection !== false;
-    const enableMultipleFacesAlert = config.multiple_faces_alert !== false;
-    const enableFaceMissingAlert = config.face_missing_alert !== false;
+    const threshold = Number(config.face_missing_threshold) || 5;
+    const enableFaceDetection = config.face_detection !== false && config.face_detection !== 'false' && config.face_detection !== 0;
+    const enableMultipleFacesAlert = config.multiple_faces_alert !== false && config.multiple_faces_alert !== 'false' && config.multiple_faces_alert !== 0;
+    const enableFaceMissingAlert = config.face_missing_alert !== false && config.face_missing_alert !== 'false' && config.face_missing_alert !== 0;
 
     if (!enableFaceDetection) return;
 
@@ -56,7 +56,7 @@ export const useFaceDetection = () => {
             if (consecutiveNoFaceSeconds >= threshold) {
               consecutiveNoFaceSeconds = 0; // Reset counter after triggering to avoid continuous spam
               
-              logEventCallback('face_absent');
+              logEventCallback('face_absent', { threshold_seconds: threshold });
               
               if (enableFaceMissingAlert && Date.now() - lastFaceWarningTime.value > 15000) {
                 warningCallback('Please ensure your face is visible to the camera.');

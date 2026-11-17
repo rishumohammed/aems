@@ -403,7 +403,7 @@ const sendManualReminders = async () => {
   dispatchingReminders.value = true;
   try {
     const { data } = await api.post(`/admin/events/${eventId}/send-manual-reminder`);
-    showSnackbar(data.message || 'Reminder emails dispatched via Brevo REST API!');
+    showSnackbar(data.message || 'Reminder emails dispatched via Resend REST API!');
     // Refresh to see updated reminder_sent_24h flags
     fetchEventData();
   } catch (err: any) {

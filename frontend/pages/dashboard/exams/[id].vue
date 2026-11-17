@@ -59,8 +59,8 @@
               <div v-if="form.proctoring_enabled" class="pl-4 border-l-2 border-warning mb-4">
                 <v-checkbox v-model="form.proctoring_config.face_detection" label="Enable Face Detection" color="warning" density="compact" hide-details />
                 <v-checkbox v-model="form.proctoring_config.capture_on_violation" label="Capture Screenshot On Violation" color="warning" density="compact" hide-details />
-                <v-checkbox v-model="form.proctoring_config.face_missing_alert" label="Face Missing Alert" color="warning" density="compact" hide-details />
-                <v-checkbox v-model="form.proctoring_config.multiple_faces_alert" label="Multiple Faces Alert" color="warning" density="compact" hide-details />
+                <v-checkbox v-model="form.proctoring_config.face_missing_alert" :disabled="!form.proctoring_config.face_detection" label="Face Missing Alert" color="warning" density="compact" hide-details />
+                <v-checkbox v-model="form.proctoring_config.multiple_faces_alert" :disabled="!form.proctoring_config.face_detection" label="Multiple Faces Alert" color="warning" density="compact" hide-details />
                 <v-checkbox v-model="form.proctoring_config.record_full_video" label="Record Full Webcam Video" color="warning" density="compact" hide-details />
                 <v-checkbox v-model="form.proctoring_config.block_tab_switching" label="Block Tab Switching" color="warning" density="compact" hide-details />
                 <v-checkbox v-model="form.proctoring_config.block_browser_switching" label="Block Browser Switching" color="warning" density="compact" hide-details />
@@ -68,7 +68,8 @@
                 <v-checkbox v-model="form.proctoring_config.enable_voice_alert" label="Enable Voice Alert (Text-to-Speech)" color="warning" density="compact" hide-details />
                 
                 <v-select
-                  v-model="form.proctoring_config.face_missing_threshold"
+                  v-model.number="form.proctoring_config.face_missing_threshold"
+                  :disabled="!form.proctoring_config.face_detection"
                   :items="[5, 10, 15]"
                   label="Face Missing Threshold"
                   suffix="seconds"
@@ -236,13 +237,17 @@ onMounted(async () => {
       };
       if (examData.proctoring_config) {
         try {
-          parsedConfig = typeof examData.proctoring_config === 'string'
+          const raw = typeof examData.proctoring_config === 'string'
             ? JSON.parse(examData.proctoring_config)
             : examData.proctoring_config;
+          if (raw && typeof raw === 'object') {
+            parsedConfig = { ...parsedConfig, ...raw };
+          }
         } catch (e) {
           console.error('Failed to parse proctoring config', e);
         }
       }
+      parsedConfig.face_missing_threshold = Number(parsedConfig.face_missing_threshold) || 5;
 
       form.value = {
         ...form.value,

@@ -2,7 +2,7 @@
   <v-dialog v-model="dialog" max-width="600" persistent scrollable>
     <v-card class="rounded-xl overflow-hidden d-flex flex-column" max-height="90vh">
       <div class="pa-6 border-b d-flex align-center justify-space-between bg-grey-lighten-4 flex-shrink-0">
-        <h3 class="text-h6 font-weight-bold">{{ readonly ? 'View Certificate' : (isEditing ? 'Edit Certificate' : 'Add External Certificate') }}</h3>
+        <h3 class="text-h6 font-weight-bold">{{ readonly ? 'View Certificate' : (isEditing ? 'Edit Certificate' : 'Add International Certificate') }}</h3>
         <v-btn icon="mdi-close" variant="text" size="small" @click="close"></v-btn>
       </div>
 
