@@ -72,6 +72,11 @@
             ></v-btn>
           </template>
           <template v-if="userRole !== 'student'">
+            <v-tooltip v-if="course.status === 'published'" text="Revert to Draft" location="top">
+              <template v-slot:activator="{ props: tipProps }">
+                <v-btn v-bind="tipProps" icon="mdi-undo-variant" variant="tonal" color="warning" size="small" @click="$emit('unpublish', course)"></v-btn>
+              </template>
+            </v-tooltip>
             <v-btn icon="mdi-pencil-outline" variant="tonal" color="primary" size="small" @click="$emit('edit', course)"></v-btn>
             <v-btn icon="mdi-delete-outline" variant="text" color="error" size="small" @click="$emit('delete', course)"></v-btn>
           </template>
@@ -95,7 +100,7 @@ const props = defineProps({
 const authStore = useAuthStore();
 const userRole = computed(() => authStore.userRole);
 
-defineEmits(['edit', 'view', 'delete', 'toggle-featured'])
+defineEmits(['edit', 'view', 'delete', 'toggle-featured', 'unpublish'])
 
 const getStatusColor = (course) => {
   switch (course.status) {

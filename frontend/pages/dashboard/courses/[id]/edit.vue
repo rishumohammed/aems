@@ -14,14 +14,25 @@
         </div>
       </div>
       
-      <div class="d-flex gap-2">
-        <template v-if="user.role === 'super_admin'">
+      <div class="d-flex align-center gap-2">
+        <template v-if="user.role === 'super_admin' || user.role === 'sub_admin'">
           <v-btn v-if="course.status !== 'published'" color="success" class="text-capitalize font-weight-bold" rounded="lg" @click="updateStatus('published')">Publish</v-btn>
-          <v-btn v-else color="success" variant="tonal" class="text-capitalize font-weight-bold" rounded="lg" disabled prepend-icon="mdi-check-circle">Published</v-btn>
+          <template v-else>
+            <v-chip color="success" variant="tonal" class="font-weight-bold mr-1" prepend-icon="mdi-check-circle">Published</v-chip>
+            <v-btn color="warning" variant="outlined" class="text-capitalize font-weight-bold" rounded="lg" prepend-icon="mdi-undo-variant" @click="openUnpublishModal">
+              Revert to Draft
+            </v-btn>
+          </template>
           <v-btn v-if="course.status !== 'published'" color="error" variant="outlined" class="text-capitalize font-weight-bold" rounded="lg" @click="openRejectModal">Reject</v-btn>
         </template>
         <template v-else-if="course.status === 'draft' || course.status === 'rejected'">
           <v-btn color="primary" class="text-capitalize font-weight-bold" rounded="lg" @click="updateStatus('pending_review')">Submit for Review</v-btn>
+        </template>
+        <template v-else-if="course.status === 'published'">
+          <v-chip color="success" variant="tonal" class="font-weight-bold mr-1" prepend-icon="mdi-check-circle">Published</v-chip>
+          <v-btn color="warning" variant="outlined" class="text-capitalize font-weight-bold" rounded="lg" prepend-icon="mdi-undo-variant" @click="openUnpublishModal">
+            Revert to Draft
+          </v-btn>
         </template>
         <v-btn color="primary" variant="flat" class="text-capitalize font-weight-bold px-8" rounded="lg" :loading="saving" @click="saveAll">Save Changes</v-btn>
       </div>
@@ -232,6 +243,25 @@
       </v-card>
     </v-dialog>
 
+    <!-- Unpublish Confirmation Modal -->
+    <v-dialog v-model="unpublishModal.show" max-width="480px">
+      <v-card rounded="xl" class="pa-6 text-center">
+        <v-avatar color="warning" variant="tonal" size="64" class="mx-auto mb-3">
+          <v-icon size="36" color="warning">mdi-undo-variant</v-icon>
+        </v-avatar>
+        <h3 class="text-h6 font-weight-bold mb-2">Revert Course to Draft?</h3>
+        <p class="text-body-2 text-grey-darken-1 mb-6">
+          Unpublishing will remove <strong>{{ course.title }}</strong> from the public catalog and website. You can edit and republish it at any time.
+        </p>
+        <div class="d-flex gap-3">
+          <v-btn variant="outlined" rounded="lg" class="flex-grow-1" @click="unpublishModal.show = false">Cancel</v-btn>
+          <v-btn color="warning" variant="flat" rounded="lg" class="flex-grow-1 font-weight-bold" :loading="unpublishModal.loading" @click="confirmUnpublish">
+            Yes, Revert to Draft
+          </v-btn>
+        </div>
+      </v-card>
+    </v-dialog>
+
     <!-- Publish Success Modal -->
     <v-dialog v-model="publishSuccessModal.show" max-width="450px" persistent>
       <v-card rounded="lg" class="pa-6 text-center position-relative">
@@ -296,6 +326,7 @@ const thumbnailPreview = ref(null)
 
 const rejectModal = reactive({ show: false, reason: '' })
 const publishSuccessModal = reactive({ show: false })
+const unpublishModal = reactive({ show: false, loading: false })
 
 const snackbar = reactive({
   show: false,
@@ -431,11 +462,27 @@ const updateStatus = async (status) => {
     
     if (status === 'published') {
       publishSuccessModal.show = true
+    } else if (status === 'draft') {
+      showMessage('Course reverted to Draft successfully')
     } else {
       showMessage(`Course ${status.replace('_', ' ')}`)
     }
   } catch (error) {
     showMessage(error.response?.data?.message || 'Failed to update status', 'error')
+  }
+}
+
+const openUnpublishModal = () => {
+  unpublishModal.show = true
+}
+
+const confirmUnpublish = async () => {
+  unpublishModal.loading = true
+  try {
+    await updateStatus('draft')
+    unpublishModal.show = false
+  } finally {
+    unpublishModal.loading = false
   }
 }
 

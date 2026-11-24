@@ -78,6 +78,23 @@
           <v-icon start>mdi-pencil</v-icon>
           Edit
         </v-btn>
+
+        <!-- Unpublish button for published courses -->
+        <v-tooltip v-if="course.status === 'published'" text="Revert to Draft" location="top">
+          <template v-slot:activator="{ props: tipProps }">
+            <v-btn
+              v-bind="tipProps"
+              color="warning"
+              variant="tonal"
+              class="rounded-lg px-0"
+              style="min-width: 44px;"
+              @click="$emit('unpublish', course)"
+            >
+              <v-icon>mdi-undo-variant</v-icon>
+            </v-btn>
+          </template>
+        </v-tooltip>
+
         <v-btn
           color="error"
           variant="tonal"
@@ -119,7 +136,7 @@ const authStore = useAuthStore();
 const userRole = computed(() => authStore.userRole);
 const router = useRouter();
 
-const emit = defineEmits(['edit', 'view', 'delete', 'toggle-featured'])
+const emit = defineEmits(['edit', 'view', 'delete', 'toggle-featured', 'unpublish'])
 
 const viewCourse = () => {
   router.push(`/courses/${props.course.slug}`);

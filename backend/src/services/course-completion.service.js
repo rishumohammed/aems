@@ -53,17 +53,19 @@ class CourseCompletionService {
         return false; // Not all assignments submitted
       }
 
-      // 4. Validate Exam
-      const [exams] = await connection.query('SELECT id FROM exams WHERE course_id = ?', [courseId]);
-      if (exams.length > 0) {
-        const examId = exams[0].id;
+      // 4. Validate Exams (all published exams for this course must be passed)
+      const [exams] = await connection.query(
+        'SELECT id FROM exams WHERE course_id = ? AND status = "published" AND deleted_at IS NULL',
+        [courseId]
+      );
+      for (const exam of exams) {
         const [passedAttempts] = await connection.query(
           'SELECT id FROM exam_attempts WHERE exam_id = ? AND student_id = ? AND passed = 1',
-          [examId, studentId]
+          [exam.id, studentId]
         );
         if (passedAttempts.length === 0) {
           await connection.rollback();
-          return false; // Exam required but not passed
+          return false; // Published exam required but not passed
         }
       }
 

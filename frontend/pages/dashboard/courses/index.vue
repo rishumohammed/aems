@@ -74,7 +74,7 @@
     <div v-else class="fade-in">
       <v-row v-if="viewType === 'grid'">
         <v-col v-for="course in filteredCourses" :key="course.id" cols="12" sm="6" md="4" lg="3">
-          <CourseGrid :course="course" @edit="editCourse" @delete="deleteCourse" @toggle-featured="toggleFeatured" />
+          <CourseGrid :course="course" @edit="editCourse" @delete="deleteCourse" @toggle-featured="toggleFeatured" @unpublish="unpublishCourse" />
         </v-col>
       </v-row>
 
@@ -87,6 +87,7 @@
           @view="viewCourse"
           @delete="deleteCourse"
           @toggle-featured="toggleFeatured"
+          @unpublish="unpublishCourse"
         />
       </div>
     </div>
@@ -172,6 +173,17 @@ const deleteCourse = async (course: any) => {
   } catch (error) {
     console.error('Delete course error:', error);
     alert('Failed to delete course');
+  }
+};
+
+const unpublishCourse = async (course: any) => {
+  if (!confirm(`Are you sure you want to revert "${course.title}" back to draft? It will no longer be visible on the public website.`)) return;
+  try {
+    await api.put(`/lms/courses/${course.id}/status`, { status: 'draft' });
+    course.status = 'draft';
+  } catch (error: any) {
+    console.error('Failed to unpublish course:', error);
+    alert(error.response?.data?.message || 'Failed to revert course to draft');
   }
 };
 

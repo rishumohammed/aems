@@ -105,6 +105,11 @@
 
           <template v-slot:item.actions="{ item }">
             <div class="d-flex justify-end gap-2">
+              <v-tooltip v-if="item.status === 'published'" text="Revert to Draft" location="top">
+                <template v-slot:activator="{ props }">
+                  <v-btn v-bind="props" icon="mdi-undo-variant" variant="tonal" size="small" color="warning" class="rounded-lg" @click="unpublishCourse(item)"></v-btn>
+                </template>
+              </v-tooltip>
               <v-btn icon="mdi-pencil" variant="tonal" size="small" color="primary" class="rounded-lg" @click="editCourse(item)"></v-btn>
               <v-btn icon="mdi-eye-outline" variant="tonal" size="small" color="grey" class="rounded-lg" @click="viewPublic(item)"></v-btn>
             </div>
@@ -164,6 +169,17 @@ const filteredCourses = computed(() => {
 
 const editCourse = (item) => {
   navigateTo(`/dashboard/courses/${item.id}/edit`);
+};
+
+const unpublishCourse = async (item) => {
+  if (!confirm(`Are you sure you want to revert "${item.title}" back to draft?`)) return;
+  try {
+    await api.put(`/lms/courses/${item.id}/status`, { status: 'draft' });
+    item.status = 'draft';
+  } catch (error) {
+    console.error('Failed to unpublish course:', error);
+    alert(error.response?.data?.message || 'Failed to revert course to draft');
+  }
 };
 
 const viewPublic = (item) => {

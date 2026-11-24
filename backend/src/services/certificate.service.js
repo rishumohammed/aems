@@ -342,13 +342,18 @@ class CertificateService {
       };
     }
 
-    // 1.5 Verify exam completion if the course has an exam
-    const [exams] = await pool.query('SELECT id FROM exams WHERE course_id = ?', [courseId]);
-    if (exams.length > 0) {
-      const examId = exams[0].id;
-      const [attempts] = await pool.query('SELECT id FROM exam_attempts WHERE exam_id = ? AND student_id = ? AND passed = 1', [examId, studentId]);
+    // 1.5 Verify exam completion if the course has published exams
+    const [exams] = await pool.query(
+      'SELECT id, title FROM exams WHERE course_id = ? AND status = "published" AND deleted_at IS NULL',
+      [courseId]
+    );
+    for (const exam of exams) {
+      const [attempts] = await pool.query(
+        'SELECT id FROM exam_attempts WHERE exam_id = ? AND student_id = ? AND passed = 1',
+        [exam.id, studentId]
+      );
       if (attempts.length === 0) {
-        throw new Error('Student has not passed the required exam for this course.');
+        throw new Error(`Student has not passed required exam "${exam.title}" for this course.`);
       }
     }
 
