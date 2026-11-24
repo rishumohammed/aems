@@ -2,7 +2,21 @@ import { pool } from '../db/connection.js';
 import { v4 as uuidv4 } from 'uuid';
 
 export const LeadService = {
-  async createLead({ name, email, phone, source, form_id, course_interest_ids = [], custom_fields = {} }) {
+  async createLead({ 
+    name, 
+    email, 
+    phone, 
+    source, 
+    form_id, 
+    course_interest_ids = [], 
+    custom_fields = {},
+    education_level = null,
+    college_name = null,
+    gender = null,
+    date_of_birth = null,
+    address = null,
+    notes = null
+  }) {
     const connection = await pool.getConnection();
     try {
       await connection.beginTransaction();
@@ -20,10 +34,33 @@ export const LeadService = {
         leadId = existingLeads[0].id;
         assignedTo = existingLeads[0].assigned_to;
         
-        // Update existing lead name/email if they were empty, append/update course interests, and reopen
+        // Update existing lead name/email if they were empty, append/update course interests, demographic info, and reopen
         await connection.query(
-          'UPDATE leads SET name = COALESCE(NULLIF(name, ""), ?), email = COALESCE(NULLIF(email, ""), ?), status = "open", course_interest_ids = ? WHERE id = ?',
-          [name, email, JSON.stringify(course_interest_ids), leadId]
+          `UPDATE leads SET 
+            name = COALESCE(NULLIF(name, ""), ?), 
+            email = COALESCE(NULLIF(email, ""), ?), 
+            status = "open", 
+            course_interest_ids = ?,
+            education_level = COALESCE(?, education_level),
+            college_name = COALESCE(?, college_name),
+            gender = COALESCE(?, gender),
+            date_of_birth = COALESCE(?, date_of_birth),
+            address = COALESCE(?, address),
+            notes = COALESCE(?, notes),
+            last_activity_at = CURRENT_TIMESTAMP
+           WHERE id = ?`,
+          [
+            name, 
+            email || null, 
+            JSON.stringify(course_interest_ids), 
+            education_level || null, 
+            college_name || null, 
+            gender || null, 
+            date_of_birth || null, 
+            address || null, 
+            notes || null, 
+            leadId
+          ]
         );
       } else {
         leadId = uuidv4();
@@ -31,8 +68,24 @@ export const LeadService = {
         assignedTo = await this.getNextAgent(connection);
 
         await connection.query(
-          'INSERT INTO leads (id, name, email, phone, source, form_id, assigned_to, status, course_interest_ids) VALUES (?, ?, ?, ?, ?, ?, ?, "open", ?)',
-          [leadId, name, email, phone, source, form_id, assignedTo, JSON.stringify(course_interest_ids)]
+          `INSERT INTO leads (id, name, email, phone, source, form_id, assigned_to, status, course_interest_ids, education_level, college_name, gender, date_of_birth, address, notes) 
+           VALUES (?, ?, ?, ?, ?, ?, ?, "open", ?, ?, ?, ?, ?, ?, ?)`,
+          [
+            leadId, 
+            name, 
+            email || null, 
+            phone, 
+            source, 
+            form_id || null, 
+            assignedTo, 
+            JSON.stringify(course_interest_ids),
+            education_level || null,
+            college_name || null,
+            gender || null,
+            date_of_birth || null,
+            address || null,
+            notes || null
+          ]
         );
       }
 

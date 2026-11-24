@@ -364,34 +364,40 @@ router.get('/about', async (req, res) => {
 
 // POST /api/public/contact - Contact form submission
 router.post('/contact', async (req, res) => {
-  const { name, email, phone, subject, message, course_interest_ids } = req.body;
+  const { name, email, phone, subject, message, course_interest_ids, education_level, college_name, gender, date_of_birth, address } = req.body;
 
-  if (!name || !email || !message) {
-    return res.status(400).json({ message: 'Name, email, and message are required' });
+  if (!name || (!email && !phone)) {
+    return res.status(400).json({ message: 'Name and either email or phone are required' });
   }
 
   try {
     const id = uuidv4();
     await pool.query(
       'INSERT INTO contact_submissions (id, name, email, phone, subject, message, status) VALUES (?, ?, ?, ?, ?, ?, ?)',
-      [id, name, email, phone, subject, message, CONTACT_STATUS.NEW]
+      [id, name, email || '', phone || '', subject || '', message || '', CONTACT_STATUS.NEW]
     );
 
     // Also create a lead in CRM
     await LeadService.createLead({
       name,
-      email,
+      email: email || null,
       phone: phone || null,
       source: 'website',
       form_id: id,
       course_interest_ids: course_interest_ids || [],
+      education_level: education_level || null,
+      college_name: college_name || null,
+      gender: gender || null,
+      date_of_birth: date_of_birth || null,
+      address: address || null,
+      notes: message || subject || 'Contact form inquiry',
       custom_fields: {
         subject: subject || '',
         message: message || ''
       }
     });
 
-    res.status(201).json({ message: 'Your message has been sent successfully' });
+    res.status(201).json({ success: true, message: 'Your message has been sent successfully' });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Internal server error' });

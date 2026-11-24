@@ -155,7 +155,13 @@ router.put('/users/:id/status', async (req, res) => {
 router.put('/users/:id', async (req, res) => {
   const { name, role } = req.body;
   try {
-    await pool.query('UPDATE users SET name = ?, role = ? WHERE id = ?', [name || null, role || null, req.params.id]);
+    await pool.query(
+      `UPDATE users 
+       SET name = ?, role = ?, 
+           status = IF(? = 'student' AND status = 'pending_review', 'active', status) 
+       WHERE id = ?`, 
+      [name || null, role || null, role || null, req.params.id]
+    );
 
     // Ensure corresponding profile exists when role is updated
     if (role === 'student') {
@@ -218,7 +224,10 @@ router.post('/users/:id/reset-password', async (req, res) => {
     const hashedPassword = await bcrypt.hash(defaultPassword, 10);
 
     await pool.query(
-      'UPDATE users SET password_hash = ?, temp_password = ?, force_password_change = 1 WHERE id = ?',
+      `UPDATE users 
+       SET password_hash = ?, temp_password = ?, force_password_change = 1,
+           status = IF(role = 'student' AND status != 'suspended', 'active', status) 
+       WHERE id = ?`,
       [hashedPassword, defaultPassword, req.params.id]
     );
     

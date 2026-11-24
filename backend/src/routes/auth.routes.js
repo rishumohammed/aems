@@ -7,6 +7,7 @@ import { pool, redis } from '../db/connection.js';
 import { authenticateJWT } from '../middleware/auth.js';
 import emailService from '../services/email.service.js';
 import { createNotification } from '../services/notification.service.js';
+import { LeadService } from '../services/lead.service.js';
 
 const router = express.Router();
 
@@ -38,57 +39,39 @@ const hashToken = (token) => crypto.createHash('sha256').update(token).digest('h
 // --- Registration ---
 
 router.post('/register/student', async (req, res) => {
-  const { name, email, password, phone, education_level, college_name, gender, date_of_birth } = req.body;
-  if (!name || !email || !password) {
-    return res.status(400).json({ message: 'Name, email, and password are required.' });
+  const { name, email, phone, education_level, college_name, gender, date_of_birth, address, course_interest_ids } = req.body;
+  if (!name || (!email && !phone)) {
+    return res.status(400).json({ message: 'Name and at least Email or Phone are required.' });
   }
 
-  const normalizedEmail = email.trim().toLowerCase();
-  const connection = await pool.getConnection();
-
   try {
-    const [existing] = await connection.query('SELECT id FROM users WHERE LOWER(email) = ?', [normalizedEmail]);
-    if (existing.length > 0) {
-      connection.release();
-      return res.status(400).json({ message: 'An account with this email address already exists. Please log in or use another email.' });
-    }
+    const normalizedEmail = email ? email.trim().toLowerCase() : null;
+    const cleanPhone = phone ? phone.trim() : null;
 
-    await connection.beginTransaction();
+    const result = await LeadService.createLead({
+      name: name.trim(),
+      email: normalizedEmail,
+      phone: cleanPhone || '',
+      source: 'website_registration',
+      course_interest_ids: course_interest_ids || [],
+      education_level: education_level || null,
+      college_name: college_name || null,
+      gender: gender || null,
+      date_of_birth: date_of_birth || null,
+      address: address || null,
+      notes: 'Submitted via public student registration form'
+    });
 
-    const id = uuidv4();
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    // 1. Create User
-    await connection.query(
-      'INSERT INTO users (id, name, email, password_hash, phone, role, status) VALUES (?, ?, ?, ?, ?, "student", "active")',
-      [id, name.trim(), normalizedEmail, hashedPassword, phone || null]
-    );
-
-    // 2. Create Profiles
-    await connection.query('INSERT INTO user_profiles (user_id) VALUES (?)', [id]);
-    await connection.query(
-      'INSERT INTO student_profiles (user_id, education_level, college_name, gender, date_of_birth) VALUES (?, ?, ?, ?, ?)',
-      [id, education_level || null, college_name || null, gender || null, date_of_birth || null]
-    );
-
-    // 3. Log Action
-    await connection.query(
-      'INSERT INTO auth_logs (user_id, action, ip_address, status, details) VALUES (?, "register", ?, "success", "Student registration")',
-      [id, req.ip]
-    );
-
-    await connection.commit();
-
-    // Notify admins
+    // Notify admins of new registration lead
     try {
-      const [admins] = await pool.query('SELECT id FROM users WHERE role = "super_admin" AND status = "active"');
+      const [admins] = await pool.query('SELECT id FROM users WHERE role IN ("super_admin", "crm_agent") AND status = "active"');
       for (const admin of admins) {
         await createNotification({
           userId: admin.id,
           type: 'info',
-          title: 'New Student Registration',
-          message: `${name} (${normalizedEmail}) has just registered as a student.`,
-          link: '/dashboard/admin/students',
+          title: 'New Student Registration Lead',
+          message: `${name} has registered on the website. Lead created in CRM.`,
+          link: `/dashboard/leads/${result.id}`,
           emailNotify: false
         });
       }
@@ -96,15 +79,13 @@ router.post('/register/student', async (req, res) => {
       console.warn('Notification sending failed:', notifError.message);
     }
 
-    res.status(201).json({ message: 'Registration successful. Welcome to the platform!' });
+    res.status(201).json({ 
+      success: true, 
+      leadId: result.id,
+      message: 'Thank you for registering! Your application has been received and our admissions team will contact you shortly to complete your enrollment.' 
+    });
   } catch (error) {
-    await connection.rollback();
-    if (error.code === 'ER_DUP_ENTRY') {
-      return res.status(400).json({ message: 'An account with this email address already exists. Please log in or use another email.' });
-    }
     res.status(500).json({ message: error.message || 'Registration failed. Please try again later.' });
-  } finally {
-    connection.release();
   }
 });
 
@@ -268,7 +249,16 @@ router.post('/login', async (req, res) => {
 
     res.json({
       accessToken,
-      user: { id: user.id, name: user.name, role: user.role, email: user.email, avatar_url: user.avatar_url, force_password_change: !!user.force_password_change, approval_status: user.approval_status }
+      user: { 
+        id: user.id, 
+        name: user.name, 
+        role: user.role, 
+        email: user.email, 
+        status: user.status,
+        avatar_url: user.avatar_url, 
+        force_password_change: !!user.force_password_change, 
+        approval_status: user.approval_status 
+      }
     });
   } catch (error) {
     console.error('CRITICAL LOGIN ERROR:', error);
@@ -424,7 +414,7 @@ router.post('/force-change-password', authenticateJWT, async (req, res) => {
     return res.status(400).json({ message: 'Password is required' });
   }
   try {
-    const [users] = await pool.query('SELECT force_password_change FROM users WHERE id = ?', [req.user.id]);
+    const [users] = await pool.query('SELECT role, status, force_password_change FROM users WHERE id = ?', [req.user.id]);
     if (users.length === 0) {
       return res.status(404).json({ message: 'User not found' });
     }
@@ -433,9 +423,13 @@ router.post('/force-change-password', authenticateJWT, async (req, res) => {
     }
     
     const hashedPassword = await bcrypt.hash(password, 10);
+    // Students never undergo an approval process; activate them upon completing password change
+    const shouldActivate = users[0].role === 'student' && users[0].status !== 'suspended';
+    const newStatus = shouldActivate ? 'active' : users[0].status;
+
     await pool.query(
-      'UPDATE users SET password_hash = ?, force_password_change = 0, temp_password = NULL WHERE id = ?',
-      [hashedPassword, req.user.id]
+      'UPDATE users SET password_hash = ?, force_password_change = 0, temp_password = NULL, status = ? WHERE id = ?',
+      [hashedPassword, newStatus, req.user.id]
     );
     res.json({ message: 'Password changed successfully' });
   } catch (error) {

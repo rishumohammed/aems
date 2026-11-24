@@ -251,23 +251,39 @@
             <h3 class="text-h6 font-weight-bold mb-4">Review & Confirm</h3>
             <v-card variant="flat" border class="pa-4 rounded-lg bg-primary-lighten-5">
               <v-row>
-                <v-col cols="6">
+                <v-col cols="12" sm="6">
                   <div class="text-caption text-grey">Student Name</div>
                   <div class="text-body-1 font-weight-bold">{{ lead.name }}</div>
                 </v-col>
-                <v-col cols="6">
-                  <div class="text-caption text-grey">Courses</div>
+                <v-col cols="12" sm="6">
+                  <div class="text-caption text-grey">Email & Phone</div>
+                  <div class="text-body-2 font-weight-medium">{{ lead.email || 'N/A' }} • {{ lead.phone }}</div>
+                </v-col>
+                <v-col cols="12" sm="6" v-if="lead.education_level || lead.college_name">
+                  <div class="text-caption text-grey">Education & Institution</div>
+                  <div class="text-body-2 font-weight-medium">{{ [lead.education_level, lead.college_name].filter(Boolean).join(' • ') }}</div>
+                </v-col>
+                <v-col cols="12" sm="6" v-if="lead.gender || lead.date_of_birth">
+                  <div class="text-caption text-grey">Gender & DOB</div>
+                  <div class="text-body-2 font-weight-medium">{{ [lead.gender, lead.date_of_birth].filter(Boolean).join(' • ') }}</div>
+                </v-col>
+                <v-col cols="12" v-if="lead.address">
+                  <div class="text-caption text-grey">Address</div>
+                  <div class="text-body-2 font-weight-medium">{{ lead.address }}</div>
+                </v-col>
+                <v-col cols="12" sm="6">
+                  <div class="text-caption text-grey">Selected Courses</div>
                   <div class="text-body-1 font-weight-bold">{{ selectedCourses.map(c => c.title).join(', ') }}</div>
                 </v-col>
-                <v-col cols="6">
+                <v-col cols="12" sm="6">
                   <div class="text-caption text-grey">Total Price</div>
                   <div class="text-body-1 font-weight-bold text-primary">INR {{ finalPrice }}</div>
                 </v-col>
-                <v-col cols="6">
+                <v-col cols="12" sm="6">
                   <div class="text-caption text-grey">Payment Mode</div>
                   <div class="text-body-1 font-weight-bold text-capitalize">{{ paymentMode }}</div>
                 </v-col>
-                <v-col cols="12" v-if="paymentMode === 'offline'">
+                <v-col cols="12" sm="6" v-if="paymentMode === 'offline'">
                   <div class="text-caption text-grey">Initial Payment</div>
                   <div class="text-body-1 font-weight-bold text-success">INR {{ amountPaid }} ({{ offlineType }})</div>
                 </v-col>

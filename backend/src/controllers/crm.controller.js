@@ -189,15 +189,29 @@ export const CRMController = {
   // POST /api/crm/leads (Manual creation)
   async createLead(req, res) {
     try {
-      const { name, email, phone, course_interest_ids, notes } = req.body;
+      const { name, email, phone, course_interest_ids, notes, education_level, college_name, gender, date_of_birth, address } = req.body;
       const id = uuidv4();
       
       // If no agent assigned, we could use round-robin here too, but for manual, we usually assign to the creator or leave unassigned
-      const assigned_to = req.user.role === 'crm_agent' ? req.user.id : null;
+      const assigned_to = req.user.role === 'crm_agent' ? req.user.id : (req.body.assigned_to || null);
 
       await pool.query(
-        'INSERT INTO leads (id, name, email, phone, source, status, course_interest_ids, notes, assigned_to) VALUES (?, ?, ?, ?, "manual", "open", ?, ?, ?)',
-        [id, name, email || null, phone || null, JSON.stringify(course_interest_ids || []), notes || null, assigned_to]
+        `INSERT INTO leads (id, name, email, phone, source, status, course_interest_ids, notes, assigned_to, education_level, college_name, gender, date_of_birth, address) 
+         VALUES (?, ?, ?, ?, "manual", "open", ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+          id, 
+          name, 
+          email || null, 
+          phone || null, 
+          JSON.stringify(course_interest_ids || []), 
+          notes || null, 
+          assigned_to,
+          education_level || null,
+          college_name || null,
+          gender || null,
+          date_of_birth || null,
+          address || null
+        ]
       );
 
       // Log activity
@@ -230,8 +244,24 @@ export const CRMController = {
 
           const id = uuidv4();
           await connection.query(
-            'INSERT INTO leads (id, name, email, phone, source, status, course_interest_ids, notes, assigned_to) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
-            [id, lead.name, lead.email || '', lead.phone || '', lead.source || 'manual', lead.status || 'open', JSON.stringify(lead.course_interest_ids || []), lead.notes || '', agentId]
+            `INSERT INTO leads (id, name, email, phone, source, status, course_interest_ids, notes, assigned_to, education_level, college_name, gender, date_of_birth, address) 
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [
+              id, 
+              lead.name, 
+              lead.email || '', 
+              lead.phone || '', 
+              lead.source || 'manual', 
+              lead.status || 'open', 
+              JSON.stringify(lead.course_interest_ids || []), 
+              lead.notes || '', 
+              agentId,
+              lead.education_level || null,
+              lead.college_name || lead.college || null,
+              lead.gender || null,
+              lead.date_of_birth || null,
+              lead.address || null
+            ]
           );
           imported++;
         }
@@ -252,7 +282,7 @@ export const CRMController = {
   async updateLead(req, res) {
     try {
       const { id } = req.params;
-      const { name, email, phone, status, assigned_to, course_interest_ids, notes } = req.body;
+      const { name, email, phone, status, assigned_to, course_interest_ids, notes, education_level, college_name, gender, date_of_birth, address } = req.body;
 
       // Get current lead to check for status change
       const [current] = await pool.query('SELECT status FROM leads WHERE id = ?', [id]);
@@ -266,8 +296,36 @@ export const CRMController = {
       }
 
       await pool.query(
-        'UPDATE leads SET name = ?, email = ?, phone = ?, status = ?, assigned_to = ?, course_interest_ids = ?, notes = ?, last_activity_at = CURRENT_TIMESTAMP WHERE id = ?',
-        [name, email || null, phone || null, status, assigned_to || null, JSON.stringify(course_interest_ids || []), notes || null, id]
+        `UPDATE leads SET 
+          name = ?, 
+          email = ?, 
+          phone = ?, 
+          status = ?, 
+          assigned_to = ?, 
+          course_interest_ids = ?, 
+          notes = ?, 
+          education_level = ?,
+          college_name = ?,
+          gender = ?,
+          date_of_birth = ?,
+          address = ?,
+          last_activity_at = CURRENT_TIMESTAMP 
+        WHERE id = ?`,
+        [
+          name, 
+          email || null, 
+          phone || null, 
+          status, 
+          assigned_to || null, 
+          JSON.stringify(course_interest_ids || []), 
+          notes || null, 
+          education_level || null,
+          college_name || null,
+          gender || null,
+          date_of_birth || null,
+          address || null,
+          id
+        ]
       );
 
       res.json({ message: 'Lead updated successfully' });
@@ -463,7 +521,12 @@ export const CRMController = {
           studentData: {
             name: lead.name,
             email: lead.email,
-            phone: lead.phone
+            phone: lead.phone,
+            education_level: lead.education_level,
+            college_name: lead.college_name,
+            gender: lead.gender,
+            date_of_birth: lead.date_of_birth,
+            address: lead.address
           },
           courseId: cid,
           pricing: { amount: parseFloat(finalCoursePrice.toFixed(2)) },

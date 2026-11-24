@@ -151,10 +151,83 @@
                   hide-details="auto"
                   class="bg-white rounded-lg mb-4"
                 ></v-select>
+
+                <v-row dense class="mb-0">
+                  <v-col cols="12" sm="6">
+                    <v-select
+                      v-model="formData.education_level"
+                      :items="educationLevels"
+                      label="Education Level"
+                      placeholder="Select level"
+                      variant="outlined"
+                      density="comfortable"
+                      color="primary"
+                      hide-details="auto"
+                      class="bg-white rounded-lg mb-4"
+                    ></v-select>
+                  </v-col>
+                  <v-col cols="12" sm="6">
+                    <v-text-field
+                      v-model="formData.college_name"
+                      label="College / Institution"
+                      placeholder="e.g. University"
+                      variant="outlined"
+                      density="comfortable"
+                      color="primary"
+                      hide-details="auto"
+                      class="bg-white rounded-lg mb-4"
+                    ></v-text-field>
+                  </v-col>
+                </v-row>
+
+                <v-row dense class="mb-0">
+                  <v-col cols="12" sm="6">
+                    <v-select
+                      v-model="formData.gender"
+                      :items="[
+                        { title: 'Male', value: 'male' },
+                        { title: 'Female', value: 'female' },
+                        { title: 'Other', value: 'other' },
+                        { title: 'Prefer not to say', value: 'prefer_not_to_say' }
+                      ]"
+                      label="Gender"
+                      placeholder="Select gender"
+                      variant="outlined"
+                      density="comfortable"
+                      color="primary"
+                      hide-details="auto"
+                      class="bg-white rounded-lg mb-4"
+                    ></v-select>
+                  </v-col>
+                  <v-col cols="12" sm="6">
+                    <v-text-field
+                      v-model="formData.date_of_birth"
+                      label="Date of Birth"
+                      type="date"
+                      variant="outlined"
+                      density="comfortable"
+                      color="primary"
+                      hide-details="auto"
+                      class="bg-white rounded-lg mb-4"
+                    ></v-text-field>
+                  </v-col>
+                </v-row>
+
+                <v-text-field
+                  v-model="formData.address"
+                  label="Address / City"
+                  placeholder="Enter your city or address"
+                  variant="outlined"
+                  density="comfortable"
+                  color="primary"
+                  hide-details="auto"
+                  class="bg-white rounded-lg mb-4"
+                ></v-text-field>
+
                 <v-textarea
                   v-model="formData.message"
-                  label="How can we help? *"
-                  placeholder="Describe your inquiry"
+                  label="How can we help? (Optional)"
+                  placeholder="Describe your inquiry or goals"
                   variant="outlined"
                   density="comfortable"
                   color="primary"
@@ -228,9 +301,29 @@ const { data: formConfig, pending: loading, error: fetchError } = await useFetch
 const submitting = ref(false);
 const success = ref(false);
 const errorMsg = ref('');
-const formData = ref({ course_interest_ids: [] });
+const formData = ref({ 
+  name: '',
+  email: '',
+  phone: '',
+  course_interest_ids: [],
+  education_level: '',
+  college_name: '',
+  gender: '',
+  date_of_birth: '',
+  address: '',
+  message: ''
+});
 const waLink = ref('');
 const coursesList = ref([]);
+const educationLevels = ref(['High School', 'Diploma', "Bachelor's Degree", "Master's Degree", "Doctorate / PhD", 'Other']);
+
+// Fetch education levels from config
+useFetch(`${config.public.apiBase}/public/config`).then((res) => {
+  if (res.data.value?.education_levels) {
+    const parsed = res.data.value.education_levels.split(',').map((s) => s.trim()).filter(Boolean);
+    if (parsed.length > 0) educationLevels.value = parsed;
+  }
+});
 
 // Fetch available courses for the dropdown
 useFetch(`${config.public.apiBase}/public/courses?limit=100`).then((res) => {
@@ -308,25 +401,23 @@ const handleSubmit = async () => {
   errorMsg.value = '';
 
   try {
-    const isFallback = !formConfig.value;
-    const endpoint = isFallback ? `${config.public.apiBase}/public/contact` : `${config.public.apiBase}/public/leads`;
+    const endpoint = `${config.public.apiBase}/public/leads`;
     
     let finalMessage = formData.value.message || 'Interested in learning more.';
     
-    // Construct payload based on endpoint
-    const payload = isFallback ? {
-      name: formData.value.name,
-      email: formData.value.email,
-      phone: formData.value.phone,
-      subject: 'Homepage Enquiry',
-      message: finalMessage,
-      course_interest_ids: formData.value.course_interest_ids || []
-    } : {
+    const payload = {
       name: formData.value.name || formData.value.full_name || 'Visitor',
       email: formData.value.email,
       phone: formData.value.phone,
-      source: props.source,
+      source: props.source || 'website',
       form_id: props.formId,
+      course_interest_ids: formData.value.course_interest_ids || [],
+      education_level: formData.value.education_level || null,
+      college_name: formData.value.college_name || null,
+      gender: formData.value.gender || null,
+      date_of_birth: formData.value.date_of_birth || null,
+      address: formData.value.address || null,
+      notes: finalMessage,
       custom_fields: { ...formData.value }
     };
 

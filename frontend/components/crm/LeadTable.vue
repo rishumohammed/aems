@@ -125,6 +125,7 @@ const onUpdateOptions = ({ page }: { page: number }) => {
 const getSourceColor = (source: string) => {
   switch (source) {
     case 'website': return 'blue';
+    case 'website_registration': return 'indigo';
     case 'whatsapp': return 'green';
     case 'manual': return 'gray';
     default: return 'blue';
@@ -134,6 +135,7 @@ const getSourceColor = (source: string) => {
 const getSourceIcon = (source: string) => {
   switch (source) {
     case 'website': return 'mdi-web';
+    case 'website_registration': return 'mdi-account-school';
     case 'whatsapp': return 'mdi-whatsapp';
     case 'manual': return 'mdi-account-edit';
     default: return 'mdi-help-circle';

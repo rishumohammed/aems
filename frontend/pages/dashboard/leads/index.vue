@@ -177,6 +177,51 @@
           ></v-autocomplete>
         </div>
       </div>
+      <div class="fr2 mb-4">
+        <div class="d-flex flex-column w-100">
+          <label style="font-size: 12px; font-weight: 600; color: var(--g5); margin-bottom: 6px; letter-spacing: 0.1px;">Education Level</label>
+          <v-select
+            v-model="newLead.education_level"
+            :items="educationLevels"
+            placeholder="Select education level..."
+            variant="outlined"
+            density="comfortable"
+            hide-details="auto"
+          ></v-select>
+        </div>
+        <AppInput v-model="newLead.college_name" label="College / Institution" placeholder="Enter college or university" large />
+      </div>
+      <div class="fr2 mb-4">
+        <div class="d-flex flex-column w-100">
+          <label style="font-size: 12px; font-weight: 600; color: var(--g5); margin-bottom: 6px; letter-spacing: 0.1px;">Gender</label>
+          <v-select
+            v-model="newLead.gender"
+            :items="[
+              { title: 'Male', value: 'male' },
+              { title: 'Female', value: 'female' },
+              { title: 'Other', value: 'other' },
+              { title: 'Prefer not to say', value: 'prefer_not_to_say' }
+            ]"
+            placeholder="Select gender..."
+            variant="outlined"
+            density="comfortable"
+            hide-details="auto"
+          ></v-select>
+        </div>
+        <div class="d-flex flex-column w-100">
+          <label style="font-size: 12px; font-weight: 600; color: var(--g5); margin-bottom: 6px; letter-spacing: 0.1px;">Date of Birth</label>
+          <v-text-field
+            v-model="newLead.date_of_birth"
+            type="date"
+            variant="outlined"
+            density="comfortable"
+            hide-details="auto"
+          ></v-text-field>
+        </div>
+      </div>
+      <div class="mb-4">
+        <AppInput v-model="newLead.address" label="Address / City" placeholder="Enter address or city..." large />
+      </div>
       <AppInput v-model="newLead.notes" label="Initial Notes" type="textarea" placeholder="Add any initial details..." :error="errors.notes" large />
     </AppModal>
 
@@ -293,19 +338,25 @@ interface KanbanColumn {
 
 const courses = ref<any[]>([]);
 const agents = ref<any[]>([]);
+const educationLevels = ref<string[]>(['High School', 'Diploma', 'Bachelor\'s Degree', 'Master\'s Degree', 'Doctorate / PhD', 'Other']);
 
 const newLead = ref({
   name: '',
   email: '',
   phone: '',
-  course_interest_ids: [],
+  course_interest_ids: [] as string[],
+  education_level: '',
+  college_name: '',
+  gender: '',
+  date_of_birth: '',
+  address: '',
   notes: ''
 });
 
 const errors = ref<any>({});
 
 const statusOptions = ['open', 'called', 'interested', 'not_interested', 'rejected', 'converted'];
-const sourceOptions = ['website', 'whatsapp', 'manual'];
+const sourceOptions = ['website', 'website_registration', 'whatsapp', 'manual'];
 
 const statsCards = computed(() => [
   { title: 'Total Leads', value: crmStore.stats.totalLeads, icon: 'mdi-account-group', color: 'blue', route: '/dashboard/leads' },
@@ -387,7 +438,18 @@ const submitAddLead = async () => {
   try {
     await crmStore.createLead(newLead.value);
     showAddLeadModal.value = false;
-    newLead.value = { name: '', email: '', phone: '', course_interest_ids: [], notes: '' };
+    newLead.value = { 
+      name: '', 
+      email: '', 
+      phone: '', 
+      course_interest_ids: [], 
+      education_level: '', 
+      college_name: '', 
+      gender: '', 
+      date_of_birth: '', 
+      address: '', 
+      notes: '' 
+    };
   } catch (error) {
     alert('Failed to create lead. Please check your input.');
   } finally {
@@ -398,13 +460,19 @@ const submitAddLead = async () => {
 onMounted(async () => {
   fetchData();
   try {
-    const [coursesRes, agentsResponse] = await Promise.all([
+    const [coursesRes, agentsResponse, configRes] = await Promise.all([
       api.get('/admin/courses').catch(() => api.get('/lms/courses')).catch(() => api.get('/public/courses?all=true&limit=1000')),
-      api.get('/crm/agents')
+      api.get('/crm/agents'),
+      api.get('/public/config').catch(() => ({ data: {} }))
     ]);
     const coursesList = Array.isArray(coursesRes.data) ? coursesRes.data : (coursesRes.data?.courses || []);
     courses.value = coursesList.map((c: any) => ({ label: c.title, value: c.id }));
     agents.value = (agentsResponse.data || []).map((a: any) => ({ label: a.name, value: a.id }));
+
+    if (configRes.data?.education_levels) {
+      const parsedLevels = configRes.data.education_levels.split(',').map((s: string) => s.trim()).filter(Boolean);
+      if (parsedLevels.length > 0) educationLevels.value = parsedLevels;
+    }
   } catch (err) {
     console.error('Failed to load CRM metadata:', err);
   }

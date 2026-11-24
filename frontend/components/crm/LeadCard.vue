@@ -50,6 +50,7 @@ defineEmits(['click']);
 const getSourceColor = (source: string) => {
   switch (source) {
     case 'website': return 'blue';
+    case 'website_registration': return 'indigo';
     case 'whatsapp': return 'green';
     case 'manual': return 'gray';
     default: return 'blue';

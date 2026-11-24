@@ -62,19 +62,64 @@ class EnrollmentService {
   async ensureStudentId(connection = pool, studentId, studentData = {}, convertedBy = null, leadSource = null) {
     const [profile] = await connection.query('SELECT student_id FROM student_profiles WHERE user_id = ?', [studentId]);
     if (profile.length > 0 && profile[0].student_id) {
+      if (studentData.education_level || studentData.college_name || studentData.college || studentData.gender || studentData.date_of_birth || studentData.address) {
+        await connection.query(
+          `UPDATE student_profiles SET 
+            education_level = COALESCE(education_level, ?),
+            college_name = COALESCE(college_name, ?),
+            gender = COALESCE(gender, ?),
+            date_of_birth = COALESCE(date_of_birth, ?),
+            address = COALESCE(address, ?)
+           WHERE user_id = ?`,
+          [
+            studentData.education_level || null,
+            studentData.college_name || studentData.college || null,
+            studentData.gender || null,
+            studentData.date_of_birth || null,
+            studentData.address || null,
+            studentId
+          ]
+        );
+      }
       return profile[0].student_id;
     }
 
     const readableStudentId = await this.generateNextStudentId(connection);
     if (profile.length > 0) {
       await connection.query(
-        'UPDATE student_profiles SET student_id = ? WHERE user_id = ?',
-        [readableStudentId, studentId]
+        `UPDATE student_profiles SET 
+          student_id = ?,
+          education_level = COALESCE(education_level, ?),
+          college_name = COALESCE(college_name, ?),
+          gender = COALESCE(gender, ?),
+          date_of_birth = COALESCE(date_of_birth, ?),
+          address = COALESCE(address, ?)
+         WHERE user_id = ?`,
+        [
+          readableStudentId,
+          studentData.education_level || null,
+          studentData.college_name || studentData.college || null,
+          studentData.gender || null,
+          studentData.date_of_birth || null,
+          studentData.address || null,
+          studentId
+        ]
       );
     } else {
       await connection.query(
-        'INSERT INTO student_profiles (user_id, student_id, converted_by, lead_source, education_level, college_name) VALUES (?, ?, ?, ?, ?, ?)',
-        [studentId, readableStudentId, convertedBy || null, leadSource || 'direct', studentData.education_level || null, studentData.college_name || studentData.college || null]
+        `INSERT INTO student_profiles (user_id, student_id, converted_by, lead_source, education_level, college_name, gender, date_of_birth, address) 
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+          studentId, 
+          readableStudentId, 
+          convertedBy || null, 
+          leadSource || 'direct', 
+          studentData.education_level || null, 
+          studentData.college_name || studentData.college || null,
+          studentData.gender || null,
+          studentData.date_of_birth || null,
+          studentData.address || null
+        ]
       );
     }
     return readableStudentId;
@@ -124,8 +169,19 @@ class EnrollmentService {
 
           // Create student profile
           await connection.query(
-            'INSERT INTO student_profiles (user_id, student_id, converted_by, lead_source, education_level, college_name) VALUES (?, ?, ?, ?, ?, ?)',
-            [studentId, readableStudentId, convertedBy || null, leadSource || null, studentData.education_level || null, studentData.college_name || studentData.college || null]
+            `INSERT INTO student_profiles (user_id, student_id, converted_by, lead_source, education_level, college_name, gender, date_of_birth, address) 
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [
+              studentId, 
+              readableStudentId, 
+              convertedBy || null, 
+              leadSource || null, 
+              studentData.education_level || null, 
+              studentData.college_name || studentData.college || null,
+              studentData.gender || null,
+              studentData.date_of_birth || null,
+              studentData.address || null
+            ]
           );
         }
       } else {

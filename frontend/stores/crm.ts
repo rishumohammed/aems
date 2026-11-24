@@ -6,9 +6,14 @@ export interface Lead {
   name: string;
   email: string;
   phone: string;
-  source: 'website' | 'whatsapp' | 'manual';
+  source: 'website' | 'website_registration' | 'whatsapp' | 'manual' | string;
   status: 'open' | 'called' | 'interested' | 'not_interested' | 'rejected' | 'converted';
   course_interest_ids: string[] | null;
+  education_level?: string | null;
+  college_name?: string | null;
+  gender?: string | null;
+  date_of_birth?: string | null;
+  address?: string | null;
   notes: string | null;
   assigned_to: string | null;
   agent_name?: string;

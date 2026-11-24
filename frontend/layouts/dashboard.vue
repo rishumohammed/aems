@@ -26,12 +26,19 @@ const authStore = useAuthStore();
 const uiStore = useUIStore();
 const theme = useTheme();
 
-const isPending = computed(() => 
-  authStore.user?.status === 'pending_review' || 
-  authStore.user?.approval_status === 'pending_approval' ||
-  authStore.user?.status === 'rejected' ||
-  authStore.user?.approval_status === 'rejected'
-);
+const isPending = computed(() => {
+  // Only tutors and employers have an account approval review workflow.
+  // Students, admins, coordinators, and staff never require approval.
+  const role = authStore.userRole;
+  if (role !== 'tutor' && role !== 'employer') return false;
+
+  return (
+    authStore.user?.status === 'pending_review' || 
+    authStore.user?.approval_status === 'pending_approval' ||
+    authStore.user?.status === 'rejected' ||
+    authStore.user?.approval_status === 'rejected'
+  );
+});
 
 
 

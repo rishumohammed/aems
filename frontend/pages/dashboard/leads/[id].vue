@@ -99,8 +99,44 @@
                       closable-chips
                     ></v-autocomplete>
                   </v-col>
+                  <v-col cols="12" md="6">
+                    <v-select
+                      v-model="lead.education_level"
+                      :items="educationLevels"
+                      label="Education Level"
+                    ></v-select>
+                  </v-col>
+                  <v-col cols="12" md="6">
+                    <v-text-field
+                      v-model="lead.college_name"
+                      label="College / Institution"
+                      placeholder="Enter college or university"
+                    ></v-text-field>
+                  </v-col>
+                  <v-col cols="12" md="6">
+                    <v-select
+                      v-model="lead.gender"
+                      :items="[
+                        { title: 'Male', value: 'male' },
+                        { title: 'Female', value: 'female' },
+                        { title: 'Other', value: 'other' },
+                        { title: 'Prefer not to say', value: 'prefer_not_to_say' }
+                      ]"
+                      label="Gender"
+                    ></v-select>
+                  </v-col>
+                  <v-col cols="12" md="6">
+                    <v-text-field
+                      v-model="lead.date_of_birth"
+                      type="date"
+                      label="Date of Birth"
+                    ></v-text-field>
+                  </v-col>
                   <v-col cols="12">
-                    <v-textarea v-model="lead.notes" label="Notes" rows="4"></v-textarea>
+                    <v-textarea v-model="lead.address" label="Address / City" rows="2"></v-textarea>
+                  </v-col>
+                  <v-col cols="12">
+                    <v-textarea v-model="lead.notes" label="Notes" rows="3"></v-textarea>
                   </v-col>
                 </v-row>
 
@@ -370,7 +406,16 @@
               </v-avatar>
               <div>
                 <div class="text-caption text-grey">Address</div>
-                <div class="text-body-2 font-weight-medium">N/A</div>
+                <div class="text-body-2 font-weight-medium">{{ lead.address || 'N/A' }}</div>
+              </div>
+            </div>
+            <div class="d-flex align-center" v-if="lead.education_level || lead.college_name">
+              <v-avatar size="32" color="grey-lighten-4" class="mr-3">
+                <v-icon size="16" color="grey-darken-1">mdi-school-outline</v-icon>
+              </v-avatar>
+              <div>
+                <div class="text-caption text-grey">Education</div>
+                <div class="text-body-2 font-weight-medium">{{ [lead.education_level, lead.college_name].filter(Boolean).join(' • ') }}</div>
               </div>
             </div>
           </div>
@@ -418,6 +463,7 @@ const showConversionWizard = ref(false);
 const activeTab = ref('details');
 const courses = ref<any[]>([]);
 const agents = ref<any[]>([]);
+const educationLevels = ref<string[]>(['High School', 'Diploma', 'Bachelor\'s Degree', 'Master\'s Degree', 'Doctorate / PhD', 'Other']);
 
 const convertedStudentDetails = ref<any>(null);
 const latestTempPassword = ref('');
@@ -506,13 +552,18 @@ const fetchData = async () => {
     if (lead.value.status === 'converted') {
       await fetchConvertedStudentDetails();
     }
-    const [coursesRes, agentsResponse] = await Promise.all([
+    const [coursesRes, agentsResponse, configRes] = await Promise.all([
       api.get('/admin/courses').catch(() => api.get('/lms/courses')).catch(() => api.get('/public/courses?all=true&limit=1000')),
-      api.get('/crm/agents')
+      api.get('/crm/agents'),
+      api.get('/public/config').catch(() => ({ data: {} }))
     ]);
     const coursesList = Array.isArray(coursesRes.data) ? coursesRes.data : (coursesRes.data?.courses || []);
     courses.value = coursesList;
     agents.value = agentsResponse.data || [];
+    if (configRes.data?.education_levels) {
+      const parsedLevels = configRes.data.education_levels.split(',').map((s: string) => s.trim()).filter(Boolean);
+      if (parsedLevels.length > 0) educationLevels.value = parsedLevels;
+    }
   } catch (error) {
     console.error('Failed to fetch lead details:', error);
   } finally {

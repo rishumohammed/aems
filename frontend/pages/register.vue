@@ -54,35 +54,56 @@
 
               <!-- Student Registration -->
               <v-window-item value="student">
+                <div class="mb-6 pa-4 bg-blue-lighten-5 rounded-lg border-primary border-opacity-25 border">
+                  <div class="d-flex align-center">
+                    <v-icon color="primary" class="mr-3">mdi-information-outline</v-icon>
+                    <p class="text-caption text-primary font-weight-bold mb-0">
+                      Submit your application details below. Our academic counseling team will reach out to guide you through course selection, enrollment, and set up your student portal.
+                    </p>
+                  </div>
+                </div>
+
                 <v-form ref="studentForm" @submit.prevent="handleStudentRegister">
                   <v-row>
                     <v-col cols="12" md="6">
                       <v-text-field v-model="student.name" label="Full Name" variant="outlined" rounded="lg" prepend-inner-icon="mdi-account-outline" :rules="[v => !!v || 'Name is required']"></v-text-field>
                     </v-col>
                     <v-col cols="12" md="6">
-                      <v-text-field v-model="student.phone" label="Phone Number" variant="outlined" rounded="lg" prepend-inner-icon="mdi-phone-outline"></v-text-field>
+                      <v-text-field v-model="student.phone" label="Phone Number" variant="outlined" rounded="lg" prepend-inner-icon="mdi-phone-outline" :rules="[v => !!v || 'Phone is required']"></v-text-field>
                     </v-col>
                     <v-col cols="12">
                       <v-text-field v-model="student.email" label="Email Address" type="email" variant="outlined" rounded="lg" prepend-inner-icon="mdi-email-outline" :rules="[v => !!v || 'Email is required']" autocomplete="off"></v-text-field>
                     </v-col>
-                    <v-col cols="12" md="6">
-                      <v-text-field v-model="student.password" label="Password" :type="showPassword ? 'text' : 'password'" variant="outlined" rounded="lg" prepend-inner-icon="mdi-lock-outline" :append-inner-icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'" @click:append-inner="showPassword = !showPassword" :rules="[v => !!v || 'Password is required']" autocomplete="new-password"></v-text-field>
-                    </v-col>
-                    <v-col cols="12" md="6">
-                      <v-text-field v-model="student.confirmPassword" label="Confirm Password" :type="showConfirmPassword ? 'text' : 'password'" variant="outlined" rounded="lg" prepend-inner-icon="mdi-lock-check-outline" :append-inner-icon="showConfirmPassword ? 'mdi-eye-off' : 'mdi-eye'" @click:append-inner="showConfirmPassword = !showConfirmPassword" :rules="[v => v === student.password || 'Passwords do not match']" autocomplete="new-password"></v-text-field>
-                    </v-col>
                     <v-col cols="12">
+                      <v-autocomplete
+                        v-model="student.course_interest_ids"
+                        :items="availableCourses"
+                        item-title="title"
+                        item-value="id"
+                        label="Courses of Interest"
+                        placeholder="Search & select courses you are interested in..."
+                        variant="outlined"
+                        rounded="lg"
+                        prepend-inner-icon="mdi-book-open-page-variant-outline"
+                        multiple
+                        chips
+                        closable-chips
+                      ></v-autocomplete>
+                    </v-col>
+                    <v-col cols="12" md="6">
                       <v-select v-model="student.education_level" :items="educationLevels" label="Education Level" variant="outlined" rounded="lg"></v-select>
                     </v-col>
-                    <v-col cols="12">
-                      <v-text-field v-model="student.college_name" label="College / Institution Name" placeholder="Enter your college or institution name" variant="outlined" rounded="lg" prepend-inner-icon="mdi-school-outline"></v-text-field>
+                    <v-col cols="12" md="6">
+                      <v-text-field v-model="student.college_name" label="College / Institution Name" placeholder="e.g. University Name" variant="outlined" rounded="lg" prepend-inner-icon="mdi-school-outline"></v-text-field>
                     </v-col>
                     <v-col cols="12" md="6">
                       <v-select
                         v-model="student.gender"
                         :items="[
                           { title: 'Male', value: 'male' },
-                          { title: 'Female', value: 'female' }
+                          { title: 'Female', value: 'female' },
+                          { title: 'Other', value: 'other' },
+                          { title: 'Prefer not to say', value: 'prefer_not_to_say' }
                         ]"
                         label="Gender"
                         variant="outlined"
@@ -98,10 +119,21 @@
                         rounded="lg"
                       ></v-text-field>
                     </v-col>
+                    <v-col cols="12">
+                      <v-textarea
+                        v-model="student.address"
+                        label="Address / City"
+                        placeholder="Enter your current city or address"
+                        variant="outlined"
+                        rounded="lg"
+                        rows="2"
+                        prepend-inner-icon="mdi-map-marker-outline"
+                      ></v-textarea>
+                    </v-col>
                   </v-row>
 
                   <v-btn type="submit" color="primary" block size="x-large" rounded="pill" class="mt-4 font-weight-black" :loading="loading">
-                    Register as Student
+                    Submit Registration
                   </v-btn>
                 </v-form>
               </v-window-item>
@@ -222,12 +254,16 @@
     </v-container>
 
     <!-- Success Dialog -->
-    <v-dialog v-model="successDialog" max-width="400" persistent>
+    <v-dialog v-model="successDialog" max-width="440" persistent>
       <v-card rounded="xl" class="pa-8 text-center">
         <v-icon color="success" size="80" class="mb-4">mdi-check-circle-outline</v-icon>
         <h2 class="text-h5 font-weight-black mb-2">{{ successDialogTitle }}</h2>
         <p class="text-body-1 text-grey mb-6">{{ successMessage }}</p>
-        <v-btn color="primary" block rounded="pill" size="large" @click="navigateTo('/login')">Go to Login</v-btn>
+        <div v-if="roleTab === 'student'" class="d-flex flex-column ga-2">
+          <v-btn color="primary" block rounded="pill" size="large" @click="navigateTo('/courses')">Explore Courses</v-btn>
+          <v-btn variant="text" block rounded="pill" size="large" @click="navigateTo('/')">Back to Home</v-btn>
+        </div>
+        <v-btn v-else color="primary" block rounded="pill" size="large" @click="navigateTo('/login')">Go to Login</v-btn>
       </v-card>
     </v-dialog>
   </div>
@@ -261,15 +297,16 @@ const student = reactive({
   name: '',
   email: '',
   phone: '',
-  password: '',
-  confirmPassword: '',
+  course_interest_ids: [],
   education_level: '',
   college_name: '',
   gender: '',
-  date_of_birth: ''
+  date_of_birth: '',
+  address: ''
 });
 
 const educationLevels = ref([]);
+const availableCourses = ref([]);
 
 const tutor = reactive({
   name: '',
@@ -320,9 +357,21 @@ const handleStudentRegister = async () => {
   errorMessage.value = '';
   loading.value = true;
   try {
-    const { data } = await api.post('/auth/register/student', student);
-    successDialogTitle.value = 'Registration Successful!';
-    successMessage.value = data.message;
+    const { data } = await api.post('/public/leads', {
+      name: student.name,
+      email: student.email,
+      phone: student.phone,
+      source: 'website_registration',
+      course_interest_ids: student.course_interest_ids,
+      education_level: student.education_level,
+      college_name: student.college_name,
+      gender: student.gender,
+      date_of_birth: student.date_of_birth,
+      address: student.address,
+      notes: 'Registered via public website student form'
+    });
+    successDialogTitle.value = 'Registration Received!';
+    successMessage.value = data?.message || 'Thank you for registering! Our academic admissions team will review your application and contact you shortly to complete your enrollment.';
     successDialog.value = true;
   } catch (err) {
     errorMessage.value = err.response?.data?.message || 'Registration failed. Please check your details and try again.';
@@ -378,6 +427,17 @@ onMounted(async () => {
     console.error('Failed to load education levels:', err);
     educationLevels.value = ['High School', 'Bachelor\'s', 'Master\'s', 'PhD', 'Self-Taught'];
     student.education_level = 'Bachelor\'s';
+  }
+
+  try {
+    const coursesRes = await api.get('/public/courses?all=true&limit=1000');
+    const courseList = coursesRes.data?.courses || coursesRes.data || [];
+    availableCourses.value = courseList.map((c) => ({
+      id: c.id,
+      title: c.title
+    }));
+  } catch (err) {
+    console.error('Failed to load courses:', err);
   }
 });
 </script>
