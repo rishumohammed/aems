@@ -1,15 +1,21 @@
 <template>
   <div class="question-builder">
-    <div class="d-flex justify-space-between align-center mb-4">
+    <div class="d-flex flex-wrap justify-space-between align-center gap-2 mb-4">
       <h3 class="text-subtitle-1 font-weight-bold">Question Bank ({{ questions.length }})</h3>
-      <div class="d-flex gap-2">
+      <div class="d-flex flex-wrap gap-2">
+        <v-btn size="small" variant="outlined" color="secondary" prepend-icon="mdi-download" @click="downloadSampleCsv">
+          Sample CSV
+        </v-btn>
+        <v-btn size="small" variant="tonal" color="success" prepend-icon="mdi-file-upload-outline" @click="openCsvModal">
+          Bulk Upload CSV
+        </v-btn>
         <v-btn size="small" variant="tonal" color="primary" prepend-icon="mdi-plus" @click="addQuestion">Add Question</v-btn>
       </div>
     </div>
 
     <div v-if="questions.length === 0" class="empty-state">
       <v-icon size="48" color="grey">mdi-help-box-outline</v-icon>
-      <p class="text-grey mt-2">No questions yet. Click "Add Question" to begin.</p>
+      <p class="text-grey mt-2">No questions yet. Click "Add Question" or "Bulk Upload CSV" to begin.</p>
     </div>
 
     <div v-for="(q, i) in questions" :key="i" class="q-item mb-4">
@@ -107,6 +113,77 @@
         </div>
       </v-card>
     </div>
+
+    <!-- Bulk CSV Upload Modal -->
+    <v-dialog v-model="csvModal.show" max-width="640px">
+      <v-card rounded="xl" class="pa-6">
+        <div class="d-flex align-center justify-space-between mb-4">
+          <div class="d-flex align-center gap-2">
+            <v-icon color="success" size="28">mdi-file-delimited-outline</v-icon>
+            <h3 class="text-h6 font-weight-bold">Bulk Upload Questions (CSV)</h3>
+          </div>
+          <v-btn icon="mdi-close" variant="text" size="small" @click="csvModal.show = false" />
+        </div>
+
+        <v-alert type="info" variant="tonal" density="compact" rounded="lg" class="mb-4 text-body-2">
+          <div class="d-flex flex-wrap align-center justify-space-between gap-2">
+            <span>
+              Columns: <code>question_text, type, option_a, option_b, option_c, option_d, correct_answer, marks, explanation</code>
+            </span>
+            <v-btn size="x-small" color="info" variant="flat" prepend-icon="mdi-download" @click="downloadSampleCsv">
+              Download Sample
+            </v-btn>
+          </div>
+          <div class="text-caption mt-1">
+            Types: <code>mcq</code>, <code>truefalse</code>, <code>short</code>, <code>long</code>. For MCQ, <code>correct_answer</code> can be the exact option text or letter (<code>A</code>–<code>D</code>).
+          </div>
+        </v-alert>
+
+        <v-file-input
+          v-model="csvModal.file"
+          label="Select CSV File"
+          accept=".csv,text/csv"
+          variant="outlined"
+          density="comfortable"
+          prepend-icon="mdi-paperclip"
+          show-size
+          clearable
+          @update:model-value="onCsvFileChange"
+        />
+
+        <v-alert v-if="csvModal.errors.length > 0" type="error" variant="tonal" density="compact" rounded="lg" class="mb-4">
+          <div class="font-weight-bold mb-1">Found {{ csvModal.errors.length }} issue(s):</div>
+          <ul class="pl-4 mb-0 text-caption" style="max-height: 120px; overflow-y: auto;">
+            <li v-for="(err, idx) in csvModal.errors" :key="idx">{{ err }}</li>
+          </ul>
+        </v-alert>
+
+        <v-alert v-else-if="csvModal.parsed.length > 0" type="success" variant="tonal" density="compact" rounded="lg" class="mb-4">
+          Ready to import <strong>{{ csvModal.parsed.length }}</strong> valid question{{ csvModal.parsed.length === 1 ? '' : 's' }}.
+        </v-alert>
+
+        <div v-if="questions.length > 0 && csvModal.parsed.length > 0" class="mb-4">
+          <v-radio-group v-model="csvModal.mode" inline density="compact" hide-details>
+            <v-radio label="Append to existing questions" value="append" color="primary" />
+            <v-radio label="Replace existing questions" value="replace" color="warning" />
+          </v-radio-group>
+        </div>
+
+        <div class="d-flex justify-end gap-2 mt-2">
+          <v-btn variant="text" @click="csvModal.show = false">Cancel</v-btn>
+          <v-btn
+            color="success"
+            variant="flat"
+            rounded="lg"
+            :disabled="csvModal.parsed.length === 0"
+            prepend-icon="mdi-check"
+            @click="confirmCsvImport"
+          >
+            Import {{ csvModal.parsed.length > 0 ? `(${csvModal.parsed.length})` : '' }}
+          </v-btn>
+        </div>
+      </v-card>
+    </v-dialog>
   </div>
 </template>
 
@@ -173,6 +250,224 @@ const onTypeChange = (q: any) => {
   if (q.type === 'mcq') q.options = ['', '', '', ''];
   else if (q.type === 'truefalse') { q.options = []; q.correct_answer = 'True'; }
   else q.options = [];
+};
+
+// ── Bulk CSV Upload & Sample Download ────────────────────────────────────────
+const csvModal = reactive({
+  show: false,
+  file: null as File | File[] | null,
+  parsed: [] as any[],
+  errors: [] as string[],
+  mode: 'append' as 'append' | 'replace',
+});
+
+const openCsvModal = () => {
+  csvModal.file = null;
+  csvModal.parsed = [];
+  csvModal.errors = [];
+  csvModal.mode = 'append';
+  csvModal.show = true;
+};
+
+const downloadSampleCsv = () => {
+  const headers = ['question_text', 'type', 'option_a', 'option_b', 'option_c', 'option_d', 'correct_answer', 'marks', 'explanation'];
+  const sampleRows = [
+    ['What does HACCP stand for in food safety?', 'mcq', 'Hazard Analysis and Critical Control Points', 'Health Assessment and Clean Cooking Protocol', 'Hazardous Area Control and Check Process', 'Hygiene Audit and Compliance Check Point', 'A', '2', 'HACCP is a systematic preventive approach to food safety.'],
+    ['Food handlers should wash their hands before handling ready-to-eat food.', 'truefalse', '', '', '', '', 'True', '1', 'Proper hand hygiene prevents cross-contamination.'],
+    ['Name the ideal temperature danger zone in Celsius for bacterial growth.', 'short', '', '', '', '', '5°C to 60°C', '2', 'Pathogens multiply rapidly between 5°C and 60°C.'],
+    ['Explain the difference between cleaning and sanitizing in a food processing facility.', 'long', '', '', '', '', 'Cleaning removes visible dirt/debris with detergent; sanitizing reduces microorganisms to safe levels.', '5', ''],
+  ];
+
+  const escapeCell = (val: string) => {
+    const str = String(val ?? '');
+    if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+      return `"${str.replace(/"/g, '""')}"`;
+    }
+    return str;
+  };
+
+  const csvContent = [headers, ...sampleRows]
+    .map(row => row.map(escapeCell).join(','))
+    .join('\r\n');
+
+  const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'sample_exam_questions.csv';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+};
+
+// RFC 4180 CSV parser supporting quoted fields, commas, newlines, and "" escapes
+const parseCsvText = (text: string): string[][] => {
+  const clean = text.replace(/^\uFEFF/, '');
+  const rows: string[][] = [];
+  let row: string[] = [];
+  let cell = '';
+  let inQuotes = false;
+
+  for (let i = 0; i < clean.length; i++) {
+    const ch = clean[i];
+    const next = clean[i + 1];
+
+    if (inQuotes) {
+      if (ch === '"' && next === '"') {
+        cell += '"';
+        i++;
+      } else if (ch === '"') {
+        inQuotes = false;
+      } else {
+        cell += ch;
+      }
+    } else {
+      if (ch === '"') {
+        inQuotes = true;
+      } else if (ch === ',') {
+        row.push(cell);
+        cell = '';
+      } else if (ch === '\r' && next === '\n') {
+        row.push(cell);
+        rows.push(row);
+        row = [];
+        cell = '';
+        i++;
+      } else if (ch === '\n' || ch === '\r') {
+        row.push(cell);
+        rows.push(row);
+        row = [];
+        cell = '';
+      } else {
+        cell += ch;
+      }
+    }
+  }
+  if (cell.length > 0 || row.length > 0) {
+    row.push(cell);
+    rows.push(row);
+  }
+  return rows.filter(r => r.some(c => c.trim() !== ''));
+};
+
+const onCsvFileChange = async (fileVal: File | File[] | null) => {
+  csvModal.parsed = [];
+  csvModal.errors = [];
+  const file = Array.isArray(fileVal) ? fileVal[0] : fileVal;
+  if (!file) return;
+
+  try {
+    const text = await file.text();
+    const rows = parseCsvText(text);
+    if (rows.length < 2) {
+      csvModal.errors.push('CSV must contain a header row and at least one question row.');
+      return;
+    }
+
+    const headers = rows[0].map(h => h.trim().toLowerCase().replace(/\s+/g, '_'));
+    const idx = (name: string) => headers.indexOf(name);
+
+    const qIdx = idx('question_text');
+    if (qIdx === -1) {
+      csvModal.errors.push('Missing required "question_text" column in CSV header.');
+      return;
+    }
+
+    const typeIdx = idx('type');
+    const optAIdx = idx('option_a');
+    const optBIdx = idx('option_b');
+    const optCIdx = idx('option_c');
+    const optDIdx = idx('option_d');
+    const ansIdx = idx('correct_answer');
+    const marksIdx = idx('marks');
+    const expIdx = idx('explanation');
+
+    const validTypes = ['mcq', 'truefalse', 'short', 'long'];
+    const letterMap: Record<string, number> = { a: 0, b: 1, c: 2, d: 3 };
+
+    const imported: any[] = [];
+    for (let r = 1; r < rows.length; r++) {
+      const row = rows[r];
+      const rowNum = r + 1;
+      const questionText = (row[qIdx] || '').trim();
+      if (!questionText) {
+        csvModal.errors.push(`Row ${rowNum}: question_text is empty.`);
+        continue;
+      }
+
+      const rawType = (typeIdx !== -1 ? row[typeIdx] : 'mcq')?.trim().toLowerCase() || 'mcq';
+      const type = rawType === 'true/false' || rawType === 'tf' ? 'truefalse' : rawType;
+      if (!validTypes.includes(type)) {
+        csvModal.errors.push(`Row ${rowNum}: invalid type "${rawType}". Use mcq, truefalse, short, or long.`);
+        continue;
+      }
+
+      const rawMarks = marksIdx !== -1 ? Number(row[marksIdx]) : 1;
+      const marks = Number.isFinite(rawMarks) && rawMarks >= 1 ? Math.round(rawMarks) : 1;
+      const explanation = expIdx !== -1 ? (row[expIdx] || '').trim() : '';
+      let correctAnswer = ansIdx !== -1 ? (row[ansIdx] || '').trim() : '';
+      let options: string[] = [];
+
+      if (type === 'mcq') {
+        options = [
+          optAIdx !== -1 ? (row[optAIdx] || '').trim() : '',
+          optBIdx !== -1 ? (row[optBIdx] || '').trim() : '',
+          optCIdx !== -1 ? (row[optCIdx] || '').trim() : '',
+          optDIdx !== -1 ? (row[optDIdx] || '').trim() : '',
+        ].filter(Boolean);
+
+        if (options.length < 2) {
+          csvModal.errors.push(`Row ${rowNum}: MCQ must have at least 2 non-empty options.`);
+          continue;
+        }
+
+        // Resolve letter (A/B/C/D or Option A) to actual option text if not an exact match
+        if (correctAnswer && !options.includes(correctAnswer)) {
+          const normalized = correctAnswer.toLowerCase().replace(/^option\s+/, '');
+          if (normalized in letterMap && options[letterMap[normalized]] !== undefined) {
+            correctAnswer = options[letterMap[normalized]];
+          }
+        }
+
+        if (!correctAnswer || !options.includes(correctAnswer)) {
+          csvModal.errors.push(`Row ${rowNum}: correct_answer "${correctAnswer}" does not match any option (or A–D).`);
+          continue;
+        }
+      } else if (type === 'truefalse') {
+        const lower = correctAnswer.toLowerCase();
+        if (['true', 't', '1', 'yes'].includes(lower)) correctAnswer = 'True';
+        else if (['false', 'f', '0', 'no'].includes(lower)) correctAnswer = 'False';
+        else {
+          csvModal.errors.push(`Row ${rowNum}: True/False correct_answer must be True or False.`);
+          continue;
+        }
+      }
+
+      imported.push({
+        question_text: questionText,
+        type,
+        options,
+        correct_answer: correctAnswer,
+        marks,
+        explanation,
+      });
+    }
+
+    csvModal.parsed = imported;
+  } catch (err: any) {
+    csvModal.errors.push('Failed to read CSV file: ' + (err?.message || 'Unknown error'));
+  }
+};
+
+const confirmCsvImport = () => {
+  if (csvModal.parsed.length === 0) return;
+  if (csvModal.mode === 'replace') {
+    questions.value = [...csvModal.parsed];
+  } else {
+    questions.value = [...questions.value, ...csvModal.parsed];
+  }
+  csvModal.show = false;
 };
 </script>
 
