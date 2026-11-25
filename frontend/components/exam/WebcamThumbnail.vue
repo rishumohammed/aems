@@ -29,15 +29,19 @@ const position = ref({ x: window.innerWidth - 180, y: 20 });
 const isDragging = ref(false);
 const dragOffset = ref({ x: 0, y: 0 });
 
-watch(() => props.stream, (newStream) => {
-  if (videoEl.value && newStream) {
+const attachStream = (newStream: MediaStream | null) => {
+  if (videoEl.value && newStream && videoEl.value.srcObject !== newStream) {
     videoEl.value.srcObject = newStream;
     // Wait for video to be playing before emitting ready (for TFjs)
     videoEl.value.onloadedmetadata = () => {
-      videoEl.value?.play();
+      videoEl.value?.play().catch(() => {});
       emit('video-ready', videoEl.value);
     };
   }
+};
+
+watch([() => props.stream, videoEl], ([newStream]) => {
+  attachStream(newStream);
 }, { immediate: true });
 
 const startDrag = (e: MouseEvent) => {

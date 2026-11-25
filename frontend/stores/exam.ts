@@ -179,19 +179,22 @@ export const useExamStore = defineStore('exam', {
     // ── Submit exam ────────────────────────────────────────────────────────────
     async submitExam(attemptId: string) {
       this.isSubmitting = true;
-      const api = useApi();
-      const answers = this.questions.map(q => ({
-        question_id: q.id,
-        answer: this.answers[q.id] || null,
-      }));
-      const { data } = await api.post(`/exams/attempts/${attemptId}/submit`, {
-        answers,
-        exam_session_token: this.examSessionToken,
-      });
-      this.clearAllIntervals();
-      this.clearStorage(attemptId);
-      this.isSubmitting = false;
-      return data;
+      try {
+        const api = useApi();
+        const answers = this.questions.map(q => ({
+          question_id: q.id,
+          answer: this.answers[q.id] || null,
+        }));
+        const { data } = await api.post(`/exams/attempts/${attemptId}/submit`, {
+          answers,
+          exam_session_token: this.examSessionToken,
+        });
+        this.clearAllIntervals();
+        this.clearStorage(attemptId);
+        return data;
+      } finally {
+        this.isSubmitting = false;
+      }
     },
 
     // ── Cleanup ────────────────────────────────────────────────────────────────

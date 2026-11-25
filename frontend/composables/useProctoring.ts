@@ -17,6 +17,8 @@ export const useProctoring = () => {
   let captureScreenshotCallback: (() => Promise<string | null>) | null = null;
   let submitCallback: ((reason: string) => void) | null = null;
   let devToolsInterval: NodeJS.Timeout;
+  let blurTimeout: ReturnType<typeof setTimeout> | null = null;
+  let lastViolationTime = 0;
 
   const initProctoring = (id: string, onSubmit: (reason: string) => void, config: any = {}, captureScreenshotFn?: () => Promise<string | null>) => {
     attemptId.value = id;
@@ -54,6 +56,10 @@ export const useProctoring = () => {
     document.removeEventListener('keydown', handleKeydown);
     
     clearInterval(devToolsInterval);
+    if (blurTimeout) {
+      clearTimeout(blurTimeout);
+      blurTimeout = null;
+    }
     if (document.fullscreenElement) {
       document.exitFullscreen().catch(e => console.warn('Could not exit fullscreen', e));
     }
@@ -122,20 +128,27 @@ export const useProctoring = () => {
   };
 
   const handleWindowBlur = () => {
-    // Window blur is another strong indicator of leaving the exam window / switching applications
-    if (document.visibilityState !== 'hidden') {
-      const isBlocked = proctoringConfig.value?.block_browser_switching !== false &&
-                        proctoringConfig.value?.block_browser_switching !== 'false' &&
-                        proctoringConfig.value?.block_browser_switching !== 0;
-      if (isBlocked) {
-        handleViolation('window_blur');
-      } else {
-        logEvent('window_blur', { blocked: false });
+    // Delay briefly because switching tabs often fires blur microseconds before visibilityState becomes 'hidden'
+    if (blurTimeout) clearTimeout(blurTimeout);
+    blurTimeout = setTimeout(() => {
+      if (document.visibilityState !== 'hidden') {
+        const isBlocked = proctoringConfig.value?.block_browser_switching !== false &&
+                          proctoringConfig.value?.block_browser_switching !== 'false' &&
+                          proctoringConfig.value?.block_browser_switching !== 0;
+        if (isBlocked) {
+          handleViolation('window_blur');
+        } else {
+          logEvent('window_blur', { blocked: false });
+        }
       }
-    }
+    }, 150);
   };
 
   const handleViolation = (type: string) => {
+    const now = Date.now();
+    if (now - lastViolationTime < 1000) return;
+    lastViolationTime = now;
+
     tabSwitchCount.value++;
     logEvent(type, { count: tabSwitchCount.value });
 

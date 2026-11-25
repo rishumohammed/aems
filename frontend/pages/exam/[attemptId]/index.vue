@@ -329,14 +329,17 @@ const proctoringConfig = computed(() => {
   };
 });
 
+const isFlagEnabled = (val: any, defaultVal = true) => {
+  if (val === undefined || val === null) return defaultVal;
+  return val !== false && val !== 'false' && val !== 0 && val !== '0';
+};
+
 const requiresCamera = computed(() => {
   if (!isProctoringEnabled.value) return false;
   const cfg = proctoringConfig.value;
-  return cfg.face_detection !== false || 
-         cfg.capture_on_violation !== false || 
-         cfg.record_full_video === true || 
-         cfg.record_full_video === 'true' || 
-         cfg.record_full_video === 1;
+  return isFlagEnabled(cfg.face_detection, true) || 
+         isFlagEnabled(cfg.capture_on_violation, true) || 
+         isFlagEnabled(cfg.record_full_video, false);
 });
 
 // ── Load attempt details ──────────────────────────────────────────────────────
@@ -362,7 +365,7 @@ const setupCamera = async () => {
   }
   const granted = await recorder.requestCamera();
   if (granted) {
-    if (proctoringConfig.value?.face_detection !== false) {
+    if (isFlagEnabled(proctoringConfig.value?.face_detection, true)) {
       await faceDetection.loadModel();
       if (!faceDetection.faceDetectionError.value) {
         cameraReady.value = true;
@@ -423,7 +426,7 @@ const resumeExam = async () => {
     // Attempt to silently restart camera if camera is required and lost (refresh)
     if (requiresCamera.value && !recorder.stream.value) {
       await recorder.requestCamera();
-      if (proctoringConfig.value?.face_detection !== false) {
+      if (isFlagEnabled(proctoringConfig.value?.face_detection, true)) {
         await faceDetection.loadModel();
       }
     }
@@ -480,6 +483,7 @@ const triggerAutoSubmitLimit = (reason: string) => {
 
 // ── Submit ────────────────────────────────────────────────────────────────────
 const doSubmit = async () => {
+  if (examStore.isSubmitting) return;
   confirmSubmit.value = false;
   try {
     const result = await examStore.submitExam(attemptId.value);
